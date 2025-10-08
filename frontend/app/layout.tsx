@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "NagAI",
-  description: "Conversational productivity assistant",
+  description: "Conversational Goal Tracking",
 };
 
 export default function RootLayout({
