@@ -1,0 +1,34 @@
+.emptyState {
+  text-align: center;
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.emptyStateIcon {
+  font-size: 64px;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.emptyStateTitle {
+  font-size: var(--font-size-3xl);
+  font-family: var(--heading-font);
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: 400;
+}
+
+.emptyStateText {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.emptyStateAction {
+  margin-top: 16px;
+}

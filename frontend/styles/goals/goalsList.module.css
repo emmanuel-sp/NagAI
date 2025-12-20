@@ -1,0 +1,95 @@
+.goalsContainer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  min-height: calc(100vh - 64px);
+  background: var(--page-background);
+}
+
+.goalsHeader {
+  margin-bottom: 40px;
+}
+
+.goalsHeaderContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.goalsTitle {
+  font-size: 42px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+}
+
+.goalsSubtitle {
+  font-size: 18px;
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: 500;
+}
+
+.addGoalButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+}
+
+.addGoalButton:hover {
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+.goalsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--text-muted);
+}
+
+.emptyStateIcon {
+  font-size: 72px;
+  margin-bottom: 20px;
+  color: var(--primary-light);
+}
+
+html[data-theme="dark"] .emptyStateIcon {
+  color: var(--primary);
+}
+
+.emptyStateTitle {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.emptyStateText {
+  font-size: 17px;
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .emptyStateText {
+  color: var(--text-muted);
+}

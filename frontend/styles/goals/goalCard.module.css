@@ -1,0 +1,145 @@
+.goalCard {
+  background: var(--card-background);
+  border: 2px solid var(--card-border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.goalCard:hover {
+  box-shadow: var(--shadow-xl);
+  border-color: var(--primary-light);
+  transform: translateY(-2px);
+  background: var(--surface-hover);
+}
+
+html[data-theme="dark"] .goalCard:hover {
+  border-color: var(--primary);
+}
+
+.goalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.goalTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.goalDescription {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+html[data-theme="dark"] .goalDescription {
+  color: var(--text-muted);
+}
+
+.goalMeta {
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaLabel {
+  font-size: 12px;
+  color: var(--primary-light);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+html[data-theme="dark"] .metaLabel {
+  color: var(--primary);
+}
+
+.metaValue {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+html[data-theme="dark"] .metaValue {
+  color: #ddd;
+}
+
+.goalActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.viewButton {
+  background: var(--primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #ffffff;
+  box-shadow: var(--shadow-lg);
+}
+
+.viewButton:hover {
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-1px);
+}
+
+.viewButton:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.checklistButton {
+  background: var(--surface-light);
+  border: 2px solid var(--card-border);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.checklistButton:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+html[data-theme="dark"] .checklistButton:hover {
+  border-color: var(--primary);
+}
+
+.checklistButton:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}

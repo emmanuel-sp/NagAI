@@ -1,0 +1,149 @@
+.navbar {
+  background: var(--card-background);
+  border-bottom: 2px solid var(--card-border);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.navContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.navBrand {
+  font-size: var(--font-size-2xl);
+  font-weight: 400;
+  font-family: var(--heading-font);
+  color: var(--text-primary);
+  text-decoration: none;
+  margin-right: 48px;
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navBrand:hover {
+  transform: scale(1.05);
+}
+
+.navBrandIcon {
+  font-size: 24px;
+}
+
+.navLinks {
+  display: flex;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+.navLink {
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+.navLinkAnchor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  letter-spacing: 0.3px;
+}
+
+.navLinkAnchor:hover {
+  color: var(--text-primary);
+  background: var(--surface-light);
+  transform: translateY(-1px);
+}
+
+.navLinkAnchor.active {
+  color: #ffffff;
+  background: var(--primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+}
+
+.navLinkAnchor.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px 2px 0 0;
+}
+
+html[data-theme="dark"] .navLinkAnchor.active::after {
+  background: var(--accent-light);
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.themeToggle {
+  background: transparent;
+  border: 2px solid var(--card-border);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  color: var(--text-primary);
+}
+
+.themeToggle:hover {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  transform: rotate(15deg) scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+html[data-theme="dark"] .themeToggle:hover {
+  border-color: var(--primary-light);
+}
+
+@media (max-width: 640px) {
+  .navContent {
+    padding: 0 16px;
+    height: 56px;
+  }
+
+  .navBrand {
+    font-size: 18px;
+    margin-right: 24px;
+  }
+
+  .navLinkAnchor {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
