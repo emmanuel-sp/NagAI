@@ -1,26 +1,11 @@
-import { useRouter } from "next/navigation";
 import styles from "@/styles/goals/goalCard.module.css";
-import { IoListOutline } from "react-icons/io5";
+import { Goal as GoalType } from "@/types/goal";
 
-export interface GoalDetails {
-    title: string;
-    description: string;
-    createdAt: string;
-    targetDate: string;
-    id: string;
-}
-
-interface GoalProps extends GoalDetails {
+interface GoalProps extends GoalType {
     onView?: (id: string) => void;
 }
 
 export function Goal({ title, description, createdAt, targetDate, id, onView }: GoalProps) {
-    const router = useRouter();
-
-    const handleViewChecklist = () => {
-        router.push(`/checklists?goalId=${id}`);
-    };
-
     return (
         <div className={styles.goalCard}>
             <div className={styles.goalHeader}>
@@ -43,13 +28,6 @@ export function Goal({ title, description, createdAt, targetDate, id, onView }: 
                     onClick={() => onView?.(id)}
                 >
                     View Details
-                </button>
-                <button
-                    className={styles.checklistButton}
-                    onClick={handleViewChecklist}
-                >
-                    <IoListOutline size={18} />
-                    Checklist
                 </button>
             </div>
         </div>

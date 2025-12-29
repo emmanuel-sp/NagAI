@@ -1,0 +1,292 @@
+.learnMoreContainer {
+  min-height: 100vh;
+  background: var(--page-background);
+  padding: 80px 24px 48px 24px;
+}
+
+.learnMoreContent {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-base);
+  margin-bottom: 32px;
+  transition: all 0.2s ease;
+  font-weight: var(--font-weight-medium);
+}
+
+.backLink:hover {
+  color: var(--primary);
+  gap: 12px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+
+.title {
+  font-size: var(--font-size-5xl);
+  font-family: var(--heading-font);
+  color: var(--primary);
+  margin: 0 0 16px 0;
+  font-weight: var(--font-weight-semibold);
+}
+
+.subtitle {
+  font-size: var(--font-size-xl);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.section {
+  margin-bottom: 64px;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-3xl);
+  color: var(--text-primary);
+  margin: 0 0 20px 0;
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--heading-font);
+}
+
+.sectionText {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin: 0;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  margin-bottom: 64px;
+}
+
+.featureSection {
+  background: var(--card-background);
+  border: 2px solid var(--card-border);
+  border-radius: 16px;
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+
+.featureSection:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+  border-color: var(--primary);
+}
+
+.featureHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.featureIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.featureTitle {
+  font-size: var(--font-size-2xl);
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--heading-font);
+}
+
+.featureDescription {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0 0 20px 0;
+}
+
+.featureList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.featureList li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.featureList li svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.howItWorks {
+  margin-bottom: 64px;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.step {
+  text-align: center;
+  padding: 24px;
+}
+
+.stepNumber {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 auto 20px auto;
+  box-shadow: var(--shadow-md);
+}
+
+.stepTitle {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--heading-font);
+}
+
+.stepText {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ctaSection {
+  text-align: center;
+  padding: 64px 32px;
+  background: var(--card-background);
+  border: 2px solid var(--primary);
+  border-radius: 20px;
+  box-shadow: var(--shadow-xl);
+}
+
+.ctaIcon {
+  color: var(--primary);
+  margin-bottom: 24px;
+}
+
+.ctaTitle {
+  font-size: var(--font-size-4xl);
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--heading-font);
+}
+
+.ctaText {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 48px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-lg);
+}
+
+.ctaButton:hover {
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+}
+
+.loginText {
+  margin-top: 24px;
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+}
+
+.loginLink {
+  color: var(--primary);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+@media (max-width: 900px) {
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stepsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .learnMoreContainer {
+    padding: 64px 16px 32px 16px;
+  }
+
+  .title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .subtitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .sectionTitle {
+    font-size: var(--font-size-2xl);
+  }
+
+  .stepsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ctaSection {
+    padding: 40px 20px;
+  }
+
+  .ctaTitle {
+    font-size: var(--font-size-3xl);
+  }
+}

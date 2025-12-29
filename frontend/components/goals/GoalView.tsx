@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GoalDetailsFull } from "@/services/goalService";
+import { GoalWithDetails } from "@/types/goal";
 
 interface GoalViewProps {
   goalId: string;
@@ -10,7 +10,7 @@ interface GoalViewProps {
 }
 
 export default function GoalView({ goalId, isOpen, onClose }: GoalViewProps) {
-  const [goal, setGoal] = useState<GoalDetailsFull | null>(null);
+  const [goal, setGoal] = useState<GoalWithDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {

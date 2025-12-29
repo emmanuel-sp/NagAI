@@ -1,95 +1,124 @@
-@import url("https://fonts.googleapis.com/css2?family=Aoboshi+One&display=swap");
 
 :root {
   /* Base Colors */
-  --background: #f5f5f9;
-  --foreground: #2a2d45;
+  --background: #ffffff;
+  --foreground: #1a2332;
 
-  /* Vintage Color Palette */
-  --pale-slate: #c9cad9;
-  --periwinkle: #d1d2f9;
-  --baby-blue-ice: #a3bcf9;
-  --wisteria-blue: #7796cb;
-  --dusty-grape: #576490;
+  /* Primary Green - Main brand color */
+  --primary: #3e6840;
+  --primary-hover: #2f5030;
+  --primary-light: #46ad747c;
 
-  /* Semantic Colors */
-  --primary: var(--wisteria-blue);
-  --primary-hover: var(--dusty-grape);
-  --primary-light: var(--baby-blue-ice);
-  --accent: var(--periwinkle);
-  --accent-light: var(--pale-slate);
-  --error: #cb7777;
+  /* Accent Colors */
+  --accent: #b8fd9d;
+  --accent-light: #f5e5eb;
+
+  /* Status Colors */
+  --success: #059669;
+  --success-light: rgba(16, 185, 129, 0.1);
+  --success-border: rgba(16, 185, 129, 0.3);
+  --warning: #d97706;
+  --warning-light: rgba(245, 158, 11, 0.1);
+  --warning-border: rgba(245, 158, 11, 0.3);
+  --error: #7d1d3f;
+  --neutral: #6b7280;
+  --neutral-hover: #4b5563;
 
   /* UI Colors - Light Mode */
-  --page-background: #ebebf0;
+  --page-background: transparent;
+  --navbar-background: #f8f9fc;
   --card-background: #ffffff;
-  --card-border: #c9cad9;
+  --card-border: #e1e4e8;
   --input-background: #ffffff;
-  --input-border: #c9cad9;
-  --text-primary: var(--primary);
-  --text-secondary: #5a5d75;
-  --text-muted: #8b8d9e;
+  --input-border: #d1d5db;
+  --text-primary: #1a2332;
+  --text-secondary: #4a684a;
+  --text-muted: #9ca3af;
 
-  /* Dark backgrounds for cards/sections */
-  --surface-light: #f5f5fa;
-  --surface-hover: #e8e9f5;
+  /* Surface Colors */
+  --surface-light: #f8f9fb;
+  --surface-hover: #eef1f6;
+  --surface-sky: #e8f5e9;
 
-  /* Shadows - Soft blue/purple vintage shadows */
-  --shadow-sm: 0 2px 8px rgba(87, 100, 144, 0.12);
-  --shadow-md: 0 2px 12px rgba(87, 100, 144, 0.15);
-  --shadow-lg: 0 4px 16px rgba(87, 100, 144, 0.2);
-  --shadow-xl: 0 6px 24px rgba(87, 100, 144, 0.25);
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(62, 104, 64, 0.08), 0 1px 2px rgba(62, 104, 64, 0.06);
+  --shadow-md: 0 4px 6px rgba(62, 104, 64, 0.07), 0 2px 4px rgba(62, 104, 64, 0.06);
+  --shadow-lg: 0 10px 15px rgba(62, 104, 64, 0.08), 0 4px 6px rgba(62, 104, 64, 0.05);
+  --shadow-xl: 0 20px 25px rgba(62, 104, 64, 0.1), 0 10px 10px rgba(62, 104, 64, 0.04);
 
-  /* Font Family - Aoboshi One */
-  --font-family: "Aoboshi One", serif;
-  --heading-font: "Aoboshi One", serif;
+  /* Font Family */
+  --font-family: "Proxima Nova", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --heading-font: "Proxima Nova", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 
   /* Font Sizes */
-  --font-size-base: 19px;
-  --font-size-sm: 16px;
-  --font-size-lg: 19px;
-  --font-size-xl: 21px;
-  --font-size-2xl: 23px;
-  --font-size-3xl: 26px;
-  --font-size-4xl: 33px;
-  --font-size-5xl: 43px;
-  --font-size-6xl: 53px;
+  --font-size-base: 16px;
+  --font-size-sm: 14px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+  --font-size-5xl: 48px;
+  --font-size-6xl: 60px;
 
   color-scheme: light;
 }
 
 html[data-theme="dark"] {
   /* Base Colors */
-  --background: #1a1c28;
-  --foreground: #e5e6f0;
+  --background: #0f1419;
+  --foreground: #e8eaed;
 
-  /* UI Colors - Dark Mode (cool vintage dark) */
-  --page-background: #1a1c28;
-  --card-background: #252736;
-  --card-border: #3a3d50;
-  --input-background: #252736;
-  --input-border: #3a3d50;
-  --text-primary: var(--baby-blue-ice);
-  --text-secondary: #a8aabb;
-  --text-muted: #6d7085;
+  /* Primary Green - Brighter for dark mode visibility */
+  --primary: #2e6930;
+  --primary-hover: rgba(130, 180, 132, 0.658);
+  --primary-light: #9fabf1;
 
-  /* Dark backgrounds for cards/sections */
-  --surface-light: #2d2f3e;
-  --surface-hover: #33364a;
+  /* Accent Colors */
+  --accent: #146416;
+  --accent-light: #acd3adbd;
 
-  /* Shadows - Dark Mode (cool shadows) */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 2px 12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.6);
-  --shadow-xl: 0 6px 24px rgba(0, 0, 0, 0.7);
+  /* Status Colors */
+  --success: #10b981;
+  --success-light: rgba(16, 185, 129, 0.15);
+  --success-border: rgba(16, 185, 129, 0.4);
+  --warning: #f59e0b;
+  --warning-light: rgba(245, 158, 11, 0.15);
+  --warning-border: rgba(245, 158, 11, 0.4);
+  --error: #c35075;
+  --neutral: #9ca3af;
+  --neutral-hover: #d1d5db;
+
+  /* UI Colors - Dark Mode */
+  --page-background: transparent;
+  --navbar-background: #0f1419;
+  --card-background: #1a1f26;
+  --card-border: #2d3440;
+  --input-background: #1a1f26;
+  --input-border: #2d3440;
+  --text-primary: #e8eaed;
+  --text-secondary: #b8bdc6;
+  --text-muted: #7a8190;
+
+  /* Surface Colors */
+  --surface-light: #1e2329;
+  --surface-hover: #252b33;
+  --surface-sky: #1e3a20;
+
+  /* Shadows - Dark Mode */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.6), 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.7), 0 10px 10px rgba(0, 0, 0, 0.5);
 
   color-scheme: dark;
-}
-
-html[data-theme="light"] {
-  --background: #ffffff;
-  --foreground: #171717;
-  color-scheme: light;
 }
 
 * {
@@ -103,21 +132,119 @@ html {
 }
 
 body {
-  background: var(--background);
+  background: #f8f9fc;
   color: var(--foreground);
   font-family: var(--font-family);
-  line-height: 1.8;
+  font-weight: var(--font-weight-normal);
+  line-height: 1.6;
   font-size: var(--font-size-base);
   transition: background 0.2s ease, color 0.2s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+html[data-theme="dark"] body {
+  background: #0f1419;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(62, 104, 64, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 80%, rgba(117, 224, 126, 0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 10% 50%, rgba(184, 253, 157, 0.15) 0%, transparent 60%);
+  animation: backgroundFloat 25s ease-in-out infinite;
+}
+
+html[data-theme="dark"] body::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(46, 105, 48, 0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 80%, rgba(30, 58, 32, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 10% 50%, rgba(20, 100, 22, 0.12) 0%, transparent 60%);
+}
+
+@keyframes backgroundFloat {
+  0%, 100% {
+    opacity: 1;
+    filter: blur(60px);
+  }
+  50% {
+    opacity: 0.7;
+    filter: blur(80px);
+  }
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 400px at 30% 40%, rgba(62, 104, 64, 0.12) 0%, transparent 100%),
+    radial-gradient(circle 300px at 70% 70%, rgba(117, 224, 126, 0.09) 0%, transparent 100%);
+  animation: backgroundOrbs 30s ease-in-out infinite alternate;
+}
+
+html[data-theme="dark"] body::after {
+  background:
+    radial-gradient(circle 400px at 30% 40%, rgba(46, 105, 48, 0.08) 0%, transparent 100%),
+    radial-gradient(circle 300px at 70% 70%, rgba(30, 58, 32, 0.06) 0%, transparent 100%);
+}
+
+@keyframes backgroundOrbs {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(30px, -30px);
+  }
+}
+
+/* Ensure all page content sits above the animated background */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+h1 {
   font-family: var(--heading-font);
-  font-weight: 400;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-family: var(--heading-font);
+  font-weight: var(--font-weight-semibold);
   line-height: 1.3;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-family: var(--heading-font);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+h4, h5, h6 {
+  font-family: var(--heading-font);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  letter-spacing: 0;
 }
 
 a {

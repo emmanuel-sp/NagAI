@@ -13,8 +13,7 @@
 
 "use client";
 
-import { IoListOutline } from "react-icons/io5";
-import styles from "@/styles/checklist.module.css";
+import styles from "@/styles/checklists/checklist.module.css";
 
 interface ChecklistsHeaderProps {
   filter: "all" | "active" | "completed";
@@ -26,43 +25,41 @@ export default function ChecklistsHeader({
   onFilterChange,
 }: ChecklistsHeaderProps) {
   return (
-    <header className={styles.pageHeader}>
+    <div className={styles.pageHeader}>
       <div className={styles.headerContent}>
-        <div className={styles.headerTitle}>
-          <IoListOutline size={40} />
-          <h1>Checklists</h1>
+        <div>
+          <h1 className={styles.headerTitle}>Checklists</h1>
+          <p className={styles.headerSubtitle}>
+            Track progress on your goals with detailed checklists
+          </p>
         </div>
-        <p className={styles.headerSubtitle}>
-          Track progress on your goals with detailed checklists
-        </p>
+        <div className={styles.filterButtons}>
+          <button
+            onClick={() => onFilterChange("all")}
+            className={`${styles.filterButton} ${
+              filter === "all" ? styles.filterButtonActive : ""
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => onFilterChange("active")}
+            className={`${styles.filterButton} ${
+              filter === "active" ? styles.filterButtonActive : ""
+            }`}
+          >
+            Active
+          </button>
+          <button
+            onClick={() => onFilterChange("completed")}
+            className={`${styles.filterButton} ${
+              filter === "completed" ? styles.filterButtonActive : ""
+            }`}
+          >
+            Completed
+          </button>
+        </div>
       </div>
-
-      <div className={styles.filterButtons}>
-        <button
-          onClick={() => onFilterChange("all")}
-          className={`${styles.filterButton} ${
-            filter === "all" ? styles.filterButtonActive : ""
-          }`}
-        >
-          All
-        </button>
-        <button
-          onClick={() => onFilterChange("active")}
-          className={`${styles.filterButton} ${
-            filter === "active" ? styles.filterButtonActive : ""
-          }`}
-        >
-          Active
-        </button>
-        <button
-          onClick={() => onFilterChange("completed")}
-          className={`${styles.filterButton} ${
-            filter === "completed" ? styles.filterButtonActive : ""
-          }`}
-        >
-          Completed
-        </button>
-      </div>
-    </header>
+    </div>
   );
 }

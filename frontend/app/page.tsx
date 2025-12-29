@@ -1,63 +1,39 @@
-import Link from "next/link";
-import styles from "@/styles/home.module.css";
-import { IoChatbubbleEllipses, IoFlagOutline, IoDocumentText } from "react-icons/io5";
+/**
+ * Home Page
+ *
+ * Shows landing page for logged-out users or dashboard for logged-in users
+ */
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { User, UserProfile } from "@/types/user";
+import LandingPage from "@/components/home/LandingPage";
+import DashboardContainer from "@/components/dashboard/DashboardContainer";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { fetchUserProfile } from "@/services/profileService";
+import { getCurrentUser, isAuthenticated } from "@/services/authService";
 
 export default function Home() {
-  return (
-    <div className={styles.homeContainer}>
-      <div className={styles.homeContent}>
-        <div className={styles.homeHero}>
-          <h1 className={styles.homeTitle}>NagAI</h1>
-          <p className={styles.homeSubtitle}>
-            Your personal productivity & goal tracking companion
-          </p>
-          <p className={styles.homeDescription}>
-            Stay organized, track your goals, and make the most of your time.
-            Simple. Clean. Effective.
-          </p>
-        </div>
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-        <div className={styles.homeFeatures}>
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <IoChatbubbleEllipses size={48} />
-            </div>
-            <h3 className={styles.featureTitle}>Chat</h3>
-            <p className={styles.featureText}>
-              Interact with your AI assistant
-            </p>
-          </div>
+  useEffect(() => {
+    const checkAuth = async () => {
+      const currentUserProfile = await fetchUserProfile();
+      setUserProfile(currentUserProfile);
+      setLoading(false);
+    };
+    checkAuth();
+  }, []);
 
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <IoFlagOutline size={48} />
-            </div>
-            <h3 className={styles.featureTitle}>Goals</h3>
-            <p className={styles.featureText}>
-              Set and track your objectives
-            </p>
-          </div>
-
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <IoDocumentText size={48} />
-            </div>
-            <h3 className={styles.featureTitle}>Digests</h3>
-            <p className={styles.featureText}>
-              Organize your summaries
-            </p>
-          </div>
-        </div>
-
-        <div className={styles.homeCTA}>
-          <Link href="/goals" className={`${styles.ctaButton} ${styles.ctaPrimary}`}>
-            Get Started
-          </Link>
-          <Link href="/chat" className={`${styles.ctaButton} ${styles.ctaSecondary}`}>
-            Learn More
-          </Link>
-        </div>
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <LoadingSpinner />
       </div>
-    </div>
-  );
+    );
+  }
+
+  return userProfile ? <DashboardContainer userProfile={userProfile} /> : <LandingPage />;
 }

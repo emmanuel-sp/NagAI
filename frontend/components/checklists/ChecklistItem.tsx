@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChecklistItem as ChecklistItemType } from "@/types/checklist";
-import styles from "@/styles/checklist.module.css";
+import styles from "@/styles/checklists/checklist.module.css";
 import {
   IoCheckmarkCircle,
   IoEllipseOutline,

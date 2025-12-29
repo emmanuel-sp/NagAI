@@ -4,108 +4,141 @@ import {
   CreateChecklistItemDto,
   UpdateChecklistItemDto,
 } from "@/types/checklist";
-import { MOCK_CHECKLISTS } from "@/lib/mockData";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-
-// Use centralized mock data
-let mockChecklists: Checklist[] = [...MOCK_CHECKLISTS];
+// Dummy data
+let mockChecklists: Checklist[] = [
+  {
+    id: "checklist-1",
+    goalId: "goal-1",
+    goalTitle: "Learn TypeScript",
+    items: [
+      {
+        id: "item-1",
+        title: "Read TypeScript handbook",
+        completed: true,
+        createdAt: new Date("2024-01-15"),
+        completedAt: new Date("2024-01-18"),
+        order: 0,
+      },
+      {
+        id: "item-2",
+        title: "Complete advanced types tutorial",
+        completed: false,
+        createdAt: new Date("2024-01-16"),
+        order: 1,
+      },
+    ],
+    createdAt: new Date("2024-01-15"),
+    updatedAt: new Date("2024-01-18"),
+  },
+  {
+    id: "checklist-2",
+    goalId: "goal-2",
+    goalTitle: "Build a SaaS Product",
+    items: [
+      {
+        id: "item-3",
+        title: "Define product requirements",
+        completed: true,
+        createdAt: new Date("2024-01-20"),
+        completedAt: new Date("2024-01-22"),
+        order: 0,
+      },
+      {
+        id: "item-4",
+        title: "Design database schema",
+        completed: false,
+        createdAt: new Date("2024-01-21"),
+        order: 1,
+      },
+      {
+        id: "item-5",
+        title: "Implement authentication",
+        completed: false,
+        createdAt: new Date("2024-01-21"),
+        order: 2,
+      },
+    ],
+    createdAt: new Date("2024-01-20"),
+    updatedAt: new Date("2024-01-22"),
+  },
+];
+// Dummy data
 
 export async function fetchChecklists(): Promise<Checklist[]> {
-  try {
-    // TODO: Replace with real API call
-    // const response = await fetch(`${API_BASE_URL}/api/checklists`);
-    // if (!response.ok) throw new Error("Failed to fetch checklists");
-    // return await response.json();
+  // API call here
+  // return await apiRequest<Checklist[]>("/checklists");
 
-    // Mock implementation
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return mockChecklists.map((checklist) => ({
-      ...checklist,
-      items: checklist.items.map((item) => ({
-        ...item,
-        createdAt: new Date(item.createdAt),
-        completedAt: item.completedAt ? new Date(item.completedAt) : undefined,
-        deadline: item.deadline ? new Date(item.deadline) : undefined,
-      })),
-      createdAt: new Date(checklist.createdAt),
-      updatedAt: new Date(checklist.updatedAt),
-    }));
-  } catch (error) {
-    console.error("Error fetching checklists:", error);
-    throw error;
-  }
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  return mockChecklists.map((checklist) => ({
+    ...checklist,
+    items: checklist.items.map((item) => ({
+      ...item,
+      createdAt: new Date(item.createdAt),
+      completedAt: item.completedAt ? new Date(item.completedAt) : undefined,
+      deadline: item.deadline ? new Date(item.deadline) : undefined,
+    })),
+    createdAt: new Date(checklist.createdAt),
+    updatedAt: new Date(checklist.updatedAt),
+  }));
+  // Dummy data
 }
 
 export async function fetchChecklistByGoalId(
   goalId: string
 ): Promise<Checklist | null> {
-  try {
-    // TODO: Replace with real API call
-    // const response = await fetch(`${API_BASE_URL}/api/checklists/goal/${goalId}`);
-    // if (response.status === 404) return null;
-    // if (!response.ok) throw new Error("Failed to fetch checklist");
-    // return await response.json();
+  // API call here
+  // return await apiRequest<Checklist>(`/checklists/goal/${goalId}`);
 
-    // Mock implementation
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const checklist = mockChecklists.find((c) => c.goalId === goalId);
-    if (!checklist) return null;
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const checklist = mockChecklists.find((c) => c.goalId === goalId);
+  if (!checklist) return null;
 
-    return {
-      ...checklist,
-      items: checklist.items.map((item) => ({
-        ...item,
-        createdAt: new Date(item.createdAt),
-        completedAt: item.completedAt ? new Date(item.completedAt) : undefined,
-        deadline: item.deadline ? new Date(item.deadline) : undefined,
-      })),
-      createdAt: new Date(checklist.createdAt),
-      updatedAt: new Date(checklist.updatedAt),
-    };
-  } catch (error) {
-    console.error("Error fetching checklist:", error);
-    throw error;
-  }
+  return {
+    ...checklist,
+    items: checklist.items.map((item) => ({
+      ...item,
+      createdAt: new Date(item.createdAt),
+      completedAt: item.completedAt ? new Date(item.completedAt) : undefined,
+      deadline: item.deadline ? new Date(item.deadline) : undefined,
+    })),
+    createdAt: new Date(checklist.createdAt),
+    updatedAt: new Date(checklist.updatedAt),
+  };
+  // Dummy data
 }
 
 export async function createChecklistItem(
   checklistId: string,
   item: CreateChecklistItemDto
 ): Promise<ChecklistItem> {
-  try {
-    // TODO: Replace with real API call
-    // const response = await fetch(`${API_BASE_URL}/api/checklists/${checklistId}/items`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(item),
-    // });
-    // if (!response.ok) throw new Error("Failed to create checklist item");
-    // return await response.json();
+  // API call here
+  // return await apiRequest<ChecklistItem>(`/checklists/${checklistId}/items`, {
+  //   method: "POST",
+  //   body: item,
+  // });
 
-    // Mock implementation
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const checklist = mockChecklists.find((c) => c.id === checklistId);
-    if (!checklist) throw new Error("Checklist not found");
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const checklist = mockChecklists.find((c) => c.id === checklistId);
+  if (!checklist) throw new Error("Checklist not found");
 
-    const newItem: ChecklistItem = {
-      id: `item-${Date.now()}`,
-      title: item.title,
-      notes: item.notes,
-      deadline: item.deadline,
-      completed: false,
-      createdAt: new Date(),
-      order: checklist.items.length,
-    };
+  const newItem: ChecklistItem = {
+    id: `item-${Date.now()}`,
+    title: item.title,
+    notes: item.notes,
+    deadline: item.deadline,
+    completed: false,
+    createdAt: new Date(),
+    order: checklist.items.length,
+  };
 
-    checklist.items.push(newItem);
-    checklist.updatedAt = new Date();
-
-    return newItem;
-  } catch (error) {
-    console.error("Error creating checklist item:", error);
-    throw error;
-  }
+  checklist.items.push(newItem);
+  checklist.updatedAt = new Date();
+  return newItem;
+  // Dummy data
 }
 
 export async function updateChecklistItem(
@@ -113,105 +146,77 @@ export async function updateChecklistItem(
   itemId: string,
   updates: UpdateChecklistItemDto
 ): Promise<ChecklistItem> {
-  try {
-    // TODO: Replace with real API call
-    // const response = await fetch(
-    //   `${API_BASE_URL}/api/checklists/${checklistId}/items/${itemId}`,
-    //   {
-    //     method: "PATCH",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(updates),
-    //   }
-    // );
-    // if (!response.ok) throw new Error("Failed to update checklist item");
-    // return await response.json();
+  // API call here
+  // return await apiRequest<ChecklistItem>(`/checklists/${checklistId}/items/${itemId}`, {
+  //   method: "PATCH",
+  //   body: updates,
+  // });
 
-    // Mock implementation
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const checklist = mockChecklists.find((c) => c.id === checklistId);
-    if (!checklist) throw new Error("Checklist not found");
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const checklist = mockChecklists.find((c) => c.id === checklistId);
+  if (!checklist) throw new Error("Checklist not found");
 
-    const item = checklist.items.find((i) => i.id === itemId);
-    if (!item) throw new Error("Item not found");
+  const item = checklist.items.find((i) => i.id === itemId);
+  if (!item) throw new Error("Item not found");
 
-    if (updates.title !== undefined) item.title = updates.title;
-    if (updates.notes !== undefined) item.notes = updates.notes;
-    if (updates.deadline !== undefined) item.deadline = updates.deadline;
-    if (updates.order !== undefined) item.order = updates.order;
-    if (updates.completed !== undefined) {
-      item.completed = updates.completed;
-      item.completedAt = updates.completed ? new Date() : undefined;
-    }
-
-    checklist.updatedAt = new Date();
-
-    return item;
-  } catch (error) {
-    console.error("Error updating checklist item:", error);
-    throw error;
+  if (updates.title !== undefined) item.title = updates.title;
+  if (updates.notes !== undefined) item.notes = updates.notes;
+  if (updates.deadline !== undefined) item.deadline = updates.deadline;
+  if (updates.order !== undefined) item.order = updates.order;
+  if (updates.completed !== undefined) {
+    item.completed = updates.completed;
+    item.completedAt = updates.completed ? new Date() : undefined;
   }
+
+  checklist.updatedAt = new Date();
+  return item;
+  // Dummy data
 }
 
 export async function deleteChecklistItem(
   checklistId: string,
   itemId: string
 ): Promise<void> {
-  try {
-    // TODO: Replace with real API call
-    // const response = await fetch(
-    //   `${API_BASE_URL}/api/checklists/${checklistId}/items/${itemId}`,
-    //   {
-    //     method: "DELETE",
-    //   }
-    // );
-    // if (!response.ok) throw new Error("Failed to delete checklist item");
+  // API call here
+  // await apiRequest(`/checklists/${checklistId}/items/${itemId}`, {
+  //   method: "DELETE",
+  // });
 
-    // Mock implementation
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const checklist = mockChecklists.find((c) => c.id === checklistId);
-    if (!checklist) throw new Error("Checklist not found");
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const checklist = mockChecklists.find((c) => c.id === checklistId);
+  if (!checklist) throw new Error("Checklist not found");
 
-    const itemIndex = checklist.items.findIndex((i) => i.id === itemId);
-    if (itemIndex === -1) throw new Error("Item not found");
+  const itemIndex = checklist.items.findIndex((i) => i.id === itemId);
+  if (itemIndex === -1) throw new Error("Item not found");
 
-    checklist.items.splice(itemIndex, 1);
-    checklist.updatedAt = new Date();
-  } catch (error) {
-    console.error("Error deleting checklist item:", error);
-    throw error;
-  }
+  checklist.items.splice(itemIndex, 1);
+  checklist.updatedAt = new Date();
+  // Dummy data
 }
 
 export async function reorderChecklistItems(
   checklistId: string,
   itemIds: string[]
 ): Promise<void> {
-  try {
-    // TODO: Replace with real API call
-    // const response = await fetch(
-    //   `${API_BASE_URL}/api/checklists/${checklistId}/reorder`,
-    //   {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ itemIds }),
-    //   }
-    // );
-    // if (!response.ok) throw new Error("Failed to reorder items");
+  // API call here
+  // await apiRequest(`/checklists/${checklistId}/reorder`, {
+  //   method: "PATCH",
+  //   body: { itemIds },
+  // });
 
-    // Mock implementation
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const checklist = mockChecklists.find((c) => c.id === checklistId);
-    if (!checklist) throw new Error("Checklist not found");
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const checklist = mockChecklists.find((c) => c.id === checklistId);
+  if (!checklist) throw new Error("Checklist not found");
 
-    itemIds.forEach((itemId, index) => {
-      const item = checklist.items.find((i) => i.id === itemId);
-      if (item) item.order = index;
-    });
+  itemIds.forEach((itemId, index) => {
+    const item = checklist.items.find((i) => i.id === itemId);
+    if (item) item.order = index;
+  });
 
-    checklist.items.sort((a, b) => a.order - b.order);
-    checklist.updatedAt = new Date();
-  } catch (error) {
-    console.error("Error reordering checklist items:", error);
-    throw error;
-  }
+  checklist.items.sort((a, b) => a.order - b.order);
+  checklist.updatedAt = new Date();
+  // Dummy data
 }

@@ -29,10 +29,11 @@ import ChecklistHeader from "./ChecklistHeader";
 import ChecklistItem from "./ChecklistItem";
 import ChecklistActions from "./ChecklistActions";
 import AddItemForm from "./AddItemForm";
-import styles from "@/styles/checklist.module.css";
+import styles from "@/styles/checklists/checklist.module.css";
 
 interface ChecklistProps {
   checklist: ChecklistType;
+  filter: "all" | "active" | "completed";
   onAddItem: (title: string, notes?: string, deadline?: Date) => void;
   onToggleItem: (itemId: string) => void;
   onUpdateItem: (
@@ -47,6 +48,7 @@ interface ChecklistProps {
 
 export default function Checklist({
   checklist,
+  filter,
   onAddItem,
   onToggleItem,
   onUpdateItem,
@@ -57,9 +59,28 @@ export default function Checklist({
 }: ChecklistProps) {
   const [isAdding, setIsAdding] = useState(false);
 
-  const sortedItems = [...checklist.items].sort((a, b) => a.order - b.order);
+  const sortedItems = [...checklist.items].sort((a, b) => {
+    if (a.completed != b.completed) {
+      return a.completed ? 1 : -1;
+    }
+    return a.order - b.order
+  });
   const completedCount = checklist.items.filter((item) => item.completed).length;
   const totalCount = checklist.items.length;
+
+  // Determine if actions should be shown based on filter
+  const shouldShowActions = filter !== "completed";
+
+  // Get appropriate empty state message based on filter
+  const getEmptyStateMessage = () => {
+    if (filter === "completed") {
+      return "No completed items yet.";
+    }
+    if (filter === "active") {
+      return "No active items. Generate a checklist with AI or add your first item!";
+    }
+    return "No checklist items yet. Generate a checklist with AI or add your first item!";
+  };
 
   const handleAdd = (title: string, notes?: string, deadline?: Date) => {
     onAddItem(title, notes, deadline);
@@ -91,7 +112,7 @@ export default function Checklist({
 
         {sortedItems.length === 0 && !isAdding && !isGenerating && (
           <div className={styles.emptyState}>
-            <p>No checklist items yet. Generate a checklist with AI or add your first item!</p>
+            <p>{getEmptyStateMessage()}</p>
           </div>
         )}
 
@@ -103,7 +124,7 @@ export default function Checklist({
         )}
       </div>
 
-      {!isAdding && !isGenerating ? (
+      {shouldShowActions && !isAdding && !isGenerating ? (
         <ChecklistActions
           hasItems={sortedItems.length > 0}
           isGenerating={isGenerating}
@@ -111,7 +132,7 @@ export default function Checklist({
           onGenerateItem={onGenerateItem || (() => {})}
           onGenerateFullChecklist={onGenerateFullChecklist || (() => {})}
         />
-      ) : isAdding ? (
+      ) : shouldShowActions && isAdding ? (
         <AddItemForm onAdd={handleAdd} onCancel={handleCancel} />
       ) : null}
     </div>

@@ -15,7 +15,7 @@
 
 import { useState } from "react";
 import { IoCalendarOutline } from "react-icons/io5";
-import styles from "@/styles/checklist.module.css";
+import styles from "@/styles/checklists/checklist.module.css";
 
 interface AddItemFormProps {
   onAdd: (title: string, notes?: string, deadline?: Date) => void;

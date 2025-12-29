@@ -21,10 +21,11 @@
 
 import { Checklist as ChecklistType } from "@/types/checklist";
 import Checklist from "@/components/checklists/Checklist";
-import styles from "@/styles/checklist.module.css";
+import styles from "@/styles/checklists/checklist.module.css";
 
 interface ChecklistsListProps {
   checklists: ChecklistType[];
+  filter: "all" | "active" | "completed";
   generatingChecklistId: string | null;
   onAddItem: (
     checklistId: string,
@@ -45,6 +46,7 @@ interface ChecklistsListProps {
 
 export default function ChecklistsList({
   checklists,
+  filter,
   generatingChecklistId,
   onAddItem,
   onToggleItem,
@@ -59,6 +61,7 @@ export default function ChecklistsList({
         <Checklist
           key={checklist.id}
           checklist={checklist}
+          filter={filter}
           onAddItem={(title, notes, deadline) =>
             onAddItem(checklist.id, title, notes, deadline)
           }

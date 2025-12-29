@@ -21,16 +21,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GoalDetails } from "@/components/goals/Goal";
+import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import { Goal } from "@/types/goal";
 import GoalsHeader from "@/components/goals/GoalsHeader";
 import GoalsEmptyState from "@/components/goals/GoalsEmptyState";
 import GoalsList from "@/components/goals/GoalsList";
 import AddGoalModal from "@/components/goals/AddGoalModal";
 import EditGoalModal from "@/components/goals/EditGoalModal";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import Toast from "@/components/common/Toast";
 import styles from "@/styles/goals/goalsList.module.css";
 import {
-  GoalDetailsFull,
+  GoalWithDetails,
   fetchGoals,
   fetchGoalById,
   updateGoal,
@@ -38,15 +41,19 @@ import {
 } from "@/services/goalService";
 
 export default function GoalsContainer() {
-  const [goals, setGoals] = useState<GoalDetails[]>([]);
-  const [selectedGoal, setSelectedGoal] = useState<GoalDetailsFull | null>(null);
+  const { loading: authLoading } = useAuth({ requireAuth: true });
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [selectedGoal, setSelectedGoal] = useState<GoalWithDetails | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    loadGoals();
-  }, []);
+    if (!authLoading) {
+      loadGoals();
+    }
+  }, [authLoading]);
 
   const loadGoals = async () => {
     setIsLoading(true);
@@ -96,9 +103,10 @@ export default function GoalsContainer() {
     await createGoal(goalData);
     await loadGoals();
     handleCloseAddModal();
+    setShowToast(true);
   };
 
-  const handleUpdateGoal = async (goal: GoalDetailsFull) => {
+  const handleUpdateGoal = async (goal: GoalFull) => {
     await updateGoal(goal.id, goal);
     await loadGoals();
     handleCloseEditModal();
@@ -134,6 +142,21 @@ export default function GoalsContainer() {
         onClose={handleCloseEditModal}
         onSave={handleUpdateGoal}
       />
+
+      {showToast && (
+        <Toast
+          message={
+            <>
+              Goal added! Head to{" "}
+              <Link href="/checklists" className={styles.toastLink}>
+                Checklists
+              </Link>{" "}
+              to track your goal
+            </>
+          }
+          onClose={() => setShowToast(false)}
+        />
+      )}
     </div>
   );
 }

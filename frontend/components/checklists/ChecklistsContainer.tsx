@@ -25,6 +25,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Checklist as ChecklistType } from "@/types/checklist";
 import ChecklistsHeader from "@/components/checklists/ChecklistsHeader";
 import ChecklistsEmptyState from "@/components/checklists/ChecklistsEmptyState";
@@ -40,17 +41,20 @@ import {
   generateChecklistItem,
   generateFullChecklist,
 } from "@/services/aiChecklistService";
-import styles from "@/styles/checklist.module.css";
+import styles from "@/styles/checklists/checklist.module.css";
 
 export default function ChecklistsContainer() {
+  const { loading: authLoading } = useAuth({ requireAuth: true });
   const [checklists, setChecklists] = useState<ChecklistType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
   const [generatingChecklistId, setGeneratingChecklistId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadChecklists();
-  }, []);
+    if (!authLoading) {
+      loadChecklists();
+    }
+  }, [authLoading]);
 
   const loadChecklists = async () => {
     try {
@@ -222,7 +226,17 @@ export default function ChecklistsContainer() {
 
   const getFilteredChecklists = () => {
     return checklists.map((checklist) => {
-      if (filter === "all") return checklist;
+      if (filter === "all") {
+        // Sort items: active items first, completed items at the bottom
+        const sortedItems = [...checklist.items].sort((a, b) => {
+          if (a.completed === b.completed) return 0;
+          return a.completed ? 1 : -1;
+        });
+        return {
+          ...checklist,
+          items: sortedItems,
+        };
+      }
 
       return {
         ...checklist,
@@ -254,6 +268,7 @@ export default function ChecklistsContainer() {
         ) : (
           <ChecklistsList
             checklists={filteredChecklists}
+            filter={filter}
             generatingChecklistId={generatingChecklistId}
             onAddItem={handleAddItem}
             onToggleItem={handleToggleItem}

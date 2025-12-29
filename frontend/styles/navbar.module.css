@@ -1,12 +1,11 @@
 .navbar {
-  background: var(--card-background);
-  border-bottom: 2px solid var(--card-border);
+  background: var(--navbar-background);
+  border-bottom: none;
   padding: 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  transition: background 0.2s ease, border-color 0.2s ease;
-  box-shadow: var(--shadow-md);
+  transition: background 0.2s ease;
 }
 
 .navContent {
@@ -21,12 +20,12 @@
 
 .navBrand {
   font-size: var(--font-size-2xl);
-  font-weight: 400;
+  font-weight: var(--font-weight-bold);
   font-family: var(--heading-font);
   color: var(--text-primary);
   text-decoration: none;
   margin-right: 48px;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -47,7 +46,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  flex: 1;
 }
 
 .navLink {
@@ -63,39 +61,28 @@
   padding: 10px 18px;
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border-radius: 8px;
-  letter-spacing: 0.3px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  transition: all 0.3s ease;
+  letter-spacing: 0.02em;
 }
 
 .navLinkAnchor:hover {
   color: var(--text-primary);
-  background: var(--surface-light);
-  transform: translateY(-1px);
+  transform: scale(1.02);
 }
 
 .navLinkAnchor.active {
-  color: #ffffff;
-  background: var(--primary);
-  font-weight: 600;
-  box-shadow: var(--shadow-lg);
+  color: var(--primary);
+  font-size: 17px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 18px rgba(62, 104, 64, 0.7), 0 0 8px rgba(62, 104, 64, 0.5);
 }
 
-.navLinkAnchor.active::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 16px;
-  right: 16px;
-  height: 3px;
-  background: var(--accent);
-  border-radius: 2px 2px 0 0;
-}
-
-html[data-theme="dark"] .navLinkAnchor.active::after {
-  background: var(--accent-light);
+html[data-theme="dark"] .navLinkAnchor.active {
+  color: var(--accent-light);
+  text-shadow: 0 0 15px rgba(184, 253, 157, 0.5);
 }
 
 .navRight {
@@ -103,32 +90,6 @@ html[data-theme="dark"] .navLinkAnchor.active::after {
   align-items: center;
   gap: 16px;
   margin-left: auto;
-}
-
-.themeToggle {
-  background: transparent;
-  border: 2px solid var(--card-border);
-  cursor: pointer;
-  font-size: var(--font-size-lg);
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  border-radius: 8px;
-  color: var(--text-primary);
-}
-
-.themeToggle:hover {
-  background: var(--primary);
-  color: #ffffff;
-  border-color: var(--primary);
-  transform: rotate(15deg) scale(1.1);
-  box-shadow: var(--shadow-lg);
-}
-
-html[data-theme="dark"] .themeToggle:hover {
-  border-color: var(--primary-light);
 }
 
 @media (max-width: 640px) {

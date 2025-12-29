@@ -1,0 +1,55 @@
+BACKEND INTEGRATION GUIDE
+
+API Configuration:
+- Set NEXT_PUBLIC_API_URL in frontend/.env.local
+- Default: http://localhost:8080/api
+
+Integration Files (16 total, 1083 lines):
+
+SERVICES (frontend/services/) - 8 files:
+  authService.ts      - login, signup, logout, getCurrentUser, isAuthenticated
+  profileService.ts   - fetchUserProfile, updateUserProfile, updatePassword
+  goalService.ts      - fetchGoals, fetchGoalById, createGoal, updateGoal, deleteGoal
+  checklistService.ts - fetchChecklists, fetchChecklistByGoalId, create/update/delete/reorder items
+  digestService.ts    - fetchDigest, createDigest, updateDigest, toggleDigestStatus, deleteDigest
+  agentService.ts     - fetchAgent, create/update/delete context, deploy/stop agent
+  aiChecklistService.ts - generateChecklistItem, generateFullChecklist
+  aiGoalService.ts    - generateSmartGoalSuggestion
+
+TYPES (frontend/types/) - 5 files:
+  user.ts      - User, UserProfile, LoginCredentials, SignupData, AuthResponse
+  goal.ts      - Goal, GoalWithDetails, CreateGoalRequest, UpdateGoalRequest
+  checklist.ts - Checklist, ChecklistItem, DTOs
+  digest.ts    - Digest, DigestFrequency, DeliveryTime, DigestContentType
+  agent.ts     - Agent, AgentContext, MessageType, MessageFrequency
+
+INFRASTRUCTURE - 3 files:
+  lib/api.ts        - apiRequest(), ApiError, handleApiError, auto-auth headers
+  hooks/useAuth.ts  - Route protection, auth state
+  contexts/ThemeContext.tsx - Theme management
+
+Integration Steps:
+1. Set NEXT_PUBLIC_API_URL env var (or update in lib/api.ts)
+2. In each service file, find "// API call here" comments
+3. Replace dummy data blocks (enclosed by "// Dummy data" comments) with apiRequest() calls
+4. Update types in frontend/types/ if backend schema differs
+
+Auth Flow:
+- Token stored in localStorage as "authToken"
+- Auto-injected in all requests via apiRequest()
+- useAuth() hook handles route protection (requireAuth/redirectIfAuth options)
+
+Example Integration:
+Find this in any service file:
+  // API call here
+  // return await apiRequest<Goal[]>("/goals");
+
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  return [...MOCK_GOALS];
+  // Dummy data
+
+Replace with:
+  return await apiRequest<Goal[]>("/goals");
+
+All service files use this pattern. All components import ONLY from services/ - no changes needed to components.

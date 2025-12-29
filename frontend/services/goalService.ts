@@ -1,44 +1,51 @@
-// Goal service stub - will be connected to backend API
+import { Goal, GoalWithDetails } from "@/types/goal";
 
-import { GoalDetails } from "@/components/goals/Goal";
-import { MOCK_GOALS, getGoalById } from "@/lib/mockData";
+// Dummy data
+const MOCK_GOALS: Goal[] = [
+  {
+    id: "goal-1",
+    title: "Learn TypeScript",
+    description: "Master TypeScript fundamentals and advanced patterns",
+    createdAt: "Jan 15, 2024",
+    targetDate: "Mar 15, 2024",
+  },
+  {
+    id: "goal-2",
+    title: "Build a SaaS Product",
+    description: "Launch a profitable software as a service application",
+    createdAt: "Jan 20, 2024",
+    targetDate: "Jun 30, 2024",
+  },
+  {
+    id: "goal-3",
+    title: "Get Fit",
+    description: "Achieve target weight and maintain healthy lifestyle",
+    createdAt: "Jan 10, 2024",
+    targetDate: "Apr 10, 2024",
+  },
+];
+// Dummy data
 
-export interface GoalDetailsFull extends GoalDetails {
-  specific?: string;
-  measurable?: string;
-  attainable?: string;
-  relevant?: string;
-  timely?: string;
-}
+export async function fetchGoals(): Promise<Goal[]> {
+  // API call here
+  // return await apiRequest<Goal[]>("/goals");
 
-/**
- * Fetch all goals for the current user
- */
-export async function fetchGoals(): Promise<GoalDetails[]> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
+  // Dummy data
   await new Promise((resolve) => setTimeout(resolve, 300));
-
-  // Stub: Return mock goals
   return [...MOCK_GOALS];
+  // Dummy data
 }
 
-/**
- * Fetch a specific goal by ID with full SMART details
- */
-export async function fetchGoalById(
-  id: string
-): Promise<GoalDetailsFull | null> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
-  await new Promise((resolve) => setTimeout(resolve, 200));
+export async function fetchGoalById(id: string): Promise<GoalWithDetails | null> {
+  // API call here
+  // return await apiRequest<GoalWithDetails>(`/goals/${id}`);
 
-  // Stub: Find goal and add SMART details
-  const goal = getGoalById(id);
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const goal = MOCK_GOALS.find(g => g.id === id);
   if (!goal) {
     return null;
   }
-
   return {
     ...goal,
     specific: "Break down into specific, measurable components",
@@ -47,43 +54,39 @@ export async function fetchGoalById(
     relevant: "Critical for career growth and project success",
     timely: `Complete by ${goal.targetDate}`,
   };
+  // Dummy data
 }
 
-/**
- * Update an existing goal
- */
-export async function updateGoal(
-  id: string,
-  data: Partial<GoalDetailsFull>
-): Promise<GoalDetailsFull | null> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
-  await new Promise((resolve) => setTimeout(resolve, 400));
+export async function updateGoal(id: string, data: Partial<GoalWithDetails>): Promise<GoalWithDetails | null> {
+  // API call here
+  // return await apiRequest<GoalWithDetails>(`/goals/${id}`, {
+  //   method: "PATCH",
+  //   body: data,
+  // });
 
-  // Stub: Return updated goal
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 400));
   const existingGoal = await fetchGoalById(id);
   if (!existingGoal) {
     return null;
   }
-
   return {
     ...existingGoal,
     ...data,
   };
+  // Dummy data
 }
 
-/**
- * Create a new goal
- */
-export async function createGoal(
-  data: Omit<GoalDetailsFull, "id" | "createdAt">
-): Promise<GoalDetailsFull> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
-  await new Promise((resolve) => setTimeout(resolve, 400));
+export async function createGoal(data: Omit<GoalWithDetails, "id" | "createdAt">): Promise<GoalWithDetails> {
+  // API call here
+  // return await apiRequest<GoalWithDetails>("/goals", {
+  //   method: "POST",
+  //   body: data,
+  // });
 
-  // Stub: Return newly created goal with generated ID
-  const newGoal: GoalDetailsFull = {
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  return {
     ...data,
     id: `goal-${Date.now()}`,
     createdAt: new Date().toLocaleDateString("en-US", {
@@ -92,18 +95,16 @@ export async function createGoal(
       year: "numeric",
     }),
   };
-
-  return newGoal;
+  // Dummy data
 }
 
-/**
- * Delete a goal
- */
-export async function deleteGoal(id: string): Promise<boolean> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
-  await new Promise((resolve) => setTimeout(resolve, 300));
+export async function deleteGoal(_id: string): Promise<boolean> {
+  // API call here
+  // await apiRequest(`/goals/${id}`, { method: "DELETE" });
+  // return true;
 
-  // Stub: Return success
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 300));
   return true;
+  // Dummy data
 }

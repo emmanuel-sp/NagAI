@@ -17,7 +17,7 @@
 "use client";
 
 import { IoAdd, IoSparkles } from "react-icons/io5";
-import styles from "@/styles/checklist.module.css";
+import styles from "@/styles/checklists/checklist.module.css";
 
 interface ChecklistActionsProps {
   hasItems: boolean;
@@ -34,6 +34,7 @@ export default function ChecklistActions({
   onGenerateItem,
   onGenerateFullChecklist,
 }: ChecklistActionsProps) {
+  
   // If no items, show "Generate Checklist with AI" and "Add Item Manually"
   if (!hasItems) {
     return (

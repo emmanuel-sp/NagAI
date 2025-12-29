@@ -14,7 +14,7 @@
 
 "use client";
 
-import styles from "@/styles/checklist.module.css";
+import styles from "@/styles/checklists/checklist.module.css";
 
 interface ChecklistHeaderProps {
   goalTitle: string;

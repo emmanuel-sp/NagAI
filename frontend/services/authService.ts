@@ -1,108 +1,98 @@
-// Authentication service stub - will be connected to backend API
+import { User, LoginCredentials, SignupData } from "@/types/user";
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface SignupData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-/**
- * Login user with email and password
- */
 export async function login(credentials: LoginCredentials): Promise<User> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  // API call here
+  // const response = await apiRequest<AuthResponse>("/auth/login", {
+  //   method: "POST",
+  //   body: credentials,
+  // });
+  // localStorage.setItem("authToken", response.token);
+  // localStorage.setItem("user", JSON.stringify(response.user));
+  // return response.user;
 
-  // Stub: Return mock user data
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 500));
   const user: User = {
     id: `user-${Date.now()}`,
     email: credentials.email,
-    name: credentials.email.split("@")[0], // Extract name from email for demo
+    name: credentials.email.split("@")[0],
   };
-
-  // Store in localStorage for now (will be replaced with JWT/session)
   if (typeof window !== "undefined") {
+    localStorage.setItem("authToken", "mock-token-" + Date.now());
     localStorage.setItem("user", JSON.stringify(user));
   }
-
   return user;
+  // Dummy data
 }
 
-/**
- * Register a new user
- */
 export async function signup(data: SignupData): Promise<User> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  // API call here
+  // const response = await apiRequest<AuthResponse>("/auth/signup", {
+  //   method: "POST",
+  //   body: data,
+  // });
+  // localStorage.setItem("authToken", response.token);
+  // localStorage.setItem("user", JSON.stringify(response.user));
+  // return response.user;
 
-  // Stub: Return mock user data
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 500));
   const user: User = {
     id: `user-${Date.now()}`,
     email: data.email,
     name: data.name,
   };
-
-  // Store in localStorage for now (will be replaced with JWT/session)
   if (typeof window !== "undefined") {
+    localStorage.setItem("authToken", "mock-token-" + Date.now());
     localStorage.setItem("user", JSON.stringify(user));
   }
-
   return user;
+  // Dummy data
 }
 
-/**
- * Logout current user
- */
 export async function logout(): Promise<void> {
-  // TODO: Replace with actual API call to backend to invalidate session
-  // Simulating API delay
-  await new Promise((resolve) => setTimeout(resolve, 200));
+  // API call here
+  // await apiRequest("/auth/logout", { method: "POST" });
 
-  // Clear local storage
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  // Dummy data
+
   if (typeof window !== "undefined") {
+    localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     localStorage.removeItem("userProfile");
   }
 }
 
-/**
- * Get current user from session
- */
 export async function getCurrentUser(): Promise<User | null> {
-  // TODO: Replace with actual API call to backend to verify session
-  // For now, get from localStorage
+  // API call here
+  // try {
+  //   const user = await apiRequest<User>("/auth/me");
+  //   localStorage.setItem("user", JSON.stringify(user));
+  //   return user;
+  // } catch {
+  //   localStorage.removeItem("authToken");
+  //   localStorage.removeItem("user");
+  //   return null;
+  // }
+
+  // Dummy data
   if (typeof window === "undefined") {
     return null;
   }
-
   const userStr = localStorage.getItem("user");
   if (!userStr) {
     return null;
   }
-
   try {
     return JSON.parse(userStr) as User;
   } catch {
     return null;
   }
+  // Dummy data
 }
 
-/**
- * Check if user is authenticated
- */
 export async function isAuthenticated(): Promise<boolean> {
   const user = await getCurrentUser();
   return user !== null;

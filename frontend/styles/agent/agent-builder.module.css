@@ -1,0 +1,691 @@
+/* ============================================
+   AGENT BUILDER CONTAINER
+   ============================================ */
+
+.agentBuilderContainer {
+  min-height: calc(100vh - 64px);
+  background: var(--page-background);
+  padding: 100px 24px 48px;
+  display: flex;
+  justify-content: center;
+}
+
+.agentBuilderContent {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.errorMessage {
+  text-align: center;
+  color: var(--error);
+  padding: 24px;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.header {
+  text-align: center;
+  padding: 40px 32px;
+  background: var(--card-background);
+  border: 2px solid var(--primary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+}
+
+.title {
+  font-size: var(--font-size-4xl);
+  font-family: var(--heading-font);
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+  font-weight: var(--font-weight-semibold);
+  position: relative;
+}
+
+.subtitle {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: var(--font-weight-normal);
+  line-height: 1.6;
+  position: relative;
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+
+.overviewCard {
+  background: var(--card-background);
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.settingsCard {
+  background: var(--card-background);
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.overviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cardTitle {
+  font-size: var(--font-size-2xl);
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+}
+
+.cardSubtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 8px 0 20px 0;
+  line-height: 1.5;
+}
+
+.statusBadge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusDeployed {
+  background: var(--success-light);
+  color: var(--success);
+  border: 1px solid var(--success-border);
+}
+
+.statusDraft {
+  background: var(--warning-light);
+  color: var(--warning);
+  border: 1px solid var(--warning-border);
+}
+
+/* ============================================
+   OVERVIEW STATS
+   ============================================ */
+
+.overviewContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.overviewStat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  background: var(--surface-light);
+  border-radius: 12px;
+  border-left: 4px solid var(--primary);
+  transition: all 0.3s ease;
+}
+
+.overviewStat:nth-child(1) {
+  border-left-color: var(--primary);
+  background: var(--surface-light);
+}
+
+.overviewStat:nth-child(2) {
+  border-left-color: var(--primary);
+  background: var(--surface-light);
+}
+
+.overviewStat:nth-child(3) {
+  border-left-color: var(--primary);
+  background: var(--surface-light);
+}
+
+.overviewStat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.statLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.statValue {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   COMMUNICATION SETTINGS
+   ============================================ */
+
+.channelOptions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.channelButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 28px 20px;
+  background: var(--card-background);
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  position: relative;
+  font-family: var(--font-family);
+  min-height: 130px;
+}
+
+.channelButton:nth-child(1) {
+  background: var(--card-background);
+  border-color: var(--card-border);
+}
+
+.channelButton:nth-child(2) {
+  background: var(--card-background);
+  border-color: var(--card-border);
+}
+
+.channelButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.channelButton.channelButtonActive {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white !important;
+  box-shadow: var(--shadow-md);
+}
+
+.channelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--surface-light);
+  border-color: var(--card-border);
+  color: var(--text-muted);
+}
+
+.channelButton:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.bothIcons {
+  display: flex;
+  gap: 8px;
+}
+
+.checkmark {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: white;
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+}
+
+/* ============================================
+   CONTEXTS SECTION
+   ============================================ */
+
+.contextsSection {
+  background: var(--card-background);
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.contextsSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.addContextButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+  box-shadow: var(--shadow-sm);
+}
+
+.addContextButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: var(--primary-hover);
+}
+
+.contextsList {
+  display: grid;
+  gap: 20px;
+}
+
+.infoMessage {
+  background: var(--primary-light);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  padding: 14px 18px;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* ============================================
+   CONTEXT CARD
+   ============================================ */
+
+.contextCard {
+  background: var(--card-background);
+  border: 2px solid var(--card-border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  border-left: 5px solid var(--primary);
+}
+
+.contextCard:nth-child(3n+1) {
+  border-left-color: var(--primary);
+  border-color: var(--card-border);
+  background: var(--card-background);
+}
+
+.contextCard:nth-child(3n+2) {
+  border-left-color: var(--primary);
+  border-color: var(--card-border);
+  background: var(--card-background);
+}
+
+.contextCard:nth-child(3n+3) {
+  border-left-color: var(--primary);
+  border-color: var(--card-border);
+  background: var(--card-background);
+}
+
+.contextCard:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px) scale(1.01);
+}
+
+.contextHeader {
+  margin-bottom: 20px;
+}
+
+.contextTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.contextName {
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.contextActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.iconButton,
+.iconButtonDanger {
+  padding: 10px;
+  background: var(--card-background);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconButton:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.iconButtonDanger:hover {
+  background: var(--error);
+  color: white;
+  border-color: var(--error);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.messageTypeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.contextBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contextDetail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--font-size-base);
+  padding: 10px;
+  background: var(--card-background);
+  border-radius: 8px;
+}
+
+.detailIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.detailLabel {
+  color: var(--text-muted);
+  font-weight: var(--font-weight-semibold);
+  min-width: 80px;
+}
+
+.detailValue {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.customInstructions {
+  margin-top: 8px;
+  padding: 16px;
+  background: var(--card-background);
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+}
+
+.instructionsText {
+  margin: 8px 0 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.emptyState {
+  text-align: center;
+  padding: 60px 32px;
+  background: var(--surface-light);
+  border: 2px dashed var(--card-border);
+  border-radius: 12px;
+}
+
+.emptyStateIcon {
+  font-size: 72px;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.emptyStateTitle {
+  font-size: var(--font-size-2xl);
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.emptyStateText {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin: 0 0 28px 0;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
+}
+
+.createButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+  box-shadow: var(--shadow-sm);
+}
+
+.createButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: var(--primary-hover);
+}
+
+.warningText {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  margin-top: 12px;
+  font-style: italic;
+}
+
+/* ============================================
+   DEPLOYMENT PANEL
+   ============================================ */
+
+.deploymentPanel {
+  background: var(--card-background);
+  border: 2px solid var(--primary);
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  box-shadow: var(--shadow-lg);
+  flex-wrap: wrap;
+}
+
+.deploymentActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.deploymentInfo {
+  flex: 1;
+  min-width: 250px;
+}
+
+.deploymentDate {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-top: 10px;
+  font-weight: var(--font-weight-medium);
+}
+
+.deployButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  background: var(--success);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: var(--font-family);
+  box-shadow: var(--shadow-sm);
+}
+
+.deployButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: var(--primary-hover);
+}
+
+.deployButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.redeployButton {
+  background: var(--primary);
+}
+
+.redeployButton:hover:not(:disabled) {
+  background: var(--primary-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.stopButton {
+  background: var(--neutral);
+}
+
+.stopButton:hover:not(:disabled) {
+  background: var(--neutral-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.deploySpinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .agentBuilderContainer {
+    padding: 24px 16px;
+  }
+
+  .agentBuilderContent {
+    gap: 20px;
+  }
+
+  .title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .overviewCard,
+  .settingsCard,
+  .contextsSection {
+    padding: 20px;
+  }
+
+  .deploymentPanel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .deploymentInfo {
+    min-width: 100%;
+  }
+
+  .deploymentActions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .deployButton {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .channelOptions {
+    grid-template-columns: 1fr;
+  }
+
+  .overviewContent {
+    grid-template-columns: 1fr;
+  }
+
+  .contextTitleRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .contextActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

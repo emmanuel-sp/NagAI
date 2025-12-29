@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import styles from "@/styles/goals/goalModal.module.css";
-import { GoalDetailsFull } from "@/services/goalService";
+import { GoalWithDetails } from "@/types/goal";
 import { IoClose } from "react-icons/io5";
 
 interface EditableFieldProps {
@@ -81,20 +81,20 @@ function EditableField({ label, value, onSave, multiline = false }: EditableFiel
 }
 
 interface GoalModalProps {
-  goal: GoalDetailsFull | null;
+  goal: GoalFull | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave?: (goal: GoalDetailsFull) => Promise<void>;
+  onSave?: (goal: GoalFull) => Promise<void>;
 }
 
 export default function GoalModal({ goal, isOpen, onClose, onSave }: GoalModalProps) {
-  const [editedGoal, setEditedGoal] = useState<GoalDetailsFull | null>(goal);
+  const [editedGoal, setEditedGoal] = useState<GoalWithDetails | null>(goal);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     // If goal is null, create a new empty goal template
     if (goal === null && isOpen) {
-      const newGoal: GoalDetailsFull = {
+      const newGoal: GoalFull = {
         id: `new-${Date.now()}`,
         title: "New Goal",
         description: "",
@@ -124,7 +124,7 @@ export default function GoalModal({ goal, isOpen, onClose, onSave }: GoalModalPr
     return null;
   }
 
-  const handleFieldSave = async (field: keyof GoalDetailsFull, value: string) => {
+  const handleFieldSave = async (field: keyof GoalWithDetails, value: string) => {
     const updated = { ...editedGoal, [field]: value };
     setEditedGoal(updated);
 

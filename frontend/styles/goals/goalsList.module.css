@@ -1,7 +1,7 @@
 .goalsContainer {
   max-width: 900px;
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 100px 24px 48px;
   min-height: calc(100vh - 64px);
   background: var(--page-background);
 }
@@ -19,7 +19,7 @@
 
 .goalsTitle {
   font-size: 42px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   margin: 0 0 12px 0;
   color: var(--text-primary);
   letter-spacing: 1px;
@@ -29,7 +29,7 @@
   font-size: 18px;
   color: var(--text-primary);
   margin: 0;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .addGoalButton {
@@ -42,7 +42,7 @@
   border: none;
   border-radius: 10px;
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
@@ -80,7 +80,7 @@ html[data-theme="dark"] .emptyStateIcon {
 
 .emptyStateTitle {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   margin-bottom: 12px;
   color: var(--text-primary);
 }

@@ -1,7 +1,10 @@
-"use client";
+import DigestBuilderContainer from "@/components/digests/DigestBuilderContainer";
 
-export default function Digests() {
-    return (
-        <div>Digests Page</div>
-    );
+export const metadata = {
+  title: "Digest Builder | NagAI",
+  description: "Create and manage your personalized content digests",
+};
+
+export default function DigestsPage() {
+  return <DigestBuilderContainer />;
 }

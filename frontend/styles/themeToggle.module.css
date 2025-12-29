@@ -1,0 +1,46 @@
+.floatingToggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  background: var(--primary);
+  border: 2px solid var(--card-border);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: white;
+  box-shadow: var(--shadow-xl);
+  z-index: 1000;
+}
+
+.floatingToggle:hover {
+  transform: scale(1.1) rotate(15deg);
+  box-shadow: 0 8px 24px rgba(62, 104, 64, 0.3);
+  background: var(--primary-hover);
+}
+
+.floatingToggle:active {
+  transform: scale(0.95);
+}
+
+html[data-theme="dark"] .floatingToggle {
+  border-color: var(--primary-light);
+}
+
+html[data-theme="dark"] .floatingToggle:hover {
+  box-shadow: 0 8px 24px rgba(111, 181, 115, 0.4);
+}
+
+@media (max-width: 640px) {
+  .floatingToggle {
+    bottom: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+  }
+}

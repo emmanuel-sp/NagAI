@@ -1,78 +1,64 @@
-// Profile service stub - will be connected to backend API
+import { UserProfile } from "@/types/user";
+import { getCurrentUser } from "./authService";
 
-export interface UserProfile {
-  name: string;
-  email: string;
-  bio: string;
-  career: string;
-  location: string;
-  interests: string[];
-  hobbies: string[];
-  habits: string[];
-}
+export async function fetchUserProfile(): Promise<UserProfile | null> {
+  // API call here
+  const user = await getCurrentUser();
+  // return await apiRequest<UserProfile>("/profile", {
+  // method: "GET",
+  // body: user.id});
 
-/**
- * Fetch user profile from backend
- */
-export async function fetchUserProfile(): Promise<UserProfile> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
+  // Dummy data
   await new Promise((resolve) => setTimeout(resolve, 300));
-
-  // Try to get from localStorage first (stub behavior)
   if (typeof window !== "undefined") {
     const stored = localStorage.getItem("userProfile");
     if (stored) {
       try {
         return JSON.parse(stored) as UserProfile;
-      } catch {
-        // Fall through to default
-      }
+      } catch {}
     }
   }
-
-  // Stub: Return default profile if nothing stored
-  return {
+  return user ? {
+    id: "user-1",
     name: "John Doe",
     email: "john@example.com",
+    phone: undefined,
     bio: "Passionate about personal growth and technology.",
     career: "Software Engineer",
     location: "San Francisco, CA",
     interests: ["AI", "Machine Learning", "Web Development"],
     hobbies: ["Reading", "Gaming", "Photography"],
     habits: ["Morning meditation", "Daily journaling", "Exercise"],
-  };
+  } : null;
+  // Dummy data
 }
 
-/**
- * Update user profile
- */
-export async function updateUserProfile(
-  profile: UserProfile
-): Promise<UserProfile> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+export async function updateUserProfile(profile: UserProfile): Promise<UserProfile> {
+  // API call here
+  // return await apiRequest<UserProfile>("/profile", {
+  //   method: "PATCH",
+  //   body: profile,
+  // });
 
-  // Stub: Save to localStorage for now
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 500));
   if (typeof window !== "undefined") {
     localStorage.setItem("userProfile", JSON.stringify(profile));
   }
-
   return profile;
+  // Dummy data
 }
 
-/**
- * Update password (requires additional verification)
- */
-export async function updatePassword(
-  currentPassword: string,
-  newPassword: string
-): Promise<boolean> {
-  // TODO: Replace with actual API call to backend
-  // Simulating API delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+export async function updatePassword(_currentPassword: string, _newPassword: string): Promise<boolean> {
+  // API call here
+  // await apiRequest("/profile/password", {
+  //   method: "POST",
+  //   body: { currentPassword, newPassword },
+  // });
+  // return true;
 
-  // Stub: Return success
+  // Dummy data
+  await new Promise((resolve) => setTimeout(resolve, 500));
   return true;
+  // Dummy data
 }

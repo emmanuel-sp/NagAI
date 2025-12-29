@@ -14,7 +14,7 @@
   backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease;
   overflow: hidden;
-  padding-top: 50px;
+  padding-top: 120px;
 }
 
 @keyframes fadeIn {
@@ -41,9 +41,9 @@
   background: var(--card-background);
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  width: 90%;
-  max-width: 900px;
-  max-height: calc(100vh - 100px);
+  width: 72%;
+  max-width: 720px;
+  max-height: calc(100vh - 180px);
   animation: slideUp 0.3s ease;
   border: 1px solid var(--card-border);
   display: flex;
@@ -52,7 +52,7 @@
 }
 
 .modalHeader {
-  padding: 28px 32px;
+  padding: 22px 28px;
   border-bottom: 2px solid var(--card-border);
   display: flex;
   justify-content: space-between;
@@ -64,47 +64,27 @@
 }
 
 .modalTitle {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: var(--font-weight-bold);
   margin: 0 0 4px 0;
   letter-spacing: 0.5px;
 }
 
-/* Add Modal - Purple to Pink gradient */
+/* Add Modal */
 .addModalTitle {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--primary);
 }
 
-html[data-theme="dark"] .addModalTitle {
-  background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-light) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Edit Modal - Pink to Purple gradient */
+/* Edit Modal */
 .editModalTitle {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-html[data-theme="dark"] .editModalTitle {
-  background: linear-gradient(135deg, var(--accent-light) 0%, var(--primary-light) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--primary);
 }
 
 .modalSubtitle {
   font-size: 13px;
   color: var(--text-muted);
   margin: 0;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .closeButton {
@@ -131,14 +111,14 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .modalBody {
-  padding: 32px;
+  padding: 24px 28px;
   flex: 1 1 0%;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
 .formSection {
-  margin-bottom: 36px;
+  margin-bottom: 28px;
 }
 
 .formSection:last-child {
@@ -147,8 +127,8 @@ html[data-theme="dark"] .closeButton:hover {
 
 .sectionTitle {
   display: block;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: var(--font-weight-bold);
   color: var(--primary);
   margin-bottom: 8px;
   letter-spacing: 0.5px;
@@ -172,7 +152,7 @@ html[data-theme="dark"] .closeButton:hover {
 .fieldLabel {
   display: block;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--text-secondary);
   margin-bottom: 8px;
   text-transform: uppercase;
@@ -235,12 +215,12 @@ html[data-theme="dark"] .closeButton:hover {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent) 100%);
-  color: var(--text-primary);
-  border: 2px solid var(--accent);
+  background: var(--primary);
+  color: white;
+  border: 2px solid var(--primary);
   border-radius: 8px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
@@ -249,8 +229,10 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .aiSuggestButton:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .aiSuggestButton:disabled {
@@ -265,8 +247,8 @@ html[data-theme="dark"] .closeButton:hover {
 .suggestionBox {
   margin-top: 12px;
   padding: 16px;
-  background: linear-gradient(135deg, rgba(109, 93, 255, 0.05) 0%, rgba(255, 107, 107, 0.05) 100%);
-  border: 2px solid var(--accent);
+  background: var(--surface-sky);
+  border: 2px solid var(--primary);
   border-radius: 10px;
   animation: slideDown 0.3s ease;
 }
@@ -292,21 +274,21 @@ html[data-theme="dark"] .closeButton:hover {
 
 .useSuggestionButton {
   padding: 8px 16px;
-  background: var(--accent);
+  background: var(--primary);
   color: #ffffff;
   border: none;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
 }
 
 .useSuggestionButton:hover {
-  background: var(--accent-hover);
+  background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .modalFooter {
@@ -326,7 +308,7 @@ html[data-theme="dark"] .closeButton:hover {
   border: 2px solid var(--card-border);
   border-radius: 10px;
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
@@ -350,30 +332,32 @@ html[data-theme="dark"] .closeButton:hover {
   border: none;
   border-radius: 10px;
   font-size: var(--font-size-base);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
 }
 
 .createButton {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-  box-shadow: 0 4px 16px rgba(109, 93, 255, 0.3);
+  background: var(--primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .createButton:hover:not(:disabled) {
+  background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(109, 93, 255, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .saveButton {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+  background: var(--primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .saveButton:hover:not(:disabled) {
+  background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .createButton:disabled,
@@ -388,10 +372,3 @@ html[data-theme="dark"] .modalContent {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
-html[data-theme="dark"] .suggestionBox {
-  background: linear-gradient(
-    135deg,
-    rgba(109, 93, 255, 0.1) 0%,
-    rgba(255, 107, 107, 0.1) 100%
-  );
-}

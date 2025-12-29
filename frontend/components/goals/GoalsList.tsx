@@ -1,9 +1,9 @@
-import { GoalDetails } from "./Goal";
+import { Goal } from "@/types/goal";
 import { Goal } from "./Goal";
 import styles from "@/styles/goals/goalsList.module.css";
 
 interface GoalsListProps {
-  goals: GoalDetails[];
+  goals: Goal[];
   onViewGoal: (id: string) => void;
 }
 
