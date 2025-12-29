@@ -23,7 +23,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { Goal } from "@/types/goal";
+import { Goal, GoalWithDetails } from "@/types/goal";
 import GoalsHeader from "@/components/goals/GoalsHeader";
 import GoalsEmptyState from "@/components/goals/GoalsEmptyState";
 import GoalsList from "@/components/goals/GoalsList";
@@ -33,7 +33,6 @@ import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Toast from "@/components/common/Toast";
 import styles from "@/styles/goals/goalsList.module.css";
 import {
-  GoalWithDetails,
   fetchGoals,
   fetchGoalById,
   updateGoal,
@@ -106,7 +105,7 @@ export default function GoalsContainer() {
     setShowToast(true);
   };
 
-  const handleUpdateGoal = async (goal: GoalFull) => {
+  const handleUpdateGoal = async (goal: GoalWithDetails) => {
     await updateGoal(goal.id, goal);
     await loadGoals();
     handleCloseEditModal();

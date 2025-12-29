@@ -5,7 +5,7 @@
 
 "use client";
 
-import { UserProfile } from "@/services/profileService";
+import { UserProfile } from "@/types/user";
 import styles from "@/styles/pages/profile.module.css";
 
 interface ProfessionalCardProps {

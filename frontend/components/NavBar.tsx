@@ -81,6 +81,8 @@ export default function NavBar() {
             </ul>
           )}
 
+          {isLoggedIn && <div className={styles.navSeparator} />}
+
           {isLoggedIn ? (
             <Link
               href="/profile"

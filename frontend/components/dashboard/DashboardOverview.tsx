@@ -181,7 +181,7 @@ export default function DashboardOverview({
               <div className={styles.statItem}>
                 <span className={styles.statLabel}>Status</span>
                 <span className={styles.statValue}>
-                  {agent.status === "deployed" ? "Deployed" : "Draft"}
+                  {agent.isDeployed ? "Deployed" : "Draft"}
                 </span>
               </div>
             </div>

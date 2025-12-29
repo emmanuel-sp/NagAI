@@ -25,9 +25,6 @@ export default function GoalsHeader({ onAddGoal }: GoalsHeaderProps) {
       <div className={styles.goalsHeaderContent}>
         <div>
           <h1 className={styles.goalsTitle}>Goals</h1>
-          <p className={styles.goalsSubtitle}>
-            Track and manage your personal and professional goals
-          </p>
         </div>
         <button onClick={onAddGoal} className={styles.addGoalButton}>
           <IoAdd size={20} />

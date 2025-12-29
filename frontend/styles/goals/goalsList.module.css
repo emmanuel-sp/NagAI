@@ -40,7 +40,7 @@
   background: var(--primary);
   color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;

@@ -22,7 +22,7 @@
 
 "use client";
 
-import { UserProfile } from "@/services/profileService";
+import { UserProfile } from "@/types/user";
 import BasicInfoCard from "@/components/profile/BasicInfoCard";
 import ProfessionalCard from "@/components/profile/ProfessionalCard";
 import InterestsCard from "@/components/profile/InterestsCard";

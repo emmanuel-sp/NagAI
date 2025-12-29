@@ -1,9 +1,9 @@
-import { Goal } from "@/types/goal";
-import { Goal } from "./Goal";
+import { Goal as GoalType } from "@/types/goal";
+import { Goal as GoalCard } from "./Goal";
 import styles from "@/styles/goals/goalsList.module.css";
 
 interface GoalsListProps {
-  goals: Goal[];
+  goals: GoalType[];
   onViewGoal: (id: string) => void;
 }
 
@@ -12,7 +12,7 @@ export default function GoalsList({ goals, onViewGoal }: GoalsListProps) {
     <ul className={styles.goalsList}>
       {goals.map((goal) => (
         <li key={goal.id}>
-          <Goal {...goal} onView={onViewGoal} />
+          <GoalCard {...goal} onView={onViewGoal} />
         </li>
       ))}
     </ul>

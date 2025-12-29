@@ -40,12 +40,40 @@ export default function DeploymentPanel({
       </div>
 
       <div className={styles.deploymentActions}>
-        {isDeployed ? (
-          <>
+        <div className={styles.deploymentButtons}>
+          {isDeployed ? (
+            <>
+              <button
+                onClick={onDeploy}
+                disabled={isDeploying}
+                className={`${styles.deployButton} ${styles.redeployButton}`}
+              >
+                {isDeploying ? (
+                  <>
+                    <div className={styles.deploySpinner} />
+                    Deploying...
+                  </>
+                ) : (
+                  <>
+                    <IoRefresh size={20} />
+                    Redeploy Agent
+                  </>
+                )}
+              </button>
+              <button
+                onClick={onStop}
+                disabled={isDeploying}
+                className={`${styles.deployButton} ${styles.stopButton}`}
+              >
+                <IoStop size={20} />
+                Stop Agent
+              </button>
+            </>
+          ) : (
             <button
               onClick={onDeploy}
-              disabled={isDeploying}
-              className={`${styles.deployButton} ${styles.redeployButton}`}
+              disabled={!canDeploy || isDeploying}
+              className={styles.deployButton}
             >
               {isDeploying ? (
                 <>
@@ -54,39 +82,13 @@ export default function DeploymentPanel({
                 </>
               ) : (
                 <>
-                  <IoRefresh size={20} />
-                  Redeploy Agent
+                  <IoRocket size={20} />
+                  Deploy Agent
                 </>
               )}
             </button>
-            <button
-              onClick={onStop}
-              disabled={isDeploying}
-              className={`${styles.deployButton} ${styles.stopButton}`}
-            >
-              <IoStop size={20} />
-              Stop Agent
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={onDeploy}
-            disabled={!canDeploy || isDeploying}
-            className={styles.deployButton}
-          >
-            {isDeploying ? (
-              <>
-                <div className={styles.deploySpinner} />
-                Deploying...
-              </>
-            ) : (
-              <>
-                <IoRocket size={20} />
-                Deploy Agent
-              </>
-            )}
-          </button>
-        )}
+          )}
+        </div>
 
         {!isDeployed && !canDeploy && (
           <p className={styles.warningText}>

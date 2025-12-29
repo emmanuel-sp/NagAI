@@ -81,10 +81,10 @@ function EditableField({ label, value, onSave, multiline = false }: EditableFiel
 }
 
 interface GoalModalProps {
-  goal: GoalFull | null;
+  goal: GoalWithDetails | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave?: (goal: GoalFull) => Promise<void>;
+  onSave?: (goal: GoalWithDetails) => Promise<void>;
 }
 
 export default function GoalModal({ goal, isOpen, onClose, onSave }: GoalModalProps) {
@@ -94,7 +94,7 @@ export default function GoalModal({ goal, isOpen, onClose, onSave }: GoalModalPr
   useEffect(() => {
     // If goal is null, create a new empty goal template
     if (goal === null && isOpen) {
-      const newGoal: GoalFull = {
+      const newGoal: GoalWithDetails = {
         id: `new-${Date.now()}`,
         title: "New Goal",
         description: "",

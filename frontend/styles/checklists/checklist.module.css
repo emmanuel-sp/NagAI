@@ -54,7 +54,7 @@
   padding: 12px 24px;
   background: var(--card-background);
   border: 2px solid var(--card-border);
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
@@ -112,7 +112,7 @@
 .checklist {
   background: var(--card-background);
   border: 2px solid var(--card-border);
-  border-radius: 16px;
+  border-radius: 2px;
   padding: 32px;
   box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
@@ -178,7 +178,7 @@
   flex: 1;
   height: 12px;
   background: var(--surface-light);
-  border-radius: 6px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid var(--card-border);
 }
@@ -186,7 +186,7 @@
 .progressFill {
   height: 100%;
   background: var(--primary);
-  border-radius: 6px;
+  border-radius: 2px;
   transition: width 0.3s ease;
 }
 
@@ -215,7 +215,7 @@
   padding: 16px;
   background: var(--surface-light);
   border: 2px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: 2px;
   transition: all 0.2s ease;
 }
 
@@ -296,7 +296,7 @@ html[data-theme="dark"] .checklistItem:hover {
   color: var(--text-secondary);
   padding: 8px 12px;
   background: var(--card-background);
-  border-radius: 8px;
+  border-radius: 2px;
   border: 1px solid var(--card-border);
 }
 
@@ -318,7 +318,7 @@ html[data-theme="dark"] .checklistItem:hover {
   padding: 2px 8px;
   background: var(--error);
   color: #ffffff;
-  border-radius: 4px;
+  border-radius: 2px;
   font-size: 11px;
   font-weight: var(--font-weight-bold);
   text-transform: uppercase;
@@ -344,7 +344,7 @@ html[data-theme="dark"] .checklistItem:hover {
   padding: 8px;
   cursor: pointer;
   color: var(--text-secondary);
-  border-radius: 6px;
+  border-radius: 2px;
   transition: all 0.2s ease;
 }
 
@@ -373,7 +373,7 @@ html[data-theme="dark"] .checklistItem:hover {
 .itemEditTitle {
   padding: 12px 16px;
   border: 2px solid var(--input-border);
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-base);
   font-family: var(--font-family);
   background: var(--input-background);
@@ -394,7 +394,7 @@ html[data-theme="dark"] .itemEditTitle:focus {
 .itemEditNotes {
   padding: 12px 16px;
   border: 2px solid var(--input-border);
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-sm);
   font-family: var(--font-family);
   background: var(--input-background);
@@ -424,7 +424,7 @@ html[data-theme="dark"] .itemEditNotes:focus {
   flex: 1;
   padding: 10px 14px;
   border: 2px solid var(--input-border);
-  border-radius: 8px;
+  border-radius: 2px;
   font-size: var(--font-size-sm);
   font-family: var(--font-family);
   background: var(--input-background);
@@ -450,7 +450,7 @@ html[data-theme="dark"] .itemEditNotes:focus {
   gap: 6px;
   padding: 10px 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: 2px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -493,7 +493,7 @@ html[data-theme="dark"] .itemEditCancel:hover {
   padding: 20px;
   background: var(--card-background);
   border: 2px solid var(--primary);
-  border-radius: 12px;
+  border-radius: 2px;
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
@@ -515,7 +515,7 @@ html[data-theme="dark"] .itemEditCancel:hover {
 .addItemTitle {
   padding: 12px 16px;
   border: 2px solid var(--input-border);
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-base);
   font-family: var(--font-family);
   background: var(--input-background);
@@ -536,7 +536,7 @@ html[data-theme="dark"] .addItemTitle:focus {
 .addItemNotes {
   padding: 12px 16px;
   border: 2px solid var(--input-border);
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-sm);
   font-family: var(--font-family);
   background: var(--input-background);
@@ -566,7 +566,7 @@ html[data-theme="dark"] .addItemNotes:focus {
   flex: 1;
   padding: 10px 14px;
   border: 2px solid var(--input-border);
-  border-radius: 8px;
+  border-radius: 2px;
   font-size: var(--font-size-sm);
   font-family: var(--font-family);
   background: var(--input-background);
@@ -589,7 +589,7 @@ html[data-theme="dark"] .addItemNotes:focus {
 .addItemCancel {
   padding: 12px 24px;
   border: none;
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -633,7 +633,7 @@ html[data-theme="dark"] .addItemCancel:hover {
   background: var(--primary);
   color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -666,7 +666,7 @@ html[data-theme="dark"] .addItemCancel:hover {
   background: var(--primary);
   color: white;
   border: 2px solid var(--primary);
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -695,7 +695,7 @@ html[data-theme="dark"] .addItemCancel:hover {
   background: var(--primary);
   color: #ffffff;
   border: none;
-  border-radius: 12px;
+  border-radius: 2px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
@@ -724,7 +724,7 @@ html[data-theme="dark"] .addItemCancel:hover {
   background: var(--surface-light);
   color: var(--text-primary);
   border: 2px solid var(--card-border);
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;

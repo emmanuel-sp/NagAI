@@ -29,9 +29,6 @@ export default function ChecklistsHeader({
       <div className={styles.headerContent}>
         <div>
           <h1 className={styles.headerTitle}>Checklists</h1>
-          <p className={styles.headerSubtitle}>
-            Track progress on your goals with detailed checklists
-          </p>
         </div>
         <div className={styles.filterButtons}>
           <button

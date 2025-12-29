@@ -62,7 +62,7 @@ html[data-theme="dark"] .homeDescription {
 .featureCard {
   padding: 32px 24px;
   background: var(--card-background);
-  border-radius: 16px;
+  border-radius: 2px;
   border: 2px solid var(--card-border);
   transition: all 0.3s ease;
 }
@@ -124,7 +124,7 @@ html[data-theme="dark"] .featureText {
 
 .ctaButton {
   padding: 16px 40px;
-  border-radius: 12px;
+  border-radius: 2px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   border: none;

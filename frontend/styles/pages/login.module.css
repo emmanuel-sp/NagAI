@@ -12,7 +12,7 @@
   max-width: 450px;
   background: var(--card-background);
   border: 2px solid var(--card-border);
-  border-radius: 20px;
+  border-radius: 2px;
   padding: 48px;
   box-shadow: var(--shadow-xl);
 }
@@ -60,7 +60,7 @@ html[data-theme="dark"] .formLabel {
   width: 100%;
   padding: 14px 18px;
   border: 2px solid var(--input-border);
-  border-radius: 12px;
+  border-radius: 2px;
   font-size: 16px;
   transition: all 0.2s ease;
   background: var(--input-background);
@@ -95,7 +95,7 @@ html[data-theme="dark"] .formInput::placeholder {
   background: var(--primary);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 2px;
   font-size: 16px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -141,7 +141,7 @@ html[data-theme="dark"] .formInput::placeholder {
   margin-top: 12px;
   padding: 12px 16px;
   background: rgba(239, 122, 133, 0.1);
-  border-radius: 8px;
+  border-radius: 2px;
   border-left: 4px solid var(--error);
 }
 

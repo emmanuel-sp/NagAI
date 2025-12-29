@@ -75,7 +75,7 @@
 .featureSection {
   background: var(--card-background);
   border: 2px solid var(--card-border);
-  border-radius: 16px;
+  border-radius: 2px;
   padding: 32px;
   transition: all 0.3s ease;
 }
@@ -186,7 +186,7 @@
   padding: 64px 32px;
   background: var(--card-background);
   border: 2px solid var(--primary);
-  border-radius: 20px;
+  border-radius: 2px;
   box-shadow: var(--shadow-xl);
 }
 
@@ -218,7 +218,7 @@
   background: var(--primary);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 2px;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   text-decoration: none;

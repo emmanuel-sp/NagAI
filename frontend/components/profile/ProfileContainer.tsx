@@ -28,8 +28,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { UserProfile } from "@/types/user";
 import {
-  UserProfile,
   fetchUserProfile,
   updateUserProfile,
 } from "@/services/profileService";

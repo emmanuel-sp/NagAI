@@ -24,15 +24,15 @@
 
 import { useState, useEffect } from "react";
 import styles from "@/styles/goals/goalModals.module.css";
-import { GoalWithDetails } from "@/services/goalService";
+import { GoalWithDetails } from "@/types/goal";
 import { IoClose, IoSparkles } from "react-icons/io5";
 import { generateSmartGoalSuggestion } from "@/services/aiGoalService";
 
 interface EditGoalModalProps {
-  goal: GoalFull | null;
+  goal: GoalWithDetails | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (goal: GoalFull) => Promise<void>;
+  onSave: (goal: GoalWithDetails) => Promise<void>;
 }
 
 export default function EditGoalModal({

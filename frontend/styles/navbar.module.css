@@ -92,6 +92,13 @@ html[data-theme="dark"] .navLinkAnchor.active {
   margin-left: auto;
 }
 
+.navSeparator {
+  width: 1px;
+  height: 24px;
+  background: var(--card-border);
+  margin: 0 8px;
+}
+
 @media (max-width: 640px) {
   .navContent {
     padding: 0 16px;

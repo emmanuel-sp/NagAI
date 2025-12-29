@@ -10,7 +10,6 @@ import {
   toggleDigestStatus,
 } from "@/services/digestService";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import DigestHeader from "./DigestHeader";
 import DigestOverview from "./DigestOverview";
 import DigestSettings from "./DigestSettings";
 import ContentTypesSelector from "./ContentTypesSelector";
@@ -131,8 +130,6 @@ export default function DigestBuilderContainer() {
   return (
     <div className={styles.agentBuilderContainer}>
       <div className={styles.agentBuilderContent}>
-        <DigestHeader />
-
         <DigestOverview digest={digest} />
 
         <DigestSettings
