@@ -2,8 +2,8 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 56px;
-  height: 56px;
+  width: 32px;
+  height: 32px;
   background: var(--primary);
   border: 2px solid var(--card-border);
   border-radius: 50%;

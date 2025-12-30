@@ -37,6 +37,7 @@ import { logout } from "@/services/authService";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileContent from "@/components/profile/ProfileContent";
 import ProfileActions from "@/components/profile/ProfileActions";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import styles from "@/styles/pages/profile.module.css";
 
 export default function ProfileContainer() {
@@ -133,9 +134,7 @@ export default function ProfileContainer() {
   if (!profile) {
     return (
       <div className={styles.profileContainer}>
-        <div className={styles.profileHeader}>
-          <h1 className={styles.profileTitle}>Loading...</h1>
-        </div>
+        <LoadingSpinner message="Loading profile..." />
       </div>
     );
   }

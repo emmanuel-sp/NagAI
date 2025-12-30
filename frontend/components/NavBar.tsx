@@ -47,8 +47,8 @@ export default function NavBar() {
                   href="/goals"
                   className={`${styles.navLinkAnchor} ${isActive("/goals") ? styles.active : ""}`}
                 >
-                  <IoFlagOutline size={20} />
-                  <span>Goals</span>
+                  
+                  <span>GOALS</span>
                 </Link>
               </li>
               <li className={styles.navLink}>
@@ -56,8 +56,7 @@ export default function NavBar() {
                   href="/checklists"
                   className={`${styles.navLinkAnchor} ${isActive("/checklists") ? styles.active : ""}`}
                 >
-                  <IoListOutline size={20} />
-                  <span>Checklists</span>
+                  <span>CHECKLISTS</span>
                 </Link>
               </li>
               <li className={styles.navLink}>
@@ -65,8 +64,7 @@ export default function NavBar() {
                   href="/digests"
                   className={`${styles.navLinkAnchor} ${isActive("/digests") ? styles.active : ""}`}
                 >
-                  <IoDocumentText size={20} />
-                  <span>Digests</span>
+                  <span>DIGESTS</span>
                 </Link>
               </li>
               <li className={styles.navLink}>
@@ -74,8 +72,7 @@ export default function NavBar() {
                   href="/agent"
                   className={`${styles.navLinkAnchor} ${isActive("/agent") ? styles.active : ""}`}
                 >
-                  <IoConstruct size={20} />
-                  <span>Agent</span>
+                  <span>AGENT</span>
                 </Link>
               </li>
             </ul>
@@ -88,8 +85,8 @@ export default function NavBar() {
               href="/profile"
               className={`${styles.navLinkAnchor} ${isActive("/profile") ? styles.active : ""}`}
             >
-              <IoPerson size={20} />
-              <span>Profile</span>
+
+              <span>PROFILE</span>
             </Link>
           ) : (
             <Link

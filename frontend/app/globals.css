@@ -5,16 +5,16 @@
   --foreground: #1a2332;
 
   /* Primary Green - Main brand color */
-  --primary: #3e6840;
+  --primary: #3e684098;
   --primary-hover: #2f5030;
-  --primary-light: #46ad747c;
+  --primary-light: #3e68407a;
 
   /* Accent Colors */
   --accent: #b8fd9d;
   --accent-light: #f5e5eb;
 
   /* Status Colors */
-  --success: #059669;
+  --success: #49a789;
   --success-light: rgba(16, 185, 129, 0.1);
   --success-border: rgba(16, 185, 129, 0.3);
   --warning: #d97706;
@@ -73,13 +73,13 @@
 
 html[data-theme="dark"] {
   /* Base Colors */
-  --background: #0f1419;
+  --background: #000000;
   --foreground: #e8eaed;
 
   /* Primary Green - Brighter for dark mode visibility */
-  --primary: #2e6930;
+  --primary: #3e6840;
   --primary-hover: rgba(130, 180, 132, 0.658);
-  --primary-light: #9fabf1;
+  --primary-light: #dcffe2;
 
   /* Accent Colors */
   --accent: #146416;
@@ -159,17 +159,17 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(62, 104, 64, 0.25) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 90% 80%, rgba(117, 224, 126, 0.18) 0%, transparent 70%),
-    radial-gradient(ellipse 100% 80% at 10% 50%, rgba(184, 253, 157, 0.15) 0%, transparent 60%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, #3e684098 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 80%, #3e68406b 0%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 10% 50%, #3e684038 0%, transparent 60%);
   animation: backgroundFloat 25s ease-in-out infinite;
 }
 
 html[data-theme="dark"] body::before {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(46, 105, 48, 0.2) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 90% 80%, rgba(30, 58, 32, 0.15) 0%, transparent 70%),
-    radial-gradient(ellipse 100% 80% at 10% 50%, rgba(20, 100, 22, 0.12) 0%, transparent 60%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, #3e6840cc 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 80%, #3e684083 0%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 10% 50%, #3e684034 0%, transparent 60%);
 }
 
 @keyframes backgroundFloat {
