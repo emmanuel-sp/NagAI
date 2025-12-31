@@ -145,6 +145,36 @@ body {
   overflow-x: hidden;
 }
 
+/* App Layout with Sidebar */
+body.has-sidebar {
+  margin-left: 240px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.has-sidebar.sidebar-collapsed {
+  margin-left: 72px;
+}
+
+@media (max-width: 768px) {
+  body.has-sidebar {
+    margin-left: 200px;
+  }
+
+  body.has-sidebar.sidebar-collapsed {
+    margin-left: 72px;
+  }
+}
+
+@media (max-width: 640px) {
+  body.has-sidebar {
+    margin-left: 72px;
+  }
+
+  body.has-sidebar.sidebar-collapsed {
+    margin-left: 72px;
+  }
+}
+
 html[data-theme="dark"] body {
   background: #0f1419;
 }

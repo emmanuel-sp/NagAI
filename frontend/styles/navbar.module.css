@@ -1,6 +1,153 @@
-.navbar {
-  background: var(--navbar-background);
-  border-bottom: none;
+/* ============================================
+   SIDEBAR NAVIGATION (Logged In)
+   ============================================ */
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 240px;
+  background: var(--card-background);
+  border-right: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed {
+  width: 72px;
+}
+
+.sidebarContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px 0;
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px 20px 16px;
+  margin-bottom: 12px;
+}
+
+.hamburger {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.hamburger:hover {
+  background: var(--surface-light);
+  color: var(--text-primary);
+}
+
+.sidebarBrand {
+  text-decoration: none;
+  overflow: hidden;
+  flex: 1;
+}
+
+.brandText {
+  font-size: 22px;
+  font-weight: var(--font-weight-bold);
+  font-family: var(--heading-font);
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.collapsed .sidebarHeader {
+  justify-content: center;
+  padding: 0 18px 20px 18px;
+}
+
+.collapsed .sidebarBrand {
+  display: none;
+}
+
+.collapsed .brandText {
+  opacity: 0;
+  width: 0;
+}
+
+.sidebarLinks {
+  list-style: none;
+  padding: 0 8px;
+  margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebarLink {
+  margin: 0;
+  padding: 0;
+}
+
+.sidebarLinkAnchor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+  position: relative;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.sidebarLinkAnchor:hover {
+  background: var(--surface-light);
+  color: var(--text-primary);
+}
+
+.sidebarLinkAnchor.active {
+  background: var(--primary);
+  color: white;
+}
+
+.collapsed .sidebarLinkAnchor {
+  justify-content: center;
+  padding: 12px;
+}
+
+.collapsed .sidebarLinkAnchor span {
+  display: none;
+}
+
+.sidebarFooter {
+  margin-top: auto;
+  padding: 12px 8px 0 8px;
+  border-top: 1px solid var(--card-border);
+}
+
+/* ============================================
+   TOP NAVBAR (Not Logged In)
+   ============================================ */
+
+.navbarTop {
+  background: var(--card-background);
+  border-bottom: 1px solid var(--card-border);
   padding: 0;
   position: sticky;
   top: 0;
@@ -8,110 +155,103 @@
   transition: background 0.2s ease;
 }
 
-.navContent {
+.navContentTop {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 72px;
 }
 
 .navBrand {
-  font-size: var(--font-size-2xl);
+  font-size: 26px;
   font-weight: var(--font-weight-bold);
   font-family: var(--heading-font);
   color: var(--text-primary);
   text-decoration: none;
-  margin-right: 48px;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.5px;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .navBrand:hover {
-  transform: scale(1.05);
-}
-
-.navBrandIcon {
-  font-size: 24px;
-}
-
-.navLinks {
-  display: flex;
-  gap: 0;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.navLink {
-  position: relative;
-  margin: 0;
-  padding: 0;
-}
-
-.navLinkAnchor {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-normal);
-  transition: all 0.3s ease;
-  letter-spacing: 0.02em;
-}
-
-.navLinkAnchor:hover {
-  color: var(--text-primary);
   transform: scale(1.02);
 }
 
-.navLinkAnchor.active {
-  color: var(--primary);
-  font-size: 17px;
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.03em;
-  text-shadow: 0 0 18px rgba(62, 104, 64, 0.7), 0 0 8px rgba(62, 104, 64, 0.5);
-}
-
-html[data-theme="dark"] .navLinkAnchor.active {
-  color: var(--accent-light);
-  text-shadow: 0 0 15px rgba(184, 253, 157, 0.5);
-}
-
-.navRight {
+.loginButton {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-left: auto;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--primary);
+  color: white;
+  border-radius: 2px;
+  text-decoration: none;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
-.navSeparator {
-  width: 1px;
-  height: 24px;
-  background: var(--card-border);
-  margin: 0 8px;
+.loginButton:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 220px;
+  }
+
+  .sidebar.collapsed {
+    width: 72px;
+  }
+
+  .sidebarLinkAnchor {
+    padding: 12px 16px;
+    font-size: 14px;
+    gap: 12px;
+  }
+
+  .brandText {
+    font-size: 22px;
+  }
 }
 
 @media (max-width: 640px) {
-  .navContent {
-    padding: 0 16px;
-    height: 56px;
+  .sidebar {
+    width: 72px;
   }
 
-  .navBrand {
-    font-size: 18px;
-    margin-right: 24px;
+  .sidebar.collapsed {
+    width: 72px;
   }
 
-  .navLinkAnchor {
-    padding: 6px 12px;
-    font-size: 13px;
+  .sidebarHeader {
+    padding: 0 12px 20px 12px;
+  }
+
+  .brandText {
+    display: none;
+  }
+
+  .hamburger {
+    margin: 0 auto;
+  }
+
+  .sidebarLinkAnchor {
+    justify-content: center;
+    padding: 14px;
+    gap: 0;
+  }
+
+  .sidebarLinkAnchor span {
+    display: none;
   }
 }

@@ -1,13 +1,13 @@
 .goalsContainer {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 100px 24px 48px;
-  min-height: calc(100vh - 64px);
+  padding: 40px;
+  min-height: 100vh;
   background: var(--page-background);
 }
 
 .goalsHeader {
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .goalsHeaderContent {
