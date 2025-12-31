@@ -217,14 +217,7 @@ export default function AgentBuilderContainer() {
   return (
     <div className={styles.agentBuilderContainer}>
       <div className={styles.agentBuilderContent}>
-        <DeploymentPanel
-          isDeployed={agent.isDeployed}
-          canDeploy={canDeploy}
-          isDeploying={isDeploying}
-          deployedAt={agent.deployedAt}
-          onDeploy={handleDeploy}
-          onStop={handleStop}
-        />
+        <AgentOverview agent={agent} />
 
         <CommunicationSettings
           currentChannel={agent.communicationChannel}
@@ -247,7 +240,14 @@ export default function AgentBuilderContainer() {
           />
         )}
 
-        <AgentOverview agent={agent} />
+        <DeploymentPanel
+          isDeployed={agent.isDeployed}
+          canDeploy={canDeploy}
+          isDeploying={isDeploying}
+          deployedAt={agent.deployedAt}
+          onDeploy={handleDeploy}
+          onStop={handleStop}
+        />
       </div>
 
       <CreateContextModal
