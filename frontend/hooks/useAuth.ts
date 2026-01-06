@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/services/authService";
-import { User } from "@/types/user";
+import { UserProfile } from "@/types/user";
 
 interface UseAuthOptions {
   requireAuth?: boolean;
@@ -9,7 +9,7 @@ interface UseAuthOptions {
 }
 
 export function useAuth(options: UseAuthOptions = {}) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 

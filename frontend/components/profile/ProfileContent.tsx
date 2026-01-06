@@ -64,21 +64,21 @@ export default function ProfileContent({
       />
 
       <InterestsCard
-        items={profile.interests}
+        items={profile.interests || []}
         isEditing={isEditing}
         onAdd={(item) => onAddItem("interests", item)}
         onRemove={(index) => onRemoveItem("interests", index)}
       />
 
       <HobbiesCard
-        items={profile.hobbies}
+        items={profile.hobbies || []}
         isEditing={isEditing}
         onAdd={(item) => onAddItem("hobbies", item)}
         onRemove={(index) => onRemoveItem("hobbies", index)}
       />
 
       <HabitsCard
-        items={profile.habits}
+        items={profile.habits || []}
         isEditing={isEditing}
         onAdd={(item) => onAddItem("habits", item)}
         onRemove={(index) => onRemoveItem("habits", index)}

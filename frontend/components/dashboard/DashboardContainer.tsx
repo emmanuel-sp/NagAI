@@ -65,7 +65,7 @@ export default function DashboardContainer({ userProfile }: DashboardContainerPr
   return (
     <div className={styles.dashboardContainer}>
       <div className={styles.dashboardContent}>
-        <DashboardHeader userName={userProfile.name} />
+        <DashboardHeader userName={userProfile.fullName} />
         <DashboardOverview
           goals={goals}
           checklists={checklists}

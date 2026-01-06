@@ -222,7 +222,7 @@ export default function AgentBuilderContainer() {
         <CommunicationSettings
           currentChannel={agent.communicationChannel}
           onChannelChange={handleCommunicationChange}
-          hasPhoneNumber={!!userProfile?.phone && userProfile.phone.trim() !== ""}
+          hasPhoneNumber={!!userProfile?.phoneNumber && userProfile.phoneNumber.trim() !== ""}
         />
 
         {agent.contexts.length === 0 ? (

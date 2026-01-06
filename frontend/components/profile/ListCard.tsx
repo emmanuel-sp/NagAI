@@ -34,7 +34,7 @@ export default function ListCard({ title, subtitle, items, isEditing, placeholde
       <h2 className={styles.cardTitle}>{title}</h2>
       <p className={styles.cardSubtitle}>{subtitle}</p>
 
-      {items.length > 0 && (
+      {items && items.length > 0 && (
         <div className={styles.bulkItems}>
           {items.map((item, idx) => (
             <div key={idx} className={styles.bulkItem}>

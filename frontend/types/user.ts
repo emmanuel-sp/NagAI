@@ -1,23 +1,20 @@
-// User and authentication types
+// User types matching backend schema
 
 export interface User {
-  id: string;
+  id: number;
+  fullName: string;
   email: string;
-  name: string;
+  phoneNumber?: string;
+  userLocation?: string;
+  career?: string;
+  bio?: string;
+  interests?: string[];
+  hobbies?: string[];
+  habits?: string[];
+  createdAt?: string;
 }
 
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  bio: string;
-  career: string;
-  location: string;
-  interests: string[];
-  hobbies: string[];
-  habits: string[];
-}
+export interface UserProfile extends User {}
 
 export interface LoginCredentials {
   email: string;
@@ -30,7 +27,7 @@ export interface SignupData {
   password: string;
 }
 
-export interface AuthResponse {
-  user: User;
+export interface LoginResponse {
   token: string;
+  expiresIn: number;
 }

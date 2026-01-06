@@ -83,7 +83,7 @@ export default function ProfileContainer() {
         prev
           ? {
               ...prev,
-              [listField]: [...prev[listField], item.trim()],
+              [listField]: [...(prev[listField] || []), item.trim()],
             }
           : prev
       );
@@ -98,7 +98,7 @@ export default function ProfileContainer() {
       prev
         ? {
             ...prev,
-            [listField]: prev[listField].filter((_, i) => i !== index),
+            [listField]: prev?.[listField]?.filter((_, i) => i !== index) || [],
           }
         : prev
     );

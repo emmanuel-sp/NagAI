@@ -36,11 +36,11 @@ export default function BasicInfoCard({
           <input
             className={styles.fieldInput}
             type="text"
-            value={profile.name}
-            onChange={(e) => onFieldChange("name", e.target.value)}
+            value={profile.fullName}
+            onChange={(e) => onFieldChange("fullName", e.target.value)}
           />
         ) : (
-          <div className={styles.fieldValue}>{profile.name}</div>
+          <div className={styles.fieldValue}>{profile.fullName}</div>
         )}
       </div>
 
@@ -64,12 +64,12 @@ export default function BasicInfoCard({
           <input
             className={styles.fieldInput}
             type="tel"
-            value={profile.phone || ""}
-            onChange={(e) => onFieldChange("phone", e.target.value)}
+            value={profile.phoneNumber || ""}
+            onChange={(e) => onFieldChange("phoneNumber", e.target.value)}
             placeholder="e.g., +1 (555) 123-4567"
           />
         ) : (
-          <div className={styles.fieldValue}>{profile.phone || "Not provided"}</div>
+          <div className={styles.fieldValue}>{profile.phoneNumber || "Not provided"}</div>
         )}
       </div>
 
@@ -79,11 +79,11 @@ export default function BasicInfoCard({
           <input
             className={styles.fieldInput}
             type="text"
-            value={profile.location}
-            onChange={(e) => onFieldChange("location", e.target.value)}
+            value={profile.userLocation || ""}
+            onChange={(e) => onFieldChange("userLocation", e.target.value)}
           />
         ) : (
-          <div className={styles.fieldValue}>{profile.location}</div>
+          <div className={styles.fieldValue}>{profile.userLocation || "Not provided"}</div>
         )}
       </div>
     </div>

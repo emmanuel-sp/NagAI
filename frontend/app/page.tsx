@@ -7,12 +7,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, UserProfile } from "@/types/user";
+import { UserProfile } from "@/types/user";
 import LandingPage from "@/components/home/LandingPage";
 import DashboardContainer from "@/components/dashboard/DashboardContainer";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import { fetchUserProfile } from "@/services/profileService";
-import { getCurrentUser, isAuthenticated } from "@/services/authService";
+import { getCurrentUser } from "@/services/authService";
 
 export default function Home() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -20,7 +19,7 @@ export default function Home() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const currentUserProfile = await fetchUserProfile();
+      const currentUserProfile = await getCurrentUser();
       setUserProfile(currentUserProfile);
       setLoading(false);
     };

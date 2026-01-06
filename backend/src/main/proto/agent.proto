@@ -1,0 +1,11 @@
+service Controller {
+    rpc sendMessage(AgentRequest) returns (AgentReply) {}
+}
+
+message AgentRequest {
+    required string message = 1;
+}
+
+message AgentReply {
+    required string message = 1;
+}
