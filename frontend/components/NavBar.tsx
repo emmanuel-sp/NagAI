@@ -62,22 +62,7 @@ export default function NavBar() {
   };
 
   if (!isLoggedIn) {
-    return (
-      <nav className={styles.navbarTop}>
-        <div className={styles.navContentTop}>
-          <Link href="/" className={styles.navBrand}>
-            <span>NagAI</span>
-          </Link>
-          <Link
-            href="/login"
-            className={styles.loginButton}
-          >
-            <IoLogIn size={20} />
-            <span>Login</span>
-          </Link>
-        </div>
-      </nav>
-    );
+    return null;
   }
 
   return (

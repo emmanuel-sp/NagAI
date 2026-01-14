@@ -33,16 +33,6 @@ export default function CreateContextModal({
   const [customInstructions, setCustomInstructions] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +130,6 @@ export default function CreateContextModal({
                   onChange={(e) => setMessageType(e.target.value as MessageType)}
                 />
                 <span className={styles.radioLabel}>
-                  <span className={styles.emoji}>⚡</span>
                   <span>Nag</span>
                   <span className={styles.radioDescription}>Persistent reminders</span>
                 </span>
@@ -153,7 +142,6 @@ export default function CreateContextModal({
                   onChange={(e) => setMessageType(e.target.value as MessageType)}
                 />
                 <span className={styles.radioLabel}>
-                  <span className={styles.emoji}>🔥</span>
                   <span>Motivation</span>
                   <span className={styles.radioDescription}>Encouraging messages</span>
                 </span>
@@ -166,7 +154,6 @@ export default function CreateContextModal({
                   onChange={(e) => setMessageType(e.target.value as MessageType)}
                 />
                 <span className={styles.radioLabel}>
-                  <span className={styles.emoji}>🧭</span>
                   <span>Guidance</span>
                   <span className={styles.radioDescription}>Strategic advice</span>
                 </span>

@@ -1,69 +1,65 @@
 .goalCard {
   background: var(--card-background);
-  border: 2px solid var(--card-border);
-  border-radius: 2px;
-  padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+  border: none;
+  padding: 48px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  border-left: 5px solid var(--primary);
+  position: relative;
+  animation: slideInRight 0.5s ease backwards;
+  backdrop-filter: blur(10px);
 }
 
-.goalCard:nth-child(4n+1) {
-  background: var(--card-background);
-  border-left-color: var(--primary);
-  border-color: var(--card-border);
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.goalCard:nth-child(4n+2) {
-  background: var(--card-background);
-  border-left-color: var(--primary);
-  border-color: var(--card-border);
-}
-
-.goalCard:nth-child(4n+3) {
-  background: var(--card-background);
-  border-left-color: var(--primary);
-  border-color: var(--card-border);
-}
-
-.goalCard:nth-child(4n+4) {
-  background: var(--card-background);
-  border-left-color: var(--primary);
-  border-color: var(--card-border);
-}
+.goalCard:nth-child(1) { animation-delay: 0.1s; }
+.goalCard:nth-child(2) { animation-delay: 0.15s; }
+.goalCard:nth-child(3) { animation-delay: 0.2s; }
+.goalCard:nth-child(4) { animation-delay: 0.25s; }
+.goalCard:nth-child(5) { animation-delay: 0.3s; }
+.goalCard:nth-child(6) { animation-delay: 0.35s; }
 
 .goalCard:hover {
   box-shadow: var(--shadow-xl);
-  transform: translateY(-2px);
-}
-
-html[data-theme="dark"] .goalCard:hover {
-  border-color: var(--primary);
+  transform: translateY(-4px);
 }
 
 .goalHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .goalTitle {
-  font-size: 20px;
-  font-weight: var(--font-weight-semibold);
+  font-size: 24px;
+  font-weight: var(--font-weight-bold);
   color: var(--text-primary);
   margin: 0;
   flex: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  transition: color 0.3s ease;
+}
+
+.goalCard:hover .goalTitle {
+  color: var(--primary);
 }
 
 .goalDescription {
-  font-size: 16px;
+  font-size: 17px;
   color: var(--text-secondary);
-  margin-bottom: 16px;
-  line-height: 1.6;
+  margin-bottom: 20px;
+  line-height: 1.7;
   font-weight: var(--font-weight-normal);
 }
 
@@ -106,27 +102,26 @@ html[data-theme="dark"] .metaLabel {
 
 .goalActions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   justify-content: flex-end;
 }
 
 .viewButton {
   background: var(--primary);
   border: none;
-  padding: 10px 20px;
-  border-radius: 2px;
-  font-size: 14px;
+  padding: 14px 32px;
+  font-size: 16px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: white;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .viewButton:hover {
   background: var(--primary-hover);
   box-shadow: var(--shadow-xl);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .viewButton:active {
@@ -136,28 +131,31 @@ html[data-theme="dark"] .metaLabel {
 
 .checklistButton {
   background: var(--surface-light);
-  border: 2px solid var(--card-border);
-  padding: 10px 20px;
-  border-radius: 2px;
-  font-size: 14px;
+  border: none;
+  padding: 14px 32px;
+  font-size: 16px;
   font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.checklistButton svg {
+  transition: transform 0.3s ease;
 }
 
 .checklistButton:hover {
   background: var(--surface-hover);
-  border-color: var(--primary-light);
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
-html[data-theme="dark"] .checklistButton:hover {
-  border-color: var(--primary);
+.checklistButton:hover svg {
+  transform: scale(1.1);
 }
 
 .checklistButton:active {

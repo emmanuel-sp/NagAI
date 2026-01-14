@@ -5,17 +5,17 @@
 .agentBuilderContainer {
   min-height: 100vh;
   background: var(--page-background);
-  padding: 40px;
+  padding: 64px 48px;
   display: flex;
   justify-content: center;
 }
 
 .agentBuilderContent {
-  max-width: 1100px;
+  max-width: 1600px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
 }
 
 .errorMessage {
@@ -28,21 +28,35 @@
    HEADER
    ============================================ */
 
+.digestHeader {
+  margin-bottom: 32px;
+}
+
+.digestTitle {
+  font-size: 56px;
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  font-family: var(--heading-font);
+}
+
 .header {
   text-align: center;
-  padding: 40px 32px;
+  padding: 56px 48px;
   background: var(--card-background);
-  border: 2px solid var(--primary);
-  border-radius: 2px;
-  box-shadow: var(--shadow-lg);
+  border: none;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
 }
 
 .title {
-  font-size: var(--font-size-4xl);
+  font-size: 56px;
   font-family: var(--heading-font);
   color: var(--text-primary);
   margin: 0 0 12px 0;
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
@@ -59,18 +73,30 @@
 
 .overviewCard {
   background: var(--card-background);
-  border: 2px solid var(--card-border);
-  border-radius: 2px;
-  padding: 28px;
-  box-shadow: var(--shadow-sm);
+  border: none;
+  padding: 56px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.overviewCard:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
 }
 
 .settingsCard {
   background: var(--card-background);
-  border: 2px solid var(--card-border);
-  border-radius: 2px;
-  padding: 28px;
-  box-shadow: var(--shadow-sm);
+  border: none;
+  padding: 56px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.settingsCard:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
 }
 
 .overviewHeader {
@@ -193,7 +219,6 @@
   padding: 16px 20px;
   background: var(--card-background);
   border: 2px solid var(--card-border);
-  border-radius: 2px;
   cursor: pointer;
   transition: all 0.2s ease;
   color: var(--text-primary);
@@ -230,7 +255,6 @@
   padding: 20px 16px;
   background: var(--card-background);
   border: 2px solid var(--card-border);
-  border-radius: 2px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
@@ -275,7 +299,6 @@
 .contentTypeCard {
   background: var(--card-background);
   border: 2px solid var(--card-border);
-  border-radius: 2px;
   padding: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -331,7 +354,6 @@
 .deploymentPanel {
   background: var(--card-background);
   border: 2px solid var(--primary);
-  border-radius: 2px;
   padding: 32px;
   display: flex;
   justify-content: space-between;
@@ -368,7 +390,6 @@
   background: var(--success);
   color: white;
   border: none;
-  border-radius: 2px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
@@ -397,7 +418,6 @@
   background: var(--neutral);
   color: white;
   border: none;
-  border-radius: 2px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   cursor: pointer;

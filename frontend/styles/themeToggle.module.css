@@ -2,45 +2,40 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 32px;
-  height: 32px;
-  background: var(--primary);
-  border: 2px solid var(--card-border);
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  background: var(--card-background);
+  border: none;
   cursor: pointer;
-  font-size: var(--font-size-lg);
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  color: white;
-  box-shadow: var(--shadow-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-md);
   z-index: 1000;
+  opacity: 0.6;
+  backdrop-filter: blur(10px);
 }
 
 .floatingToggle:hover {
-  transform: scale(1.1) rotate(15deg);
-  box-shadow: 0 8px 24px rgba(62, 104, 64, 0.3);
-  background: var(--primary-hover);
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
+  color: var(--primary);
 }
 
 .floatingToggle:active {
-  transform: scale(0.95);
-}
-
-html[data-theme="dark"] .floatingToggle {
-  border-color: var(--primary-light);
-}
-
-html[data-theme="dark"] .floatingToggle:hover {
-  box-shadow: 0 8px 24px rgba(111, 181, 115, 0.4);
+  transform: scale(1);
 }
 
 @media (max-width: 640px) {
   .floatingToggle {
     bottom: 16px;
     right: 16px;
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
   }
 }

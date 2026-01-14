@@ -4,11 +4,8 @@ import styles from "@/styles/agent/agent-builder.module.css";
 
 export default function AgentBuilderHeader() {
   return (
-    <header className={styles.header}>
-      <h1 className={styles.title}>Agent Builder</h1>
-      <p className={styles.subtitle}>
-        Create and configure your personal AI agent to help you stay on track with your goals
-      </p>
-    </header>
+    <div className={styles.agentHeader}>
+      <h1 className={styles.agentTitle}>Agent Builder</h1>
+    </div>
   );
 }

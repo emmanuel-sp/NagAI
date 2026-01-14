@@ -6,15 +6,15 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(12px);
+  animation: fadeIn 0.3s ease;
   overflow: hidden;
-  padding-top: 120px;
+  padding-top: 80px;
 }
 
 @keyframes fadeIn {
@@ -39,35 +39,33 @@
 
 .modalContent {
   background: var(--card-background);
-  border-radius: 2px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  width: 72%;
-  max-width: 720px;
-  max-height: calc(100vh - 180px);
-  animation: slideUp 0.3s ease;
+  box-shadow: var(--shadow-2xl);
+  width: 80%;
+  max-width: 800px;
+  height: auto;
+  max-height: calc(100vh - 160px);
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .modalHeader {
-  padding: 22px 28px;
-  border-bottom: 2px solid var(--card-border);
+  padding: 32px 40px;
+  border-bottom: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: var(--card-background);
   flex-shrink: 0;
-  border-top-left-radius: 2px;
-  border-top-right-radius: 2px;
 }
 
 .modalTitle {
-  font-size: 22px;
+  font-size: 32px;
   font-weight: var(--font-weight-bold);
-  margin: 0 0 4px 0;
-  letter-spacing: 0.5px;
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
 /* Add Modal */
@@ -111,10 +109,13 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .modalBody {
-  padding: 24px 28px;
-  flex: 1 1 0%;
+  padding: 24px 24px 20% 28px;
+  flex: 1 1 20%;
+  /* overflow-y: auto; */
   overflow-x: hidden;
+  max-height: 80vh;
   -webkit-overflow-scrolling: touch;
+  
 }
 
 .formSection {

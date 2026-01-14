@@ -22,18 +22,18 @@ export default function ProfessionalCard({ profile, isEditing, onFieldChange }: 
       <div className={styles.fieldGroup}>
         <label className={styles.fieldLabel}>Career</label>
         {isEditing ? (
-          <input className={styles.fieldInput} type="text" value={profile.career} onChange={(e) => onFieldChange("career", e.target.value)} />
+          <input className={styles.fieldInput} type="text" value={profile.career || ""} onChange={(e) => onFieldChange("career", e.target.value)} />
         ) : (
-          <div className={styles.fieldValue}>{profile.career}</div>
+          <div className={styles.fieldValue}>{profile.career || "-"}</div>
         )}
       </div>
 
       <div className={styles.fieldGroup}>
         <label className={styles.fieldLabel}>Bio</label>
         {isEditing ? (
-          <textarea className={styles.fieldTextarea} value={profile.bio} onChange={(e) => onFieldChange("bio", e.target.value)} />
+          <textarea className={styles.fieldTextarea} value={profile.bio || ""} onChange={(e) => onFieldChange("bio", e.target.value)} />
         ) : (
-          <div className={styles.fieldValue} style={{ minHeight: "60px", alignItems: "flex-start", padding: "12px" }}>{profile.bio}</div>
+          <div className={styles.fieldValue} style={{ minHeight: "60px", alignItems: "flex-start", padding: "12px" }}>{profile.bio || "-"}</div>
         )}
       </div>
     </div>

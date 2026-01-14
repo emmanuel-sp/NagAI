@@ -54,18 +54,6 @@ export default function EditGoalModal({
   const [loadingSuggestion, setLoadingSuggestion] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, string>>({});
 
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
 
   useEffect(() => {
     if (goal && isOpen) {

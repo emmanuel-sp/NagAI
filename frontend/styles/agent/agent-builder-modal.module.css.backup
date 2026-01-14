@@ -6,75 +6,49 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(12px);
-  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(4px);
   overflow: hidden;
-  padding-top: 80px;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  padding-top: 120px;
 }
 
 .modalContent {
   background: var(--card-background);
-  box-shadow: var(--shadow-2xl);
-  width: 80%;
-  max-width: 800px;
-  height: auto;
-  max-height: calc(100vh - 160px);
-  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--card-border);
+  border-radius: 2px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 72%;
+  max-width: 560px;
+  max-height: calc(100vh - 180px);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .modalHeader {
-  padding: 32px 40px;
-  border-bottom: none;
+  padding: 22px 28px;
+  border-bottom: 2px solid var(--card-border);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 20px;
-  background: var(--card-background);
   flex-shrink: 0;
 }
 
 .modalTitle {
-  font-size: 32px;
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: var(--primary);
+  color: var(--text-primary);
   margin: 0 0 4px 0;
-  letter-spacing: -0.02em;
 }
 
 .modalSubtitle {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   margin: 0;
-  font-weight: var(--font-weight-medium);
 }
 
 .closeButton {
@@ -83,12 +57,12 @@
   color: var(--text-secondary);
   cursor: pointer;
   font-size: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 8px;
   border-radius: 2px;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -97,19 +71,12 @@
   color: var(--text-primary);
 }
 
-html[data-theme="dark"] .closeButton:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
 .modalBody {
   padding: 24px 28px;
-  flex: 1 1 0%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  overflow-x: hidden;
 }
 
 .formSection {
@@ -119,13 +86,11 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .formLabel {
-  display: block;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 8px;
 }
 
 .required {
@@ -136,8 +101,8 @@ html[data-theme="dark"] .closeButton:hover {
 .formSelect,
 .formTextarea {
   width: 100%;
-  padding: 14px 16px;
-  font-size: 15px;
+  padding: 12px 16px;
+  font-size: var(--font-size-base);
   border: 2px solid var(--card-border);
   border-radius: 2px;
   background: var(--input-background);
@@ -156,7 +121,7 @@ html[data-theme="dark"] .closeButton:hover {
 
 .formTextarea {
   resize: vertical;
-  min-height: 60px;
+  min-height: 100px;
   line-height: 1.6;
 }
 
@@ -198,7 +163,11 @@ html[data-theme="dark"] .closeButton:hover {
   flex: 1;
 }
 
-.radioLabel > span:nth-child(1) {
+.emoji {
+  font-size: var(--font-size-2xl);
+}
+
+.radioLabel > span:nth-child(2) {
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
 }
@@ -298,17 +267,16 @@ html[data-theme="dark"] .closeButton:hover {
 
 /* Modal Footer */
 .modalFooter {
-  padding: 24px 32px;
+  padding: 20px 28px;
   border-top: 2px solid var(--card-border);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  background: var(--card-background);
   flex-shrink: 0;
 }
 
 .cancelButton {
-  padding: 14px 28px;
+  padding: 12px 24px;
   background: transparent;
   color: var(--text-secondary);
   border: 2px solid var(--card-border);
@@ -321,8 +289,8 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .cancelButton:hover:not(:disabled) {
-  background: var(--card-hover);
-  border-color: var(--text-muted);
+  background: var(--surface-light);
+  border-color: var(--primary);
   color: var(--text-primary);
 }
 
@@ -333,8 +301,8 @@ html[data-theme="dark"] .closeButton:hover {
 
 .createButton,
 .saveButton {
-  padding: 14px 32px;
-  color: #ffffff;
+  padding: 12px 28px;
+  color: white;
   border: none;
   border-radius: 2px;
   font-size: var(--font-size-base);
@@ -350,9 +318,9 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .createButton:hover:not(:disabled) {
-  background: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+  background: var(--primary-hover);
 }
 
 .saveButton {
@@ -361,9 +329,9 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .saveButton:hover:not(:disabled) {
-  background: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+  background: var(--primary-hover);
 }
 
 .createButton:disabled,
@@ -376,6 +344,10 @@ html[data-theme="dark"] .closeButton:hover {
 /* Dark Mode */
 html[data-theme="dark"] .modalContent {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="dark"] .closeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Responsive */

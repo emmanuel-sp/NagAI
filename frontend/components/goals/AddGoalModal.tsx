@@ -55,17 +55,19 @@ export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalPro
   const [loadingSuggestion, setLoadingSuggestion] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, string>>({});
 
-  // Prevent body scroll when modal is open
+  // Reset form when modal closes
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+    if (!isOpen) {
+      setTitle("");
+      setDescription("");
+      setTargetDate("");
+      setSpecific("");
+      setMeasurable("");
+      setAttainable("");
+      setRelevant("");
+      setTimely("");
+      setSuggestions({});
     }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen]);
 
   const handleGenerateSuggestion = async (

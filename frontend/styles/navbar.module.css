@@ -7,32 +7,36 @@
   left: 0;
   top: 0;
   height: 100vh;
-  width: 240px;
-  background: var(--card-background);
-  border-right: 1px solid var(--card-border);
+  width: 280px;
+  background: var(--navbar-background);
+  backdrop-filter: blur(20px);
+  border-right: none;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   z-index: 100;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar.collapsed {
-  width: 72px;
+  width: 80px;
+  box-shadow: none;
 }
 
 .sidebarContent {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 20px 0;
+  padding: 24px 0;
 }
 
 .sidebarHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 16px 20px 16px;
-  margin-bottom: 12px;
+  gap: 16px;
+  padding: 0 16px 20px 0px;
+  margin-bottom: 16px;
+  animation: fadeInDown 0.5s ease;
 }
 
 .hamburger {
@@ -40,20 +44,23 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 6px;
-  border-radius: 2px;
-  transition: all 0.2s ease;
+  padding: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
 }
 
 .hamburger:hover {
   background: var(--surface-light);
   color: var(--text-primary);
+}
+
+.hamburger:active {
+  transform: scale(0.95);
 }
 
 .sidebarBrand {
@@ -63,13 +70,17 @@
 }
 
 .brandText {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: var(--font-weight-bold);
   font-family: var(--heading-font);
   color: var(--text-primary);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
   white-space: nowrap;
-  transition: opacity 0.2s ease;
+  transition: all 0.3s ease;
+}
+
+.sidebarBrand:hover .brandText {
+  color: var(--primary);
 }
 
 .collapsed .sidebarHeader {
@@ -88,32 +99,55 @@
 
 .sidebarLinks {
   list-style: none;
-  padding: 0 8px;
+  padding: 0 0px;
   margin: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .sidebarLink {
   margin: 0;
   padding: 0;
+  animation: fadeInRight 0.5s ease backwards;
+}
+
+.sidebarLink:nth-child(1) { animation-delay: 0.05s; }
+.sidebarLink:nth-child(2) { animation-delay: 0.1s; }
+.sidebarLink:nth-child(3) { animation-delay: 0.15s; }
+.sidebarLink:nth-child(4) { animation-delay: 0.2s; }
+.sidebarLink:nth-child(5) { animation-delay: 0.25s; }
+.sidebarLink:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .sidebarLinkAnchor {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 14px;
+  padding: 14px 16px;
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: var(--font-weight-medium);
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  border-radius: 2px;
   white-space: nowrap;
+}
+
+.sidebarLinkAnchor svg {
+  font-size: 20px;
+  transition: transform 0.3s ease;
 }
 
 .sidebarLinkAnchor:hover {
@@ -121,9 +155,33 @@
   color: var(--text-primary);
 }
 
+.sidebarLinkAnchor:hover svg {
+  transform: scale(1.1);
+}
+
 .sidebarLinkAnchor.active {
+  background: transparent;
+  color: var(--primary);
+  font-weight: var(--font-weight-semibold);
+  position: relative;
+  box-shadow: 0 0 20px rgba(62, 104, 64, 0.15);
+}
+
+.sidebarLinkAnchor.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
   background: var(--primary);
-  color: white;
+  box-shadow: 0 0 10px var(--primary);
+}
+
+.sidebarLinkAnchor.active svg {
+  color: var(--primary);
+  filter: drop-shadow(0 0 4px rgba(62, 104, 64, 0.4));
 }
 
 .collapsed .sidebarLinkAnchor {
@@ -137,8 +195,20 @@
 
 .sidebarFooter {
   margin-top: auto;
-  padding: 12px 8px 0 8px;
-  border-top: 1px solid var(--card-border);
+  padding: 16px 0px 0 0px;
+  border-top: none;
+  animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ============================================
@@ -146,57 +216,85 @@
    ============================================ */
 
 .navbarTop {
-  background: var(--card-background);
-  border-bottom: 1px solid var(--card-border);
+  background: var(--navbar-background);
+  backdrop-filter: blur(20px);
+  border-bottom: none;
   padding: 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  animation: fadeInDown 0.5s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .navContentTop {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 32px;
+  padding: 0 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
+  height: 84px;
 }
 
 .navBrand {
-  font-size: 26px;
+  font-size: 32px;
   font-weight: var(--font-weight-bold);
   font-family: var(--heading-font);
   color: var(--text-primary);
   text-decoration: none;
-  letter-spacing: -0.5px;
-  transition: all 0.2s ease;
+  letter-spacing: -0.8px;
+  transition: all 0.3s ease;
 }
 
 .navBrand:hover {
-  transform: scale(1.02);
+  transform: scale(1.05);
+  color: var(--primary);
 }
 
 .loginButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
+  gap: 10px;
+  padding: 16px 32px;
   background: var(--primary);
   color: white;
-  border-radius: 2px;
   text-decoration: none;
-  font-size: var(--font-size-base);
+  font-size: 18px;
   font-weight: var(--font-weight-semibold);
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md);
+}
+
+.loginButton svg {
+  font-size: 20px;
+  transition: transform 0.3s ease;
 }
 
 .loginButton:hover {
   background: var(--primary-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+.loginButton:hover svg {
+  transform: translateX(4px);
+}
+
+.loginButton:active {
+  transform: translateY(0);
   box-shadow: var(--shadow-md);
 }
 

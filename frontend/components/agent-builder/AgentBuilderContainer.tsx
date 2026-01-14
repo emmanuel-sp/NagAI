@@ -41,6 +41,7 @@ import { fetchGoals } from "@/services/goalService";
 import { fetchUserProfile } from "@/services/profileService";
 import { Goal } from "@/types/goal";
 import { UserProfile } from "@/types/user";
+import AgentBuilderHeader from "./AgentBuilderHeader";
 import AgentOverview from "./AgentOverview";
 import CommunicationSettings from "./CommunicationSettings";
 import ContextList from "./ContextList";
@@ -217,6 +218,8 @@ export default function AgentBuilderContainer() {
   return (
     <div className={styles.agentBuilderContainer}>
       <div className={styles.agentBuilderContent}>
+        <AgentBuilderHeader />
+
         <AgentOverview agent={agent} />
 
         <CommunicationSettings
