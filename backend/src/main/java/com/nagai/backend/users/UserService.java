@@ -33,5 +33,18 @@ public class UserService {
 
         return users;
     }
+
+    public User updateUser(User user) {
+        User identifiedUser = getUserByEmail(user.getEmail());
+        identifiedUser.setFullName(user.getFullName());
+        identifiedUser.setBio(user.getBio());
+        identifiedUser.setPhoneNumber(user.getPhoneNumber());
+        identifiedUser.setUserLocation(user.getUserLocation());
+        identifiedUser.setCareer(user.getCareer());
+        identifiedUser.setInterests(user.getInterests());
+        identifiedUser.setHobbies(user.getHobbies());
+        identifiedUser.setHabits(user.getHabits());
+        return userRepository.save(identifiedUser);
+    }
     
 }

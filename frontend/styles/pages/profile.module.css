@@ -294,6 +294,7 @@ html[data-theme="dark"] .secondaryButton:hover {
 }
 
 .successMessage {
+  margin: 16px;
   grid-column: 1 / -1;
   color: var(--text-primary);
   font-size: 15px;

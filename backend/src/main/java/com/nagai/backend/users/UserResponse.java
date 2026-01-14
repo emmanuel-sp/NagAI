@@ -2,20 +2,25 @@ package com.nagai.backend.users;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.CreationTimestamp;
-
-import com.nagai.backend.common.ApiResponse;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper=false)
-public class UserResponse extends ApiResponse {
+public class UserResponse {
+    public UserResponse(User user) {
+        this.id = user.getId();
+        this.fullName = user.getFullName();
+        this.email = user.getEmail();
+        this.createdAt = user.getCreatedAt();
+        this.phoneNumber = user.getPhoneNumber();
+        this.userLocation = user.getUserLocation();
+        this.password = user.getPassword();
+        this.career = user.getCareer();
+        this.bio = user.getBio();
+        this.interests = user.getInterests();
+        this.hobbies = user.getHobbies();
+        this.habits = user.getHabits();
+    }
+
     private Long id;
     
     private String fullName;
