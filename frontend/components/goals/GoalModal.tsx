@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styles from "@/styles/goals/goalModal.module.css";
+import styles from "@/styles/goals/goalModals.module.css";
 import { GoalWithDetails } from "@/types/goal";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoTrash } from "react-icons/io5";
 
 interface EditableFieldProps {
   label: string;
@@ -85,11 +85,14 @@ interface GoalModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave?: (goal: GoalWithDetails) => Promise<void>;
+  onRemove?: (goalId: string) => Promise<void>;
 }
 
-export default function GoalModal({ goal, isOpen, onClose, onSave }: GoalModalProps) {
+export default function GoalModal({ goal, isOpen, onClose, onSave, onRemove }: GoalModalProps) {
   const [editedGoal, setEditedGoal] = useState<GoalWithDetails | null>(goal);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     // If goal is null, create a new empty goal template
@@ -138,6 +141,21 @@ export default function GoalModal({ goal, isOpen, onClose, onSave }: GoalModalPr
       } finally {
         setIsSaving(false);
       }
+    }
+  };
+
+  const handleRemoveGoal = async () => {
+    if (!editedGoal || !onRemove) return;
+
+    setIsDeleting(true);
+    try {
+      await onRemove(editedGoal.id);
+      setShowDeleteConfirm(false);
+      onClose();
+    } catch (error) {
+      console.error("Failed to remove goal:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -221,11 +239,50 @@ export default function GoalModal({ goal, isOpen, onClose, onSave }: GoalModalPr
         </div>
 
         <div className={styles.modalFooter}>
-          <button className={styles.secondaryButton} onClick={onClose} disabled={isSaving}>
+          {onRemove && (
+            <button
+              type="button"
+              className={styles.deleteButton}
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={isSaving || isDeleting}
+            >
+              <IoTrash size={16} />
+              Remove Goal
+            </button>
+          )}
+          <button className={styles.cancelButton} onClick={onClose} disabled={isSaving}>
             Close
           </button>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className={styles.confirmOverlay} onClick={() => setShowDeleteConfirm(false)}>
+          <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.confirmTitle}>Remove Goal</h3>
+            <p className={styles.confirmMessage}>
+              Are you sure you want to remove &quot;{editedGoal?.title}&quot;? This action cannot be undone.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmDeleteButton}
+                onClick={handleRemoveGoal}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Removing..." : "Yes, Remove"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

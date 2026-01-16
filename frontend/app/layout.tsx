@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import NavBar from "@/components/NavBar";
 import ThemeToggle from "@/components/ThemeToggle";
+import Footer from "@/components/Footer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,10 +31,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body
         className="antialiased"
+        style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
       >
         <ThemeProvider>
           <NavBar/>
-          {children}
+          <main style={{ flex: 1, paddingTop: "60px" }}>
+            {children}
+          </main>
+          <Footer />
           <ThemeToggle />
         </ThemeProvider>
       </body>

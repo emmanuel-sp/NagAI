@@ -52,7 +52,7 @@
 }
 
 .modalHeader {
-  padding: 32px 40px;
+  padding: 32px 8px 32px 32px;
   border-bottom: none;
   display: flex;
   justify-content: space-between;
@@ -109,11 +109,12 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .modalBody {
-  padding: 24px 24px 20% 28px;
+  padding: 24px 24px 2px 28px;
   flex: 1 1 20%;
-  /* overflow-y: auto; */
+  overflow-y: auto;
   overflow-x: hidden;
-  max-height: 80vh;
+  min-height: 10vh;
+  max-height: 70vh;
   -webkit-overflow-scrolling: touch;
   
 }
@@ -368,8 +369,111 @@ html[data-theme="dark"] .closeButton:hover {
   transform: none;
 }
 
+/* Delete Button */
+.deleteButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: transparent;
+  color: var(--error);
+  border: 2px solid var(--error);
+  border-radius: 2px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+  margin-right: auto;
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: var(--error);
+  color: #ffffff;
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Confirmation Dialog */
+.confirmOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.confirmDialog {
+  background: var(--card-background);
+  border: 1px solid var(--card-border);
+  border-radius: 2px;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-2xl);
+  animation: slideUp 0.3s ease;
+}
+
+.confirmTitle {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  color: var(--error);
+  margin: 0 0 16px 0;
+}
+
+.confirmMessage {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.confirmDeleteButton {
+  padding: 12px 24px;
+  background: var(--error);
+  color: #ffffff;
+  border: none;
+  border-radius: 2px;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+}
+
+.confirmDeleteButton:hover:not(:disabled) {
+  background: #c53030;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.confirmDeleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Dark mode adjustments */
 html[data-theme="dark"] .modalContent {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="dark"] .confirmDialog {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
 }
 

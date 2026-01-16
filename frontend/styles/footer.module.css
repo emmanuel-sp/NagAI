@@ -1,0 +1,146 @@
+.footer {
+  width: 100%;
+  background: transparent;
+  border-top: 1px solid var(--card-border);
+  margin-top: 200px;
+}
+
+.footerContent {
+  width: 100%;
+  padding: var(--spacing-lg) var(--spacing-2xl);
+}
+
+.footerMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-xl);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.brandSection {
+  flex: 1;
+}
+
+.brandName {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+
+.tagline {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+.linksSection {
+  display: flex;
+  gap: 120px;
+}
+
+.linkGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.linkGroupTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.footerLink {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footerLink:hover {
+  color: var(--primary);
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.socialLink:hover {
+  color: var(--primary);
+}
+
+.footerBottom {
+  padding-top: var(--spacing-sm);
+  text-align: center;
+}
+
+.copyright {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer {
+    margin-top: 120px;
+  }
+
+  .footerContent {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .footerMain {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .brandSection {
+    text-align: center;
+  }
+
+  .tagline {
+    max-width: 100%;
+  }
+
+  .linksSection {
+    width: 100%;
+    justify-content: center;
+    gap: var(--spacing-xl);
+  }
+
+  .linkGroup {
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    margin-top: 80px;
+  }
+
+  .footerContent {
+    padding: var(--spacing-md) var(--spacing-md);
+  }
+
+  .linksSection {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-lg);
+  }
+}

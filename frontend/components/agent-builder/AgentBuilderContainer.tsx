@@ -222,11 +222,7 @@ export default function AgentBuilderContainer() {
 
         <AgentOverview agent={agent} />
 
-        <CommunicationSettings
-          currentChannel={agent.communicationChannel}
-          onChannelChange={handleCommunicationChange}
-          hasPhoneNumber={!!userProfile?.phoneNumber && userProfile.phoneNumber.trim() !== ""}
-        />
+        
 
         {agent.contexts.length === 0 ? (
           <EmptyContextState
@@ -242,6 +238,12 @@ export default function AgentBuilderContainer() {
             onCreate={() => setIsCreateModalOpen(true)}
           />
         )}
+
+        <CommunicationSettings
+          currentChannel={agent.communicationChannel}
+          onChannelChange={handleCommunicationChange}
+          hasPhoneNumber={!!userProfile?.phoneNumber && userProfile.phoneNumber.trim() !== ""}
+        />
 
         <DeploymentPanel
           isDeployed={agent.isDeployed}

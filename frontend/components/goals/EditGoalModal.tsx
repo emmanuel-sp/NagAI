@@ -25,7 +25,7 @@
 import { useState, useEffect } from "react";
 import styles from "@/styles/goals/goalModals.module.css";
 import { GoalWithDetails } from "@/types/goal";
-import { IoClose, IoSparkles } from "react-icons/io5";
+import { IoClose, IoSparkles, IoTrash } from "react-icons/io5";
 import { generateSmartGoalSuggestion } from "@/services/aiGoalService";
 
 interface EditGoalModalProps {
@@ -33,6 +33,7 @@ interface EditGoalModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (goal: GoalWithDetails) => Promise<void>;
+  onRemove?: (goalId: string) => Promise<void>;
 }
 
 export default function EditGoalModal({
@@ -40,6 +41,7 @@ export default function EditGoalModal({
   isOpen,
   onClose,
   onSave,
+  onRemove,
 }: EditGoalModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -53,6 +55,8 @@ export default function EditGoalModal({
   const [isSaving, setIsSaving] = useState(false);
   const [loadingSuggestion, setLoadingSuggestion] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, string>>({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
 
   useEffect(() => {
@@ -141,6 +145,21 @@ export default function EditGoalModal({
       alert("Failed to update goal. Please try again.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleRemoveGoal = async () => {
+    if (!goal || !onRemove) return;
+
+    setIsDeleting(true);
+    try {
+      await onRemove(goal.id);
+      setShowDeleteConfirm(false);
+      onClose();
+    } catch (error) {
+      console.error("Failed to remove goal:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -419,6 +438,17 @@ export default function EditGoalModal({
           </div>
 
           <div className={styles.modalFooter}>
+            {onRemove && (
+              <button
+                type="button"
+                className={styles.deleteButton}
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isSaving || isDeleting}
+              >
+                <IoTrash size={16} />
+                Remove Goal
+              </button>
+            )}
             <button
               type="button"
               className={styles.cancelButton}
@@ -437,6 +467,34 @@ export default function EditGoalModal({
           </div>
         </form>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className={styles.confirmOverlay} onClick={() => setShowDeleteConfirm(false)}>
+          <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.confirmTitle}>Remove Goal</h3>
+            <p className={styles.confirmMessage}>
+              Are you sure you want to remove &quot;{title}&quot;? This action cannot be undone.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmDeleteButton}
+                onClick={handleRemoveGoal}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Removing..." : "Yes, Remove"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

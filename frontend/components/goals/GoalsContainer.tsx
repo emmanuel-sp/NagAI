@@ -37,6 +37,7 @@ import {
   fetchGoalById,
   updateGoal,
   createGoal,
+  deleteGoal,
 } from "@/services/goalService";
 
 export default function GoalsContainer() {
@@ -111,6 +112,12 @@ export default function GoalsContainer() {
     handleCloseEditModal();
   };
 
+  const handleRemoveGoal = async (goalId: string) => {
+    await deleteGoal(goalId);
+    await loadGoals();
+    handleCloseEditModal();
+  };
+
   if (isLoading) {
     return (
       <div className={styles.goalsContainer}>
@@ -140,6 +147,7 @@ export default function GoalsContainer() {
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
         onSave={handleUpdateGoal}
+        onRemove={handleRemoveGoal}
       />
 
       {showToast && (

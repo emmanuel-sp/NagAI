@@ -30,55 +30,15 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className={styles.homeFeatures}>
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <IoFlagOutline size={48} />
-            </div>
-            <h3 className={styles.featureTitle}>Goal Tracking</h3>
-            <p className={styles.featureText}>
-              Set and monitor your personal and professional goals
-            </p>
-          </div>
-
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <IoListOutline size={48} />
-            </div>
-            <h3 className={styles.featureTitle}>Smart Checklists</h3>
-            <p className={styles.featureText}>
-              Break down goals into actionable steps with AI assistance
-            </p>
-          </div>
-
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <IoDocumentText size={48} />
-            </div>
-            <h3 className={styles.featureTitle}>Personalized Digests</h3>
-            <p className={styles.featureText}>
-              Receive curated insights, tips, and opportunities tailored to you
-            </p>
-          </div>
-
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>
-              <IoConstruct size={48} />
-            </div>
-            <h3 className={styles.featureTitle}>AI Agent Builder</h3>
-            <p className={styles.featureText}>
-              Configure your personal AI assistant for proactive support
-            </p>
-          </div>
-        </div>
+        
 
         <div className={styles.homeCTA}>
           <Link href="/signup" className={`${styles.ctaButton} ${styles.ctaPrimary}`}>
-            <IoRocket size={20} />
+  
             <span>Get Started</span>
           </Link>
           <Link href="/learn-more" className={`${styles.ctaButton} ${styles.ctaSecondary}`}>
-            <IoSparkles size={20} />
+
             <span>Learn More</span>
           </Link>
         </div>
