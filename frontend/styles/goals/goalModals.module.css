@@ -6,15 +6,26 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(12px);
-  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(0px);
+  animation: overlayFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   overflow: hidden;
   padding-top: 80px;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(16px);
+  }
 }
 
 @keyframes fadeIn {
@@ -26,14 +37,16 @@
   }
 }
 
-@keyframes slideUp {
+@keyframes modalSlideUp {
   from {
-    transform: translateY(30px);
     opacity: 0;
+    transform: translateY(24px) scale(0.98);
+    filter: blur(4px);
   }
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
 }
 
@@ -42,12 +55,20 @@
   box-shadow: var(--shadow-2xl);
   width: 80%;
   max-width: 800px;
-  height: auto;
   max-height: calc(100vh - 160px);
-  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s backwards;
   border: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+/* Form inside modal needs to be flex too */
+.modalContent > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -110,13 +131,10 @@ html[data-theme="dark"] .closeButton:hover {
 
 .modalBody {
   padding: 24px 24px 2px 28px;
-  flex: 1 1 20%;
+  flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
-  min-height: 10vh;
-  max-height: 70vh;
-  -webkit-overflow-scrolling: touch;
-  
+  min-height: 0;
 }
 
 .formSection {
@@ -252,17 +270,19 @@ html[data-theme="dark"] .closeButton:hover {
   background: var(--surface-sky);
   border: 2px solid var(--primary);
   border-radius: 2px;
-  animation: slideDown 0.3s ease;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
+    filter: blur(2px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0px);
   }
 }
 
@@ -404,13 +424,24 @@ html[data-theme="dark"] .closeButton:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1100;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(0px);
+  animation: confirmOverlayFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes confirmOverlayFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
 }
 
 .confirmDialog {
@@ -421,7 +452,20 @@ html[data-theme="dark"] .closeButton:hover {
   max-width: 400px;
   width: 90%;
   box-shadow: var(--shadow-2xl);
-  animation: slideUp 0.3s ease;
+  animation: confirmDialogSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.03s backwards;
+}
+
+@keyframes confirmDialogSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
 }
 
 .confirmTitle {

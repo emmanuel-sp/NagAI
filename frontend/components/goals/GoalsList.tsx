@@ -4,14 +4,14 @@ import styles from "@/styles/goals/goalsList.module.css";
 
 interface GoalsListProps {
   goals: GoalType[];
-  onViewGoal: (id: string) => void;
+  onViewGoal: (goalId: number) => void;
 }
 
 export default function GoalsList({ goals, onViewGoal }: GoalsListProps) {
   return (
     <ul className={styles.goalsList}>
       {goals.map((goal) => (
-        <li key={goal.id}>
+        <li key={goal.goalId}>
           <GoalCard {...goal} onView={onViewGoal} />
         </li>
       ))}

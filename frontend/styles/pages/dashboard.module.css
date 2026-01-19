@@ -9,7 +9,18 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  animation: fadeIn 0.5s ease;
+  animation: containerFadeIn 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes containerFadeIn {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+  }
 }
 
 @keyframes fadeIn {
@@ -39,7 +50,20 @@
 .header {
   margin-bottom: 56px;
   text-align: center;
-  animation: fadeInDown 0.6s ease;
+  animation: headerFadeInDown 0.9s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+@keyframes headerFadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
 }
 
 @keyframes fadeInDown {
@@ -90,8 +114,21 @@
   gap: 24px;
   cursor: pointer;
   box-shadow: var(--shadow-md);
-  animation: fadeInUp 0.6s ease backwards;
+  animation: cardPopIn 0.9s cubic-bezier(0.4, 0, 0.2, 1) backwards;
   backdrop-filter: blur(10px);
+}
+
+@keyframes cardPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(16px);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
 }
 
 @keyframes fadeInUp {
@@ -103,22 +140,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.overviewCard:nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.overviewCard:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.overviewCard:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.overviewCard:nth-child(4) {
-  animation-delay: 0.4s;
 }
 
 .overviewCard:hover {

@@ -85,7 +85,7 @@ interface GoalModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave?: (goal: GoalWithDetails) => Promise<void>;
-  onRemove?: (goalId: string) => Promise<void>;
+  onRemove?: (goalId: number) => Promise<void>;
 }
 
 export default function GoalModal({ goal, isOpen, onClose, onSave, onRemove }: GoalModalProps) {
@@ -94,26 +94,20 @@ export default function GoalModal({ goal, isOpen, onClose, onSave, onRemove }: G
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     // If goal is null, create a new empty goal template
     if (goal === null && isOpen) {
-      const newGoal: GoalWithDetails = {
-        id: `new-${Date.now()}`,
-        title: "New Goal",
-        description: "",
-        createdAt: new Date().toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-        targetDate: "",
-        specific: "",
-        measurable: "",
-        attainable: "",
-        relevant: "",
-        timely: "",
-      };
-      setEditedGoal(newGoal);
+      return; // Error here
     } else {
       setEditedGoal(goal);
     }
@@ -149,7 +143,7 @@ export default function GoalModal({ goal, isOpen, onClose, onSave, onRemove }: G
 
     setIsDeleting(true);
     try {
-      await onRemove(editedGoal.id);
+      await onRemove(editedGoal.goalId);
       setShowDeleteConfirm(false);
       onClose();
     } catch (error) {

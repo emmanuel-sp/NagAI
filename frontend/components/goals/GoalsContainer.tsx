@@ -67,9 +67,9 @@ export default function GoalsContainer() {
     }
   };
 
-  const handleViewGoal = async (id: string) => {
+  const handleViewGoal = async (goalId: number) => {
     try {
-      const goal = await fetchGoalById(id);
+      const goal = await fetchGoalById(goalId);
       setSelectedGoal(goal);
       setIsEditModalOpen(true);
     } catch (error) {
@@ -107,12 +107,12 @@ export default function GoalsContainer() {
   };
 
   const handleUpdateGoal = async (goal: GoalWithDetails) => {
-    await updateGoal(goal.id, goal);
+    await updateGoal(goal.goalId, goal);
     await loadGoals();
     handleCloseEditModal();
   };
 
-  const handleRemoveGoal = async (goalId: string) => {
+  const handleRemoveGoal = async (goalId: number) => {
     await deleteGoal(goalId);
     await loadGoals();
     handleCloseEditModal();

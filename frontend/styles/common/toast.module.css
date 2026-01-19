@@ -1,7 +1,8 @@
 .toast {
   position: fixed;
-  top: 80px;
-  right: 24px;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--card-background);
   border: 2px solid var(--primary);
   border-radius: 2px;
@@ -11,17 +12,17 @@
   align-items: center;
   gap: 12px;
   z-index: 1001;
-  animation: slideIn 0.3s ease-out;
+  animation: slideUp 0.3s ease-out;
   max-width: 400px;
 }
 
-@keyframes slideIn {
+@keyframes slideUp {
   from {
-    transform: translateX(100%);
+    transform: translateX(-50%) translateY(100%);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
 }
@@ -78,9 +79,21 @@
 
 @media (max-width: 640px) {
   .toast {
-    top: 72px;
-    right: 16px;
+    bottom: 24px;
     left: 16px;
+    right: 16px;
+    transform: none;
     max-width: none;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 }

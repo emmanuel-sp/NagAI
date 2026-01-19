@@ -4,14 +4,14 @@
   --background: #ffffff;
   --foreground: #1a2332;
 
-  /* Primary Green - Main brand color */
-  --primary: #3e684098;
-  --primary-hover: #2f5030;
-  --primary-light: #3e68407a;
+  /* Primary Lavender - Main brand color */
+  --primary: #9b8ac4;
+  --primary-hover: #7c6ba8;
+  --primary-light: #c4b8db;
 
   /* Accent Colors */
-  --accent: #b8fd9d;
-  --accent-light: #f5e5eb;
+  --accent: #d4c6ec;
+  --accent-light: #f0eaf8;
 
   /* Status Colors */
   --success: #49a789;
@@ -20,32 +20,32 @@
   --warning: #d97706;
   --warning-light: rgba(245, 158, 11, 0.1);
   --warning-border: rgba(245, 158, 11, 0.3);
-  --error: #7d1d3f;
+  --error: #c45c84;
   --neutral: #6b7280;
   --neutral-hover: #4b5563;
 
   /* UI Colors - Light Mode - Transparent cards, no borders */
   --page-background: transparent;
-  --navbar-background: rgba(248, 249, 252, 0.6);
+  --navbar-background: rgba(250, 248, 253, 0.6);
   --card-background: rgba(255, 255, 255, 0.7);
   --card-border: transparent;
   --input-background: rgba(255, 255, 255, 0.8);
   --input-border: transparent;
   --text-primary: #1a2332;
-  --text-secondary: #4a684a;
+  --text-secondary: #5c5478;
   --text-muted: #9ca3af;
 
   /* Surface Colors */
-  --surface-light: #f8f9fb;
-  --surface-hover: #eef1f6;
-  --surface-sky: #e8f5e9;
+  --surface-light: #faf8fc;
+  --surface-hover: #f3eef8;
+  --surface-sky: #f0eaf8;
 
   /* Shadows - Softer, more elevated */
-  --shadow-sm: 0 2px 4px rgba(62, 104, 64, 0.06), 0 1px 2px rgba(62, 104, 64, 0.04);
-  --shadow-md: 0 8px 16px rgba(62, 104, 64, 0.08), 0 4px 8px rgba(62, 104, 64, 0.05);
-  --shadow-lg: 0 16px 32px rgba(62, 104, 64, 0.1), 0 8px 16px rgba(62, 104, 64, 0.06);
-  --shadow-xl: 0 24px 48px rgba(62, 104, 64, 0.12), 0 12px 24px rgba(62, 104, 64, 0.08);
-  --shadow-2xl: 0 32px 64px rgba(62, 104, 64, 0.14), 0 16px 32px rgba(62, 104, 64, 0.1);
+  --shadow-sm: 0 2px 4px rgba(155, 138, 196, 0.08), 0 1px 2px rgba(155, 138, 196, 0.05);
+  --shadow-md: 0 8px 16px rgba(155, 138, 196, 0.1), 0 4px 8px rgba(155, 138, 196, 0.06);
+  --shadow-lg: 0 16px 32px rgba(155, 138, 196, 0.12), 0 8px 16px rgba(155, 138, 196, 0.08);
+  --shadow-xl: 0 24px 48px rgba(155, 138, 196, 0.14), 0 12px 24px rgba(155, 138, 196, 0.1);
+  --shadow-2xl: 0 32px 64px rgba(155, 138, 196, 0.16), 0 16px 32px rgba(155, 138, 196, 0.12);
 
   /* Font Family */
   --font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -94,14 +94,14 @@ html[data-theme="dark"] {
   --background: #000000;
   --foreground: #e8eaed;
 
-  /* Primary Green - Brighter for dark mode visibility */
-  --primary: #7c9b7d;
-  --primary-hover: rgba(130, 180, 132, 0.658);
-  --primary-light: #dcffe2;
+  /* Primary Lavender - Brighter for dark mode visibility */
+  --primary: #b8a5d9;
+  --primary-hover: #cdbee8;
+  --primary-light: #e0d6f0;
 
   /* Accent Colors */
-  --accent: #a5c4a6;
-  --accent-light: #acd3adbd;
+  --accent: #c4b8db;
+  --accent-light: rgba(184, 165, 217, 0.3);
 
   /* Status Colors */
   --success: #10b981;
@@ -110,7 +110,7 @@ html[data-theme="dark"] {
   --warning: #f59e0b;
   --warning-light: rgba(245, 158, 11, 0.15);
   --warning-border: rgba(245, 158, 11, 0.4);
-  --error: #c35075;
+  --error: #e07a9f;
   --neutral: #9ca3af;
   --neutral-hover: #d1d5db;
 
@@ -122,13 +122,13 @@ html[data-theme="dark"] {
   --input-background: rgba(26, 31, 38, 0.7);
   --input-border: transparent;
   --text-primary: #e8eaed;
-  --text-secondary: #b8bdc6;
+  --text-secondary: #c0b8d0;
   --text-muted: #7a8190;
 
   /* Surface Colors */
   --surface-light: #1e2329;
   --surface-hover: #252b33;
-  --surface-sky: #1e3a20;
+  --surface-sky: #2a243a;
 
   /* Shadows - Dark Mode - Softer, more elevated */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -152,7 +152,7 @@ html {
 }
 
 body {
-  background: #f8f9fc;
+  background: #f9f8fc;
   color: var(--foreground);
   font-family: var(--font-family);
   font-weight: var(--font-weight-normal);
@@ -209,18 +209,18 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 90% 60% at 50% -20%, rgba(62, 104, 64, 0.65) 0%, transparent 65%),
-    radial-gradient(ellipse 70% 90% at 95% 80%, rgba(62, 104, 64, 0.45) 0%, transparent 75%),
-    radial-gradient(ellipse 110% 90% at 5% 50%, rgba(62, 104, 64, 0.3) 0%, transparent 65%);
+    radial-gradient(ellipse 90% 60% at 50% -20%, rgba(155, 138, 196, 0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 90% at 95% 80%, rgba(184, 165, 217, 0.4) 0%, transparent 75%),
+    radial-gradient(ellipse 110% 90% at 5% 50%, rgba(196, 184, 219, 0.3) 0%, transparent 65%);
   animation: backgroundFloat 20s ease-in-out infinite;
   filter: blur(80px);
 }
 
 html[data-theme="dark"] body::before {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, #ffffffcc 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 90% 80%, #ffffff83 0%, transparent 70%),
-    radial-gradient(ellipse 100% 80% at 10% 50%, #ffffff34 0%, transparent 60%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, #c18fe9af 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 80%, #d7baf033 0%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 10% 50%, #c18fe934 0%, transparent 60%);
 }
 
 @keyframes backgroundFloat {
@@ -248,17 +248,17 @@ body::after {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle 500px at 30% 40%, rgba(62, 104, 64, 0.15) 0%, transparent 100%),
-    radial-gradient(circle 400px at 70% 70%, rgba(117, 224, 126, 0.12) 0%, transparent 100%),
-    radial-gradient(circle 350px at 50% 50%, rgba(62, 104, 64, 0.08) 0%, transparent 100%);
+    radial-gradient(circle 500px at 30% 40%, rgba(155, 138, 196, 0.15) 0%, transparent 100%),
+    radial-gradient(circle 400px at 70% 70%, rgba(212, 198, 236, 0.12) 0%, transparent 100%),
+    radial-gradient(circle 350px at 50% 50%, rgba(184, 165, 217, 0.08) 0%, transparent 100%);
   animation: backgroundOrbs 35s ease-in-out infinite;
   filter: blur(60px);
 }
 
 html[data-theme="dark"] body::after {
   background:
-    radial-gradient(circle 400px at 30% 40%, rgba(46, 105, 48, 0.08) 0%, transparent 100%),
-    radial-gradient(circle 300px at 70% 70%, rgba(30, 58, 32, 0.06) 0%, transparent 100%);
+    radial-gradient(circle 400px at 30% 40%, rgba(155, 138, 196, 0.08) 0%, transparent 100%),
+    radial-gradient(circle 300px at 70% 70%, rgba(90, 70, 130, 0.06) 0%, transparent 100%);
 }
 
 @keyframes backgroundOrbs {

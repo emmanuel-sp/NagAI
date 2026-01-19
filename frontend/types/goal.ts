@@ -1,7 +1,7 @@
 // Goal types
 
 export interface Goal {
-  id: string;
+  goalId: number;
   title: string;
   description: string;
   createdAt: string;

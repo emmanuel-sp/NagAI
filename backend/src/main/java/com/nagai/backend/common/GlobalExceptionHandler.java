@@ -8,11 +8,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+
+import com.nagai.backend.exceptions.*;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleSecurityException(Exception exception) {
         ProblemDetail errorDetail = null;
@@ -45,9 +49,44 @@ public class GlobalExceptionHandler {
             errorDetail.setProperty("description", "The JWT token has expired");
         }
 
+        if (exception instanceof EmailAlreadyExistsException) {
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(409), exception.getMessage());
+            errorDetail.setProperty("description", "This email already exists in database");
+        }
+
         if (errorDetail == null) {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
             errorDetail.setProperty("description", "Unknown internal server error.");
+        }
+
+        return errorDetail;
+    }
+
+    @ExceptionHandler(GoalException.class)
+    public ProblemDetail handleGoalException(Exception exception) {
+        ProblemDetail errorDetail = null;
+        // TODO send this stack trace to an observability tool
+        exception.printStackTrace();
+
+        if (exception instanceof GoalNotFoundException) {
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), exception.getMessage());
+            errorDetail.setProperty("description", "The requested Goal does not exist!");
+            return errorDetail;
+        }
+
+        return errorDetail;
+    }
+
+    @ExceptionHandler(UserException.class)
+    public ProblemDetail handleUserException(Exception exception) {
+        ProblemDetail errorDetail = null;
+        // TODO send this stack trace to an observability tool
+        exception.printStackTrace();
+
+        if (exception instanceof UserNotFoundException) {
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), exception.getMessage());
+            errorDetail.setProperty("description", "The requested User does not exist!");
+            return errorDetail;
         }
 
         return errorDetail;

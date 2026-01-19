@@ -33,7 +33,7 @@ interface EditGoalModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (goal: GoalWithDetails) => Promise<void>;
-  onRemove?: (goalId: string) => Promise<void>;
+  onRemove?: (goalId: number) => Promise<void>;
 }
 
 export default function EditGoalModal({
@@ -58,6 +58,15 @@ export default function EditGoalModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (goal && isOpen) {
@@ -153,7 +162,7 @@ export default function EditGoalModal({
 
     setIsDeleting(true);
     try {
-      await onRemove(goal.id);
+      await onRemove(goal.goalId);
       setShowDeleteConfirm(false);
       onClose();
     } catch (error) {

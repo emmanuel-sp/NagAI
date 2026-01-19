@@ -92,7 +92,7 @@ export default function AgentBuilderContainer() {
 
     try {
       const newContext = await createContext(agent.id, contextData);
-      const goalName = goals.find((g) => g.id === contextData.goalId)?.title;
+      const goalName = goals.find((g) => g.goalId === contextData.goalId)?.title;
 
       setAgent((prev) =>
         prev
@@ -119,7 +119,7 @@ export default function AgentBuilderContainer() {
 
     try {
       const updatedContext = await updateContext(agent.id, contextId, updates);
-      const goalName = goals.find((g) => g.id === updates.goalId)?.title;
+      const goalName = goals.find((g) => g.goalId === updates.goalId)?.title;
 
       setAgent((prev) =>
         prev

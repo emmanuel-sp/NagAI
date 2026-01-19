@@ -33,6 +33,15 @@ export default function CreateContextModal({
   const [customInstructions, setCustomInstructions] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

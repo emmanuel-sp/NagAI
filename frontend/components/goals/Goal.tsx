@@ -2,10 +2,10 @@ import styles from "@/styles/goals/goalCard.module.css";
 import { Goal as GoalType } from "@/types/goal";
 
 interface GoalProps extends GoalType {
-    onView?: (id: string) => void;
+    onView?: (goalId: number) => void;
 }
 
-export function Goal({ title, description, createdAt, targetDate, id, onView }: GoalProps) {
+export function Goal({ title, description, createdAt, targetDate, goalId, onView }: GoalProps) {
     return (
         <div className={styles.goalCard}>
             <div className={styles.goalHeader}>
@@ -25,7 +25,7 @@ export function Goal({ title, description, createdAt, targetDate, id, onView }: 
             <div className={styles.goalActions}>
                 <button
                     className={styles.viewButton}
-                    onClick={() => onView?.(id)}
+                    onClick={() => onView?.(goalId)}
                 >
                     View Details
                 </button>

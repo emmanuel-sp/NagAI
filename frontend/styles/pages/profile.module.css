@@ -4,6 +4,16 @@
   padding: 40px;
   min-height: 100vh;
   background: var(--page-background);
+  animation: pageEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .profileHeader {
@@ -39,7 +49,20 @@
   padding: 48px;
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(10px);
+  animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 .cardTitle {
   font-size: 24px;

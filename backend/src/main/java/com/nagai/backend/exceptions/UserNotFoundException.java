@@ -1,6 +1,6 @@
 package com.nagai.backend.exceptions;
 
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends UserException {
     public UserNotFoundException() {
         super();
     }

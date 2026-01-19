@@ -32,7 +32,7 @@ export interface Agent {
 
 export interface CreateContextRequest {
   name: string;
-  goalId: string;
+  goalId: number;
   messageType: MessageType;
   messageFrequency: MessageFrequency;
   customInstructions?: string;
@@ -40,7 +40,7 @@ export interface CreateContextRequest {
 
 export interface UpdateContextRequest {
   name?: string;
-  goalId?: string;
+  goalId?: number;
   messageType?: MessageType;
   messageFrequency?: MessageFrequency;
   customInstructions?: string;

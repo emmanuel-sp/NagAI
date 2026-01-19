@@ -14,7 +14,8 @@ export class ApiError extends Error {
 
 export async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  type: string = "json"
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
@@ -55,4 +56,7 @@ export async function apiRequest<T>(
   }
 
   return await response.json();
+
+
+  
 }

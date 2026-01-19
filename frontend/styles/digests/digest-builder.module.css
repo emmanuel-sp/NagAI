@@ -8,6 +8,16 @@
   padding: 64px 48px;
   display: flex;
   justify-content: center;
+  animation: pageEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .agentBuilderContent {
@@ -74,10 +84,23 @@
 .overviewCard {
   background: var(--card-background);
   border: none;
+  /* border-radius: 100px; */
   padding: 56px;
   box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .overviewCard:hover {
@@ -92,6 +115,7 @@
   box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
 .settingsCard:hover {
