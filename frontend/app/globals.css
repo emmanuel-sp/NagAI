@@ -24,16 +24,17 @@
   --neutral: #6b7280;
   --neutral-hover: #4b5563;
 
-  /* UI Colors - Light Mode - Transparent cards, no borders */
+  /* UI Colors - Light Mode */
   --page-background: transparent;
-  --navbar-background: rgba(250, 248, 253, 0.6);
-  --card-background: rgba(255, 255, 255, 0.7);
-  --card-border: transparent;
-  --input-background: rgba(255, 255, 255, 0.8);
-  --input-border: transparent;
-  --text-primary: #1a2332;
-  --text-secondary: #5c5478;
-  --text-muted: #9ca3af;
+  --navbar-background: rgba(255, 255, 255, 0.85);
+  --card-background: #ffffff;
+  --card-border: rgba(155, 138, 196, 0.12);
+  --card-hover: rgba(155, 138, 196, 0.04);
+  --input-background: #ffffff;
+  --input-border: rgba(155, 138, 196, 0.2);
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4a68;
+  --text-muted: #8a8aa0;
 
   /* Surface Colors */
   --surface-light: #faf8fc;
@@ -79,12 +80,12 @@
   --spacing-3xl: 64px;
   --spacing-4xl: 96px;
 
-  /* Border Radius - Square, modern */
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-full: 0px;
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
 
   color-scheme: light;
 }
@@ -114,16 +115,17 @@ html[data-theme="dark"] {
   --neutral: #9ca3af;
   --neutral-hover: #d1d5db;
 
-  /* UI Colors - Dark Mode - Transparent cards, no borders */
+  /* UI Colors - Dark Mode */
   --page-background: transparent;
-  --navbar-background: rgba(15, 20, 25, 0.6);
-  --card-background: rgba(26, 31, 38, 0.5);
-  --card-border: transparent;
-  --input-background: rgba(26, 31, 38, 0.7);
-  --input-border: transparent;
+  --navbar-background: rgba(20, 22, 28, 0.9);
+  --card-background: #1a1c24;
+  --card-border: rgba(155, 138, 196, 0.1);
+  --card-hover: rgba(155, 138, 196, 0.05);
+  --input-background: #1e2028;
+  --input-border: rgba(155, 138, 196, 0.15);
   --text-primary: #e8eaed;
-  --text-secondary: #c0b8d0;
-  --text-muted: #7a8190;
+  --text-secondary: #b0a8c0;
+  --text-muted: #6a6a80;
 
   /* Surface Colors */
   --surface-light: #1e2329;
@@ -152,7 +154,7 @@ html {
 }
 
 body {
-  background: #f9f8fc;
+  background: #f5f4f8;
   color: var(--foreground);
   font-family: var(--font-family);
   font-weight: var(--font-weight-normal);
@@ -209,18 +211,15 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 90% 60% at 50% -20%, rgba(155, 138, 196, 0.55) 0%, transparent 65%),
-    radial-gradient(ellipse 70% 90% at 95% 80%, rgba(184, 165, 217, 0.4) 0%, transparent 75%),
-    radial-gradient(ellipse 110% 90% at 5% 50%, rgba(196, 184, 219, 0.3) 0%, transparent 65%);
-  animation: backgroundFloat 20s ease-in-out infinite;
-  filter: blur(80px);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(155, 138, 196, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 100% 100%, rgba(184, 165, 217, 0.1) 0%, transparent 70%);
+  filter: blur(60px);
 }
 
 html[data-theme="dark"] body::before {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, #c18fe9af 0%, transparent 60%),
-    radial-gradient(ellipse 60% 80% at 90% 80%, #d7baf033 0%, transparent 70%),
-    radial-gradient(ellipse 100% 80% at 10% 50%, #c18fe934 0%, transparent 60%);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(155, 138, 196, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 100% 100%, rgba(140, 120, 180, 0.08) 0%, transparent 70%);
 }
 
 @keyframes backgroundFloat {
@@ -239,38 +238,7 @@ html[data-theme="dark"] body::before {
 }
 
 body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle 500px at 30% 40%, rgba(155, 138, 196, 0.15) 0%, transparent 100%),
-    radial-gradient(circle 400px at 70% 70%, rgba(212, 198, 236, 0.12) 0%, transparent 100%),
-    radial-gradient(circle 350px at 50% 50%, rgba(184, 165, 217, 0.08) 0%, transparent 100%);
-  animation: backgroundOrbs 35s ease-in-out infinite;
-  filter: blur(60px);
-}
-
-html[data-theme="dark"] body::after {
-  background:
-    radial-gradient(circle 400px at 30% 40%, rgba(155, 138, 196, 0.08) 0%, transparent 100%),
-    radial-gradient(circle 300px at 70% 70%, rgba(90, 70, 130, 0.06) 0%, transparent 100%);
-}
-
-@keyframes backgroundOrbs {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(50px, -40px) scale(1.1);
-  }
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
+  display: none;
 }
 
 /* Modern Animations */

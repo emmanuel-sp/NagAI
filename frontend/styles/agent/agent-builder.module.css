@@ -43,36 +43,35 @@
 }
 
 .agentTitle {
-  font-size: 56px;
+  font-size: 32px;
   font-weight: var(--font-weight-bold);
-  margin: 0;
+  margin: 0 0 4px 0;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   font-family: var(--heading-font);
 }
 
 .header {
   text-align: center;
-  padding: 56px 48px;
+  padding: 32px;
   background: var(--card-background);
-  border: none;
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
-  font-size: 56px;
+  font-size: 32px;
   font-family: var(--heading-font);
   color: var(--text-primary);
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   font-weight: var(--font-weight-bold);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   position: relative;
 }
 
 .subtitle {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
+  font-size: 15px;
+  color: var(--text-muted);
   margin: 0;
   font-weight: var(--font-weight-normal);
   line-height: 1.6;
@@ -85,11 +84,10 @@
 
 .overviewCard {
   background: var(--card-background);
-  border: none;
-  padding: 56px;
-  box-shadow: var(--shadow-md);
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
   animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
@@ -105,23 +103,22 @@
 }
 
 .overviewCard:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
 }
 
 .settingsCard {
   background: var(--card-background);
-  border: none;
-  padding: 56px;
-  box-shadow: var(--shadow-md);
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
   animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
 .settingsCard:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
 }
 
 .overviewHeader {
@@ -310,10 +307,9 @@
 
 .contextsSection {
   background: var(--card-background);
-  border: none;
+  border: 1px solid var(--card-border);
   padding: 28px;
   box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(10px);
 }
 
 .contextsSectionHeader {
@@ -368,12 +364,11 @@
 
 .contextCard {
   background: var(--card-background);
-  border: none;
-  border-left: 4px solid var(--primary);
+  border: 1px solid var(--card-border);
+  border-left: 3px solid var(--primary);
   padding: 24px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(10px);
 }
 
 .contextCard:nth-child(3n+1) {
@@ -395,8 +390,8 @@
 }
 
 .contextCard:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
 }
 
 .contextHeader {
@@ -578,16 +573,15 @@
 
 .deploymentPanel {
   background: var(--card-background);
-  border: none;
-  border-left: 4px solid var(--primary);
-  padding: 32px;
+  border: 1px solid var(--card-border);
+  border-left: 3px solid var(--primary);
+  padding: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 28px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-sm);
   flex-wrap: wrap;
-  backdrop-filter: blur(10px);
 }
 
 .deploymentActions {

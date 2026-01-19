@@ -29,12 +29,14 @@ export default function ListCard({ title, subtitle, items, isEditing, placeholde
     }
   };
 
+  const hasItems = items && items.length > 0;
+
   return (
     <div className={styles.profileCard}>
       <h2 className={styles.cardTitle}>{title}</h2>
       <p className={styles.cardSubtitle}>{subtitle}</p>
 
-      {items && items.length > 0 && (
+      {hasItems ? (
         <div className={styles.bulkItems}>
           {items.map((item, idx) => (
             <div key={idx} className={styles.bulkItem}>
@@ -47,6 +49,12 @@ export default function ListCard({ title, subtitle, items, isEditing, placeholde
             </div>
           ))}
         </div>
+      ) : (
+        !isEditing && (
+          <div className={styles.emptyPlaceholder}>
+            No {title.toLowerCase()} added yet
+          </div>
+        )
       )}
 
       {isEditing && (

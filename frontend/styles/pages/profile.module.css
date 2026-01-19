@@ -21,17 +21,17 @@
 }
 
 .profileTitle {
-  font-size: 56px;
+  font-size: 32px;
   font-weight: var(--font-weight-bold);
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   font-family: var(--heading-font);
 }
 
 .profileSubtitle {
-  font-size: 18px;
-  color: var(--text-secondary);
+  font-size: 15px;
+  color: var(--text-muted);
   margin: 0;
   letter-spacing: 0;
   font-weight: var(--font-weight-normal);
@@ -45,11 +45,16 @@
 
 .profileCard {
   background: var(--card-background);
-  border: none;
-  padding: 48px;
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
   animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+.profileCard:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
 }
 
 @keyframes cardEnter {
@@ -111,7 +116,7 @@ html[data-theme="dark"] .fieldLabel {
   color: var(--text-primary);
   padding: 10px 12px;
   background: var(--surface-light);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--card-border);
   min-height: 32px;
   display: flex;
@@ -130,7 +135,7 @@ html[data-theme="dark"] .fieldLabel {
   width: 100%;
   padding: 12px 16px;
   border: 2px solid var(--input-border);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: 15px;
   transition: all 0.2s ease;
   background: var(--input-background);
@@ -154,7 +159,7 @@ html[data-theme="dark"] .fieldInput:focus {
   width: 100%;
   padding: 12px 16px;
   border: 2px solid var(--input-border);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: 15px;
   transition: all 0.2s ease;
   background: var(--input-background);
@@ -183,38 +188,57 @@ html[data-theme="dark"] .fieldTextarea:focus {
 .bulkItems {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 12px;
 }
 
 .bulkItem {
-  background: var(--primary-light);
-  border: 1px solid var(--primary);
-  color: var(--primary);
-  padding: 6px 12px;
-  border-radius: 2px;
-  font-size: 13px;
+  background: var(--primary);
+  border: none;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
   font-family: var(--font-family);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
 }
 
 .bulkItemRemove {
   cursor: pointer;
-  font-weight: bold;
-  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
 }
 
 .bulkItemRemove:hover {
-  color: var(--error);
+  background: var(--error);
+}
+
+.emptyPlaceholder {
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 16px;
+  background: var(--surface-light);
+  border: 1px dashed var(--card-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-style: italic;
 }
 
 .bulkInput {
   width: 100%;
   padding: 10px 14px;
   border: 2px solid var(--input-border);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: 15px;
   transition: all 0.2s ease;
   background: var(--input-background);
@@ -238,7 +262,7 @@ html[data-theme="dark"] .bulkInput:focus {
   border: 2px solid var(--primary);
   color: var(--primary);
   padding: 8px 16px;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -277,7 +301,7 @@ html[data-theme="dark"] .addButton:hover {
   border: none;
   color: white;
   padding: 14px 32px;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: 15px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -298,7 +322,7 @@ html[data-theme="dark"] .addButton:hover {
   border: 2px solid var(--card-border);
   color: var(--text-primary);
   padding: 14px 32px;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: 15px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -323,7 +347,7 @@ html[data-theme="dark"] .secondaryButton:hover {
   font-size: 15px;
   padding: 14px 18px;
   background: var(--surface-light);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   border-left: 4px solid var(--primary);
 }
 

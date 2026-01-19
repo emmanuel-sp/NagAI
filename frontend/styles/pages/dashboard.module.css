@@ -78,17 +78,17 @@
 }
 
 .greeting {
-  font-size: clamp(48px, 6vw, 72px);
+  font-size: clamp(32px, 4vw, 42px);
   font-family: var(--heading-font);
   color: var(--text-primary);
-  margin: 0 0 16px 0;
+  margin: 0 0 8px 0;
   font-weight: var(--font-weight-bold);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
 }
 
 .subtitle {
-  font-size: var(--font-size-xl);
-  color: var(--text-secondary);
+  font-size: 16px;
+  color: var(--text-muted);
   margin: 0;
   font-weight: var(--font-weight-normal);
 }
@@ -105,29 +105,26 @@
 
 .overviewCard {
   background: var(--card-background);
-  border: none;
-  padding: 56px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--card-border);
+  padding: 32px;
+  transition: all 0.2s ease;
   text-decoration: none;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   cursor: pointer;
-  box-shadow: var(--shadow-md);
-  animation: cardPopIn 0.9s cubic-bezier(0.4, 0, 0.2, 1) backwards;
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  animation: cardPopIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
 @keyframes cardPopIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(16px);
-    filter: blur(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0px);
+    transform: translateY(0);
   }
 }
 
@@ -143,8 +140,8 @@
 }
 
 .overviewCard:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
 }
 
 /* ============================================
