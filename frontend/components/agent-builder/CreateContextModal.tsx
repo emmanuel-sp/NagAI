@@ -79,19 +79,20 @@ export default function CreateContextModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <div>
-            <h2 className={styles.modalTitle}>Create New Context</h2>
-            <p className={styles.modalSubtitle}>
-              Define how your agent will interact with you about a specific goal
-            </p>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.modalHeader}>
+            <div>
+              <h2 className={styles.modalTitle}>Create New Context</h2>
+              <p className={styles.modalSubtitle}>
+                Define how your agent will interact with you about a specific goal
+              </p>
+            </div>
+            <button type="button" onClick={onClose} className={styles.closeButton}>
+              <IoClose />
+            </button>
           </div>
-          <button onClick={onClose} className={styles.closeButton}>
-            <IoClose />
-          </button>
-        </div>
 
-        <form onSubmit={handleSubmit} className={styles.modalBody}>
+          <div className={styles.modalBody}>
           {/* Context Name */}
           <div className={styles.formSection}>
             <label className={styles.formLabel}>
@@ -197,6 +198,7 @@ export default function CreateContextModal({
               placeholder="Add any specific instructions for how the agent should communicate about this goal..."
               rows={4}
             />
+          </div>
           </div>
 
           <div className={styles.modalFooter}>

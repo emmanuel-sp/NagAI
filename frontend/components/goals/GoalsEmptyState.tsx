@@ -23,7 +23,6 @@ interface GoalsEmptyStateProps {
 export default function GoalsEmptyState({ onAddGoal }: GoalsEmptyStateProps) {
   return (
     <EmptyState
-      icon={<IoFlagOutline />}
       title="No goals yet"
       description="Create your first goal to get started on your journey"
       action={

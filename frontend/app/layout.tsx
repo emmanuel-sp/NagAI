@@ -4,7 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import NavBar from "@/components/NavBar";
 import ThemeToggle from "@/components/ThemeToggle";
-import Footer from "@/components/Footer";
+import ConditionalFooter from "@/components/ConditionalFooter";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -38,7 +38,7 @@ export default function RootLayout({
           <main style={{ flex: 1, paddingTop: "60px" }}>
             {children}
           </main>
-          <Footer />
+          <ConditionalFooter />
           <ThemeToggle />
         </ThemeProvider>
       </body>

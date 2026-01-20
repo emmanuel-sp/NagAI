@@ -85,20 +85,21 @@ export default function EditContextModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <div>
-            <h2 className={styles.modalTitle}>Edit Context</h2>
-            <p className={styles.modalSubtitle}>
-              Update how your agent interacts with you about this goal
-            </p>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.modalHeader}>
+            <div>
+              <h2 className={styles.modalTitle}>Edit Context</h2>
+              <p className={styles.modalSubtitle}>
+                Update how your agent interacts with you about this goal
+              </p>
+            </div>
+            <button type="button" onClick={onClose} className={styles.closeButton}>
+              <IoClose />
+            </button>
           </div>
-          <button onClick={onClose} className={styles.closeButton}>
-            <IoClose />
-          </button>
-        </div>
 
-        <form onSubmit={handleSubmit} className={styles.modalBody}>
-          <div className={styles.formSection}>
+          <div className={styles.modalBody}>
+            <div className={styles.formSection}>
             <label className={styles.formLabel}>
               Context Name <span className={styles.required}>*</span>
             </label>
@@ -170,6 +171,7 @@ export default function EditContextModal({
           <div className={styles.formSection}>
             <label className={styles.formLabel}>Custom Instructions (Optional)</label>
             <textarea value={customInstructions} onChange={(e) => setCustomInstructions(e.target.value)} className={styles.formTextarea} placeholder="Add any specific instructions..." rows={4} />
+          </div>
           </div>
 
           <div className={styles.modalFooter}>
