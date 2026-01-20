@@ -7,6 +7,7 @@ export default function DigestHeader() {
   return (
     <div className={styles.digestHeader}>
       <h1 className={styles.digestTitle}>Digest Builder</h1>
+      <p className={styles.digestSubtitle}>Build personalized content summaries</p>
     </div>
   );
 }

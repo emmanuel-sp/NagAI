@@ -6,6 +6,7 @@ export default function AgentBuilderHeader() {
   return (
     <div className={styles.agentHeader}>
       <h1 className={styles.agentTitle}>Agent Builder</h1>
+      <p className={styles.agentSubtitle}>Configure your AI agent and knowledge base</p>
     </div>
   );
 }

@@ -2,20 +2,20 @@
   width: 100%;
   background: transparent;
   border-top: 1px solid var(--card-border);
-  margin-top: 200px;
+  margin-top: 300px;
 }
 
 .footerContent {
   width: 100%;
-  padding: var(--spacing-lg) var(--spacing-2xl);
+  padding: var(--spacing-md) var(--spacing-2xl);
 }
 
 .footerMain {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: var(--spacing-xl);
-  padding-bottom: var(--spacing-md);
+  gap: var(--spacing-lg);
+  padding-bottom: var(--spacing-sm);
   border-bottom: 1px solid var(--card-border);
 }
 
@@ -84,7 +84,7 @@
 }
 
 .footerBottom {
-  padding-top: var(--spacing-sm);
+  padding-top: var(--spacing-xs);
   text-align: center;
 }
 

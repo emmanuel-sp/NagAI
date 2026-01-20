@@ -53,8 +53,8 @@
 .modalContent {
   background: var(--card-background);
   box-shadow: var(--shadow-2xl);
-  width: 80%;
-  max-width: 800px;
+  width: 90%;
+  max-width: 650px;
   max-height: calc(100vh - 160px);
   animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s backwards;
   border: 1px solid var(--card-border);
@@ -73,7 +73,7 @@
 }
 
 .modalHeader {
-  padding: 32px 40px;
+  padding: 20px 24px;
   border-bottom: none;
   display: flex;
   justify-content: space-between;
@@ -176,7 +176,7 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .formTextarea {
-  resize: vertical;
+  resize: none;
   min-height: 60px;
   line-height: 1.6;
 }
@@ -319,7 +319,7 @@ html[data-theme="dark"] .closeButton:hover {
 
 /* Modal Footer */
 .modalFooter {
-  padding: 24px 32px;
+  padding: 16px 24px;
   border-top: 2px solid var(--card-border);
   display: flex;
   justify-content: flex-end;
@@ -329,7 +329,7 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .cancelButton {
-  padding: 14px 28px;
+  padding: 10px 20px;
   background: transparent;
   color: var(--text-secondary);
   border: 2px solid var(--card-border);
@@ -354,7 +354,7 @@ html[data-theme="dark"] .closeButton:hover {
 
 .createButton,
 .saveButton {
-  padding: 14px 32px;
+  padding: 10px 24px;
   color: #ffffff;
   border: none;
   border-radius: 2px;

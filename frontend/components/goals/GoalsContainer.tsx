@@ -128,7 +128,7 @@ export default function GoalsContainer() {
 
   return (
     <div className={styles.goalsContainer}>
-      <GoalsHeader onAddGoal={handleAddGoal} />
+      {goals.length > 0 && <GoalsHeader onAddGoal={handleAddGoal} />}
 
       {goals.length === 0 ? (
         <GoalsEmptyState onAddGoal={handleAddGoal} />

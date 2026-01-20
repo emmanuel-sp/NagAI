@@ -51,6 +51,14 @@
   font-family: var(--heading-font);
 }
 
+.agentSubtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: var(--font-weight-normal);
+  line-height: 1.5;
+}
+
 .header {
   text-align: center;
   padding: 32px;
