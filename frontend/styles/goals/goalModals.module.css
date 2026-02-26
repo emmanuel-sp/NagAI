@@ -6,7 +6,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(15, 23, 42, 0.4);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -18,52 +18,31 @@
 }
 
 @keyframes overlayFadeIn {
-  from {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-  to {
-    opacity: 1;
-    backdrop-filter: blur(16px);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to { opacity: 1; backdrop-filter: blur(16px); }
 }
 
 @keyframes modalSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(0.98);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0px);
-  }
+  from { opacity: 0; transform: translateY(24px) scale(0.98); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
 }
 
 .modalContent {
-  background: var(--card-background);
-  box-shadow: var(--shadow-2xl);
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  box-shadow: var(--shadow-2xl), var(--glass-inset);
+  border-radius: var(--radius-xl);
   width: 90%;
   max-width: 650px;
   max-height: calc(100vh - 160px);
   animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s backwards;
-  border: 1px solid var(--card-border);
+  border: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-/* Form inside modal needs to be flex too */
 .modalContent > form {
   display: flex;
   flex-direction: column;
@@ -78,7 +57,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--card-background);
   flex-shrink: 0;
 }
 
@@ -89,12 +67,7 @@
   letter-spacing: -0.02em;
 }
 
-/* Add Modal */
-.addModalTitle {
-  color: var(--primary);
-}
-
-/* Edit Modal */
+.addModalTitle,
 .editModalTitle {
   color: var(--primary);
 }
@@ -116,17 +89,13 @@
   align-items: center;
   justify-content: center;
   padding: 8px;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   transition: all 0.2s ease;
 }
 
 .closeButton:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(15, 23, 42, 0.06);
   color: var(--text-primary);
-}
-
-html[data-theme="dark"] .closeButton:hover {
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .modalBody {
@@ -188,9 +157,11 @@ html[data-theme="dark"] .closeButton:hover {
   width: 100%;
   padding: 14px 16px;
   font-size: 15px;
-  border: 2px solid var(--card-border);
-  border-radius: 2px;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-md);
   background: var(--input-background);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: var(--text-primary);
   font-family: var(--font-family);
   transition: all 0.2s ease;
@@ -199,16 +170,18 @@ html[data-theme="dark"] .closeButton:hover {
 .fieldInput:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(109, 93, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
 }
 
 .fieldTextarea {
   width: 100%;
   padding: 14px 16px;
   font-size: 15px;
-  border: 2px solid var(--card-border);
-  border-radius: 2px;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-md);
   background: var(--input-background);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: var(--text-primary);
   font-family: var(--font-family);
   resize: none;
@@ -220,7 +193,7 @@ html[data-theme="dark"] .closeButton:hover {
 .fieldTextarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(109, 93, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
 }
 
 .labelWithButton {
@@ -235,10 +208,10 @@ html[data-theme="dark"] .closeButton:hover {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: var(--primary);
+  background: var(--ai);
   color: white;
-  border: 2px solid var(--primary);
-  border-radius: 2px;
+  border: 2px solid var(--ai);
+  border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -249,8 +222,8 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .aiSuggestButton:hover:not(:disabled) {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
+  background: #0284C7;
+  border-color: #0284C7;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -267,23 +240,15 @@ html[data-theme="dark"] .closeButton:hover {
 .suggestionBox {
   margin-top: 12px;
   padding: 16px;
-  background: var(--surface-sky);
-  border: 2px solid var(--primary);
-  border-radius: 2px;
+  background: var(--ai-light);
+  border: 2px solid var(--ai);
+  border-radius: var(--radius-md);
   animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-    filter: blur(2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0px);
-  }
+  from { opacity: 0; transform: translateY(-8px); filter: blur(2px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0px); }
 }
 
 .suggestionText {
@@ -296,10 +261,10 @@ html[data-theme="dark"] .closeButton:hover {
 
 .useSuggestionButton {
   padding: 8px 16px;
-  background: var(--primary);
+  background: var(--ai);
   color: #ffffff;
   border: none;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -308,18 +273,17 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .useSuggestionButton:hover {
-  background: var(--primary-hover);
+  background: #0284C7;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
 .modalFooter {
   padding: 16px 24px;
-  border-top: 2px solid var(--card-border);
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  background: var(--card-background);
   flex-shrink: 0;
 }
 
@@ -327,8 +291,8 @@ html[data-theme="dark"] .closeButton:hover {
   padding: 10px 20px;
   background: transparent;
   color: var(--text-secondary);
-  border: 2px solid var(--card-border);
-  border-radius: 2px;
+  border: 1.5px solid rgba(15, 23, 42, 0.12);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -337,7 +301,7 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .cancelButton:hover:not(:disabled) {
-  background: var(--card-hover);
+  background: rgba(15, 23, 42, 0.04);
   border-color: var(--text-muted);
   color: var(--text-primary);
 }
@@ -352,34 +316,21 @@ html[data-theme="dark"] .closeButton:hover {
   padding: 10px 24px;
   color: #ffffff;
   border: none;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
-}
-
-.createButton {
   background: var(--primary);
   box-shadow: var(--shadow-sm);
 }
 
-.createButton:hover:not(:disabled) {
-  background: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.saveButton {
-  background: var(--primary);
-  box-shadow: var(--shadow-sm);
-}
-
+.createButton:hover:not(:disabled),
 .saveButton:hover:not(:disabled) {
   background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
 }
 
 .createButton:disabled,
@@ -398,7 +349,7 @@ html[data-theme="dark"] .closeButton:hover {
   background: transparent;
   color: var(--error);
   border: 2px solid var(--error);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -424,7 +375,7 @@ html[data-theme="dark"] .closeButton:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(15, 23, 42, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -434,38 +385,26 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 @keyframes confirmOverlayFadeIn {
-  from {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-  to {
-    opacity: 1;
-    backdrop-filter: blur(8px);
-  }
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to { opacity: 1; backdrop-filter: blur(8px); }
 }
 
 .confirmDialog {
-  background: var(--card-background);
-  border: 1px solid var(--card-border);
-  border-radius: 2px;
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   padding: 32px;
   max-width: 400px;
   width: 90%;
-  box-shadow: var(--shadow-2xl);
+  box-shadow: var(--shadow-2xl), var(--glass-inset);
   animation: confirmDialogSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.03s backwards;
 }
 
 @keyframes confirmDialogSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.96);
-    filter: blur(3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0px);
-  }
+  from { opacity: 0; transform: translateY(16px) scale(0.96); filter: blur(3px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
 }
 
 .confirmTitle {
@@ -493,7 +432,7 @@ html[data-theme="dark"] .closeButton:hover {
   background: var(--error);
   color: #ffffff;
   border: none;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -502,7 +441,7 @@ html[data-theme="dark"] .closeButton:hover {
 }
 
 .confirmDeleteButton:hover:not(:disabled) {
-  background: #c53030;
+  background: #E11D48;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -511,13 +450,3 @@ html[data-theme="dark"] .closeButton:hover {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
-/* Dark mode adjustments */
-html[data-theme="dark"] .modalContent {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-html[data-theme="dark"] .confirmDialog {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-}
-

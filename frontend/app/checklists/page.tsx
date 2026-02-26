@@ -8,7 +8,7 @@
  * - ChecklistsPage (this page)
  *   └── ChecklistsContainer
  *       ├── ChecklistsHeader
- *       ├── ChecklistsEmptyState (when no checklists)
+ *       ├── EmptyState (when no checklists)
  *       └── ChecklistsList
  *           └── Checklist (for each checklist)
  *               ├── ChecklistHeader

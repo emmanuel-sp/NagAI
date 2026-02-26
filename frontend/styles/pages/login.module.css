@@ -3,18 +3,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: var(--page-background);
+  padding: 32px;
+  animation: containerEnter 0.5s var(--transition-base);
+}
+
+@keyframes containerEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .loginCard {
   width: 100%;
-  max-width: 450px;
-  background: var(--card-background);
-  border: 2px solid var(--card-border);
-  border-radius: 2px;
-  padding: 48px;
-  box-shadow: var(--shadow-xl);
+  max-width: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  box-shadow: var(--shadow-lg);
+  animation: cardSlideUp 0.4s var(--transition-base) backwards;
+}
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .loginHeader {
@@ -23,178 +40,177 @@
 }
 
 .loginTitle {
-  font-size: 36px;
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 12px 0;
+  font-size: 28px;
+  font-weight: var(--fw-700);
+  font-family: var(--font-display);
+  margin: 0 0 8px 0;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .loginSubtitle {
-  font-size: 16px;
-  color: var(--text-primary);
+  font-size: 14px;
+  color: var(--text-muted);
   margin: 0;
-  letter-spacing: 0;
-  font-weight: var(--font-weight-light);
+  font-weight: var(--fw-400);
 }
 
 .formGroup {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .formLabel {
   display: block;
-  font-size: 14px;
-  font-weight: var(--font-weight-bold);
-  color: var(--primary-light);
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-html[data-theme="dark"] .formLabel {
-  color: var(--primary);
+  font-size: 13px;
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
 }
 
 .formInput {
   width: 100%;
-  padding: 14px 18px;
-  border: 2px solid var(--input-border);
-  border-radius: 2px;
-  font-size: 16px;
-  transition: all 0.2s ease;
-  background: var(--input-background);
-  color: var(--foreground);
+  padding: 10px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  transition: border-color var(--transition-fast);
+  background: var(--bg-card);
+  color: var(--text-primary);
   box-sizing: border-box;
-  font-family: var(--font-family);
+  font-family: var(--font-body);
+  font-weight: var(--fw-400);
 }
 
 .formInput:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(110, 68, 255, 0.15);
-}
-
-html[data-theme="dark"] .formInput:focus {
-  border-color: var(--primary-light);
-  box-shadow: 0 0 0 4px rgba(184, 146, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
 }
 
 .formInput::placeholder {
-  color: var(--primary-light);
-  opacity: 0.6;
-}
-
-html[data-theme="dark"] .formInput::placeholder {
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .submitButton {
   width: 100%;
-  padding: 16px;
-  background: var(--primary);
+  padding: 11px 20px;
+  background: var(--text-primary);
   color: white;
   border: none;
-  border-radius: 2px;
-  font-size: 16px;
-  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: var(--fw-600);
   cursor: pointer;
-  transition: all 0.2s ease;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-fast);
+  font-family: var(--font-body);
+  box-shadow: var(--shadow-sm);
 }
 
-.submitButton:hover {
-  background: var(--primary-hover);
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-2px);
+.submitButton:hover:not(:disabled) {
+  background: var(--primary);
+  box-shadow: var(--shadow-md);
 }
 
-.submitButton:active {
+.submitButton:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: var(--shadow-lg);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .formFooter {
-  margin-top: 24px;
+  margin-top: 20px;
   text-align: center;
-  font-size: 15px;
-  color: var(--text-secondary);
+  font-size: 14px;
+  color: var(--text-muted);
 }
 
 .formLink {
-  color: var(--text-primary);
-  font-weight: var(--font-weight-semibold);
+  color: var(--primary);
+  font-weight: var(--fw-500);
   text-decoration: none;
-  transition: opacity 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .formLink:hover {
-  opacity: 0.8;
-  text-decoration: underline;
+  color: var(--primary-hover);
 }
 
 .errorMessage {
   color: var(--error);
   font-size: 14px;
-  margin-top: 12px;
-  padding: 12px 16px;
-  background: rgba(239, 122, 133, 0.1);
-  border-radius: 2px;
-  border-left: 4px solid var(--error);
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: var(--error-light);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(220, 38, 38, 0.15);
 }
 
 .divider {
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 32px 0;
+  margin: 24px 0;
   color: var(--text-muted);
-  font-size: 14px;
-  font-weight: var(--font-weight-semibold);
+  font-size: 12px;
+  font-weight: var(--fw-500);
+  letter-spacing: 0.05em;
 }
 
 .divider::before,
 .divider::after {
   content: "";
   flex: 1;
-  border-bottom: 2px solid var(--card-border);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .divider::before {
-  margin-right: 16px;
+  margin-right: 12px;
 }
 
 .divider::after {
-  margin-left: 16px;
+  margin-left: 12px;
 }
 
 .linkText {
   text-align: center;
-  font-size: 15px;
-  color: var(--text-secondary);
+  font-size: 14px;
+  color: var(--text-muted);
   margin-top: 12px;
 }
 
 .linkText a {
   color: var(--primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--fw-500);
   text-decoration: none;
-  transition: all 0.2s ease;
 }
 
 .linkText a:hover {
-  text-decoration: underline;
-  opacity: 0.8;
+  color: var(--primary-hover);
 }
 
 @media (max-width: 480px) {
   .loginCard {
-    padding: 32px 24px;
+    padding: 40px 28px;
   }
 
   .loginTitle {
-    font-size: 28px;
+    font-size: 24px;
+  }
+
+  .submitButton {
+    font-size: 14px;
+  }
+
+  .formInput {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .formGroup {
+    margin-bottom: 20px;
   }
 }

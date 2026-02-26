@@ -52,7 +52,6 @@ export default function LearnMorePage() {
         <div className={styles.featuresGrid}>
           <div className={styles.featureSection}>
             <div className={styles.featureHeader}>
-              <IoFlagOutline size={32} className={styles.featureIcon} />
               <h3 className={styles.featureTitle}>Goal Tracking</h3>
             </div>
             <p className={styles.featureDescription}>
@@ -77,7 +76,6 @@ export default function LearnMorePage() {
 
           <div className={styles.featureSection}>
             <div className={styles.featureHeader}>
-              <IoListOutline size={32} className={styles.featureIcon} />
               <h3 className={styles.featureTitle}>Smart Checklists</h3>
             </div>
             <p className={styles.featureDescription}>
@@ -102,7 +100,7 @@ export default function LearnMorePage() {
 
           <div className={styles.featureSection}>
             <div className={styles.featureHeader}>
-              <IoDocumentText size={32} className={styles.featureIcon} />
+
               <h3 className={styles.featureTitle}>Personalized Digests</h3>
             </div>
             <p className={styles.featureDescription}>
@@ -131,7 +129,6 @@ export default function LearnMorePage() {
 
           <div className={styles.featureSection}>
             <div className={styles.featureHeader}>
-              <IoConstruct size={32} className={styles.featureIcon} />
               <h3 className={styles.featureTitle}>AI Agent Builder</h3>
             </div>
             <p className={styles.featureDescription}>
@@ -162,41 +159,39 @@ export default function LearnMorePage() {
               <div className={styles.stepNumber}>1</div>
               <h4 className={styles.stepTitle}>Create Your Profile</h4>
               <p className={styles.stepText}>
-                Sign up and tell us about your goals, interests, and aspirations
+                Sign up and create your profile
               </p>
             </div>
             <div className={styles.step}>
               <div className={styles.stepNumber}>2</div>
               <h4 className={styles.stepTitle}>Set Your Goals</h4>
               <p className={styles.stepText}>
-                Define your objectives and organize them by priority and timeline
+                Define your objectives using the SMART goal framework
               </p>
             </div>
             <div className={styles.step}>
               <div className={styles.stepNumber}>3</div>
               <h4 className={styles.stepTitle}>Build Action Plans</h4>
               <p className={styles.stepText}>
-                Create checklists with actionable steps to achieve your goals
+                Create checklists with actionable steps to achieve your goals with AI support
               </p>
             </div>
             <div className={styles.step}>
               <div className={styles.stepNumber}>4</div>
               <h4 className={styles.stepTitle}>Configure Your AI</h4>
               <p className={styles.stepText}>
-                Set up personalized digests and your AI agent for ongoing support
+                Set up personalized digests and an AI agent for recurrent support
               </p>
             </div>
           </div>
         </div>
 
         <div className={styles.ctaSection}>
-          <IoSparkles size={48} className={styles.ctaIcon} />
           <h2 className={styles.ctaTitle}>Ready to Get Started?</h2>
           <p className={styles.ctaText}>
             Join NagAI today and start your journey toward achieving your goals
           </p>
           <Link href="/signup" className={styles.ctaButton}>
-            <IoRocket size={20} />
             <span>Create Your Account</span>
           </Link>
           <p className={styles.loginText}>

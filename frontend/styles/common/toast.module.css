@@ -3,11 +3,13 @@
   bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--card-background);
-  border: 2px solid var(--primary);
-  border-radius: 2px;
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   padding: 16px 20px;
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-xl), var(--glass-inset);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -55,7 +57,7 @@
 }
 
 .toastMessage a:hover {
-  color: var(--primary-dark);
+  color: var(--primary-hover);
 }
 
 .toastClose {
@@ -67,13 +69,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .toastClose:hover {
-  background: var(--surface-light);
+  background: rgba(15, 23, 42, 0.06);
   color: var(--text-primary);
 }
 

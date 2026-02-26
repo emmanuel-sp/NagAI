@@ -6,7 +6,7 @@
  * Component Hierarchy:
  * - ChecklistsContainer (this component)
  *   ├── ChecklistsHeader
- *   ├── ChecklistsEmptyState (when no checklists)
+ *   ├── EmptyState (when no checklists)
  *   └── ChecklistsList
  *       └── Checklist (for each checklist)
  *           ├── ChecklistHeader
@@ -28,9 +28,10 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Checklist as ChecklistType } from "@/types/checklist";
 import ChecklistsHeader from "@/components/checklists/ChecklistsHeader";
-import ChecklistsEmptyState from "@/components/checklists/ChecklistsEmptyState";
 import ChecklistsList from "@/components/checklists/ChecklistsList";
+import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { IoListOutline } from "react-icons/io5";
 import {
   fetchChecklists,
   createChecklistItem,
@@ -264,7 +265,11 @@ export default function ChecklistsContainer() {
         <ChecklistsHeader filter={filter} onFilterChange={setFilter} />
 
         {filteredChecklists.length === 0 ? (
-          <ChecklistsEmptyState />
+          <EmptyState
+            icon={<IoListOutline size={80} />}
+            title="No checklists yet"
+            description="Checklists will be created automatically when you add goals."
+          />
         ) : (
           <ChecklistsList
             checklists={filteredChecklists}

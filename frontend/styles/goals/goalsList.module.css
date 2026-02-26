@@ -1,6 +1,5 @@
 .goalsContainer {
-  max-width: 1600px;
-  margin: 0 auto;
+  width: 100%;
   padding: 40px;
   min-height: 100vh;
   background: var(--page-background);
@@ -8,12 +7,8 @@
 }
 
 @keyframes pageEnter {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .goalsHeader {
@@ -51,7 +46,7 @@
   background: var(--primary);
   color: #ffffff;
   border: none;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
@@ -79,10 +74,6 @@
 .emptyStateIcon {
   font-size: 72px;
   margin-bottom: 20px;
-  color: var(--primary-light);
-}
-
-html[data-theme="dark"] .emptyStateIcon {
   color: var(--primary);
 }
 
@@ -98,6 +89,8 @@ html[data-theme="dark"] .emptyStateIcon {
   color: var(--text-secondary);
 }
 
-html[data-theme="dark"] .emptyStateText {
-  color: var(--text-muted);
+.toastLink {
+  color: var(--primary);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
 }

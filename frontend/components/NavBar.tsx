@@ -5,55 +5,24 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { getCurrentUser } from "@/services/authService";
 import styles from "@/styles/navbar.module.css";
-import {
-  IoConstruct,
-  IoFlagOutline,
-  IoListOutline,
-  IoDocumentText,
-  IoPerson,
-  IoLogIn,
-  IoHomeOutline,
-  IoMenuOutline
-} from "react-icons/io5";
+import { IoMenuOutline, IoCloseOutline } from "react-icons/io5";
 
 export default function NavBar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       const user = await getCurrentUser();
       setIsLoggedIn(!!user);
-
-      // Add/remove sidebar class to body
-      if (user) {
-        document.body.classList.add('has-sidebar');
-        // Check if collapsed state is in localStorage
-        const collapsed = localStorage.getItem('sidebar-collapsed') === 'true';
-        setIsCollapsed(collapsed);
-        if (collapsed) {
-          document.body.classList.add('sidebar-collapsed');
-        }
-      } else {
-        document.body.classList.remove('has-sidebar');
-        document.body.classList.remove('sidebar-collapsed');
-      }
     };
     checkAuth();
   }, [pathname]);
 
-  const toggleSidebar = () => {
-    const newCollapsed = !isCollapsed;
-    setIsCollapsed(newCollapsed);
-    localStorage.setItem('sidebar-collapsed', String(newCollapsed));
-
-    if (newCollapsed) {
-      document.body.classList.add('sidebar-collapsed');
-    } else {
-      document.body.classList.remove('sidebar-collapsed');
-    }
-  };
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   const isActive = (path: string) => {
     if (path === "/" && pathname === "/") return true;
@@ -61,89 +30,90 @@ export default function NavBar() {
     return false;
   };
 
-  if (!isLoggedIn) {
-    return null;
+  if (isLoggedIn) {
+    return (
+      <nav className={styles.navbar}>
+        <Link href="/" className={styles.brand}>
+          NagAI
+        </Link>
+
+        <button
+          className={styles.mobileToggle}
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <IoCloseOutline size={22} /> : <IoMenuOutline size={22} />}
+        </button>
+
+        <div className={`${styles.navCenter} ${mobileOpen ? styles.navCenterOpen : ""}`}>
+          <Link
+            href="/"
+            className={`${styles.navLink} ${isActive("/") && pathname === "/" ? styles.navLinkActive : ""}`}
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/goals"
+            className={`${styles.navLink} ${isActive("/goals") ? styles.navLinkActive : ""}`}
+          >
+            Goals
+          </Link>
+          <Link
+            href="/checklists"
+            className={`${styles.navLink} ${isActive("/checklists") ? styles.navLinkActive : ""}`}
+          >
+            Checklists
+          </Link>
+          <Link
+            href="/digests"
+            className={`${styles.navLink} ${isActive("/digests") ? styles.navLinkActive : ""}`}
+          >
+            Digests
+          </Link>
+          <Link
+            href="/agent"
+            className={`${styles.navLink} ${isActive("/agent") ? styles.navLinkActive : ""}`}
+          >
+            Agent
+          </Link>
+        </div>
+
+        <div className={styles.navRight}>
+          <Link
+            href="/profile"
+            className={`${styles.navLink} ${styles.profileLink} ${isActive("/profile") ? styles.navLinkActive : ""}`}
+          >
+            Profile
+          </Link>
+        </div>
+      </nav>
+    );
   }
 
   return (
-    <nav className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
-      <div className={styles.sidebarContent}>
-        <div className={styles.sidebarHeader}>
-          <button
-            onClick={toggleSidebar}
-            className={styles.hamburger}
-            aria-label="Toggle sidebar"
-          >
-            <IoMenuOutline size={24} />
-          </button>
-          <Link href="/" className={styles.sidebarBrand}>
-            <span className={styles.brandText}>NagAI</span>
-          </Link>
-        </div>
+    <nav className={styles.navbar}>
+      <Link href="/" className={styles.brand}>
+        NagAI
+      </Link>
 
-        <ul className={styles.sidebarLinks}>
-          <li className={styles.sidebarLink}>
-            <Link
-              href="/"
-              className={`${styles.sidebarLinkAnchor} ${isActive("/") && pathname === "/" ? styles.active : ""}`}
-              title="Dashboard"
-            >
-              <IoHomeOutline size={22} />
-              <span>Dashboard</span>
-            </Link>
-          </li>
-          <li className={styles.sidebarLink}>
-            <Link
-              href="/goals"
-              className={`${styles.sidebarLinkAnchor} ${isActive("/goals") ? styles.active : ""}`}
-              title="Goals"
-            >
-              <IoFlagOutline size={22} />
-              <span>Goals</span>
-            </Link>
-          </li>
-          <li className={styles.sidebarLink}>
-            <Link
-              href="/checklists"
-              className={`${styles.sidebarLinkAnchor} ${isActive("/checklists") ? styles.active : ""}`}
-              title="Checklists"
-            >
-              <IoListOutline size={22} />
-              <span>Checklists</span>
-            </Link>
-          </li>
-          <li className={styles.sidebarLink}>
-            <Link
-              href="/digests"
-              className={`${styles.sidebarLinkAnchor} ${isActive("/digests") ? styles.active : ""}`}
-              title="Digests"
-            >
-              <IoDocumentText size={22} />
-              <span>Digests</span>
-            </Link>
-          </li>
-          <li className={styles.sidebarLink}>
-            <Link
-              href="/agent"
-              className={`${styles.sidebarLinkAnchor} ${isActive("/agent") ? styles.active : ""}`}
-              title="Agent"
-            >
-              <IoConstruct size={22} />
-              <span>Agent</span>
-            </Link>
-          </li>
-        </ul>
+      <button
+        className={styles.mobileToggle}
+        onClick={() => setMobileOpen(!mobileOpen)}
+        aria-label="Toggle menu"
+      >
+        {mobileOpen ? <IoCloseOutline size={22} /> : <IoMenuOutline size={22} />}
+      </button>
 
-        <div className={styles.sidebarFooter}>
-          <Link
-            href="/profile"
-            className={`${styles.sidebarLinkAnchor} ${isActive("/profile") ? styles.active : ""}`}
-            title="Profile"
-          >
-            <IoPerson size={22} />
-            <span>Profile</span>
-          </Link>
-        </div>
+      <div className={`${styles.navRight} ${mobileOpen ? styles.navRightOpen : ""}`}>
+        <Link href="/learn-more" className={styles.navLink}>
+          Learn More
+        </Link>
+        <Link href="/login" className={styles.navLink}>
+          Log In
+        </Link>
+        <Link href="/signup" className={styles.ctaLink}>
+          Get Started
+        </Link>
       </div>
     </nav>
   );

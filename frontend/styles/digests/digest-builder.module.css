@@ -21,7 +21,6 @@
 }
 
 .agentBuilderContent {
-  max-width: 1600px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -62,9 +61,12 @@
 .header {
   text-align: center;
   padding: 32px;
-  background: var(--card-background);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--shadow-sm);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm), var(--glass-inset);
 }
 
 .title {
@@ -89,10 +91,13 @@
    ============================================ */
 
 .overviewCard {
-  background: var(--card-background);
-  border: 1px solid var(--card-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   padding: 32px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), var(--glass-inset);
   transition: all 0.2s ease;
   animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
@@ -114,10 +119,13 @@
 }
 
 .settingsCard {
-  background: var(--card-background);
-  border: 1px solid var(--card-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   padding: 32px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), var(--glass-inset);
   transition: all 0.2s ease;
   animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
@@ -152,7 +160,7 @@
 
 .statusBadge {
   padding: 8px 16px;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   display: inline-flex;
@@ -188,8 +196,7 @@
   gap: 8px;
   padding: 20px;
   background: var(--surface-light);
-  border-radius: 2px;
-  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-md);
   transition: all 0.3s ease;
 }
 
@@ -245,14 +252,17 @@
 
 .frequencyButton {
   padding: 16px 20px;
-  background: var(--card-background);
-  border: 2px solid var(--card-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border);
   cursor: pointer;
   transition: all 0.2s ease;
   color: var(--text-primary);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   font-family: var(--font-family);
+  border-radius: var(--radius-lg);
 }
 
 .frequencyButton:hover {
@@ -281,12 +291,15 @@
   justify-content: center;
   gap: 8px;
   padding: 20px 16px;
-  background: var(--card-background);
-  border: 2px solid var(--card-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
   min-height: 100px;
+  border-radius: var(--radius-lg);
 }
 
 .timeButton:hover {
@@ -325,14 +338,17 @@
 }
 
 .contentTypeCard {
-  background: var(--card-background);
-  border: 2px solid var(--card-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   padding: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
   font-family: var(--font-family);
-  border-left: 4px solid var(--card-border);
+  border-left: 4px solid var(--glass-border);
 }
 
 .contentTypeCard:hover {
@@ -380,14 +396,17 @@
    ============================================ */
 
 .deploymentPanel {
-  background: var(--card-background);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 2px solid var(--primary);
+  border-radius: var(--radius-lg);
   padding: 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 28px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), var(--glass-inset);
   flex-wrap: wrap;
 }
 

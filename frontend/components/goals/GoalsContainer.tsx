@@ -6,16 +6,10 @@
  * Component Hierarchy:
  * - GoalsContainer (this component)
  *   ├── GoalsHeader
- *   ├── GoalsEmptyState (when no goals)
+ *   ├── EmptyState (when no goals)
  *   ├── GoalsList (when goals exist)
  *   ├── AddGoalModal
  *   └── EditGoalModal
- *
- * Responsibilities:
- * - Fetch and manage goals data
- * - Handle goal CRUD operations
- * - Manage modal states (add/edit)
- * - Coordinate between child components
  */
 
 "use client";
@@ -25,12 +19,13 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { Goal, GoalWithDetails } from "@/types/goal";
 import GoalsHeader from "@/components/goals/GoalsHeader";
-import GoalsEmptyState from "@/components/goals/GoalsEmptyState";
 import GoalsList from "@/components/goals/GoalsList";
 import AddGoalModal from "@/components/goals/AddGoalModal";
 import EditGoalModal from "@/components/goals/EditGoalModal";
+import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Toast from "@/components/common/Toast";
+import { IoAdd } from "react-icons/io5";
 import styles from "@/styles/goals/goalsList.module.css";
 import {
   fetchGoals,
@@ -131,7 +126,16 @@ export default function GoalsContainer() {
       {goals.length > 0 && <GoalsHeader onAddGoal={handleAddGoal} />}
 
       {goals.length === 0 ? (
-        <GoalsEmptyState onAddGoal={handleAddGoal} />
+        <EmptyState
+          title="No goals yet"
+          description="Create your first goal to get started on your journey"
+          action={
+            <button onClick={handleAddGoal} className={styles.addGoalButton}>
+              <IoAdd size={20} />
+              Add Your First Goal
+            </button>
+          }
+        />
       ) : (
         <GoalsList goals={goals} onViewGoal={handleViewGoal} />
       )}

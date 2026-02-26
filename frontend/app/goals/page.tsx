@@ -8,7 +8,7 @@
  * - GoalsPage (this page)
  *   └── GoalsContainer
  *       ├── GoalsHeader
- *       ├── GoalsEmptyState (when no goals)
+ *       ├── EmptyState (when no goals)
  *       ├── GoalsList (when goals exist)
  *       ├── AddGoalModal
  *       └── EditGoalModal
