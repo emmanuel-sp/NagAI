@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package nagai.ai;
+
+option java_package = "com.nagai.ai";
+option java_outer_classname = "AiServiceProto";
+option java_multiple_files = true;
+
+service AiService {
+  rpc SuggestSmartField     (SmartFieldRequest)    returns (SmartFieldResponse);
+  rpc GenerateChecklistItem (ChecklistItemRequest) returns (ChecklistItemResponse);
+  rpc GenerateFullChecklist (FullChecklistRequest) returns (FullChecklistResponse);
+}
+
+// --- SuggestSmartField ---
+
+message SmartFieldRequest {
+  string field            = 1;  // specific|measurable|attainable|relevant|timely
+  string goal_title       = 2;
+  string goal_description = 3;
+  map<string, string> existing_fields = 4;  // already-filled SMART fields for coherent suggestions
+}
+
+message SmartFieldResponse {
+  string suggestion = 1;
+}
+
+// --- GenerateChecklistItem ---
+
+message ChecklistItemRequest {
+  string          goal_title       = 1;
+  string          goal_description = 2;
+  repeated string existing_items   = 3;
+}
+
+message ChecklistItemResponse {
+  string title    = 1;
+  string notes    = 2;
+  string deadline = 3;
+}
+
+// --- GenerateFullChecklist ---
+
+message FullChecklistRequest {
+  string goal_title       = 1;
+  string goal_description = 2;
+}
+
+message ChecklistItem {
+  string title    = 1;
+  string notes    = 2;
+  string deadline = 3;
+}
+
+message FullChecklistResponse {
+  repeated ChecklistItem items = 1;
+}

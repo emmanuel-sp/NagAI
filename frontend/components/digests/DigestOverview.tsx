@@ -2,7 +2,7 @@
 "use client";
 
 import { Digest } from "@/types/digest";
-import styles from "@/styles/digests/digest-builder.module.css";
+import styles from "./digest-builder.module.css";
 
 interface DigestOverviewProps {
   digest: Digest;
@@ -32,10 +32,10 @@ export default function DigestOverview({ digest }: DigestOverviewProps) {
         <h2 className={styles.cardTitle}>Digest Overview</h2>
         <span
           className={`${styles.statusBadge} ${
-            digest.isActive ? styles.statusActive : styles.statusInactive
+            digest.active ? styles.statusActive : styles.statusInactive
           }`}
         >
-          {digest.isActive ? "● Active" : "● Inactive"}
+          {digest.active ? "● Active" : "● Inactive"}
         </span>
       </div>
 

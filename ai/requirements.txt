@@ -1,0 +1,6 @@
+grpcio>=1.60.0
+grpcio-tools>=1.60.0
+protobuf>=5.0.0
+anthropic>=0.40.0
+confluent-kafka>=2.4.0
+python-dotenv>=1.0.0

@@ -7,32 +7,32 @@ export type MessageFrequency = "daily" | "twice-daily" | "weekly" | "bi-weekly";
 export type CommunicationChannel = "email" | "phone";
 
 export interface AgentContext {
-  id: string;
+  contextId: number;
+  agentId: number;
   name: string;
-  goalId: string;
-  goalName?: string; // For display purposes
+  goalId?: number | null;
+  goalName?: string | null;
   messageType: MessageType;
   messageFrequency: MessageFrequency;
-  customInstructions?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  customInstructions?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Agent {
-  id: string;
-  userId: string;
+  agentId: number;
+  userId: number;
   name: string;
-  isDeployed: boolean;
+  deployed: boolean;
   communicationChannel: CommunicationChannel;
   contexts: AgentContext[];
-  createdAt: Date;
-  deployedAt?: Date;
-  lastUpdatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateContextRequest {
   name: string;
-  goalId: number;
+  goalId?: number | null;
   messageType: MessageType;
   messageFrequency: MessageFrequency;
   customInstructions?: string;
@@ -40,7 +40,7 @@ export interface CreateContextRequest {
 
 export interface UpdateContextRequest {
   name?: string;
-  goalId?: number;
+  goalId?: number | null;
   messageType?: MessageType;
   messageFrequency?: MessageFrequency;
   customInstructions?: string;

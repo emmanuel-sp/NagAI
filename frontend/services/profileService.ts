@@ -16,7 +16,7 @@ export async function updateUserProfile(profile: UserProfile): Promise<UserProfi
 }
 
 export async function updatePassword(_currentPassword: string, _newPassword: string): Promise<boolean> {
-  const updated = await apiRequest<boolean>("users/me/password", {
+  const updated = await apiRequest<boolean>("/users/me/password", {
       method: "PUT",
       body: JSON.stringify({currentPassword: _currentPassword, newPassword: _newPassword})
     });

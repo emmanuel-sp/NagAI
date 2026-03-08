@@ -14,8 +14,7 @@ export class ApiError extends Error {
 
 export async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {},
-  type: string = "json"
+  options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
@@ -33,30 +32,22 @@ export async function apiRequest<T>(
     Object.assign(headers, options.headers);
   }
 
-  const config: RequestInit = {
-    ...options,
-    headers,
-  };
-
-  const response = await fetch(url, config);
+  const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
-
-    throw new ApiError(
-      response.status,
-      errorData?.message || `Request failed with status ${response.status}`,
-      errorData?.errorCode,
-      errorData?.timestamp
-    );
+    // Spring ProblemDetail uses "detail" for the human-readable message.
+    // Fall back through: detail → message → generic
+    const message =
+      errorData?.detail ||
+      errorData?.message ||
+      `Request failed with status ${response.status}`;
+    throw new ApiError(response.status, message, errorData?.errorCode, errorData?.timestamp);
   }
 
   if (response.status === 204) {
     return undefined as T;
   }
 
-  return await response.json();
-
-
-  
+  return response.json();
 }

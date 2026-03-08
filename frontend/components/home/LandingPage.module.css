@@ -1,0 +1,221 @@
+.landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  position: relative;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+  padding: var(--space-3xl) var(--space-2xl) var(--space-2xl);
+  margin-top: var(--space-xl);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.4s ease both;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-lighter);
+  border: 1px solid var(--accent-border);
+  padding: 5px 16px;
+  border-radius: var(--radius-full);
+  margin-bottom: 32px;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(52px, 7vw, 88px);
+  line-height: 1.0;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+
+.headlineAccent {
+  display: block;
+  color: var(--accent);
+  font-weight: 200;
+  letter-spacing: -0.02em;
+}
+
+.subline {
+  font-family: var(--font-display);
+  font-size: var(--fs-base);
+  line-height: 1.7;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto 40px;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.primaryCta {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--cream);
+  background: var(--accent);
+  padding: 12px 28px;
+  border-radius: var(--radius-md);
+  letter-spacing: 0.01em;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.primaryCta:hover {
+  background: var(--accent-dark);
+}
+
+.primaryCta:active {
+  transform: scale(0.97);
+}
+
+.secondaryCta {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-400);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  letter-spacing: 0.005em;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.secondaryCta:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
+.footnote {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  color: var(--text-light);
+  font-weight: var(--fw-300);
+}
+
+.footnoteLink {
+  color: var(--text-muted);
+  font-weight: var(--fw-500);
+  transition: color var(--transition-fast);
+}
+
+.footnoteLink:hover {
+  color: var(--text-primary);
+}
+
+/* ─── Feature Strip ─── */
+.featureDivider {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--content-lg);
+  height: 0;
+  margin: 0 auto;
+}
+
+.features {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 800px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: var(--space-lg) 0 var(--space-2xl);
+  animation: fadeInUp 0.5s 0.15s ease both;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-md) var(--space-lg);
+}
+
+.feature:last-child {
+  border-right: none;
+}
+
+.featureLabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.featureText {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+@media (max-width: 768px) {
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  .feature {
+    padding: var(--space-md) 0;
+  }
+
+  .feature:last-child {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .landing {
+    padding: 0 16px;
+    justify-content: flex-start;
+  }
+
+  .hero {
+    padding: var(--space-2xl) 0 var(--space-lg);
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primaryCta,
+  .secondaryCta {
+    justify-content: center;
+  }
+}

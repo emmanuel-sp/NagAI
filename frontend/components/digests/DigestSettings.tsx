@@ -2,7 +2,7 @@
 "use client";
 
 import { DigestFrequency, DeliveryTime } from "@/types/digest";
-import styles from "@/styles/digests/digest-builder.module.css";
+import styles from "./digest-builder.module.css";
 
 interface DigestSettingsProps {
   frequency: DigestFrequency;

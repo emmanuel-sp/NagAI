@@ -16,7 +16,7 @@ import { fetchAgent } from "@/services/agentService";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import DashboardHeader from "./DashboardHeader";
 import DashboardOverview from "./DashboardOverview";
-import styles from "@/styles/pages/dashboard.module.css";
+import styles from "./dashboard.module.css";
 
 interface DashboardContainerProps {
   userProfile: UserProfile;

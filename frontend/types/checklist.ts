@@ -1,35 +1,36 @@
-// Checklist types for goal progress tracking
+// Checklist types — aligned with backend ChecklistResponse
 
 export interface ChecklistItem {
-  id: string;
+  checklistId: number;
+  goalId: number;
   title: string;
   notes?: string;
-  deadline?: Date;
+  deadline?: string;
   completed: boolean;
-  createdAt: Date;
-  completedAt?: Date;
-  order: number; // For sorting items
+  completedAt?: string;
+  sortOrder: number;
 }
 
+// Frontend-only grouping for display (one per goal)
 export interface Checklist {
-  id: string;
-  goalId: string;
-  goalTitle?: string; // For display purposes
+  goalId: number;
+  goalTitle: string;
   items: ChecklistItem[];
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface CreateChecklistItemDto {
+  goalId: number;
   title: string;
   notes?: string;
-  deadline?: Date;
+  deadline?: string;
+  sortOrder?: number;
 }
 
 export interface UpdateChecklistItemDto {
-  title?: string;
+  checklistId: number;
+  title: string;
   notes?: string;
-  deadline?: Date;
+  deadline?: string;
+  sortOrder?: number;
   completed?: boolean;
-  order?: number;
 }

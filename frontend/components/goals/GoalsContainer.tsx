@@ -18,15 +18,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { Goal, GoalWithDetails } from "@/types/goal";
-import GoalsHeader from "@/components/goals/GoalsHeader";
 import GoalsList from "@/components/goals/GoalsList";
 import AddGoalModal from "@/components/goals/AddGoalModal";
 import EditGoalModal from "@/components/goals/EditGoalModal";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Toast from "@/components/common/Toast";
-import { IoAdd } from "react-icons/io5";
-import styles from "@/styles/goals/goalsList.module.css";
+import { IoAdd } from "@/components/icons";
+import styles from "./goalsList.module.css";
 import {
   fetchGoals,
   fetchGoalById,
@@ -42,6 +41,7 @@ export default function GoalsContainer() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
@@ -52,11 +52,13 @@ export default function GoalsContainer() {
 
   const loadGoals = async () => {
     setIsLoading(true);
+    setLoadError(null);
     try {
       const fetchedGoals = await fetchGoals();
       setGoals(fetchedGoals);
     } catch (error) {
       console.error("Failed to fetch goals:", error);
+      setLoadError("Failed to load goals. Please refresh the page.");
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +71,7 @@ export default function GoalsContainer() {
       setIsEditModalOpen(true);
     } catch (error) {
       console.error("Failed to fetch goal details:", error);
+      setLoadError("Failed to open goal. Please try again.");
     }
   };
 
@@ -123,7 +126,16 @@ export default function GoalsContainer() {
 
   return (
     <div className={styles.goalsContainer}>
-      {goals.length > 0 && <GoalsHeader onAddGoal={handleAddGoal} />}
+      {loadError && <div className={styles.loadError}>{loadError}</div>}
+
+      {goals.length > 0 && (
+        <div className={styles.goalsHeader}>
+          <button onClick={handleAddGoal} className={styles.addGoalButton}>
+            <IoAdd size={18} />
+            Add Goal
+          </button>
+        </div>
+      )}
 
       {goals.length === 0 ? (
         <EmptyState

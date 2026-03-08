@@ -1,0 +1,36 @@
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 56px 24px;
+  gap: 12px;
+  animation: fadeInUp 0.3s ease both;
+}
+
+.emptyStateIcon {
+  color: var(--text-light);
+  margin-bottom: 8px;
+  opacity: 0.6;
+  animation: float 4s ease-in-out infinite;
+}
+
+.emptyStateTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.emptyStateText {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  max-width: 360px;
+  line-height: 1.65;
+  font-weight: var(--fw-300);
+}
+
+.emptyStateAction {
+  margin-top: 8px;
+}

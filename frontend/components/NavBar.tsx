@@ -4,98 +4,39 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { getCurrentUser } from "@/services/authService";
-import styles from "@/styles/navbar.module.css";
-import { IoMenuOutline, IoCloseOutline } from "react-icons/io5";
+import { useModal } from "@/contexts/ModalContext";
+import styles from "./NavBar.module.css";
+import { IoMenuOutline, IoCloseOutline } from "@/components/icons";
 
 export default function NavBar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { modalOpen } = useModal();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const user = await getCurrentUser();
-      setIsLoggedIn(!!user);
-    };
-    checkAuth();
+    getCurrentUser().then((user) => setIsLoggedIn(!!user));
   }, [pathname]);
 
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  const isActive = (path: string) => {
-    if (path === "/" && pathname === "/") return true;
-    if (path !== "/" && pathname.startsWith(path)) return true;
-    return false;
-  };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-  if (isLoggedIn) {
-    return (
-      <nav className={styles.navbar}>
-        <Link href="/" className={styles.brand}>
-          NagAI
-        </Link>
+  const active = (path: string) =>
+    path === "/" ? pathname === "/" : pathname.startsWith(path);
 
-        <button
-          className={styles.mobileToggle}
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <IoCloseOutline size={22} /> : <IoMenuOutline size={22} />}
-        </button>
-
-        <div className={`${styles.navCenter} ${mobileOpen ? styles.navCenterOpen : ""}`}>
-          <Link
-            href="/"
-            className={`${styles.navLink} ${isActive("/") && pathname === "/" ? styles.navLinkActive : ""}`}
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/goals"
-            className={`${styles.navLink} ${isActive("/goals") ? styles.navLinkActive : ""}`}
-          >
-            Goals
-          </Link>
-          <Link
-            href="/checklists"
-            className={`${styles.navLink} ${isActive("/checklists") ? styles.navLinkActive : ""}`}
-          >
-            Checklists
-          </Link>
-          <Link
-            href="/digests"
-            className={`${styles.navLink} ${isActive("/digests") ? styles.navLinkActive : ""}`}
-          >
-            Digests
-          </Link>
-          <Link
-            href="/agent"
-            className={`${styles.navLink} ${isActive("/agent") ? styles.navLinkActive : ""}`}
-          >
-            Agent
-          </Link>
-        </div>
-
-        <div className={styles.navRight}>
-          <Link
-            href="/profile"
-            className={`${styles.navLink} ${styles.profileLink} ${isActive("/profile") ? styles.navLinkActive : ""}`}
-          >
-            Profile
-          </Link>
-        </div>
-      </nav>
-    );
-  }
+  if (!isLoggedIn) return null;
 
   return (
-    <nav className={styles.navbar}>
-      <Link href="/" className={styles.brand}>
-        NagAI
-      </Link>
-
+    <nav className={`${styles.navbar} ${scrolled ? styles.navbarScrolled : ""} ${modalOpen ? styles.navbarDisabled : ""}`}>
       <button
         className={styles.mobileToggle}
         onClick={() => setMobileOpen(!mobileOpen)}
@@ -104,16 +45,13 @@ export default function NavBar() {
         {mobileOpen ? <IoCloseOutline size={22} /> : <IoMenuOutline size={22} />}
       </button>
 
-      <div className={`${styles.navRight} ${mobileOpen ? styles.navRightOpen : ""}`}>
-        <Link href="/learn-more" className={styles.navLink}>
-          Learn More
-        </Link>
-        <Link href="/login" className={styles.navLink}>
-          Log In
-        </Link>
-        <Link href="/signup" className={styles.ctaLink}>
-          Get Started
-        </Link>
+      <div className={`${styles.navCenter} ${mobileOpen ? styles.navCenterOpen : ""}`}>
+        <Link href="/" className={`${styles.navLink} ${active("/") ? styles.navLinkActive : ""}`}>Dashboard</Link>
+        <Link href="/goals" className={`${styles.navLink} ${active("/goals") ? styles.navLinkActive : ""}`}>Goals</Link>
+        <Link href="/checklists" className={`${styles.navLink} ${active("/checklists") ? styles.navLinkActive : ""}`}>Checklists</Link>
+        <Link href="/digests" className={`${styles.navLink} ${active("/digests") ? styles.navLinkActive : ""}`}>Digests</Link>
+        <Link href="/agent" className={`${styles.navLink} ${active("/agent") ? styles.navLinkActive : ""}`}>Agent</Link>
+        <Link href="/profile" className={`${styles.navLink} ${active("/profile") ? styles.navLinkActive : ""}`}>Profile</Link>
       </div>
     </nav>
   );

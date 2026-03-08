@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styles from "@/styles/goals/goalModals.module.css";
+import styles from "./goalModals.module.css";
 import { GoalWithDetails } from "@/types/goal";
-import { IoClose, IoTrash } from "react-icons/io5";
+import { useModal } from "@/contexts/ModalContext";
+import { IoClose, IoTrash } from "@/components/icons";
 import { useSmartGoalForm, SmartField } from "@/hooks/useSmartGoalForm";
 import SmartFieldGroup from "@/components/goals/SmartFieldGroup";
 
@@ -18,20 +19,26 @@ interface EditGoalModalProps {
 }
 
 export default function EditGoalModal({ goal, isOpen, onClose, onSave, onRemove }: EditGoalModalProps) {
-  const { fields, setField, resetFields, loadingSuggestion, suggestions, generateSuggestion, useSuggestion } =
+  const { fields, setField, resetFields, loadingSuggestion, suggestions, suggestionError, generateSuggestion, useSuggestion } =
     useSmartGoalForm();
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const { registerModal } = useModal();
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      registerModal(true);
     }
     return () => {
       document.body.style.overflow = "";
+      registerModal(false);
     };
-  }, [isOpen]);
+  }, [isOpen, registerModal]);
 
   useEffect(() => {
     if (goal && isOpen) {
@@ -51,16 +58,17 @@ export default function EditGoalModal({ goal, isOpen, onClose, onSave, onRemove 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!goal || !fields.title.trim()) {
-      alert("Goal title is required");
+      setFormError("Goal title is required");
       return;
     }
 
+    setFormError(null);
     setIsSaving(true);
     try {
       await onSave({ ...goal, ...fields });
     } catch (error) {
       console.error("Failed to update goal:", error);
-      alert("Failed to update goal. Please try again.");
+      setFormError("Failed to update goal. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -68,6 +76,7 @@ export default function EditGoalModal({ goal, isOpen, onClose, onSave, onRemove 
 
   const handleRemoveGoal = async () => {
     if (!goal || !onRemove) return;
+    setDeleteError(null);
     setIsDeleting(true);
     try {
       await onRemove(goal.goalId);
@@ -75,6 +84,7 @@ export default function EditGoalModal({ goal, isOpen, onClose, onSave, onRemove 
       onClose();
     } catch (error) {
       console.error("Failed to remove goal:", error);
+      setDeleteError("Failed to remove goal. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -111,6 +121,7 @@ export default function EditGoalModal({ goal, isOpen, onClose, onSave, onRemove 
                   onChange={(e) => setField("title", e.target.value)}
                   placeholder="Enter your goal title"
                   required
+                  maxLength={200}
                 />
               </div>
 
@@ -122,6 +133,7 @@ export default function EditGoalModal({ goal, isOpen, onClose, onSave, onRemove 
                   onChange={(e) => setField("description", e.target.value)}
                   placeholder="Describe your goal in detail"
                   rows={3}
+                  maxLength={1000}
                 />
               </div>
 
@@ -142,6 +154,8 @@ export default function EditGoalModal({ goal, isOpen, onClose, onSave, onRemove 
                 Use AI to help refine your specific, measurable, attainable, relevant, and timely goals
               </p>
 
+              {suggestionError && <p className={styles.deleteError}>{suggestionError}</p>}
+
               {SMART_FIELDS.map((field) => (
                 <SmartFieldGroup
                   key={field}
@@ -157,6 +171,8 @@ export default function EditGoalModal({ goal, isOpen, onClose, onSave, onRemove 
               ))}
             </div>
           </div>
+
+          {formError && <div className={styles.formError}>{formError}</div>}
 
           <div className={styles.modalFooter}>
             {onRemove && (
@@ -187,6 +203,7 @@ export default function EditGoalModal({ goal, isOpen, onClose, onSave, onRemove 
             <p className={styles.confirmMessage}>
               Are you sure you want to remove &quot;{fields.title}&quot;? This action cannot be undone.
             </p>
+            {deleteError && <p className={styles.deleteError}>{deleteError}</p>}
             <div className={styles.confirmActions}>
               <button className={styles.cancelButton} onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting}>
                 Cancel

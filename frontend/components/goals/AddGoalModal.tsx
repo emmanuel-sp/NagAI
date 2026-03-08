@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styles from "@/styles/goals/goalModals.module.css";
-import { IoClose } from "react-icons/io5";
+import styles from "./goalModals.module.css";
+import { IoClose } from "@/components/icons";
+import { useModal } from "@/contexts/ModalContext";
 import { useSmartGoalForm, SmartField } from "@/hooks/useSmartGoalForm";
 import SmartFieldGroup from "@/components/goals/SmartFieldGroup";
 
@@ -24,18 +25,23 @@ interface AddGoalModalProps {
 }
 
 export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalProps) {
-  const { fields, setField, resetFields, loadingSuggestion, suggestions, generateSuggestion, useSuggestion } =
+  const { fields, setField, resetFields, loadingSuggestion, suggestions, suggestionError, generateSuggestion, useSuggestion } =
     useSmartGoalForm();
   const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const { registerModal } = useModal();
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      registerModal(true);
     }
     return () => {
       document.body.style.overflow = "";
+      registerModal(false);
     };
-  }, [isOpen]);
+  }, [isOpen, registerModal]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -46,17 +52,18 @@ export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fields.title.trim()) {
-      alert("Goal title is required");
+      setFormError("Goal title is required");
       return;
     }
 
+    setFormError(null);
     setIsSaving(true);
     try {
       await onAdd(fields);
       resetFields();
     } catch (error) {
       console.error("Failed to create goal:", error);
-      alert("Failed to create goal. Please try again.");
+      setFormError("Failed to create goal. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -99,6 +106,7 @@ export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalPro
                   placeholder="Enter your goal title"
                   required
                   autoFocus
+                  maxLength={200}
                 />
               </div>
 
@@ -110,6 +118,7 @@ export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalPro
                   onChange={(e) => setField("description", e.target.value)}
                   placeholder="Describe your goal in detail"
                   rows={3}
+                  maxLength={1000}
                 />
               </div>
 
@@ -130,6 +139,8 @@ export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalPro
                 Use AI to help you create specific, measurable, attainable, relevant, and timely goals
               </p>
 
+              {suggestionError && <p className={styles.deleteError}>{suggestionError}</p>}
+
               {SMART_FIELDS.map((field) => (
                 <SmartFieldGroup
                   key={field}
@@ -145,6 +156,8 @@ export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalPro
               ))}
             </div>
           </div>
+
+          {formError && <div className={styles.formError}>{formError}</div>}
 
           <div className={styles.modalFooter}>
             <button type="button" className={styles.cancelButton} onClick={handleClose} disabled={isSaving}>

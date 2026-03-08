@@ -1,7 +1,6 @@
 package com.nagai.backend.goals;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +12,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/goals")
@@ -29,31 +30,27 @@ public class GoalController {
             .stream()
             .map(GoalResponse::fromEntity)
             .toList();
-
         return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{goalId}")
     public ResponseEntity<GoalResponse> getGoal(@PathVariable Long goalId) {
-        Goal goal = goalService.getGoal(goalId);
-        return ResponseEntity.ok(GoalResponse.fromEntity(goal));
+        return ResponseEntity.ok(GoalResponse.fromEntity(goalService.getGoal(goalId)));
     }
 
     @PostMapping
-    public ResponseEntity<Goal> addGoal(@RequestBody GoalAddRequest goalAddRequest) {
-        Goal goal = goalService.addGoal(goalAddRequest);
-        return ResponseEntity.ok(goal);
+    public ResponseEntity<GoalResponse> addGoal(@Valid @RequestBody GoalAddRequest goalAddRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(GoalResponse.fromEntity(goalService.addGoal(goalAddRequest)));
     }
+
     @PutMapping
-    public ResponseEntity<Goal> updateGoal(@RequestBody GoalUpdateRequest goalUpdateRequest) {
-        Goal goal = goalService.updateGoal(goalUpdateRequest);
-        return ResponseEntity.ok(goal);
+    public ResponseEntity<GoalResponse> updateGoal(@Valid @RequestBody GoalUpdateRequest goalUpdateRequest) {
+        return ResponseEntity.ok(GoalResponse.fromEntity(goalService.updateGoal(goalUpdateRequest)));
     }
 
     @DeleteMapping("/{goalId}")
-    public ResponseEntity<Boolean> deleteGoal(@PathVariable Long goalId) {
+    public ResponseEntity<Void> deleteGoal(@PathVariable Long goalId) {
         goalService.deleteGoal(goalId);
-        return ResponseEntity.status(HttpStatus.OK).body(true);
+        return ResponseEntity.noContent().build();
     }
-
 }

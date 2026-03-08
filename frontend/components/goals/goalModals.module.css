@@ -1,0 +1,364 @@
+/* ─── Goal Modals ─── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 11, 8, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 40px 24px;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease;
+}
+
+.modalContent {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 680px;
+  box-shadow: var(--shadow-2xl);
+  animation: scaleIn 0.2s ease both;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 24px 0;
+  gap: 16px;
+}
+
+.modalTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.addModalTitle,
+.editModalTitle { color: var(--text-primary); }
+
+.modalSubtitle {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.5;
+  font-weight: var(--fw-300);
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
+/* ─── Body ─── */
+.modalBody {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-700);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: block;
+}
+
+.sectionDescription {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  margin-top: -8px;
+  line-height: 1.5;
+  font-weight: var(--fw-300);
+}
+
+/* ─── Form Fields ─── */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.required { color: var(--error); }
+
+.formError {
+  background: var(--error-light);
+  border: 1px solid var(--error-border);
+  border-top: none;
+  padding: 10px 20px;
+  color: var(--error);
+  font-size: var(--fs-sm);
+}
+
+.deleteError {
+  color: var(--error);
+  font-size: var(--fs-sm);
+  margin: 0 0 8px;
+}
+
+.fieldTextarea { min-height: 72px; }
+
+.charCount {
+  font-size: var(--fs-2xs);
+  color: var(--text-light);
+  text-align: right;
+  line-height: 1;
+}
+
+.charCountWarning { color: var(--error); }
+
+/* ─── SMART Field AI Suggestion ─── */
+.labelWithButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.aiSuggestButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--accent);
+  background: var(--accent-lighter);
+  border: 1px solid var(--accent-border);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.aiSuggestButton:hover { background: var(--accent-light); }
+.aiSuggestButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.inputWithSuggestion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestionBox {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeInUp 0.2s ease;
+}
+
+.suggestionText {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  line-height: 1.55;
+  font-weight: var(--fw-300);
+  font-style: italic;
+}
+
+.useSuggestionButton {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background var(--transition-fast);
+  letter-spacing: 0.02em;
+}
+
+.useSuggestionButton:hover { background: var(--surface); }
+
+/* ─── Footer ─── */
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  background: var(--surface);
+}
+
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-500);
+  color: var(--error);
+  background: none;
+  border: 1px solid transparent;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  margin-right: auto;
+}
+
+.deleteButton:hover {
+  background: var(--error-light);
+  border-color: var(--error-border);
+}
+
+.deleteButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cancelButton {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-400);
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.cancelButton:hover { color: var(--text-primary); background: var(--surface-hover); }
+.cancelButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.createButton,
+.saveButton {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: none;
+  padding: 8px 20px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  letter-spacing: 0.005em;
+}
+
+.createButton:hover,
+.saveButton:hover { background: var(--accent-dark); }
+
+.createButton:active,
+.saveButton:active { transform: scale(0.97); }
+
+.createButton:disabled,
+.saveButton:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+/* ─── Delete Confirm Dialog ─── */
+.confirmOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 11, 8, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: var(--radius-xl);
+  animation: fadeIn 0.15s ease;
+}
+
+.confirmDialog {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 340px;
+  width: calc(100% - 48px);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: scaleIn 0.2s ease;
+}
+
+.confirmTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.confirmMessage {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-weight: var(--fw-300);
+}
+
+.confirmActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.confirmDeleteButton {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--cream);
+  background: var(--error);
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.confirmDeleteButton:hover { background: color-mix(in srgb, var(--error), black 15%); }
+.confirmDeleteButton:active { transform: scale(0.97); }
+.confirmDeleteButton:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }

@@ -7,11 +7,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signup } from "@/services/authService";
+import { signup, loginWithGoogle } from "@/services/authService";
+import { ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 import SignupForm from "./SignupForm";
-import SignupLinks from "./SignupLinks";
-import styles from "@/styles/pages/login.module.css";
+import { GoogleLogin } from "@react-oauth/google";
+import styles from "./login.module.css";
 
 export default function SignupContainer() {
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function SignupContainer() {
   const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   if (loading) {
     return (
@@ -63,14 +66,39 @@ export default function SignupContainer() {
       }
 
       await signup({ name: formData.name, email: formData.email, password: formData.password });
-      router.push("/profile");
+      setRegistered(true);
     } catch (err) {
-      console.error("Signup error:", err);
-      setError("Signup failed. Please try again.");
+      if (err instanceof ApiError) {
+        if (err.status === 409) {
+          setError("An account with this email already exists.");
+        } else if (err.status === 400) {
+          setError(err.message || "Please check your input and try again.");
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (registered) {
+    return (
+      <div className={styles.loginContainer}>
+        <div className={styles.loginCard}>
+          <div className={styles.loginHeader}>
+            <h1 className={styles.loginTitle}>Check your email</h1>
+            <p className={styles.loginSubtitle}>We sent a verification link to <strong>{formData.email}</strong>. Click it to activate your account.</p>
+          </div>
+          <div className={styles.linkText} style={{ marginTop: "28px" }}>
+            <Link href="/login">Back to login</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.loginContainer}>
@@ -84,7 +112,31 @@ export default function SignupContainer() {
 
         <SignupForm formData={formData} isLoading={isLoading} onChange={handleChange} onSubmit={handleSubmit} />
 
-        <SignupLinks />
+        <div className={styles.divider}>OR</div>
+
+        <div className={styles.googleButtonWrapper}>
+          <GoogleLogin
+            theme="filled_black"
+            size="large"
+            width="100%"
+            onSuccess={async (credentialResponse) => {
+              try {
+                await loginWithGoogle(credentialResponse.credential!);
+                router.push("/profile");
+              } catch {
+                setError("Google sign-in failed. Please try again.");
+              }
+            }}
+            onError={() => setError("Google sign-in failed. Please try again.")}
+          />
+        </div>
+
+        <div className={styles.linkText} style={{ marginTop: "20px" }}>
+          Already have an account? <Link href="/login">Login here</Link>
+        </div>
+        <div className={styles.linkText} style={{ marginTop: "24px" }}>
+          <Link href="/">Back to home</Link>
+        </div>
       </div>
     </div>
   );

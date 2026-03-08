@@ -1,7 +1,7 @@
 /** AgentOverview Component - Displays agent status and information. Parent: AgentBuilderContainer */
 "use client";
 import { Agent } from "@/types/agent";
-import styles from "@/styles/agent/agent-builder.module.css";
+import styles from "./agent-builder.module.css";
 
 interface AgentOverviewProps {
   agent: Agent;
@@ -14,10 +14,10 @@ export default function AgentOverview({ agent }: AgentOverviewProps) {
         <h2 className={styles.cardTitle}>Agent Overview</h2>
         <span
           className={`${styles.statusBadge} ${
-            agent.isDeployed ? styles.statusDeployed : styles.statusDraft
+            agent.deployed ? styles.statusDeployed : styles.statusDraft
           }`}
         >
-          {agent.isDeployed ? "✓ Deployed" : "● Draft"}
+          {agent.deployed ? "✓ Deployed" : "● Draft"}
         </span>
       </div>
 
@@ -27,19 +27,10 @@ export default function AgentOverview({ agent }: AgentOverviewProps) {
           <span className={styles.statValue}>{agent.contexts.length}</span>
         </div>
 
-        {agent.deployedAt && (
-          <div className={styles.overviewStat}>
-            <span className={styles.statLabel}>Deployed</span>
-            <span className={styles.statValue}>
-              {agent.deployedAt.toLocaleDateString()}
-            </span>
-          </div>
-        )}
-
         <div className={styles.overviewStat}>
           <span className={styles.statLabel}>Last Updated</span>
           <span className={styles.statValue}>
-            {agent.lastUpdatedAt.toLocaleDateString()}
+            {new Date(agent.updatedAt).toLocaleDateString()}
           </span>
         </div>
       </div>

@@ -1,24 +1,11 @@
-/**
- * AddItemForm Component
- *
- * Form for adding a new checklist item with title, notes, and deadline.
- *
- * Parent: Checklist
- * Children: None (form component)
- *
- * Props:
- * - onAdd: Callback to add item (title, notes?, deadline?)
- * - onCancel: Callback to cancel and hide form
- */
-
 "use client";
 
 import { useState } from "react";
-import { IoCalendarOutline } from "react-icons/io5";
-import styles from "@/styles/checklists/checklist.module.css";
+import { IoCalendarOutline } from "@/components/icons";
+import styles from "./checklist.module.css";
 
 interface AddItemFormProps {
-  onAdd: (title: string, notes?: string, deadline?: Date) => void;
+  onAdd: (title: string, notes?: string, deadline?: string) => void;
   onCancel: () => void;
 }
 
@@ -29,11 +16,7 @@ export default function AddItemForm({ onAdd, onCancel }: AddItemFormProps) {
 
   const handleAdd = () => {
     if (title.trim()) {
-      onAdd(
-        title,
-        notes || undefined,
-        deadline ? new Date(deadline) : undefined
-      );
+      onAdd(title, notes || undefined, deadline || undefined);
       setTitle("");
       setNotes("");
       setDeadline("");
@@ -56,6 +39,7 @@ export default function AddItemForm({ onAdd, onCancel }: AddItemFormProps) {
         className={styles.addItemTitle}
         placeholder="New item title"
         autoFocus
+        maxLength={200}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleAdd();
           if (e.key === "Escape") handleCancel();
@@ -67,6 +51,7 @@ export default function AddItemForm({ onAdd, onCancel }: AddItemFormProps) {
         className={styles.addItemNotes}
         placeholder="Add notes (optional)"
         rows={2}
+        maxLength={500}
       />
       <div className={styles.addItemDeadline}>
         <IoCalendarOutline size={18} />

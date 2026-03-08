@@ -9,11 +9,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/services/authService";
+import { login, loginWithGoogle } from "@/services/authService";
+import { ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import Link from "next/link";
 import LoginForm from "./LoginForm";
-import LoginLinks from "./LoginLinks";
-import styles from "@/styles/pages/login.module.css";
+import { GoogleLogin } from "@react-oauth/google";
+import styles from "./login.module.css";
 
 export default function LoginContainer() {
   const router = useRouter();
@@ -47,8 +49,19 @@ export default function LoginContainer() {
       await login({ email, password });
       router.push("/");
     } catch (err) {
-      console.error("Login error:", err);
-      setError("Login failed. Please try again.");
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setError("Invalid email or password.");
+        } else if (err.status === 403 && err.message.includes("verify your email")) {
+          setError("Please verify your email address. Check your inbox for the verification link.");
+        } else if (err.status === 403) {
+          setError("Your account has been locked. Please contact support.");
+        } else {
+          setError("Login failed. Please try again.");
+        }
+      } else {
+        setError("Login failed. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +86,31 @@ export default function LoginContainer() {
           onSubmit={handleSubmit}
         />
 
-        <LoginLinks />
+        <div className={styles.divider}>OR</div>
+
+        <div className={styles.googleButtonWrapper}>
+          <GoogleLogin
+            theme="filled_black"
+            size="large"
+            width="100%"
+            onSuccess={async (credentialResponse) => {
+              try {
+                await loginWithGoogle(credentialResponse.credential!);
+                router.push("/");
+              } catch {
+                setError("Google sign-in failed. Please try again.");
+              }
+            }}
+            onError={() => setError("Google sign-in failed. Please try again.")}
+          />
+        </div>
+
+        <div className={styles.linkText} style={{ marginTop: "20px" }}>
+          Don&apos;t have an account? <Link href="/signup">Create one</Link>
+        </div>
+        <div className={styles.linkText} style={{ marginTop: "24px" }}>
+          <Link href="/">Back to home</Link>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,615 @@
+/* ═══════════════════════════════════════════════
+   Digest Builder — Refined Editorial Layout
+   Warm, spacious, with deliberate visual rhythm
+   ═══════════════════════════════════════════════ */
+
+/* ─── Page Container ─── */
+.agentBuilderContainer {
+  width: 100%;
+}
+
+.agentBuilderContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.errorMessage {
+  background: var(--error-light);
+  border: 1px solid var(--error-border);
+  border-radius: var(--radius-xl);
+  padding: 18px 24px;
+  font-size: var(--fs-sm);
+  color: var(--error);
+  line-height: 1.5;
+}
+
+/* ─── Digest Header ─── */
+.digestHeader {
+  padding-bottom: var(--space-sm);
+  position: relative;
+}
+
+.digestTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-4xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  line-height: 1.1;
+}
+
+.digestSubtitle {
+  font-size: var(--fs-base);
+  color: var(--text-secondary);
+  font-weight: var(--fw-300);
+  letter-spacing: 0.005em;
+}
+
+/* ─── Shared Card Pattern ─── */
+.overviewCard,
+.settingsCard,
+.contentTypes,
+.deploymentPanel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base);
+}
+
+.overviewCard:hover,
+.settingsCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ─── Card Headers ─── */
+.overviewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border-light);
+  background: transparent;
+}
+
+.deploymentInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 28px 32px;
+  border-bottom: 1px solid var(--border-light);
+  background: transparent;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.cardSubtitle {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  font-weight: var(--fw-300);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+/* ─── Status Badge ─── */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all var(--transition-fast);
+}
+
+.statusActive {
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+}
+
+.statusInactive {
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* ─── Overview Content — 4-column stat grid ─── */
+.overviewContent {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+
+.overviewStat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 28px 32px;
+  min-width: 0;
+}
+
+.statLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.statTime {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  font-weight: var(--fw-300);
+}
+
+/* ─── Settings Card ─── */
+.settingsCard .cardTitle {
+  padding: 28px 32px 0;
+}
+
+.settingsCard .cardSubtitle {
+  padding: 0 32px 8px;
+}
+
+.settingSection {
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settingSection:last-child {
+  border-bottom: none;
+  padding-bottom: 28px;
+}
+
+.settingLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-700);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ─── Frequency & Time Buttons ─── */
+.frequencyOptions,
+.timeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.frequencyButton,
+.timeButton {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 11px 22px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform 80ms ease;
+  letter-spacing: 0.01em;
+}
+
+.frequencyButton:hover,
+.timeButton:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  box-shadow: var(--shadow-xs);
+}
+
+.frequencyButton:active,
+.timeButton:active {
+  transform: scale(0.97);
+}
+
+.frequencyButtonActive,
+.frequencyButtonActive:hover,
+.timeButtonActive,
+.timeButtonActive:hover {
+  color: var(--cream);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 2px 10px var(--accent-shadow);
+}
+
+.timeLabel {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+}
+
+.timeButtonActive .timeLabel {
+  color: var(--cream);
+}
+
+.timeValue {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  margin-top: 2px;
+}
+
+.timeButtonActive .timeValue {
+  color: var(--cream-dark);
+}
+
+/* ─── Content Types Grid ─── */
+.contentTypeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  padding: 28px 32px 32px;
+}
+
+.contentTypeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 22px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-base),
+    background var(--transition-base),
+    box-shadow var(--transition-base),
+    transform 100ms ease;
+  position: relative;
+}
+
+.contentTypeCard:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.contentTypeCardActive {
+  border-color: var(--accent);
+  background: var(--accent-lighter);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 2px 8px var(--accent-shadow);
+}
+
+.contentTypeCardActive:hover {
+  border-color: var(--accent-dark);
+  background: var(--accent-light);
+  box-shadow:
+    0 0 0 1px var(--accent-dark),
+    0 4px 12px var(--accent-shadow);
+}
+
+.contentTypeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.contentTypeLabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: -0.005em;
+}
+
+.contentTypeCardActive .contentTypeLabel {
+  color: var(--text-primary);
+}
+
+.contentTypeDescription {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-top: 0;
+  font-weight: var(--fw-300);
+}
+
+.contentTypeCardActive .contentTypeDescription {
+  color: var(--text-secondary);
+}
+
+/* Checkmark — refined circle toggle */
+.checkmark {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: transparent;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    color var(--transition-fast),
+    transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.contentTypeCardActive .checkmark {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--cream);
+  transform: scale(1.05);
+}
+
+/* ─── Deployment / Status Panel ─── */
+.deploymentPanel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.deploymentDate {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-weight: var(--fw-300);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.deploymentActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 32px 28px;
+}
+
+.deployButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--cream);
+  background: var(--accent);
+  border: none;
+  padding: 13px 28px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform 80ms ease;
+  letter-spacing: 0.01em;
+}
+
+.deployButton:hover {
+  background: var(--accent-dark);
+  box-shadow: 0 4px 14px var(--accent-shadow);
+}
+
+.deployButton:active {
+  transform: scale(0.97);
+}
+
+.deployButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.stopButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--error);
+  background: var(--error-light);
+  border: 1.5px solid var(--error-border);
+  padding: 12px 28px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform 80ms ease;
+}
+
+.stopButton:hover {
+  background: rgba(139, 99, 103, 0.12);
+  border-color: var(--error);
+  box-shadow: 0 2px 8px rgba(139, 99, 103, 0.15);
+}
+
+.stopButton:active {
+  transform: scale(0.97);
+}
+
+/* ─── Misc classes ─── */
+.description {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding: 0 32px 20px;
+  font-weight: var(--fw-300);
+}
+
+.includes {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.label {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+}
+
+.value {
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  font-weight: var(--fw-600);
+}
+
+.time {
+  font-family: var(--font-body);
+}
+
+.isActive {
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  .agentBuilderContent {
+    gap: var(--space-md);
+  }
+
+  .digestTitle {
+    font-size: var(--fs-3xl);
+  }
+
+  .overviewContent {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .overviewStat {
+    padding: 20px 22px;
+  }
+
+  .overviewHeader {
+    padding: 20px 24px;
+  }
+
+  .settingSection {
+    padding: 20px 24px;
+  }
+
+  .settingsCard .cardTitle {
+    padding: 24px 24px 0;
+  }
+
+  .settingsCard .cardSubtitle {
+    padding: 0 24px 6px;
+  }
+
+  .contentTypeGrid {
+    gap: 12px;
+    padding: 24px;
+  }
+
+  .deploymentInfo {
+    padding: 24px;
+  }
+
+  .deploymentActions {
+    padding: 16px 24px 24px;
+  }
+}
+
+@media (max-width: 500px) {
+
+  .digestTitle {
+    font-size: var(--fs-2xl);
+  }
+
+  .digestSubtitle {
+    font-size: var(--fs-sm);
+  }
+
+  .overviewContent {
+    grid-template-columns: 1fr;
+  }
+
+  .overviewStat {
+    padding: 18px 20px;
+  }
+
+  .contentTypeGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 20px;
+  }
+
+  .frequencyOptions,
+  .timeOptions {
+    gap: 8px;
+  }
+
+  .frequencyButton,
+  .timeButton {
+    padding: 10px 18px;
+    font-size: var(--fs-xs);
+  }
+
+  .settingSection {
+    padding: 18px 20px;
+  }
+
+  .settingsCard .cardTitle {
+    padding: 22px 20px 0;
+  }
+
+  .settingsCard .cardSubtitle {
+    padding: 0 20px 4px;
+  }
+
+  .deploymentInfo {
+    padding: 20px;
+  }
+
+  .deploymentActions {
+    padding: 14px 20px 22px;
+    flex-direction: column;
+  }
+
+  .deployButton,
+  .stopButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

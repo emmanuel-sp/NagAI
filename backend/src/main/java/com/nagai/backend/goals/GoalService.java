@@ -38,7 +38,9 @@ public class GoalService {
     public Goal updateGoal(GoalUpdateRequest goalUpdateRequest) {
         User currentUser = userService.getCurrentUser();
         Goal goal = goalRepository.findById(goalUpdateRequest.getGoalId()).orElseThrow(() -> new GoalNotFoundException());
-        goal.setUserId(currentUser.getUserId());
+        if (!currentUser.getUserId().equals(goal.getUserId())) {
+            throw new AccessDeniedException("You do not have permission to update this goal");
+        }
         goal.setTitle(goalUpdateRequest.getTitle());
         goal.setDescription(goalUpdateRequest.getDescription());
         goal.setTargetDate(goalUpdateRequest.getTargetDate());
@@ -65,12 +67,10 @@ public class GoalService {
     public void deleteGoal(Long goalId) {
         User user = userService.getCurrentUser();
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new GoalNotFoundException());
-        if (user.getUserId() == goal.getUserId()) {
+        if (user.getUserId().equals(goal.getUserId())) {
             goalRepository.delete(goal);
         } else {
-            System.out.println(user.getUserId());
-            System.out.println(goal.getGoalId());
-            throw new AccessDeniedException("Failed to delete Goal because user id of goal doesn't match!");
+            throw new AccessDeniedException("You do not have permission to delete this goal");
         }
     }
 

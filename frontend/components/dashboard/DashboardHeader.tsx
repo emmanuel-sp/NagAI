@@ -3,7 +3,7 @@
  */
 "use client";
 
-import styles from "@/styles/pages/dashboard.module.css";
+import styles from "./dashboard.module.css";
 
 interface DashboardHeaderProps {
   userName: string;
@@ -17,12 +17,18 @@ export default function DashboardHeader({ userName }: DashboardHeaderProps) {
     return "Good evening";
   };
 
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <div className={styles.header}>
+      <span className={styles.dateLine}>{today}</span>
       <h1 className={styles.greeting}>
         {getGreeting()}, {userName}
       </h1>
-      <p className={styles.subtitle}>Here's your progress overview</p>
     </div>
   );
 }

@@ -18,12 +18,16 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const currentUserProfile = await getCurrentUser();
-      setUserProfile(currentUserProfile);
+    // Skip the API call entirely if there's no token — show landing page immediately
+    const hasToken = !!localStorage.getItem("authToken");
+    if (!hasToken) {
       setLoading(false);
-    };
-    checkAuth();
+      return;
+    }
+    getCurrentUser().then((user) => {
+      setUserProfile(user);
+      setLoading(false);
+    });
   }, []);
 
   if (loading) {

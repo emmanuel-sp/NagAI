@@ -1,6 +1,6 @@
 import { Goal as GoalType } from "@/types/goal";
 import { Goal as GoalCard } from "./Goal";
-import styles from "@/styles/goals/goalsList.module.css";
+import styles from "./goalsList.module.css";
 
 interface GoalsListProps {
   goals: GoalType[];

@@ -8,10 +8,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { CreateContextRequest, MessageType, MessageFrequency } from "@/types/agent";
 import { Goal } from "@/types/goal";
-import { IoClose } from "react-icons/io5";
-import styles from "@/styles/agent/agent-builder-modal.module.css";
+import { IoClose } from "@/components/icons";
+import { useModal } from "@/contexts/ModalContext";
+import styles from "./agent-builder-modal.module.css";
 
 interface CreateContextModalProps {
   isOpen: boolean;
@@ -33,21 +35,24 @@ export default function CreateContextModal({
   const [customInstructions, setCustomInstructions] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Lock body scroll when modal is open
+  const { registerModal } = useModal();
+
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
+      registerModal(true);
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
+      registerModal(false);
     };
-  }, [isOpen]);
+  }, [isOpen, registerModal]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim() || !goalId) {
-      alert("Please provide a name and select a goal");
+    if (!name.trim()) {
+      alert("Please provide a name");
       return;
     }
 
@@ -55,7 +60,7 @@ export default function CreateContextModal({
     try {
       const contextData: CreateContextRequest = {
         name: name.trim(),
-        goalId,
+        goalId: goalId ? Number(goalId) : null,
         messageType,
         messageFrequency,
         customInstructions: customInstructions.trim() || undefined,
@@ -76,7 +81,7 @@ export default function CreateContextModal({
 
   if (!isOpen) return null;
 
-  return (
+  const modal = (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <form onSubmit={handleSubmit}>
@@ -105,23 +110,21 @@ export default function CreateContextModal({
               className={styles.formInput}
               placeholder="e.g., Morning Motivation, Weekly Check-in"
               required
+              maxLength={100}
             />
           </div>
 
           {/* Goal Selection */}
           <div className={styles.formSection}>
-            <label className={styles.formLabel}>
-              Goal <span className={styles.required}>*</span>
-            </label>
+            <label className={styles.formLabel}>Goal</label>
             <select
               value={goalId}
               onChange={(e) => setGoalId(e.target.value)}
               className={styles.formSelect}
-              required
             >
               <option value="">Select a goal...</option>
               {goals.map((goal) => (
-                <option key={goal.id} value={goal.id}>
+                <option key={goal.goalId} value={goal.goalId}>
                   {goal.title}
                 </option>
               ))}
@@ -197,6 +200,7 @@ export default function CreateContextModal({
               className={styles.formTextarea}
               placeholder="Add any specific instructions for how the agent should communicate about this goal..."
               rows={4}
+              maxLength={2000}
             />
           </div>
           </div>
@@ -222,4 +226,6 @@ export default function CreateContextModal({
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }

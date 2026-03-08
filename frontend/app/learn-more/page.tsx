@@ -5,7 +5,7 @@
  */
 
 import Link from "next/link";
-import styles from "@/styles/pages/learn-more.module.css";
+import styles from "./learn-more.module.css";
 import {
   IoFlagOutline,
   IoListOutline,
@@ -15,7 +15,7 @@ import {
   IoCheckmarkCircle,
   IoRocket,
   IoArrowBack
-} from "react-icons/io5";
+} from "@/components/icons";
 
 export const metadata = {
   title: "Learn More | NagAI",
@@ -52,6 +52,7 @@ export default function LearnMorePage() {
         <div className={styles.featuresGrid}>
           <div className={styles.featureSection}>
             <div className={styles.featureHeader}>
+              <IoFlagOutline size={22} className={styles.featureIcon} />
               <h3 className={styles.featureTitle}>Goal Tracking</h3>
             </div>
             <p className={styles.featureDescription}>
@@ -76,6 +77,7 @@ export default function LearnMorePage() {
 
           <div className={styles.featureSection}>
             <div className={styles.featureHeader}>
+              <IoListOutline size={22} className={styles.featureIcon} />
               <h3 className={styles.featureTitle}>Smart Checklists</h3>
             </div>
             <p className={styles.featureDescription}>
@@ -100,7 +102,7 @@ export default function LearnMorePage() {
 
           <div className={styles.featureSection}>
             <div className={styles.featureHeader}>
-
+              <IoDocumentText size={22} className={styles.featureIcon} />
               <h3 className={styles.featureTitle}>Personalized Digests</h3>
             </div>
             <p className={styles.featureDescription}>
@@ -129,6 +131,7 @@ export default function LearnMorePage() {
 
           <div className={styles.featureSection}>
             <div className={styles.featureHeader}>
+              <IoConstruct size={22} className={styles.featureIcon} />
               <h3 className={styles.featureTitle}>AI Agent Builder</h3>
             </div>
             <p className={styles.featureDescription}>

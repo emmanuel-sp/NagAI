@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChecklistItem as ChecklistItemType } from "@/types/checklist";
-import styles from "@/styles/checklists/checklist.module.css";
+import styles from "./checklist.module.css";
 import {
   IoCheckmarkCircle,
   IoEllipseOutline,
@@ -12,16 +12,16 @@ import {
   IoClose,
   IoCalendarOutline,
   IoDocumentTextOutline,
-} from "react-icons/io5";
+} from "@/components/icons";
 
 interface ChecklistItemProps {
   item: ChecklistItemType;
-  onToggle: (itemId: string) => void;
+  onToggle: (checklistId: number) => void;
   onUpdate: (
-    itemId: string,
-    updates: { title?: string; notes?: string; deadline?: Date }
+    checklistId: number,
+    updates: { title?: string; notes?: string; deadline?: string }
   ) => void;
-  onDelete: (itemId: string) => void;
+  onDelete: (checklistId: number) => void;
 }
 
 export default function ChecklistItem({
@@ -33,15 +33,13 @@ export default function ChecklistItem({
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(item.title);
   const [editNotes, setEditNotes] = useState(item.notes || "");
-  const [editDeadline, setEditDeadline] = useState(
-    item.deadline ? item.deadline.toISOString().split("T")[0] : ""
-  );
+  const [editDeadline, setEditDeadline] = useState(item.deadline || "");
 
   const handleSave = () => {
-    onUpdate(item.id, {
+    onUpdate(item.checklistId, {
       title: editTitle,
       notes: editNotes || undefined,
-      deadline: editDeadline ? new Date(editDeadline) : undefined,
+      deadline: editDeadline || undefined,
     });
     setIsEditing(false);
   };
@@ -49,9 +47,7 @@ export default function ChecklistItem({
   const handleCancel = () => {
     setEditTitle(item.title);
     setEditNotes(item.notes || "");
-    setEditDeadline(
-      item.deadline ? item.deadline.toISOString().split("T")[0] : ""
-    );
+    setEditDeadline(item.deadline || "");
     setIsEditing(false);
   };
 
@@ -60,8 +56,8 @@ export default function ChecklistItem({
     !item.completed &&
     new Date(item.deadline) < new Date();
 
-  const formatDeadline = (date: Date) => {
-    return date.toLocaleDateString([], {
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString([], {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -118,7 +114,7 @@ export default function ChecklistItem({
       } ${isOverdue ? styles.checklistItemOverdue : ""}`}
     >
       <button
-        onClick={() => onToggle(item.id)}
+        onClick={() => onToggle(item.checklistId)}
         className={styles.itemCheckbox}
         aria-label={item.completed ? "Mark as incomplete" : "Mark as complete"}
       >
@@ -144,13 +140,13 @@ export default function ChecklistItem({
             }`}
           >
             <IoCalendarOutline size={14} />
-            {formatDeadline(item.deadline)}
+            {formatDate(item.deadline)}
             {isOverdue && <span className={styles.overdueLabel}>Overdue</span>}
           </div>
         )}
         {item.completedAt && (
           <div className={styles.itemCompletedAt}>
-            Completed on {formatDeadline(item.completedAt)}
+            Completed on {formatDate(item.completedAt)}
           </div>
         )}
       </div>
@@ -164,7 +160,7 @@ export default function ChecklistItem({
           <IoPencil size={18} />
         </button>
         <button
-          onClick={() => onDelete(item.id)}
+          onClick={() => onDelete(item.checklistId)}
           className={`${styles.itemActionButton} ${styles.itemActionDelete}`}
           aria-label="Delete item"
         >

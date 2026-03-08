@@ -1,6 +1,6 @@
 /** SignupForm Component - Signup form with all required fields. Parent: SignupContainer */
 "use client";
-import styles from "@/styles/pages/login.module.css";
+import styles from "./login.module.css";
 
 interface SignupFormProps {
   formData: { name: string; email: string; password: string; confirmPassword: string };

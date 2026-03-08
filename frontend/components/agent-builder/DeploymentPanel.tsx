@@ -1,13 +1,12 @@
 /** DeploymentPanel Component - Deploy/Redeploy/Stop agent button and status. Parent: AgentBuilderContainer */
 "use client";
-import { IoRocket, IoRefresh, IoStop } from "react-icons/io5";
-import styles from "@/styles/agent/agent-builder.module.css";
+import { IoRocket, IoRefresh, IoStop } from "@/components/icons";
+import styles from "./agent-builder.module.css";
 
 interface DeploymentPanelProps {
   isDeployed: boolean;
   canDeploy: boolean;
   isDeploying: boolean;
-  deployedAt?: Date;
   onDeploy: () => void;
   onStop: () => void;
 }
@@ -16,7 +15,6 @@ export default function DeploymentPanel({
   isDeployed,
   canDeploy,
   isDeploying,
-  deployedAt,
   onDeploy,
   onStop,
 }: DeploymentPanelProps) {
@@ -31,12 +29,6 @@ export default function DeploymentPanel({
             ? "Your agent is live and will start communicating based on your contexts."
             : "Deploy your agent to activate communication. You must have at least one context."}
         </p>
-        {deployedAt && (
-          <p className={styles.deploymentDate}>
-            Deployed on {deployedAt.toLocaleDateString()} at{" "}
-            {deployedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </p>
-        )}
       </div>
 
       <div className={styles.deploymentActions}>

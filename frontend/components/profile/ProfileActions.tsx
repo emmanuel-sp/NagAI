@@ -1,6 +1,6 @@
 /** ProfileActions Component - Action buttons for profile (Edit, Save, Cancel, Logout). Parent: ProfileContainer */
 "use client";
-import styles from "@/styles/pages/profile.module.css";
+import styles from "./profile.module.css";
 
 interface ProfileActionsProps {
   isEditing: boolean;

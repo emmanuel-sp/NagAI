@@ -1,0 +1,224 @@
+.dashboardContainer {
+  width: 100%;
+}
+
+.dashboardContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
+/* ─── Header ─── */
+.header {
+  padding-bottom: var(--space-lg);
+}
+
+.dateLine {
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+  margin-bottom: 12px;
+}
+
+.greeting {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  line-height: 1.0;
+  animation: fadeInUp 0.4s ease both;
+}
+
+/* ─── Overview ─── */
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ─── Stats ─── */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.statBlock {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 28px 28px 24px;
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  cursor: default;
+  transition: background var(--transition-base), box-shadow var(--transition-base);
+}
+
+a.statBlock {
+  cursor: pointer;
+}
+
+a.statBlock:hover {
+  background: var(--surface-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.statNumber {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.statName {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ─── Progress ─── */
+.progressSection {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progressLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.progressValue {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+}
+
+.progressTrack {
+  height: 4px;
+  background: var(--surface);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Quick Links ─── */
+.quickLinks {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+}
+
+.quickLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  background: transparent;
+  text-decoration: none;
+  transition: background var(--transition-base);
+  gap: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.quickLink:last-child {
+  border-bottom: none;
+}
+
+.quickLink:hover {
+  background: var(--surface);
+}
+
+.quickLinkContent {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.quickLinkTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.quickLinkMeta {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: var(--fw-300);
+}
+
+.quickLinkArrow {
+  font-size: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.quickLink:hover .quickLinkArrow {
+  color: var(--text-primary);
+  transform: translateX(3px);
+}
+
+@media (max-width: 768px) {
+  .statsRow {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .statBlock {
+    padding: 20px 16px 18px;
+  }
+
+  .statNumber {
+    font-size: 36px;
+  }
+
+  .quickLink {
+    padding: 18px 20px;
+  }
+}

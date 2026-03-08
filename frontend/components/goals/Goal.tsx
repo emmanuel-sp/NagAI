@@ -1,4 +1,4 @@
-import styles from "@/styles/goals/goalCard.module.css";
+import styles from "./goalCard.module.css";
 import { Goal as GoalType } from "@/types/goal";
 
 interface GoalProps extends GoalType {

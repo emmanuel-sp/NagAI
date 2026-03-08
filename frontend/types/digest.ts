@@ -13,16 +13,16 @@ export type DigestContentType =
   | "progress_insights";
 
 export interface Digest {
-  id: string;
+  digestId: number;
   name: string;
   description: string;
   frequency: DigestFrequency;
   deliveryTime: DeliveryTime;
   contentTypes: DigestContentType[];
-  isActive: boolean;
-  createdAt: Date;
-  lastDeliveredAt?: Date;
-  nextDeliveryAt?: Date;
+  active: boolean;
+  createdAt: string;
+  lastDeliveredAt?: string;
+  nextDeliveryAt?: string;
 }
 
 export interface CreateDigestRequest {

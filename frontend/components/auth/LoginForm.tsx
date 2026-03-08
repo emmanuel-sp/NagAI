@@ -1,6 +1,6 @@
 /** LoginForm Component - Login form with email and password fields. Parent: LoginContainer */
 "use client";
-import styles from "@/styles/pages/login.module.css";
+import styles from "./login.module.css";
 
 interface LoginFormProps {
   email: string;

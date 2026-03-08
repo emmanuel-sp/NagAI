@@ -41,7 +41,6 @@ import { fetchGoals } from "@/services/goalService";
 import { fetchUserProfile } from "@/services/profileService";
 import { Goal } from "@/types/goal";
 import { UserProfile } from "@/types/user";
-import AgentBuilderHeader from "./AgentBuilderHeader";
 import AgentOverview from "./AgentOverview";
 import CommunicationSettings from "./CommunicationSettings";
 import ContextList from "./ContextList";
@@ -50,7 +49,7 @@ import DeploymentPanel from "./DeploymentPanel";
 import CreateContextModal from "./CreateContextModal";
 import EditContextModal from "./EditContextModal";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import styles from "@/styles/agent/agent-builder.module.css";
+import styles from "./agent-builder.module.css";
 
 export default function AgentBuilderContainer() {
   const { loading: authLoading } = useAuth({ requireAuth: true });
@@ -91,17 +90,9 @@ export default function AgentBuilderContainer() {
     if (!agent) return;
 
     try {
-      const newContext = await createContext(agent.id, contextData);
-      const goalName = goals.find((g) => g.goalId === contextData.goalId)?.title;
-
+      const newContext = await createContext(contextData);
       setAgent((prev) =>
-        prev
-          ? {
-              ...prev,
-              contexts: [...prev.contexts, { ...newContext, goalName }],
-              lastUpdatedAt: new Date(),
-            }
-          : prev
+        prev ? { ...prev, contexts: [...prev.contexts, newContext] } : prev
       );
       setIsCreateModalOpen(false);
     } catch (error) {
@@ -114,21 +105,18 @@ export default function AgentBuilderContainer() {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateContext = async (contextId: string, updates: CreateContextRequest) => {
+  const handleUpdateContext = async (contextId: number, updates: CreateContextRequest) => {
     if (!agent) return;
 
     try {
-      const updatedContext = await updateContext(agent.id, contextId, updates);
-      const goalName = goals.find((g) => g.goalId === updates.goalId)?.title;
-
+      const updatedContext = await updateContext(contextId, updates);
       setAgent((prev) =>
         prev
           ? {
               ...prev,
               contexts: prev.contexts.map((c) =>
-                c.id === contextId ? { ...updatedContext, goalName } : c
+                c.contextId === contextId ? updatedContext : c
               ),
-              lastUpdatedAt: new Date(),
             }
           : prev
       );
@@ -139,17 +127,16 @@ export default function AgentBuilderContainer() {
     }
   };
 
-  const handleDeleteContext = async (contextId: string) => {
+  const handleDeleteContext = async (contextId: number) => {
     if (!agent || !confirm("Are you sure you want to delete this context?")) return;
 
     try {
-      await deleteContext(agent.id, contextId);
+      await deleteContext(contextId);
       setAgent((prev) =>
         prev
           ? {
               ...prev,
-              contexts: prev.contexts.filter((c) => c.id !== contextId),
-              lastUpdatedAt: new Date(),
+              contexts: prev.contexts.filter((c) => c.contextId !== contextId),
             }
           : prev
       );
@@ -163,7 +150,7 @@ export default function AgentBuilderContainer() {
 
     setIsDeploying(true);
     try {
-      const deployedAgent = await deployAgent(agent.id);
+      const deployedAgent = await deployAgent();
       setAgent(deployedAgent);
     } catch (error) {
       console.error("Failed to deploy agent:", error);
@@ -177,7 +164,7 @@ export default function AgentBuilderContainer() {
 
     setIsDeploying(true);
     try {
-      const stoppedAgent = await stopAgent(agent.id);
+      const stoppedAgent = await stopAgent();
       setAgent(stoppedAgent);
     } catch (error) {
       console.error("Failed to stop agent:", error);
@@ -190,7 +177,7 @@ export default function AgentBuilderContainer() {
     if (!agent) return;
 
     try {
-      const updatedAgent = await updateAgentCommunication(agent.id, channel);
+      const updatedAgent = await updateAgentCommunication(channel);
       setAgent(updatedAgent);
     } catch (error) {
       console.error("Failed to update communication channel:", error);
@@ -213,16 +200,14 @@ export default function AgentBuilderContainer() {
     );
   }
 
-  const canDeploy = agent.contexts.length > 0 && !agent.isDeployed;
+  const canDeploy = agent.contexts.length > 0 && !agent.deployed;
 
   return (
     <div className={styles.agentBuilderContainer}>
       <div className={styles.agentBuilderContent}>
-        <AgentBuilderHeader />
-
         <AgentOverview agent={agent} />
 
-        
+
 
         {agent.contexts.length === 0 ? (
           <EmptyContextState
@@ -246,10 +231,9 @@ export default function AgentBuilderContainer() {
         />
 
         <DeploymentPanel
-          isDeployed={agent.isDeployed}
+          isDeployed={agent.deployed}
           canDeploy={canDeploy}
           isDeploying={isDeploying}
-          deployedAt={agent.deployedAt}
           onDeploy={handleDeploy}
           onStop={handleStop}
         />

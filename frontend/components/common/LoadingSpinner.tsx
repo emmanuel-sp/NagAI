@@ -1,4 +1,4 @@
-import styles from "@/styles/common/loadingSpinner.module.css";
+import styles from "./LoadingSpinner.module.css";
 
 interface LoadingSpinnerProps {
   message?: string;

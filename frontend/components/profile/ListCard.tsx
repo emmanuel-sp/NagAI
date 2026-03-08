@@ -6,8 +6,8 @@
 "use client";
 
 import { useState } from "react";
-import { IoClose } from "react-icons/io5";
-import styles from "@/styles/pages/profile.module.css";
+import { IoClose } from "@/components/icons";
+import styles from "./profile.module.css";
 
 interface ListCardProps {
   title: string;

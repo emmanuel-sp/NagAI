@@ -1,28 +1,3 @@
-/**
- * ProfileContainer Component
- *
- * Main container component for the Profile page that handles all business logic and state management.
- *
- * Component Hierarchy:
- * - ProfileContainer (this component)
- *   ├── ProfileHeader
- *   ├── ProfileContent
- *   │   ├── BasicInfoCard
- *   │   ├── ProfessionalCard
- *   │   ├── InterestsCard
- *   │   ├── HobbiesCard
- *   │   ├── HabitsCard
- *   │   └── SecurityCard
- *   └── ProfileActions
- *
- * Responsibilities:
- * - Fetch and manage user profile data
- * - Handle profile update operations
- * - Manage edit mode state
- * - Handle logout functionality
- * - Coordinate between child components
- */
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -34,11 +9,10 @@ import {
   updateUserProfile,
 } from "@/services/profileService";
 import { logout } from "@/services/authService";
-import ProfileHeader from "@/components/profile/ProfileHeader";
-import ProfileContent from "@/components/profile/ProfileContent";
-import ProfileActions from "@/components/profile/ProfileActions";
+import ListCard from "./ListCard";
+import ProfileActions from "./ProfileActions";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import styles from "@/styles/pages/profile.module.css";
+import styles from "./profile.module.css";
 
 export default function ProfileContainer() {
   const router = useRouter();
@@ -68,39 +42,21 @@ export default function ProfileContainer() {
     value: string
   ) => {
     setProfile((prev) =>
-      prev
-        ? {
-            ...prev,
-            [field]: value,
-          }
-        : prev
+      prev ? { ...prev, [field]: value } : prev
     );
   };
 
   const handleAddItem = (listField: "interests" | "hobbies" | "habits", item: string) => {
     if (item.trim()) {
       setProfile((prev) =>
-        prev
-          ? {
-              ...prev,
-              [listField]: [...(prev[listField] || []), item.trim()],
-            }
-          : prev
+        prev ? { ...prev, [listField]: [...(prev[listField] || []), item.trim()] } : prev
       );
     }
   };
 
-  const handleRemoveItem = (
-    listField: "interests" | "hobbies" | "habits",
-    index: number
-  ) => {
+  const handleRemoveItem = (listField: "interests" | "hobbies" | "habits", index: number) => {
     setProfile((prev) =>
-      prev
-        ? {
-            ...prev,
-            [listField]: prev?.[listField]?.filter((_, i) => i !== index) || [],
-          }
-        : prev
+      prev ? { ...prev, [listField]: prev?.[listField]?.filter((_, i) => i !== index) || [] } : prev
     );
   };
 
@@ -141,15 +97,86 @@ export default function ProfileContainer() {
 
   return (
     <div className={styles.profileContainer}>
-      <ProfileHeader saveMessage={saveMessage} />
+      {saveMessage && <div className={styles.successMessage}>{saveMessage}</div>}
 
-      <ProfileContent
-        profile={profile}
-        isEditing={isEditing}
-        onFieldChange={handleFieldChange}
-        onAddItem={handleAddItem}
-        onRemoveItem={handleRemoveItem}
-      />
+      <div className={styles.profileContent}>
+        {/* Basic Info */}
+        <div className={styles.profileCard}>
+          <h2 className={styles.cardTitle}>Basic Info</h2>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Name</label>
+            {isEditing ? (
+              <input className={styles.fieldInput} type="text" value={profile.fullName} onChange={(e) => handleFieldChange("fullName", e.target.value)} />
+            ) : (
+              <div className={styles.fieldValue}>{profile.fullName}</div>
+            )}
+          </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Email</label>
+            {isEditing ? (
+              <input className={styles.fieldInput} type="email" value={profile.email} onChange={(e) => handleFieldChange("email", e.target.value)} />
+            ) : (
+              <div className={styles.fieldValue}>{profile.email}</div>
+            )}
+          </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Phone Number</label>
+            {isEditing ? (
+              <input className={styles.fieldInput} type="tel" value={profile.phoneNumber || ""} onChange={(e) => handleFieldChange("phoneNumber", e.target.value)} placeholder="e.g., +1 (555) 123-4567" />
+            ) : (
+              <div className={styles.fieldValue}>{profile.phoneNumber || "Not provided"}</div>
+            )}
+          </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Location</label>
+            {isEditing ? (
+              <input className={styles.fieldInput} type="text" value={profile.userLocation || ""} onChange={(e) => handleFieldChange("userLocation", e.target.value)} />
+            ) : (
+              <div className={styles.fieldValue}>{profile.userLocation || "Not provided"}</div>
+            )}
+          </div>
+        </div>
+
+        {/* Professional */}
+        <div className={styles.profileCard}>
+          <h2 className={styles.cardTitle}>Professional</h2>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Career</label>
+            {isEditing ? (
+              <input className={styles.fieldInput} type="text" value={profile.career || ""} onChange={(e) => handleFieldChange("career", e.target.value)} />
+            ) : (
+              <div className={styles.fieldValue}>{profile.career || "-"}</div>
+            )}
+          </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Bio</label>
+            {isEditing ? (
+              <textarea className={styles.fieldTextarea} value={profile.bio || ""} onChange={(e) => handleFieldChange("bio", e.target.value)} />
+            ) : (
+              <div className={styles.fieldValue} style={{ minHeight: "60px", alignItems: "flex-start", padding: "12px" }}>{profile.bio || "-"}</div>
+            )}
+          </div>
+        </div>
+
+        {/* List cards */}
+        <ListCard title="Interests" subtitle="Things you care about" items={profile.interests || []} isEditing={isEditing} placeholder="Add an interest..." onAdd={(item) => handleAddItem("interests", item)} onRemove={(index) => handleRemoveItem("interests", index)} />
+        <ListCard title="Hobbies" subtitle="What you love to do" items={profile.hobbies || []} isEditing={isEditing} placeholder="Add a hobby..." onAdd={(item) => handleAddItem("hobbies", item)} onRemove={(index) => handleRemoveItem("hobbies", index)} />
+        <ListCard title="Habits" subtitle="Your daily routines" items={profile.habits || []} isEditing={isEditing} placeholder="Add a habit..." onAdd={(item) => handleAddItem("habits", item)} onRemove={(index) => handleRemoveItem("habits", index)} />
+
+        {/* Security */}
+        <div className={styles.profileCard}>
+          <h2 className={styles.cardTitle}>Security</h2>
+          <p className={styles.cardSubtitle}>Password changes require additional verification</p>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Password</label>
+            {isEditing ? (
+              <input className={styles.fieldInput} type="password" placeholder="Leave blank to keep current" />
+            ) : (
+              <div className={styles.fieldValue}>••••••••</div>
+            )}
+          </div>
+        </div>
+      </div>
 
       <ProfileActions
         isEditing={isEditing}

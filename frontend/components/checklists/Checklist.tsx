@@ -1,46 +1,19 @@
-/**
- * Checklist Component
- *
- * Individual checklist component that displays checklist items and manages add/edit state.
- *
- * Parent: ChecklistsList
- * Children:
- * - ChecklistHeader
- * - ChecklistItem (for each item)
- * - ChecklistActions
- * - AddItemForm (when adding new item)
- *
- * Props:
- * - checklist: Checklist data object
- * - onAddItem: Callback to add a new item
- * - onToggleItem: Callback to toggle item completion
- * - onUpdateItem: Callback to update an item
- * - onDeleteItem: Callback to delete an item
- * - onGenerateItem: Callback to generate single item with AI
- * - onGenerateFullChecklist: Callback to generate full checklist with AI
- * - isGenerating: Whether AI is currently generating items
- */
-
 "use client";
 
 import { useState } from "react";
 import { Checklist as ChecklistType } from "@/types/checklist";
-import ChecklistHeader from "./ChecklistHeader";
 import ChecklistItem from "./ChecklistItem";
-import ChecklistActions from "./ChecklistActions";
 import AddItemForm from "./AddItemForm";
-import styles from "@/styles/checklists/checklist.module.css";
+import { IoAdd, IoSparkles } from "@/components/icons";
+import styles from "./checklist.module.css";
 
 interface ChecklistProps {
   checklist: ChecklistType;
   filter: "all" | "active" | "completed";
-  onAddItem: (title: string, notes?: string, deadline?: Date) => void;
-  onToggleItem: (itemId: string) => void;
-  onUpdateItem: (
-    itemId: string,
-    updates: { title?: string; notes?: string; deadline?: Date }
-  ) => void;
-  onDeleteItem: (itemId: string) => void;
+  onAddItem: (title: string, notes?: string, deadline?: string) => void;
+  onToggleItem: (checklistId: number) => void;
+  onUpdateItem: (checklistId: number, updates: { title?: string; notes?: string; deadline?: string }) => void;
+  onDeleteItem: (checklistId: number) => void;
   onGenerateItem?: () => void;
   onGenerateFullChecklist?: () => void;
   isGenerating?: boolean;
@@ -60,54 +33,46 @@ export default function Checklist({
   const [isAdding, setIsAdding] = useState(false);
 
   const sortedItems = [...checklist.items].sort((a, b) => {
-    if (a.completed != b.completed) {
-      return a.completed ? 1 : -1;
-    }
-    return a.order - b.order
+    if (a.completed != b.completed) return a.completed ? 1 : -1;
+    return a.sortOrder - b.sortOrder;
   });
   const completedCount = checklist.items.filter((item) => item.completed).length;
   const totalCount = checklist.items.length;
-
-  // Determine if actions should be shown based on filter
+  const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
   const shouldShowActions = filter !== "completed";
 
-  // Get appropriate empty state message based on filter
   const getEmptyStateMessage = () => {
-    if (filter === "completed") {
-      return "No completed items yet.";
-    }
-    if (filter === "active") {
-      return "No active items. Generate a checklist with AI or add your first item!";
-    }
+    if (filter === "completed") return "No completed items yet.";
+    if (filter === "active") return "No active items. Generate a checklist with AI or add your first item!";
     return "No checklist items yet. Generate a checklist with AI or add your first item!";
   };
 
-  const handleAdd = (title: string, notes?: string, deadline?: Date) => {
+  const handleAdd = (title: string, notes?: string, deadline?: string) => {
     onAddItem(title, notes, deadline);
-    setIsAdding(false);
-  };
-
-  const handleCancel = () => {
     setIsAdding(false);
   };
 
   return (
     <div className={styles.checklist}>
-      <ChecklistHeader
-        goalTitle={checklist.goalTitle || "Untitled Goal"}
-        completedCount={completedCount}
-        totalCount={totalCount}
-      />
+      {/* Header with progress */}
+      <div className={styles.checklistHeader}>
+        <div className={styles.checklistHeaderInfo}>
+          <h2 className={styles.checklistGoalTitle}>{checklist.goalTitle || "Untitled Goal"}</h2>
+          <div className={styles.checklistProgress}>
+            <div className={styles.progressBar}>
+              <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
+            </div>
+            <span className={styles.progressText}>
+              {completedCount} of {totalCount} completed
+            </span>
+          </div>
+        </div>
+      </div>
 
+      {/* Items */}
       <div className={styles.checklistItems}>
         {sortedItems.map((item) => (
-          <ChecklistItem
-            key={item.id}
-            item={item}
-            onToggle={onToggleItem}
-            onUpdate={onUpdateItem}
-            onDelete={onDeleteItem}
-          />
+          <ChecklistItem key={item.checklistId} item={item} onToggle={onToggleItem} onUpdate={onUpdateItem} onDelete={onDeleteItem} />
         ))}
 
         {sortedItems.length === 0 && !isAdding && !isGenerating && (
@@ -124,16 +89,35 @@ export default function Checklist({
         )}
       </div>
 
+      {/* Actions */}
       {shouldShowActions && !isAdding && !isGenerating ? (
-        <ChecklistActions
-          hasItems={sortedItems.length > 0}
-          isGenerating={isGenerating}
-          onAddItem={() => setIsAdding(true)}
-          onGenerateItem={onGenerateItem || (() => {})}
-          onGenerateFullChecklist={onGenerateFullChecklist || (() => {})}
-        />
+        <div className={styles.actionButtons}>
+          {sortedItems.length === 0 ? (
+            <>
+              <button onClick={onGenerateFullChecklist || (() => {})} className={styles.generateFullButton} disabled={isGenerating}>
+                <IoSparkles size={20} />
+                Generate Checklist with AI
+              </button>
+              <button onClick={() => setIsAdding(true)} className={styles.addItemButtonSecondary}>
+                <IoAdd size={20} />
+                Add Item Manually
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => setIsAdding(true)} className={styles.addItemButton}>
+                <IoAdd size={20} />
+                Add Item
+              </button>
+              <button onClick={onGenerateItem || (() => {})} className={styles.generateItemButton} disabled={isGenerating}>
+                <IoSparkles size={18} />
+                AI Suggest
+              </button>
+            </>
+          )}
+        </div>
       ) : shouldShowActions && isAdding ? (
-        <AddItemForm onAdd={handleAdd} onCancel={handleCancel} />
+        <AddItemForm onAdd={handleAdd} onCancel={() => setIsAdding(false)} />
       ) : null}
     </div>
   );

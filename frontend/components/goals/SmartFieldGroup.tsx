@@ -1,7 +1,7 @@
 "use client";
 
-import { IoSparkles } from "react-icons/io5";
-import styles from "@/styles/goals/goalModals.module.css";
+import { IoSparkles } from "@/components/icons";
+import styles from "./goalModals.module.css";
 import { SmartField } from "@/hooks/useSmartGoalForm";
 
 const SMART_PLACEHOLDERS: Record<SmartField, string> = {
@@ -56,7 +56,13 @@ export default function SmartFieldGroup({
           onChange={(e) => onChange(e.target.value)}
           placeholder={SMART_PLACEHOLDERS[field]}
           rows={2}
+          maxLength={1000}
         />
+        {value.length > 800 && (
+          <span className={value.length >= 1000 ? styles.charCountWarning : styles.charCount}>
+            {value.length}/1000
+          </span>
+        )}
         {suggestion && (
           <div className={styles.suggestionBox}>
             <p className={styles.suggestionText}>{suggestion}</p>

@@ -1,8 +1,8 @@
 /** CommunicationSettings Component - Communication channel selection (email/phone). Parent: AgentBuilderContainer */
 "use client";
 import { CommunicationChannel } from "@/types/agent";
-import { IoMail, IoCall } from "react-icons/io5";
-import styles from "@/styles/agent/agent-builder.module.css";
+import { IoMail, IoCall } from "@/components/icons";
+import styles from "./agent-builder.module.css";
 
 interface CommunicationSettingsProps {
   currentChannel: CommunicationChannel;

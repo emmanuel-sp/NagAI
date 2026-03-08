@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, ReactNode } from "react";
-import { IoCheckmarkCircle, IoClose } from "react-icons/io5";
-import styles from "@/styles/common/toast.module.css";
+import { IoCheckmarkCircle, IoClose } from "@/components/icons";
+import styles from "./Toast.module.css";
 
 interface ToastProps {
   message: ReactNode;

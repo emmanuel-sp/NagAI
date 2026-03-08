@@ -1,0 +1,108 @@
+/* ─── Goal Card ─── */
+.goalCard {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.3s ease both;
+  cursor: pointer;
+}
+
+.goalCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ─── Header ─── */
+.goalHeader {
+  margin-bottom: 10px;
+}
+
+.goalTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+
+/* ─── Description ─── */
+.goalDescription {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 0;
+  flex: 1;
+  font-weight: var(--fw-300);
+}
+
+/* ─── Meta ─── */
+.goalMeta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 0 14px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.metaLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-700);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+.metaValue {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+}
+
+/* ─── Actions ─── */
+.goalActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.viewButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.viewButton:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}

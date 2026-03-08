@@ -2,14 +2,14 @@
 "use client";
 import { AgentContext } from "@/types/agent";
 import ContextCard from "./ContextCard";
-import { IoAdd } from "react-icons/io5";
-import styles from "@/styles/agent/agent-builder.module.css";
+import { IoAdd } from "@/components/icons";
+import styles from "./agent-builder.module.css";
 
 interface ContextListProps {
   contexts: AgentContext[];
   canEdit: boolean;
   onEdit: (context: AgentContext) => void;
-  onDelete: (contextId: string) => void;
+  onDelete: (contextId: number) => void;
   onCreate: () => void;
 }
 
@@ -41,11 +41,11 @@ export default function ContextList({
       <div className={styles.contextsList}>
         {contexts.map((context) => (
           <ContextCard
-            key={context.id}
+            key={context.contextId}
             context={context}
             canEdit={canEdit}
             onEdit={() => onEdit(context)}
-            onDelete={() => onDelete(context.id)}
+            onDelete={() => onDelete(context.contextId)}
           />
         ))}
       </div>

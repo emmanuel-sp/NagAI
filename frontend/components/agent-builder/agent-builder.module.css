@@ -1,0 +1,651 @@
+/* ─── Page Container ─── */
+.agentBuilderContainer {
+  width: 100%;
+}
+
+.agentBuilderContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.errorMessage {
+  background: var(--error-light);
+  border: 1px solid var(--error-border);
+  border-radius: var(--radius-xl);
+  padding: 18px 24px;
+  font-size: var(--fs-sm);
+  color: var(--error);
+  line-height: 1.5;
+}
+
+/* ─── Agent Header ─── */
+.agentHeader {
+  padding-bottom: var(--space-lg);
+  position: relative;
+}
+
+.agentTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-4xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  line-height: 1.1;
+}
+
+.agentSubtitle {
+  font-size: var(--fs-base);
+  color: var(--text-secondary);
+  font-weight: var(--fw-300);
+  letter-spacing: 0.005em;
+}
+
+/* ─── Shared Card Pattern ─── */
+.overviewCard,
+.settingsCard,
+.contextsSection,
+.deploymentPanel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base);
+}
+
+.overviewCard:hover,
+.settingsCard:hover,
+.contextsSection:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.overviewHeader,
+.contextsSectionHeader,
+.deploymentInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border-light);
+  background: transparent;
+  gap: 12px;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.cardSubtitle {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  font-weight: var(--fw-300);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+/* ─── Status Badge ─── */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.statusDeployed {
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.statusDraft {
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* ─── Overview Content ─── */
+.overviewContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0;
+}
+
+.overviewStat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 28px 32px;
+  min-width: 0;
+}
+
+.overviewStat:last-child {
+  border-right: none;
+}
+
+.statLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+/* ─── Context Section ─── */
+.addContextButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  white-space: nowrap;
+}
+
+.addContextButton:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-xs);
+}
+
+.infoMessage {
+  margin: 20px 32px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.contextsList {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px;
+  gap: 12px;
+}
+
+/* ─── Context Card ─── */
+.contextCard {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.contextCard:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.contextHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  gap: 12px;
+}
+
+.contextTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.contextName {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.messageTypeBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-700);
+  color: var(--text-muted);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.contextActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.iconButton:hover {
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+.iconButtonDanger:hover {
+  color: var(--error);
+  background: var(--error-light);
+  border-color: var(--error-border);
+}
+
+.contextBody {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-top: 1px solid var(--border);
+}
+
+.contextDetail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-right: 1px solid var(--border);
+}
+
+.contextDetail:last-child {
+  border-right: none;
+}
+
+.detailIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.detailLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.detailValue {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+}
+
+.goalName {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  font-weight: var(--fw-400);
+  padding: 6px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.messageFrequency {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+  padding: 6px 16px;
+  border-top: 1px solid var(--border);
+  font-weight: var(--fw-300);
+}
+
+.customInstructions {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  font-style: italic;
+  font-weight: var(--fw-300);
+}
+
+.instructionsText {
+  font-style: italic;
+}
+
+/* ─── Empty Context State ─── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 56px 32px;
+  gap: 16px;
+}
+
+.emptyStateIcon {
+  color: var(--text-light);
+  margin-bottom: 8px;
+  animation: float 4s ease-in-out infinite;
+}
+
+.emptyStateTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.emptyStateText {
+  font-size: var(--fs-base);
+  color: var(--text-secondary);
+  max-width: 420px;
+  line-height: 1.6;
+  font-weight: var(--fw-300);
+}
+
+/* ─── Communication Settings ─── */
+.settingsCard .cardTitle {
+  padding: 28px 32px 0;
+}
+
+.settingsCard .cardSubtitle {
+  padding: 0 32px 8px;
+}
+
+.channelOptions {
+  display: flex;
+  gap: 12px;
+  padding: 24px 32px;
+  flex-wrap: wrap;
+}
+
+.channelButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 11px 22px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.channelButton:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  box-shadow: var(--shadow-xs);
+}
+
+.channelButtonActive {
+  color: var(--cream);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 2px 10px var(--accent-shadow);
+}
+
+.checkmark {
+  font-size: 12px;
+  font-weight: 700;
+  color: inherit;
+}
+
+/* ─── Deployment Panel ─── */
+.deploymentPanel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.deploymentDate {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-weight: var(--fw-300);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.deploymentInfo {
+  padding: 28px 32px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.deploymentButtons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 32px 28px;
+  flex-wrap: wrap;
+}
+
+.deploymentActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.deployButton,
+.redeployButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--cream);
+  background: var(--accent);
+  border: none;
+  padding: 13px 28px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), transform 80ms ease;
+}
+
+.deployButton:hover,
+.redeployButton:hover {
+  background: var(--accent-dark);
+  box-shadow: 0 4px 14px var(--accent-shadow);
+}
+
+.deployButton:active,
+.redeployButton:active {
+  transform: scale(0.97);
+}
+
+.deployButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.stopButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--error);
+  background: var(--error-light);
+  border: 1.5px solid var(--error-border);
+  padding: 12px 28px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform 80ms ease;
+}
+
+.stopButton:hover {
+  background: rgba(139, 99, 103, 0.12);
+  border-color: var(--error);
+  box-shadow: 0 2px 8px rgba(139, 99, 103, 0.15);
+}
+
+.stopButton:active {
+  transform: scale(0.97);
+}
+
+.stopButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.deploySpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 248, 231, 0.3);
+  border-top-color: var(--cream);
+  border-radius: var(--radius-full);
+  animation: spin 0.7s linear infinite;
+}
+
+.warningText {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  padding: 0 20px 14px;
+  line-height: 1.5;
+  font-weight: var(--fw-300);
+}
+
+.saveButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: none;
+  padding: 7px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.saveButton:hover {
+  background: var(--accent-dark);
+}
+
+@media (max-width: 768px) {
+
+  .agentBuilderContent {
+    gap: var(--space-md);
+  }
+
+  .agentTitle {
+    font-size: var(--fs-3xl);
+  }
+
+  .overviewContent {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .overviewStat {
+    padding: 22px 24px;
+  }
+
+  .overviewHeader,
+  .contextsSectionHeader,
+  .deploymentInfo {
+    padding: 20px 24px;
+  }
+
+  .contextsList {
+    padding: 16px 20px;
+  }
+
+  .channelOptions {
+    padding: 20px 24px;
+  }
+
+  .deploymentInfo {
+    padding: 24px;
+  }
+
+  .deploymentButtons {
+    padding: 16px 24px 24px;
+  }
+}
+
+@media (max-width: 500px) {
+
+  .agentTitle {
+    font-size: var(--fs-2xl);
+  }
+
+  .overviewContent {
+    grid-template-columns: 1fr;
+  }
+
+  .overviewStat {
+    padding: 18px 20px;
+  }
+
+  .settingsCard .cardTitle {
+    padding: 24px 24px 0;
+  }
+
+  .settingsCard .cardSubtitle {
+    padding: 0 24px 6px;
+  }
+
+  .channelOptions {
+    padding: 18px 20px;
+  }
+
+  .deploymentInfo {
+    padding: 20px;
+  }
+
+  .deploymentButtons {
+    padding: 14px 20px 22px;
+    flex-direction: column;
+  }
+
+  .deployButton,
+  .redeployButton,
+  .stopButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

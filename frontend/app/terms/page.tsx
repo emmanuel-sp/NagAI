@@ -1,4 +1,4 @@
-import styles from "@/styles/pages/legal.module.css";
+import styles from "@/components/legal/legal.module.css";
 
 export const metadata = {
   title: "Terms of Service | NagAI",

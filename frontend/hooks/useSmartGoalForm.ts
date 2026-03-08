@@ -31,6 +31,7 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
   const [fields, setFields] = useState<SmartGoalFields>({ ...emptyFields, ...initialValues });
   const [loadingSuggestion, setLoadingSuggestion] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, string>>({});
+  const [suggestionError, setSuggestionError] = useState<string | null>(null);
 
   const setField = (field: keyof SmartGoalFields, value: string) => {
     setFields((prev) => ({ ...prev, [field]: value }));
@@ -39,6 +40,7 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
   const resetFields = (values?: Partial<SmartGoalFields>) => {
     setFields({ ...emptyFields, ...values });
     setSuggestions({});
+    setSuggestionError(null);
   };
 
   const generateSuggestion = async (field: SmartField) => {
@@ -47,12 +49,14 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
       return;
     }
 
+    setSuggestionError(null);
     setLoadingSuggestion(field);
     try {
       const suggestion = await generateSmartGoalSuggestion(field, fields.title, fields.description);
       setSuggestions((prev) => ({ ...prev, [field]: suggestion }));
     } catch (error) {
       console.error("Failed to generate suggestion:", error);
+      setSuggestionError("AI suggestion unavailable. Please try again.");
     } finally {
       setLoadingSuggestion(null);
     }
@@ -76,6 +80,7 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
     resetFields,
     loadingSuggestion,
     suggestions,
+    suggestionError,
     generateSuggestion,
     useSuggestion,
   };

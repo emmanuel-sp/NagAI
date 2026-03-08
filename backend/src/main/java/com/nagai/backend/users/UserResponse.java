@@ -13,7 +13,6 @@ public class UserResponse {
         this.createdAt = user.getCreatedAt();
         this.phoneNumber = user.getPhoneNumber();
         this.userLocation = user.getUserLocation();
-        this.password = user.getPassword();
         this.career = user.getCareer();
         this.bio = user.getBio();
         this.interests = user.getInterests();
@@ -32,8 +31,6 @@ public class UserResponse {
     private String phoneNumber;
 
     private String userLocation;
-
-    private String password;
 
     private String career;
 
