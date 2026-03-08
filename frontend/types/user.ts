@@ -11,6 +11,8 @@ export interface User {
   interests?: string[];
   hobbies?: string[];
   habits?: string[];
+  age?: number;
+  lifeContext?: string;
   createdAt?: string;
 }
 

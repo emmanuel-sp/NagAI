@@ -51,8 +51,19 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
 
     setSuggestionError(null);
     setLoadingSuggestion(field);
+
+    const smartFieldKeys: SmartField[] = ["specific", "measurable", "attainable", "relevant", "timely"];
+    const existingFields = Object.fromEntries(
+      smartFieldKeys
+        .filter((f) => f !== field && fields[f].trim())
+        .map((f) => [f, fields[f]])
+    ) as Partial<Record<SmartField, string>>;
+
     try {
-      const suggestion = await generateSmartGoalSuggestion(field, fields.title, fields.description);
+      const suggestion = await generateSmartGoalSuggestion(
+        field, fields.title, fields.description,
+        Object.keys(existingFields).length > 0 ? existingFields : undefined
+      );
       setSuggestions((prev) => ({ ...prev, [field]: suggestion }));
     } catch (error) {
       console.error("Failed to generate suggestion:", error);

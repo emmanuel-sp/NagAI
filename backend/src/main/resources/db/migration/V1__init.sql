@@ -14,22 +14,24 @@ CREATE TABLE users (
     bio VARCHAR(255),
     interests TEXT[],
     hobbies TEXT[],
-    habits TEXT[]
+    habits TEXT[],
+    age INTEGER,
+    life_context TEXT
 );
 
 CREATE TABLE goals (
     goal_id SERIAL PRIMARY KEY,
     user_id INTEGER,
     title VARCHAR(255) NOT NULL,
-    description VARCHAR(255),
+    description TEXT,
     target_date VARCHAR(64),
-    specific VARCHAR(255),
-    measurable VARCHAR(255),
-    attainable VARCHAR(255),
-    relevant VARCHAR(255),
-    timely VARCHAR(255),
+    specific TEXT,
+    measurable TEXT,
+    attainable TEXT,
+    relevant TEXT,
+    timely TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
 );
 
@@ -38,7 +40,7 @@ CREATE TABLE checklist_items (
     goal_id INTEGER,
     sort_order INT NOT NULL,
     title VARCHAR(255) NOT NULL,
-    notes VARCHAR(255),
+    notes TEXT,
     deadline VARCHAR(30),
     completed BOOLEAN NOT NULL DEFAULT FALSE,
     completed_at VARCHAR(30),
@@ -80,6 +82,7 @@ CREATE TABLE agent_contexts (
     message_type VARCHAR(30) NOT NULL,
     message_frequency VARCHAR(30) NOT NULL,
     custom_instructions TEXT,
+    last_message_sent_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (agent_id) REFERENCES agents (agent_id) ON DELETE CASCADE,

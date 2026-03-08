@@ -41,7 +41,7 @@ class AiGrpcClientServiceTest {
                 SmartFieldResponse.newBuilder().setSuggestion("Track 3 workouts per week").build());
 
         String result = service.suggestSmartField("measurable", "Get fit", "Exercise regularly",
-                Map.of("specific", "Go to the gym 4x per week"));
+                Map.of("specific", "Go to the gym 4x per week"), "");
 
         assertThat(result).isEqualTo("Track 3 workouts per week");
     }
@@ -56,7 +56,9 @@ class AiGrpcClientServiceTest {
                         .build());
 
         ChecklistItemResponse result = service.generateChecklistItem(
-                "Get fit", "Exercise regularly", List.of("Buy running shoes"));
+                "Get fit", "Exercise regularly",
+                List.of("Buy running shoes"), List.of("Research gyms"),
+                "Specific: Go to gym 4x/week", "");
 
         assertThat(result.getTitle()).isEqualTo("Sign up for gym");
         assertThat(result.getDeadline()).isEqualTo("2026-04-01");
@@ -69,7 +71,8 @@ class AiGrpcClientServiceTest {
                         .addItems(ChecklistItem.newBuilder().setTitle("Start jogging").build())
                         .build());
 
-        FullChecklistResponse result = service.generateFullChecklist("Get fit", "Exercise");
+        FullChecklistResponse result = service.generateFullChecklist(
+                "Get fit", "Exercise", List.of("Research gyms"), "", "");
 
         assertThat(result.getItemsList()).hasSize(1);
         assertThat(result.getItems(0).getTitle()).isEqualTo("Start jogging");
@@ -81,7 +84,7 @@ class AiGrpcClientServiceTest {
                 .thenThrow(new StatusRuntimeException(
                         Status.UNAVAILABLE.withDescription("Connection refused")));
 
-        assertThatThrownBy(() -> service.suggestSmartField("specific", "Get fit", "Exercise", Map.of()))
+        assertThatThrownBy(() -> service.suggestSmartField("specific", "Get fit", "Exercise", Map.of(), ""))
                 .isInstanceOf(AiServiceException.class)
                 .hasMessageContaining("Connection refused");
     }

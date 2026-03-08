@@ -152,10 +152,7 @@ export default function ChecklistsContainer() {
     setGeneratingGoalId(goalId);
     try {
       const checklist = checklists.find((c) => c.goalId === goalId);
-      const suggestion = await generateChecklistItem(
-        goalId,
-        checklist?.items || []
-      );
+      const suggestion = await generateChecklistItem(goalId);
       const newItem = await createChecklistItem({
         goalId,
         title: suggestion.title,

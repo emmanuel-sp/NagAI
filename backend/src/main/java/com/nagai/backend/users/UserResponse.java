@@ -18,6 +18,8 @@ public class UserResponse {
         this.interests = user.getInterests();
         this.hobbies = user.getHobbies();
         this.habits = user.getHabits();
+        this.age = user.getAge();
+        this.lifeContext = user.getLifeContext();
     }
 
     private Long id;
@@ -41,4 +43,6 @@ public class UserResponse {
     private String[] hobbies;
 
     private String[] habits;
+    private Integer age;
+    private String lifeContext;
 }

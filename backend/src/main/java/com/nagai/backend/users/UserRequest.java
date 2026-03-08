@@ -12,4 +12,6 @@ public class UserRequest {
     private String[] interests;
     private String[] hobbies;
     private String[] habits;
+    private Integer age;
+    private String lifeContext;
 }

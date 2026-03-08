@@ -57,6 +57,8 @@ public class UserService {
         currentUser.setInterests(request.getInterests());
         currentUser.setHobbies(request.getHobbies());
         currentUser.setHabits(request.getHabits());
+        currentUser.setAge(request.getAge());
+        currentUser.setLifeContext(request.getLifeContext());
         return userRepository.save(currentUser);
     }
 

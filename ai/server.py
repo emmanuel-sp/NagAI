@@ -20,7 +20,9 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
     def SuggestSmartField(self, request, context):
         try:
             suggestion = ai_handlers.suggest_smart_field(
-                request.field, request.goal_title, request.goal_description
+                request.field, request.goal_title, request.goal_description,
+                dict(request.existing_fields),
+                request.user_profile,
             )
             return ai_service_pb2.SmartFieldResponse(suggestion=suggestion)
         except Exception as e:
@@ -35,6 +37,9 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
                 request.goal_title,
                 request.goal_description,
                 list(request.existing_items),
+                request.user_profile,
+                list(request.completed_items),
+                request.goal_smart_context,
             )
             return ai_service_pb2.ChecklistItemResponse(
                 title=item["title"],
@@ -50,7 +55,11 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
     def GenerateFullChecklist(self, request, context):
         try:
             items = ai_handlers.generate_full_checklist(
-                request.goal_title, request.goal_description
+                request.goal_title,
+                request.goal_description,
+                request.user_profile,
+                list(request.completed_items),
+                request.goal_smart_context,
             )
             pb_items = [
                 ai_service_pb2.ChecklistItem(

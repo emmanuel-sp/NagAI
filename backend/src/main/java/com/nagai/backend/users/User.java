@@ -64,6 +64,11 @@ public class User implements UserDetails{
 
     private String[] habits;
 
+    private Integer age;
+
+    @Column(name = "life_context", columnDefinition = "TEXT")
+    private String lifeContext;
+
     @Override
     public String getUsername() {
         return email;

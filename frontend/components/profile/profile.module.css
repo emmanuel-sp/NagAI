@@ -334,3 +334,52 @@
     justify-content: center;
   }
 }
+
+/* ─── AI Context Completeness ─── */
+.aiContextBar {
+  height: 6px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.aiContextFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.aiContextLabel {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  font-weight: var(--fw-500);
+  margin-bottom: 10px;
+}
+
+.aiContextFields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.aiContextFieldFilled {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-500);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.aiContextFieldEmpty {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-400);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-light);
+  border: 1px solid var(--border);
+}

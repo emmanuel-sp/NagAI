@@ -14,6 +14,25 @@ import ProfileActions from "./ProfileActions";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import styles from "./profile.module.css";
 
+const AI_CONTEXT_FIELDS: Array<{ key: keyof UserProfile; label: string }> = [
+  { key: "age", label: "Age" },
+  { key: "career", label: "Career" },
+  { key: "bio", label: "Bio" },
+  { key: "interests", label: "Interests" },
+  { key: "hobbies", label: "Hobbies" },
+  { key: "habits", label: "Habits" },
+  { key: "lifeContext", label: "Life context" },
+];
+
+function countAiContextFields(profile: UserProfile): number {
+  return AI_CONTEXT_FIELDS.filter(({ key }) => {
+    const val = profile[key];
+    if (Array.isArray(val)) return val.length > 0;
+    if (typeof val === "number") return val != null;
+    return typeof val === "string" && val.trim().length > 0;
+  }).length;
+}
+
 export default function ProfileContainer() {
   const router = useRouter();
   const { loading: authLoading } = useAuth({ requireAuth: true });
@@ -95,6 +114,9 @@ export default function ProfileContainer() {
     );
   }
 
+  const aiContextCount = countAiContextFields(profile);
+  const aiContextTotal = AI_CONTEXT_FIELDS.length;
+
   return (
     <div className={styles.profileContainer}>
       {saveMessage && <div className={styles.successMessage}>{saveMessage}</div>}
@@ -117,6 +139,26 @@ export default function ProfileContainer() {
               <input className={styles.fieldInput} type="email" value={profile.email} onChange={(e) => handleFieldChange("email", e.target.value)} />
             ) : (
               <div className={styles.fieldValue}>{profile.email}</div>
+            )}
+          </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Age</label>
+            {isEditing ? (
+              <input
+                className={styles.fieldInput}
+                type="number"
+                min={1}
+                max={120}
+                value={profile.age ?? ""}
+                onChange={(e) =>
+                  setProfile((prev) =>
+                    prev ? { ...prev, age: e.target.value ? parseInt(e.target.value, 10) : undefined } : prev
+                  )
+                }
+                placeholder="e.g., 28"
+              />
+            ) : (
+              <div className={styles.fieldValue}>{profile.age ?? "Not provided"}</div>
             )}
           </div>
           <div className={styles.fieldGroup}>
@@ -156,12 +198,59 @@ export default function ProfileContainer() {
               <div className={styles.fieldValue} style={{ minHeight: "60px", alignItems: "flex-start", padding: "12px" }}>{profile.bio || "-"}</div>
             )}
           </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>What are you working towards in life?</label>
+            {isEditing ? (
+              <textarea
+                className={styles.fieldTextarea}
+                value={profile.lifeContext || ""}
+                onChange={(e) => handleFieldChange("lifeContext", e.target.value)}
+                placeholder="e.g., Building financial independence while staying healthy and present for my family..."
+              />
+            ) : (
+              <div className={styles.fieldValue} style={{ minHeight: "60px", alignItems: "flex-start", padding: "12px" }}>
+                {profile.lifeContext || "-"}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* List cards */}
         <ListCard title="Interests" subtitle="Things you care about" items={profile.interests || []} isEditing={isEditing} placeholder="Add an interest..." onAdd={(item) => handleAddItem("interests", item)} onRemove={(index) => handleRemoveItem("interests", index)} />
         <ListCard title="Hobbies" subtitle="What you love to do" items={profile.hobbies || []} isEditing={isEditing} placeholder="Add a hobby..." onAdd={(item) => handleAddItem("hobbies", item)} onRemove={(index) => handleRemoveItem("hobbies", index)} />
         <ListCard title="Habits" subtitle="Your daily routines" items={profile.habits || []} isEditing={isEditing} placeholder="Add a habit..." onAdd={(item) => handleAddItem("habits", item)} onRemove={(index) => handleRemoveItem("habits", index)} />
+
+        {/* AI Context */}
+        <div className={styles.profileCard}>
+          <h2 className={styles.cardTitle}>AI Context</h2>
+          <p className={styles.cardSubtitle}>Richer profile = more personalized AI suggestions</p>
+          <div className={styles.fieldGroup}>
+            <div className={styles.aiContextBar}>
+              <div
+                className={styles.aiContextFill}
+                style={{ width: `${(aiContextCount / aiContextTotal) * 100}%` }}
+              />
+            </div>
+            <div className={styles.aiContextLabel}>
+              {aiContextCount} of {aiContextTotal} fields filled
+            </div>
+            <div className={styles.aiContextFields}>
+              {AI_CONTEXT_FIELDS.map(({ key, label }) => {
+                const val = profile[key];
+                const filled = Array.isArray(val)
+                  ? val.length > 0
+                  : typeof val === "number"
+                  ? val != null
+                  : typeof val === "string" && val.trim().length > 0;
+                return (
+                  <span key={key} className={filled ? styles.aiContextFieldFilled : styles.aiContextFieldEmpty}>
+                    {label}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
         {/* Security */}
         <div className={styles.profileCard}>

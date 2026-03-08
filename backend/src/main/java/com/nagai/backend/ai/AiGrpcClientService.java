@@ -34,13 +34,14 @@ public class AiGrpcClientService {
     }
 
     public String suggestSmartField(String field, String goalTitle, String goalDescription,
-                                    Map<String, String> existingFields) {
+                                    Map<String, String> existingFields, String userProfile) {
         try {
             return stub.suggestSmartField(SmartFieldRequest.newBuilder()
                     .setField(field)
                     .setGoalTitle(goalTitle)
                     .setGoalDescription(goalDescription)
                     .putAllExistingFields(existingFields)
+                    .setUserProfile(userProfile)
                     .build()).getSuggestion();
         } catch (StatusRuntimeException e) {
             throw new AiServiceException("AI service unavailable: " + e.getStatus().getDescription(), e);
@@ -48,23 +49,33 @@ public class AiGrpcClientService {
     }
 
     public ChecklistItemResponse generateChecklistItem(
-            String goalTitle, String goalDescription, List<String> existingItems) {
+            String goalTitle, String goalDescription,
+            List<String> activeItems, List<String> completedItems,
+            String goalSmartContext, String userProfile) {
         try {
             return stub.generateChecklistItem(ChecklistItemRequest.newBuilder()
                     .setGoalTitle(goalTitle)
                     .setGoalDescription(goalDescription)
-                    .addAllExistingItems(existingItems)
+                    .addAllExistingItems(activeItems)
+                    .setUserProfile(userProfile)
+                    .addAllCompletedItems(completedItems)
+                    .setGoalSmartContext(goalSmartContext)
                     .build());
         } catch (StatusRuntimeException e) {
             throw new AiServiceException("AI service unavailable: " + e.getStatus().getDescription(), e);
         }
     }
 
-    public FullChecklistResponse generateFullChecklist(String goalTitle, String goalDescription) {
+    public FullChecklistResponse generateFullChecklist(
+            String goalTitle, String goalDescription,
+            List<String> completedItems, String goalSmartContext, String userProfile) {
         try {
             return stub.generateFullChecklist(FullChecklistRequest.newBuilder()
                     .setGoalTitle(goalTitle)
                     .setGoalDescription(goalDescription)
+                    .setUserProfile(userProfile)
+                    .addAllCompletedItems(completedItems)
+                    .setGoalSmartContext(goalSmartContext)
                     .build());
         } catch (StatusRuntimeException e) {
             throw new AiServiceException("AI service unavailable: " + e.getStatus().getDescription(), e);
