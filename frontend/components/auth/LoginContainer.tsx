@@ -71,8 +71,8 @@ export default function LoginContainer() {
     <div className={styles.loginContainer}>
       <div className={styles.loginCard}>
         <div className={styles.loginHeader}>
-          <h1 className={styles.loginTitle}>Login</h1>
-          <p className={styles.loginSubtitle}>Welcome back to NagAI</p>
+          <h1 className={styles.loginTitle}>Welcome back</h1>
+          <p className={styles.loginSubtitle}>Sign in to track your goals and stay accountable</p>
         </div>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
@@ -90,7 +90,7 @@ export default function LoginContainer() {
 
         <div className={styles.googleButtonWrapper}>
           <GoogleLogin
-            theme="filled_black"
+            theme="outline"
             size="large"
             width="100%"
             onSuccess={async (credentialResponse) => {
@@ -105,10 +105,10 @@ export default function LoginContainer() {
           />
         </div>
 
-        <div className={styles.linkText} style={{ marginTop: "20px" }}>
+        <div className={styles.linkText} style={{ marginTop: "24px" }}>
           Don&apos;t have an account? <Link href="/signup">Create one</Link>
         </div>
-        <div className={styles.linkText} style={{ marginTop: "24px" }}>
+        <div className={styles.linkText} style={{ marginTop: "16px" }}>
           <Link href="/">Back to home</Link>
         </div>
       </div>

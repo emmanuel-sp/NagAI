@@ -1,7 +1,10 @@
 /** ContentTypesSelector Component - Select content types for digest */
 "use client";
 
+import { useState } from "react";
 import { DigestContentType } from "@/types/digest";
+import { IoEye } from "@/components/icons";
+import DigestPreview from "./DigestPreview";
 import styles from "./digest-builder.module.css";
 
 interface ContentTypesSelectorProps {
@@ -14,6 +17,8 @@ export default function ContentTypesSelector({
   onToggleType,
 }: ContentTypesSelectorProps) {
   const safeSelected = selectedTypes ?? [];
+  const [previewOpen, setPreviewOpen] = useState(false);
+
   const contentTypes: { value: DigestContentType; label: string; description: string }[] = [
     {
       value: "nearby_opportunities",
@@ -58,28 +63,48 @@ export default function ContentTypesSelector({
   ];
 
   return (
-    <div className={styles.settingsCard}>
-      <h2 className={styles.cardTitle}>Content Types</h2>
-      <p className={styles.cardSubtitle}>
-        Choose what types of content you'd like to receive in your digest
-      </p>
+    <>
+      <div className={styles.settingsCard}>
+        <h2 className={styles.cardTitle}>Content Types</h2>
+        <p className={styles.cardSubtitle}>
+          Choose what types of content you&apos;d like to receive in your digest
+        </p>
 
-      <div className={styles.contentTypeGrid}>
-        {contentTypes.map((type) => (
+        <div className={styles.contentTypeGrid}>
+          {contentTypes.map((type) => (
+            <button
+              key={type.value}
+              onClick={() => onToggleType(type.value)}
+              className={`${styles.contentTypeCard} ${
+                safeSelected.includes(type.value) ? styles.contentTypeCardActive : ""
+              }`}
+            >
+              <div className={styles.contentTypeHeader}>
+                <span className={styles.contentTypeLabel}>{type.label}</span>
+              </div>
+              <p className={styles.contentTypeDescription}>{type.description}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.previewTriggerRow}>
           <button
-            key={type.value}
-            onClick={() => onToggleType(type.value)}
-            className={`${styles.contentTypeCard} ${
-              safeSelected.includes(type.value) ? styles.contentTypeCardActive : ""
-            }`}
+            type="button"
+            className={styles.previewTrigger}
+            onClick={() => setPreviewOpen(true)}
+            disabled={safeSelected.length === 0}
           >
-            <div className={styles.contentTypeHeader}>
-              <span className={styles.contentTypeLabel}>{type.label}</span>
-            </div>
-            <p className={styles.contentTypeDescription}>{type.description}</p>
+            <IoEye size={16} />
+            Preview Digest
           </button>
-        ))}
+        </div>
       </div>
-    </div>
+
+      <DigestPreview
+        selectedTypes={safeSelected}
+        isOpen={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+      />
+    </>
   );
 }

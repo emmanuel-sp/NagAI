@@ -167,7 +167,14 @@ const steps = [
 /* ─── Main Component ─── */
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [heroScrolled, setHeroScrolled] = useState(false);
   const hero = useScrollReveal(0.1);
+
+  useEffect(() => {
+    const onScroll = () => setHeroScrolled(window.scrollY > 80);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   const featureRefs = [
     useScrollReveal(0.12),
     useScrollReveal(0.12),
@@ -211,6 +218,14 @@ export default function LandingPage() {
               </Link>
             </div>
           )}
+          <div
+            className={`${styles.scrollIndicator} ${heroScrolled ? styles.scrollIndicatorHidden : ""}`}
+            aria-hidden="true"
+          >
+            <div className={styles.scrollChevron} />
+            <div className={styles.scrollChevron} />
+            <div className={styles.scrollChevron} />
+          </div>
         </div>
         <div className={styles.heroMockupWrap}>
           <MockupPlaceholder
