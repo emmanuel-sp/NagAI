@@ -14,6 +14,16 @@ export function useAuth(options: UseAuthOptions = {}) {
   const router = useRouter();
 
   useEffect(() => {
+    // Fast path: if redirectIfAuth and a token exists, redirect immediately
+    // before any async work so the user never glimpses the page
+    if (options.redirectIfAuth) {
+      const hasToken = !!localStorage.getItem("authToken");
+      if (hasToken) {
+        router.replace("/home");
+        return; // keep loading=true so nothing renders
+      }
+    }
+
     const checkAuth = async () => {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
@@ -24,7 +34,7 @@ export function useAuth(options: UseAuthOptions = {}) {
       }
 
       if (options.redirectIfAuth && currentUser) {
-        router.push("/");
+        router.replace("/home");
       }
     };
 

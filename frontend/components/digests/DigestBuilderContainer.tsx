@@ -111,9 +111,11 @@ export default function DigestBuilderContainer() {
 
   const handleToggleContentType = async (type: DigestContentType) => {
     if (!digest) return;
-    const newTypes = digest.contentTypes.includes(type)
-      ? digest.contentTypes.filter((t) => t !== type)
-      : [...digest.contentTypes, type];
+    const currentTypes = digest.contentTypes ?? [];
+    const newTypes = currentTypes.includes(type)
+      ? currentTypes.filter((t) => t !== type)
+      : [...currentTypes, type];
+    if (newTypes.length === 0) return;
     try {
       const updated = await updateDigest({
         name: digest.name,

@@ -17,7 +17,7 @@ export default function AgentOverview({ agent }: AgentOverviewProps) {
             agent.deployed ? styles.statusDeployed : styles.statusDraft
           }`}
         >
-          {agent.deployed ? "✓ Deployed" : "● Draft"}
+          {agent.deployed ? "Deployed" : "Draft"}
         </span>
       </div>
 

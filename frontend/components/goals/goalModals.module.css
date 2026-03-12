@@ -2,9 +2,9 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 11, 8, 0.55);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(80, 65, 50, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;

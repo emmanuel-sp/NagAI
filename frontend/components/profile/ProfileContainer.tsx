@@ -117,9 +117,31 @@ export default function ProfileContainer() {
   const aiContextCount = countAiContextFields(profile);
   const aiContextTotal = AI_CONTEXT_FIELDS.length;
 
+  const initials = profile.fullName
+    ? profile.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "?";
+
+  const renderValue = (value: string | undefined | null, fallback = "Tap edit to add") => {
+    if (value && value.trim()) {
+      return <div className={styles.fieldValue}>{value}</div>;
+    }
+    return <div className={styles.fieldValueEmpty}>{fallback}</div>;
+  };
+
   return (
     <div className={styles.profileContainer}>
       {saveMessage && <div className={styles.successMessage}>{saveMessage}</div>}
+
+      {/* Profile Hero */}
+      <div className={styles.profileHero}>
+        <div className={styles.avatarCircle}>{initials}</div>
+        <div className={styles.heroInfo}>
+          <div className={styles.heroName}>{profile.fullName || "Your Name"}</div>
+          <div className={styles.heroDetail}>
+            {[profile.career, profile.userLocation].filter(Boolean).join(" · ") || "Tell us about yourself"}
+          </div>
+        </div>
+      </div>
 
       <div className={styles.profileContent}>
         {/* Basic Info */}
@@ -158,7 +180,7 @@ export default function ProfileContainer() {
                 placeholder="e.g., 28"
               />
             ) : (
-              <div className={styles.fieldValue}>{profile.age ?? "Not provided"}</div>
+              renderValue(profile.age?.toString(), "How old are you?")
             )}
           </div>
           <div className={styles.fieldGroup}>
@@ -166,7 +188,7 @@ export default function ProfileContainer() {
             {isEditing ? (
               <input className={styles.fieldInput} type="tel" value={profile.phoneNumber || ""} onChange={(e) => handleFieldChange("phoneNumber", e.target.value)} placeholder="e.g., +1 (555) 123-4567" />
             ) : (
-              <div className={styles.fieldValue}>{profile.phoneNumber || "Not provided"}</div>
+              renderValue(profile.phoneNumber, "Add your number")
             )}
           </div>
           <div className={styles.fieldGroup}>
@@ -174,32 +196,34 @@ export default function ProfileContainer() {
             {isEditing ? (
               <input className={styles.fieldInput} type="text" value={profile.userLocation || ""} onChange={(e) => handleFieldChange("userLocation", e.target.value)} />
             ) : (
-              <div className={styles.fieldValue}>{profile.userLocation || "Not provided"}</div>
+              renderValue(profile.userLocation, "Where are you based?")
             )}
           </div>
         </div>
 
-        {/* Professional */}
+        {/* About You */}
         <div className={styles.profileCard}>
-          <h2 className={styles.cardTitle}>Professional</h2>
+          <h2 className={styles.cardTitle}>About You</h2>
           <div className={styles.fieldGroup}>
             <label className={styles.fieldLabel}>Career</label>
             {isEditing ? (
-              <input className={styles.fieldInput} type="text" value={profile.career || ""} onChange={(e) => handleFieldChange("career", e.target.value)} />
+              <input className={styles.fieldInput} type="text" value={profile.career || ""} onChange={(e) => handleFieldChange("career", e.target.value)} placeholder="e.g., Software Engineer" />
             ) : (
-              <div className={styles.fieldValue}>{profile.career || "-"}</div>
+              renderValue(profile.career, "What do you do?")
             )}
           </div>
           <div className={styles.fieldGroup}>
             <label className={styles.fieldLabel}>Bio</label>
             {isEditing ? (
-              <textarea className={styles.fieldTextarea} value={profile.bio || ""} onChange={(e) => handleFieldChange("bio", e.target.value)} />
+              <textarea className={styles.fieldTextarea} value={profile.bio || ""} onChange={(e) => handleFieldChange("bio", e.target.value)} placeholder="A little about who you are..." />
             ) : (
-              <div className={styles.fieldValue} style={{ minHeight: "60px", alignItems: "flex-start", padding: "12px" }}>{profile.bio || "-"}</div>
+              <div className={profile.bio ? styles.fieldValue : styles.fieldValueEmpty} style={{ minHeight: "48px", alignItems: "flex-start" }}>
+                {profile.bio || "Share a bit about yourself"}
+              </div>
             )}
           </div>
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>What are you working towards in life?</label>
+            <label className={styles.fieldLabel}>What are you working towards?</label>
             {isEditing ? (
               <textarea
                 className={styles.fieldTextarea}
@@ -208,8 +232,8 @@ export default function ProfileContainer() {
                 placeholder="e.g., Building financial independence while staying healthy and present for my family..."
               />
             ) : (
-              <div className={styles.fieldValue} style={{ minHeight: "60px", alignItems: "flex-start", padding: "12px" }}>
-                {profile.lifeContext || "-"}
+              <div className={profile.lifeContext ? styles.fieldValue : styles.fieldValueEmpty} style={{ minHeight: "48px", alignItems: "flex-start" }}>
+                {profile.lifeContext || "What drives you forward?"}
               </div>
             )}
           </div>
@@ -221,9 +245,9 @@ export default function ProfileContainer() {
         <ListCard title="Habits" subtitle="Your daily routines" items={profile.habits || []} isEditing={isEditing} placeholder="Add a habit..." onAdd={(item) => handleAddItem("habits", item)} onRemove={(index) => handleRemoveItem("habits", index)} />
 
         {/* AI Context */}
-        <div className={styles.profileCard}>
+        <div className={`${styles.profileCard} ${styles.aiContextCard}`}>
           <h2 className={styles.cardTitle}>AI Context</h2>
-          <p className={styles.cardSubtitle}>Richer profile = more personalized AI suggestions</p>
+          <p className={styles.cardSubtitle}>The more you share, the better your AI suggestions become</p>
           <div className={styles.fieldGroup}>
             <div className={styles.aiContextBar}>
               <div
@@ -244,7 +268,7 @@ export default function ProfileContainer() {
                   : typeof val === "string" && val.trim().length > 0;
                 return (
                   <span key={key} className={filled ? styles.aiContextFieldFilled : styles.aiContextFieldEmpty}>
-                    {label}
+                    {filled ? "\u2713 " : ""}{label}
                   </span>
                 );
               })}

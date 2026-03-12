@@ -58,6 +58,7 @@ export default function Checklist({
       <div className={styles.checklistHeader}>
         <div className={styles.checklistHeaderInfo}>
           <h2 className={styles.checklistGoalTitle}>{checklist.goalTitle || "Untitled Goal"}</h2>
+          {filter == "all" &&
           <div className={styles.checklistProgress}>
             <div className={styles.progressBar}>
               <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
@@ -66,6 +67,7 @@ export default function Checklist({
               {completedCount} of {totalCount} completed
             </span>
           </div>
+          }
         </div>
       </div>
 

@@ -52,7 +52,7 @@ export default function ListCard({ title, subtitle, items, isEditing, placeholde
       ) : (
         !isEditing && (
           <div className={styles.emptyPlaceholder}>
-            No {title.toLowerCase()} added yet
+            No {title.toLowerCase()} yet — tap edit to add some
           </div>
         )
       )}
@@ -67,7 +67,7 @@ export default function ListCard({ title, subtitle, items, isEditing, placeholde
             onChange={(e) => setTempInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleAdd()}
           />
-          <button className={styles.addButton} onClick={handleAdd} style={{ marginTop: "8px" }}>
+          <button className={styles.addButton} onClick={handleAdd}>
             Add {title.slice(0, -1)}
           </button>
         </div>

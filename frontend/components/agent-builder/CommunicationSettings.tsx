@@ -31,7 +31,6 @@ export default function CommunicationSettings({
         >
           <IoMail size={24} />
           <span>Email</span>
-          {currentChannel === "email" && <span className={styles.checkmark}>✓</span>}
         </button>
 
         <button
@@ -43,7 +42,6 @@ export default function CommunicationSettings({
         >
           <IoCall size={24} />
           <span>{hasPhoneNumber ? "Phone" : "Add phone in profile"}</span>
-          {currentChannel === "phone" && <span className={styles.checkmark}>✓</span>}
         </button>
       </div>
     </div>

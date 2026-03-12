@@ -6,6 +6,7 @@ import { IoClose } from "@/components/icons";
 import { useModal } from "@/contexts/ModalContext";
 import { useSmartGoalForm, SmartField } from "@/hooks/useSmartGoalForm";
 import SmartFieldGroup from "@/components/goals/SmartFieldGroup";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 const SMART_FIELDS: SmartField[] = ["specific", "measurable", "attainable", "relevant", "timely"];
 
@@ -29,6 +30,7 @@ export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalPro
     useSmartGoalForm();
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   const { registerModal } = useModal();
 
@@ -71,7 +73,8 @@ export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalPro
 
   const handleClose = () => {
     const hasChanges = fields.title || fields.description || fields.specific || fields.measurable || fields.attainable || fields.relevant || fields.timely;
-    if (hasChanges && !confirm("You have unsaved changes. Are you sure you want to close?")) {
+    if (hasChanges) {
+      setShowCloseConfirm(true);
       return;
     }
     onClose();
@@ -169,6 +172,15 @@ export default function AddGoalModal({ isOpen, onClose, onAdd }: AddGoalModalPro
           </div>
         </form>
       </div>
+      <ConfirmDialog
+        isOpen={showCloseConfirm}
+        title="Unsaved Changes"
+        message="You have unsaved changes. Are you sure you want to close?"
+        confirmLabel="Discard"
+        destructive
+        onConfirm={() => { setShowCloseConfirm(false); onClose(); }}
+        onCancel={() => setShowCloseConfirm(false)}
+      />
     </div>
   );
 }

@@ -47,7 +47,7 @@ export default function LoginContainer() {
       }
 
       await login({ email, password });
-      router.push("/");
+      router.push("/home");
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) {
@@ -96,7 +96,7 @@ export default function LoginContainer() {
             onSuccess={async (credentialResponse) => {
               try {
                 await loginWithGoogle(credentialResponse.credential!);
-                router.push("/");
+                router.push("/home");
               } catch {
                 setError("Google sign-in failed. Please try again.");
               }

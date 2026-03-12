@@ -45,7 +45,7 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
 
   const generateSuggestion = async (field: SmartField) => {
     if (!fields.title.trim()) {
-      alert("Please enter a goal title first to generate AI suggestions");
+      setSuggestionError("Please enter a goal title first to generate AI suggestions");
       return;
     }
 

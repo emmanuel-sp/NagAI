@@ -49,6 +49,7 @@ import DeploymentPanel from "./DeploymentPanel";
 import CreateContextModal from "./CreateContextModal";
 import EditContextModal from "./EditContextModal";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import styles from "./agent-builder.module.css";
 
 export default function AgentBuilderContainer() {
@@ -61,6 +62,7 @@ export default function AgentBuilderContainer() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedContext, setSelectedContext] = useState<AgentContext | null>(null);
   const [isDeploying, setIsDeploying] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -68,8 +70,11 @@ export default function AgentBuilderContainer() {
     }
   }, [authLoading]);
 
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   const loadData = async () => {
     setIsLoading(true);
+    setLoadError(null);
     try {
       const [fetchedAgent, fetchedGoals, fetchedProfile] = await Promise.all([
         fetchAgent(),
@@ -79,8 +84,13 @@ export default function AgentBuilderContainer() {
       setAgent(fetchedAgent);
       setGoals(fetchedGoals);
       setUserProfile(fetchedProfile);
-    } catch (error) {
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      const detail = err?.status
+        ? `${err.status}: ${err.message}`
+        : (error instanceof Error ? error.message : "Unknown error");
       console.error("Failed to load agent data:", error);
+      setLoadError(detail);
     } finally {
       setIsLoading(false);
     }
@@ -127,22 +137,25 @@ export default function AgentBuilderContainer() {
     }
   };
 
-  const handleDeleteContext = async (contextId: number) => {
-    if (!agent || !confirm("Are you sure you want to delete this context?")) return;
-
-    try {
-      await deleteContext(contextId);
-      setAgent((prev) =>
-        prev
-          ? {
-              ...prev,
-              contexts: prev.contexts.filter((c) => c.contextId !== contextId),
-            }
-          : prev
-      );
-    } catch (error) {
-      console.error("Failed to delete context:", error);
-    }
+  const handleDeleteContext = (contextId: number) => {
+    if (!agent) return;
+    setConfirmAction({
+      title: "Delete Context",
+      message: "Are you sure you want to delete this context? This action cannot be undone.",
+      onConfirm: async () => {
+        setConfirmAction(null);
+        try {
+          await deleteContext(contextId);
+          setAgent((prev) =>
+            prev
+              ? { ...prev, contexts: prev.contexts.filter((c) => c.contextId !== contextId) }
+              : prev
+          );
+        } catch (error) {
+          console.error("Failed to delete context:", error);
+        }
+      },
+    });
   };
 
   const handleDeploy = async () => {
@@ -159,18 +172,24 @@ export default function AgentBuilderContainer() {
     }
   };
 
-  const handleStop = async () => {
-    if (!agent || !confirm("Are you sure you want to stop your agent?")) return;
-
-    setIsDeploying(true);
-    try {
-      const stoppedAgent = await stopAgent();
-      setAgent(stoppedAgent);
-    } catch (error) {
-      console.error("Failed to stop agent:", error);
-    } finally {
-      setIsDeploying(false);
-    }
+  const handleStop = () => {
+    if (!agent) return;
+    setConfirmAction({
+      title: "Stop Agent",
+      message: "Are you sure you want to stop your agent? It will no longer send messages until redeployed.",
+      onConfirm: async () => {
+        setConfirmAction(null);
+        setIsDeploying(true);
+        try {
+          const stoppedAgent = await stopAgent();
+          setAgent(stoppedAgent);
+        } catch (error) {
+          console.error("Failed to stop agent:", error);
+        } finally {
+          setIsDeploying(false);
+        }
+      },
+    });
   };
 
   const handleCommunicationChange = async (channel: CommunicationChannel) => {
@@ -195,7 +214,9 @@ export default function AgentBuilderContainer() {
   if (!agent) {
     return (
       <div className={styles.agentBuilderContainer}>
-        <div className={styles.errorMessage}>Failed to load agent data</div>
+        <div className={styles.errorMessage}>
+          Failed to load agent data{loadError ? ` — ${loadError}` : ""}
+        </div>
       </div>
     );
   }
@@ -255,6 +276,16 @@ export default function AgentBuilderContainer() {
           setSelectedContext(null);
         }}
         onUpdate={handleUpdateContext}
+      />
+
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ""}
+        message={confirmAction?.message ?? ""}
+        confirmLabel={confirmAction?.title.startsWith("Delete") ? "Delete" : "Stop"}
+        destructive
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
       />
     </div>
   );

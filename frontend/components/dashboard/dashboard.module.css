@@ -27,7 +27,7 @@
 .greeting {
   font-family: var(--font-display);
   font-size: clamp(48px, 6vw, 80px);
-  font-weight: 700;
+  font-weight: 350;
   letter-spacing: -0.04em;
   color: var(--text-primary);
   line-height: 1.0;

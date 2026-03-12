@@ -45,7 +45,9 @@ export default function DigestStatusPanel({
       <div className={styles.deploymentActions}>
         <button
           onClick={onToggleStatus}
+          disabled={!digest.active && !(digest.contentTypes?.length > 0)}
           className={digest.active ? styles.stopButton : styles.deployButton}
+          title={!digest.active && !(digest.contentTypes?.length > 0) ? "Select at least one content type first" : undefined}
         >
           {digest.active ? "Deactivate Digest" : "Activate Digest"}
         </button>

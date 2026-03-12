@@ -201,8 +201,15 @@ export default function ChecklistsContainer() {
     }
   };
 
+  const getLatestCompletedAt = (checklist: ChecklistType): number => {
+    const times = checklist.items
+      .filter((i) => i.completed && i.completedAt)
+      .map((i) => new Date(i.completedAt!).getTime());
+    return times.length ? Math.max(...times) : 0;
+  };
+
   const getFilteredChecklists = () => {
-    return checklists.map((checklist) => {
+    const mapped = checklists.map((checklist) => {
       if (filter === "all") {
         const sortedItems = [...checklist.items].sort((a, b) => {
           if (a.completed === b.completed) return 0;
@@ -218,6 +225,8 @@ export default function ChecklistsContainer() {
             : checklist.items.filter((item) => item.completed),
       };
     });
+
+    return mapped.sort((a, b) => getLatestCompletedAt(b) - getLatestCompletedAt(a));
   };
 
   const filteredChecklists = getFilteredChecklists();

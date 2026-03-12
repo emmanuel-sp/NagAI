@@ -5,6 +5,9 @@ interface GoalProps extends GoalType {
     onView?: (goalId: number) => void;
 }
 
+const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
 export function Goal({ title, description, createdAt, targetDate, goalId, onView }: GoalProps) {
     return (
         <div className={styles.goalCard}>
@@ -15,12 +18,15 @@ export function Goal({ title, description, createdAt, targetDate, goalId, onView
             <div className={styles.goalMeta}>
                 <div className={styles.metaItem}>
                     <span className={styles.metaLabel}>Created</span>
-                    <span className={styles.metaValue}>{createdAt}</span>
+                    <span className={styles.metaValue}>{formatDate(createdAt)}</span>
                 </div>
+                {
+                targetDate &&
                 <div className={styles.metaItem}>
                     <span className={styles.metaLabel}>Target Date</span>
-                    <span className={styles.metaValue}>{targetDate}</span>
+                    <span className={styles.metaValue}>{formatDate(targetDate)}</span>
                 </div>
+                }
             </div>
             <div className={styles.goalActions}>
                 <button

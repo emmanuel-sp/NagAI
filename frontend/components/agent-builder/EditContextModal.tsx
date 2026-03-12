@@ -36,6 +36,7 @@ export default function EditContextModal({
   const [messageFrequency, setMessageFrequency] = useState<MessageFrequency>("daily");
   const [customInstructions, setCustomInstructions] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const { registerModal } = useModal();
 
@@ -65,9 +66,10 @@ export default function EditContextModal({
     e.preventDefault();
 
     if (!context || !name.trim()) {
-      alert("Please provide a name");
+      setFormError("Please provide a name");
       return;
     }
+    setFormError(null);
 
     setIsSaving(true);
     try {
@@ -104,6 +106,7 @@ export default function EditContextModal({
           </div>
 
           <div className={styles.modalBody}>
+            {formError && <p className={styles.required} style={{ fontSize: "var(--fs-sm)", margin: 0 }}>{formError}</p>}
             <div className={styles.formSection}>
             <label className={styles.formLabel}>
               Context Name <span className={styles.required}>*</span>

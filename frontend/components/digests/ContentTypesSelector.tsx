@@ -10,9 +10,10 @@ interface ContentTypesSelectorProps {
 }
 
 export default function ContentTypesSelector({
-  selectedTypes,
+  selectedTypes = [],
   onToggleType,
 }: ContentTypesSelectorProps) {
+  const safeSelected = selectedTypes ?? [];
   const contentTypes: { value: DigestContentType; label: string; description: string }[] = [
     {
       value: "nearby_opportunities",
@@ -69,14 +70,11 @@ export default function ContentTypesSelector({
             key={type.value}
             onClick={() => onToggleType(type.value)}
             className={`${styles.contentTypeCard} ${
-              selectedTypes.includes(type.value) ? styles.contentTypeCardActive : ""
+              safeSelected.includes(type.value) ? styles.contentTypeCardActive : ""
             }`}
           >
             <div className={styles.contentTypeHeader}>
               <span className={styles.contentTypeLabel}>{type.label}</span>
-              {selectedTypes.includes(type.value) && (
-                <span className={styles.checkmark}>✓</span>
-              )}
             </div>
             <p className={styles.contentTypeDescription}>{type.description}</p>
           </button>

@@ -1,13 +1,67 @@
 /* ─── Profile Container ─── */
 .profileContainer {
-  max-width: var(--content-md);
+  max-width: var(--content-lg);
+  width: 100%;
   margin: 0 auto;
+  padding: 32px clamp(20px, 4vw, 64px);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
-/* ─── Profile Header ─── */
+/* ─── Profile Hero ─── */
+.profileHero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 28px 24px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--bg-card)) 0%, var(--bg-card) 100%);
+  border: 1px solid color-mix(in srgb, var(--accent) 15%, var(--border));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.avatarCircle {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--text-inverse);
+  letter-spacing: -0.02em;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent),
+              var(--shadow-sm);
+}
+
+.heroInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.heroName {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.heroDetail {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  font-weight: var(--fw-400);
+}
+
+/* ─── Profile Header (legacy) ─── */
 .profileHeader {
   padding-bottom: var(--space-md);
 }
@@ -45,7 +99,7 @@
 .profileContent {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 /* ─── Profile Card ─── */
@@ -55,6 +109,12 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-xs);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profileCard:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .cardTitle {
@@ -68,6 +128,12 @@
   border-bottom: 1px solid var(--border);
 }
 
+.cardIcon {
+  margin-right: 8px;
+  font-size: var(--fs-base);
+  vertical-align: -2px;
+}
+
 .profileCard:has(.cardSubtitle) .cardTitle {
   border-bottom: none;
 }
@@ -77,8 +143,8 @@
   color: var(--text-secondary);
   font-weight: var(--fw-400);
   display: block;
-  padding: 8px 24px 8px;
-  margin-top: 2px;
+  padding: 4px 24px 10px;
+  margin-top: 0;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
 }
@@ -110,6 +176,14 @@
   color: var(--text-primary);
   font-weight: var(--fw-400);
   line-height: 1.5;
+}
+
+.fieldValueEmpty {
+  font-size: var(--fs-sm);
+  color: var(--text-light);
+  font-weight: var(--fw-400);
+  line-height: 1.5;
+  font-style: italic;
 }
 
 .fieldInput {
@@ -244,10 +318,11 @@
 
 .emptyPlaceholder {
   font-size: var(--fs-sm);
-  color: var(--text-secondary);
+  color: var(--text-light);
   font-style: italic;
   font-weight: var(--fw-400);
-  padding: 20px 24px;
+  padding: 24px;
+  text-align: center;
 }
 
 /* ─── Profile Actions ─── */
@@ -319,6 +394,11 @@
 }
 
 @media (max-width: 600px) {
+  .profileHero {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px 20px;
+  }
 
   .profileTitle {
     font-size: var(--fs-2xl);
@@ -336,38 +416,47 @@
 }
 
 /* ─── AI Context Completeness ─── */
+.aiContextCard {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 6%, var(--bg-card)) 0%, var(--bg-card) 100%);
+  border-color: color-mix(in srgb, var(--accent) 12%, var(--border));
+}
+
+.aiContextCard:hover {
+  border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+}
+
 .aiContextBar {
-  height: 6px;
+  height: 8px;
   background: var(--border);
   border-radius: var(--radius-full);
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .aiContextFill {
   height: 100%;
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--accent), var(--accent-dark));
   border-radius: var(--radius-full);
-  transition: width 0.4s ease;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .aiContextLabel {
   font-size: var(--fs-xs);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-weight: var(--fw-500);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .aiContextFields {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .aiContextFieldFilled {
   font-size: var(--fs-2xs);
   font-weight: var(--fw-500);
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   color: var(--accent);
@@ -377,9 +466,9 @@
 .aiContextFieldEmpty {
   font-size: var(--fs-2xs);
   font-weight: var(--fw-400);
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-light);
-  border: 1px solid var(--border);
+  border: 1px dashed var(--border);
 }

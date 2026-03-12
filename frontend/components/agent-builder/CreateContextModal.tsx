@@ -34,6 +34,7 @@ export default function CreateContextModal({
   const [messageFrequency, setMessageFrequency] = useState<MessageFrequency>("daily");
   const [customInstructions, setCustomInstructions] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const { registerModal } = useModal();
 
@@ -52,9 +53,10 @@ export default function CreateContextModal({
     e.preventDefault();
 
     if (!name.trim()) {
-      alert("Please provide a name");
+      setFormError("Please provide a name");
       return;
     }
+    setFormError(null);
 
     setIsSaving(true);
     try {
@@ -98,6 +100,7 @@ export default function CreateContextModal({
           </div>
 
           <div className={styles.modalBody}>
+          {formError && <p className={styles.required} style={{ fontSize: "var(--fs-sm)", margin: 0 }}>{formError}</p>}
           {/* Context Name */}
           <div className={styles.formSection}>
             <label className={styles.formLabel}>

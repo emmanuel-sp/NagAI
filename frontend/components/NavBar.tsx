@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { getCurrentUser } from "@/services/authService";
 import { useModal } from "@/contexts/ModalContext";
 import styles from "./NavBar.module.css";
-import { IoMenuOutline, IoCloseOutline } from "@/components/icons";
+import { IoMenuOutline, IoCloseOutline, IoHome, IoPerson } from "@/components/icons";
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -31,7 +31,7 @@ export default function NavBar() {
   }, []);
 
   const active = (path: string) =>
-    path === "/" ? pathname === "/" : pathname.startsWith(path);
+    path === "/home" ? pathname === "/home" : pathname.startsWith(path);
 
   if (!isLoggedIn) return null;
 
@@ -45,14 +45,33 @@ export default function NavBar() {
         {mobileOpen ? <IoCloseOutline size={22} /> : <IoMenuOutline size={22} />}
       </button>
 
+      {/* Dashboard - left */}
+      <Link
+        href="/home"
+        className={`${styles.navIconLink} ${active("/home") ? styles.navLinkActive : ""}`}
+        aria-label="Home"
+        title="Home"
+      >
+        <IoHome size={18} />
+      </Link>
+
+      {/* Center links */}
       <div className={`${styles.navCenter} ${mobileOpen ? styles.navCenterOpen : ""}`}>
-        <Link href="/" className={`${styles.navLink} ${active("/") ? styles.navLinkActive : ""}`}>Dashboard</Link>
         <Link href="/goals" className={`${styles.navLink} ${active("/goals") ? styles.navLinkActive : ""}`}>Goals</Link>
         <Link href="/checklists" className={`${styles.navLink} ${active("/checklists") ? styles.navLinkActive : ""}`}>Checklists</Link>
         <Link href="/digests" className={`${styles.navLink} ${active("/digests") ? styles.navLinkActive : ""}`}>Digests</Link>
         <Link href="/agent" className={`${styles.navLink} ${active("/agent") ? styles.navLinkActive : ""}`}>Agent</Link>
-        <Link href="/profile" className={`${styles.navLink} ${active("/profile") ? styles.navLinkActive : ""}`}>Profile</Link>
       </div>
+
+      {/* Profile - right */}
+      <Link
+        href="/profile"
+        className={`${styles.navIconLink} ${styles.navIconRight} ${active("/profile") ? styles.navLinkActive : ""}`}
+        aria-label="Profile"
+        title="Profile"
+      >
+        <IoPerson size={18} />
+      </Link>
     </nav>
   );
 }
