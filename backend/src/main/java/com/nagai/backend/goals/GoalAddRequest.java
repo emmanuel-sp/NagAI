@@ -22,4 +22,6 @@ public class GoalAddRequest {
     private String relevant;
     @Size(max = 1000, message = "timely must be 1000 characters or fewer")
     private String timely;
+    @Size(max = 2000, message = "stepsTaken must be 2000 characters or fewer")
+    private String stepsTaken;
 }

@@ -15,6 +15,7 @@ public class GoalResponse {
     private String attainable;
     private String relevant;
     private String timely;
+    private String stepsTaken;
     private LocalDateTime createdAt;
 
     public static GoalResponse fromEntity(Goal goal) {
@@ -29,6 +30,7 @@ public class GoalResponse {
         goalResponse.setAttainable(goal.getAttainable());
         goalResponse.setRelevant(goal.getRelevant());
         goalResponse.setTimely(goal.getTimely());
+        goalResponse.setStepsTaken(goal.getStepsTaken());
         return goalResponse;
     }
 }

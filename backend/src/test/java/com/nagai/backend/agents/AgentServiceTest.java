@@ -60,7 +60,6 @@ class AgentServiceTest {
         context.setAgentId(10L);
         context.setName("Morning Check");
         context.setMessageType("motivation");
-        context.setMessageFrequency("daily");
     }
 
     @Test
@@ -143,7 +142,6 @@ class AgentServiceTest {
         AddContextRequest request = new AddContextRequest();
         request.setName("Evening Review");
         request.setMessageType("guidance");
-        request.setMessageFrequency("weekly");
         request.setCustomInstructions("Be concise.");
 
         when(userService.getCurrentUser()).thenReturn(user);
@@ -166,7 +164,6 @@ class AgentServiceTest {
     void updateContext_updatesFields() {
         UpdateContextRequest request = new UpdateContextRequest();
         request.setName("Updated Name");
-        request.setMessageFrequency("weekly");
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
@@ -176,7 +173,6 @@ class AgentServiceTest {
         AgentContextResponse result = agentService.updateContext(100L, request);
 
         assertThat(result.getName()).isEqualTo("Updated Name");
-        assertThat(result.getMessageFrequency()).isEqualTo("weekly");
     }
 
     @Test

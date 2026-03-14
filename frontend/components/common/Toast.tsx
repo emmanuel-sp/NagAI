@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, ReactNode } from "react";
-import { IoCheckmarkCircle, IoClose } from "@/components/icons";
+import { IoCheckmarkCircle, IoAlertCircle, IoClose } from "@/components/icons";
 import styles from "./Toast.module.css";
 
 interface ToastProps {
   message: ReactNode;
   onClose: () => void;
   duration?: number;
+  variant?: "success" | "error";
 }
 
-export default function Toast({ message, onClose, duration = 6000 }: ToastProps) {
+export default function Toast({ message, onClose, duration = 6000, variant = "success" }: ToastProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -19,10 +20,12 @@ export default function Toast({ message, onClose, duration = 6000 }: ToastProps)
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
+  const Icon = variant === "error" ? IoAlertCircle : IoCheckmarkCircle;
+
   return (
-    <div className={styles.toast}>
+    <div className={`${styles.toast} ${variant === "error" ? styles.toastError : ""}`}>
       <div className={styles.toastContent}>
-        <IoCheckmarkCircle className={styles.toastIcon} size={24} />
+        <Icon className={`${styles.toastIcon} ${variant === "error" ? styles.toastIconError : ""}`} size={24} />
         <p className={styles.toastMessage}>{message}</p>
       </div>
       <button onClick={onClose} className={styles.toastClose}>

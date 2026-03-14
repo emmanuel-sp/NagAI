@@ -7,6 +7,5 @@ public class UpdateContextRequest {
     private String name;
     private Long goalId;
     private String messageType;
-    private String messageFrequency;
     private String customInstructions;
 }

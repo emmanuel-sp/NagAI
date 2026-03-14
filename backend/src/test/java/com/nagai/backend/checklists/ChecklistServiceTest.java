@@ -59,6 +59,8 @@ class ChecklistServiceTest {
 
     @Test
     void fetchGoalChecklist_returnsMappedResponses() {
+        when(goalService.getGoal(5L)).thenReturn(goal);
+        when(userService.getCurrentUser()).thenReturn(user);
         when(checklistRepository.findChecklistItemByGoalId(5L)).thenReturn(List.of(item));
 
         List<ChecklistResponse> results = checklistService.fetchGoalChecklist(5L);

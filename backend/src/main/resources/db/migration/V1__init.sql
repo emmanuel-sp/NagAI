@@ -16,7 +16,8 @@ CREATE TABLE users (
     hobbies TEXT[],
     habits TEXT[],
     age INTEGER,
-    life_context TEXT
+    life_context TEXT,
+    timezone VARCHAR(50) DEFAULT 'UTC'
 );
 
 CREATE TABLE goals (
@@ -30,6 +31,7 @@ CREATE TABLE goals (
     attainable TEXT,
     relevant TEXT,
     timely TEXT,
+    steps_taken TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
@@ -80,7 +82,6 @@ CREATE TABLE agent_contexts (
     goal_id INTEGER,
     name VARCHAR(255) NOT NULL,
     message_type VARCHAR(30) NOT NULL,
-    message_frequency VARCHAR(30) NOT NULL,
     custom_instructions TEXT,
     last_message_sent_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -88,3 +89,45 @@ CREATE TABLE agent_contexts (
     FOREIGN KEY (agent_id) REFERENCES agents (agent_id) ON DELETE CASCADE,
     FOREIGN KEY (goal_id) REFERENCES goals (goal_id) ON DELETE SET NULL
 );
+
+CREATE TABLE sent_digests (
+    sent_digest_id SERIAL PRIMARY KEY,
+    digest_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    subject VARCHAR(255),
+    content TEXT,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (digest_id) REFERENCES digests (digest_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE sent_agent_messages (
+    sent_message_id SERIAL PRIMARY KEY,
+    context_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    subject VARCHAR(255),
+    content TEXT,
+    email_message_id VARCHAR(255),
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (context_id) REFERENCES agent_contexts (context_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE agent_replies (
+    reply_id SERIAL PRIMARY KEY,
+    sent_message_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    content TEXT,
+    received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (sent_message_id) REFERENCES sent_agent_messages (sent_message_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+);
+
+-- Performance indexes for scheduled queries
+CREATE INDEX idx_digests_active_next_delivery ON digests (active, next_delivery_at);
+CREATE INDEX idx_agents_deployed ON agents (deployed);
+CREATE INDEX idx_checklist_items_goal_id ON checklist_items (goal_id);
+CREATE INDEX idx_goals_user_id ON goals (user_id);
+CREATE INDEX idx_agent_contexts_agent_id ON agent_contexts (agent_id);
+CREATE INDEX idx_sent_agent_messages_context_id ON sent_agent_messages (context_id);

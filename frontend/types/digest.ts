@@ -3,14 +3,14 @@ export type DigestFrequency = "daily" | "weekly" | "biweekly" | "monthly";
 export type DeliveryTime = "morning" | "afternoon" | "evening";
 
 export type DigestContentType =
-  | "nearby_opportunities"
   | "affirmations"
   | "news"
   | "knowledge_snippets"
   | "tips"
   | "motivational_quotes"
   | "resource_recommendations"
-  | "progress_insights";
+  | "progress_insights"
+  | "reflection_prompts";
 
 export interface Digest {
   digestId: number;

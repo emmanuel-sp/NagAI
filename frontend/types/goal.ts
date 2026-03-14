@@ -14,6 +14,7 @@ export interface GoalWithDetails extends Goal {
   attainable?: string;
   relevant?: string;
   timely?: string;
+  stepsTaken?: string;
 }
 
 export interface CreateGoalRequest {
@@ -25,6 +26,7 @@ export interface CreateGoalRequest {
   attainable?: string;
   relevant?: string;
   timely?: string;
+  stepsTaken?: string;
 }
 
 export interface UpdateGoalRequest extends Partial<CreateGoalRequest> {}

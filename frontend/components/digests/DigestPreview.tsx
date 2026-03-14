@@ -15,11 +15,6 @@ interface DigestPreviewProps {
 }
 
 const PREVIEW_CONTENT: Record<DigestContentType, { label: string; content: string }> = {
-  nearby_opportunities: {
-    label: "Nearby Opportunities",
-    content:
-      "Community Workshop: Public Speaking Mastery — this Saturday at 2 PM @ Central Library. Free entry, limited seats. This interactive session covers overcoming stage fright, structuring compelling narratives, and projecting confidence. Perfect if you\u2019re working toward career or personal development goals.",
-  },
   affirmations: {
     label: "Daily Affirmation",
     content:
@@ -54,6 +49,11 @@ const PREVIEW_CONTENT: Record<DigestContentType, { label: string; content: strin
     label: "Your Progress",
     content:
       "Great week \u2014 you\u2019ve completed 7 of 10 checklist items, putting you at 70% completion. That\u2019s up from 55% last week. At this pace, you\u2019ll finish your current goal about 2 weeks ahead of schedule. Your strongest streak is 5 consecutive days of activity. Keep it going \u2014 consistency is your biggest advantage right now.",
+  },
+  reflection_prompts: {
+    label: "Reflect",
+    content:
+      "What\u2019s one thing you did this week that moved you closer to your goal \u2014 even if it felt small? Sometimes the steps that feel insignificant in the moment are the ones that compound the most. Take a minute to write down what worked, what didn\u2019t, and what you\u2019d do differently next week.",
   },
 };
 

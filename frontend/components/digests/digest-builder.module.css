@@ -4,11 +4,11 @@
    ═══════════════════════════════════════════════ */
 
 /* ─── Page Container ─── */
-.agentBuilderContainer {
+.digestBuilderContainer {
   width: 100%;
 }
 
-.agentBuilderContent {
+.digestBuilderContent {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
@@ -316,6 +316,19 @@
   box-shadow:
     0 0 0 1px var(--accent-dark),
     0 4px 12px var(--accent-shadow);
+}
+
+.contentTypeCardDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.contentTypeLimitHint {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 8px;
 }
 
 .contentTypeHeader {
@@ -767,7 +780,7 @@
 
 @media (max-width: 768px) {
 
-  .agentBuilderContent {
+  .digestBuilderContent {
     gap: var(--space-md);
   }
 

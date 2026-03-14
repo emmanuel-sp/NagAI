@@ -12,6 +12,7 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   destructive?: boolean;
+  loading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -23,6 +24,7 @@ export default function ConfirmDialog({
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   destructive = false,
+  loading = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -48,13 +50,14 @@ export default function ConfirmDialog({
         </div>
         <p className={styles.message}>{message}</p>
         <div className={styles.actions}>
-          <button type="button" onClick={onCancel} className={styles.cancelBtn}>
+          <button type="button" onClick={onCancel} className={styles.cancelBtn} disabled={loading}>
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className={destructive ? styles.destructiveBtn : styles.confirmBtn}
+            disabled={loading}
           >
             {confirmLabel}
           </button>

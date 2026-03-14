@@ -199,6 +199,22 @@ export default function ProfileContainer() {
               renderValue(profile.userLocation, "Where are you based?")
             )}
           </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel}>Timezone</label>
+            {isEditing ? (
+              <select
+                className={styles.fieldInput}
+                value={profile.timezone || "UTC"}
+                onChange={(e) => handleFieldChange("timezone", e.target.value)}
+              >
+                {Intl.supportedValuesOf("timeZone").map((tz) => (
+                  <option key={tz} value={tz}>{tz.replace(/_/g, " ")}</option>
+                ))}
+              </select>
+            ) : (
+              renderValue(profile.timezone, "Set your timezone")
+            )}
+          </div>
         </div>
 
         {/* About You */}

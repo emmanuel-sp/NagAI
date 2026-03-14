@@ -25,6 +25,11 @@ public class ChecklistService {
     }
 
     public List<ChecklistResponse> fetchGoalChecklist(Long goalId) {
+        Goal goal = goalService.getGoal(goalId);
+        User currentUser = userService.getCurrentUser();
+        if (!currentUser.getUserId().equals(goal.getUserId())) {
+            throw new AccessDeniedException("You do not have permission to view this goal's checklist");
+        }
         List<ChecklistItem> checklists = checklistRepository.findChecklistItemByGoalId(goalId);
         return checklists.stream().map(ChecklistResponse::fromEntity).toList();
     }

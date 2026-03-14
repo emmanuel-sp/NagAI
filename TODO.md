@@ -266,25 +266,178 @@ Python AI Service
 
 ---
 
-### Step 11 — Agent Message Scheduling: Kafka + Python
+### Step 11 — Conversational AI Agent: LangChain + Email Replies
 **Difficulty: Hard**
 
-**Context:** Deployed agents with contexts should generate and send personalized messages (nag/motivation/guidance) on each context's configured frequency.
+**Context:** The agent should feel fundamentally different from digests. Digests are scheduled content drops. The agent is a **conversational companion** — it initiates contact, but the user can **reply** and the agent responds. No rigid frequency selector; the agent decides when to reach out based on activity patterns, and the user can talk back at any time.
 
-**Suggested backend files:**
-- A Spring `@Scheduled` component that checks deployed agents and publishes due context messages to Kafka
-- Reuse Kafka producer from Step 10
+#### Key Design Principle: Agents ≠ Digests
 
-**Python:** Kafka consumer subscribes to agent message topic, generates message with LLM using goal details + message type + custom instructions, delivers via email/SMS.
+Digests have a frequency (daily/weekly) because they're content curation. The agent should feel like a person who checks in when it makes sense — not a cron job. Remove the `messageFrequency` field from the context model. Instead, the agent autonomously decides when to send its next message based on:
+- How recently the user was active (checklist completions, goal updates)
+- How long since the last agent message
+- The agent's personality (a "tough love" agent nags more often than a "zen" agent)
+- Whether the user replied to the last message (if they're engaged, keep the conversation going)
 
-**DB:** Add `last_message_sent_at` to `agent_contexts` in `V1__init.sql` to track scheduling.
+#### Architecture: LangChain Agent + Gmail API Reply Polling
 
-**Frontend files to optionally modify:**
-- `frontend/components/agent-builder/DeploymentPanel.tsx` — if you want to surface last message sent timestamp
+```
+                    ┌─────────────────────────┐
+                    │  AgentScheduler (Java)   │
+                    │  @Scheduled(fixedRate)   │
+                    │  Checks: deployed agents │
+                    │  with no recent message  │
+                    └──────────┬──────────────┘
+                               │ Kafka (agent-messages)
+                               ▼
+                    ┌─────────────────────────┐
+                    │  agent_message_handler   │
+                    │  (Python + LangChain)    │
+                    │                         │
+                    │  Tools:                 │
+                    │  - get_user_progress    │
+                    │  - get_previous_messages│
+                    │  - get_user_replies     │  ← NEW: checks for email replies
+                    │  - search_news          │
+                    │                         │
+                    │  Sends email via SMTP   │
+                    │  Saves to sent_agent_   │
+                    │  messages table         │
+                    └─────────────────────────┘
+
+    User replies to email
+           │
+           ▼
+    ┌─────────────────────────┐
+    │  Reply Ingestion        │
+    │  (Python poller)        │
+    │  Polls Gmail API ~30s   │  ← Suggestion: consider best approach
+    │  Matches reply to       │
+    │  sent_agent_messages    │
+    │  Triggers agent to      │
+    │  respond via LangChain  │
+    └─────────────────────────┘
+```
+
+#### LangChain Agent Tools
+
+| Tool | Purpose |
+|------|---------|
+| `get_user_progress` | Query checklist completion + goal data to understand recent activity |
+| `get_previous_messages` | Load conversation history from `sent_agent_messages` to maintain continuity |
+| `get_user_replies` | Load user's email replies to the agent (from `agent_replies` table) to enable back-and-forth |
+| `search_news` | Reuse `web_search.search_news()` if the agent decides news is relevant |
+
+The agent decides autonomously:
+- **When to reach out** — based on user activity, time since last message, personality config
+- **What tone to use** — based on personality (name, message_type, custom_instructions) and recent activity
+- **What to focus on** — which goal needs attention based on checklist progress, deadlines, or inactivity
+- **Whether to include resources** — agent can search for relevant content if it determines the user would benefit
+- **How to respond to user replies** — maintain conversational context across email exchanges
+
+#### Learning Over Time
+
+All agent messages AND user replies are stored, giving the agent full conversation history. This enables:
+- Vary tone and avoid repeating itself
+- Reference past conversations ("Last week I mentioned X — how did that go?")
+- Escalate urgency if a user has been inactive across multiple check-ins
+- Celebrate streaks and milestone completions
+- Respond to what the user said in their reply, not just push content
+
+#### Reply Ingestion — Design Considerations
+
+The user should be able to reply to agent emails and have the agent respond. Possible approaches (evaluate during planning):
+
+1. **Gmail API polling (~30s interval)** — Python process polls for replies to sent agent messages using Gmail API thread matching. Simple, works with existing Gmail setup, but requires OAuth2 credentials with Gmail read scope. Latency is ~30s.
+
+2. **Webhook/push notifications** — Gmail push notifications via Google Cloud Pub/Sub. Lower latency but more infrastructure.
+
+3. **Inbound email parsing** — Services like SendGrid Inbound Parse or Mailgun routes can forward incoming emails to a webhook. Decouples from Gmail but adds a dependency.
+
+The simplest starting point is likely Gmail API polling. The `Message-ID` / `In-Reply-To` headers on sent emails can be used to match replies to specific agent messages. Store a `gmail_thread_id` or `message_id` on each sent agent message for matching.
+
+#### Implementation
+
+**DB changes (`V1__init.sql`):**
+
+```sql
+CREATE TABLE sent_agent_messages (
+    sent_message_id SERIAL PRIMARY KEY,
+    context_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    subject VARCHAR(255),
+    content TEXT,
+    email_message_id VARCHAR(255),    -- for reply matching
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (context_id) REFERENCES agent_contexts (context_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE agent_replies (
+    reply_id SERIAL PRIMARY KEY,
+    sent_message_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    content TEXT,
+    received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (sent_message_id) REFERENCES sent_agent_messages (sent_message_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+);
+```
+
+Remove `message_frequency` column from `agent_contexts` table in V1 schema.
+
+**Backend:**
+- Remove `messageFrequency` from `AgentContext` entity, `AddContextRequest`, `UpdateContextRequest`, `AgentContextResponse`
+- New `AgentScheduler` (`@Scheduled(fixedRate=60000)`) — queries deployed agents, uses heuristics to decide which contexts are due for a message (time since last message + user activity level, not a fixed frequency)
+- `AgentMessagePayload` — includes agent config, context config, user profile, goals + checklist progress
+- Publishes to `KafkaConfig.TOPIC_AGENT_MESSAGES`
+
+**Frontend:**
+- Remove "Message Frequency" dropdown from `CreateContextModal.tsx` and `EditContextModal.tsx`
+- Remove `messageFrequency` from agent types
+- Update context cards to not show frequency
+- Consider adding conversation history view (show agent messages + user replies) — could be a future step
+- Consider updating agent builder UI to emphasize the conversational nature ("Your agent will reach out when it has something to say" instead of frequency pickers)
+
+**Python dependencies (add to requirements.txt):**
+```
+langchain>=0.3.0
+langchain-anthropic>=0.3.0
+```
+
+**Python: `agent_message_handler.py`** (new file):
+```python
+# Uses LangChain agent with:
+# - ChatAnthropic (claude-haiku-4-5) as LLM
+# - Custom tools: get_user_progress, get_previous_messages, get_user_replies, search_news
+# - System prompt built from agent personality + user context + conversation history
+# - Sends result as HTML email via Gmail SMTP (include proper Message-ID for reply threading)
+# - Saves to sent_agent_messages table with email_message_id
+```
+
+**Python: reply poller** (new — approach TBD during planning):
+```python
+# Polls for user replies to agent emails
+# Matches replies to sent_agent_messages via email threading
+# Stores in agent_replies table
+# Triggers agent to respond (either immediately or on next poll cycle)
+```
+
+**Python: update `kafka_consumer.py`** — wire dispatch for `agent-messages` topic
+
+**Suggested files:**
+- `backend/.../agents/AgentScheduler.java` (new)
+- `backend/.../agents/AgentMessagePayload.java` (new)
+- `backend/.../agents/AgentSchedulerTest.java` (new)
+- `ai/agent_message_handler.py` (new)
+- `frontend/components/agent-builder/CreateContextModal.tsx` (modify — remove frequency)
+- `frontend/components/agent-builder/EditContextModal.tsx` (modify — remove frequency)
+- `frontend/types/agent.ts` (modify — remove MessageFrequency)
 
 **After implementing:** Write unit tests for the agent scheduler. Run `./mvnw test`.
 
-> **Manual verification required:** Deploy an agent with a context, temporarily reduce the schedule interval, and confirm the generated message is received via email/SMS.
+> **Manual verification:** Deploy an agent with a context, confirm it sends an initial message. Reply to the email. Verify the agent picks up the reply and responds with context from the conversation. Verify the second proactive message references or varies from the first.
 
 ---
 

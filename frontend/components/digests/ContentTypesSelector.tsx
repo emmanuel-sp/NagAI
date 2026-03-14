@@ -21,11 +21,6 @@ export default function ContentTypesSelector({
 
   const contentTypes: { value: DigestContentType; label: string; description: string }[] = [
     {
-      value: "nearby_opportunities",
-      label: "Nearby Opportunities",
-      description: "Local events, resources, and opportunities relevant to your goals",
-    },
-    {
       value: "affirmations",
       label: "Affirmations",
       description: "Personalized positive affirmations to boost motivation",
@@ -60,6 +55,11 @@ export default function ContentTypesSelector({
       label: "Progress Insights",
       description: "Analysis of your achievements and areas for improvement",
     },
+    {
+      value: "reflection_prompts",
+      label: "Reflection Prompts",
+      description: "Guided questions to reflect on your progress and mindset",
+    },
   ];
 
   return (
@@ -71,21 +71,32 @@ export default function ContentTypesSelector({
         </p>
 
         <div className={styles.contentTypeGrid}>
-          {contentTypes.map((type) => (
-            <button
-              key={type.value}
-              onClick={() => onToggleType(type.value)}
-              className={`${styles.contentTypeCard} ${
-                safeSelected.includes(type.value) ? styles.contentTypeCardActive : ""
-              }`}
-            >
-              <div className={styles.contentTypeHeader}>
-                <span className={styles.contentTypeLabel}>{type.label}</span>
-              </div>
-              <p className={styles.contentTypeDescription}>{type.description}</p>
-            </button>
-          ))}
+          {contentTypes.map((type) => {
+            const isSelected = safeSelected.includes(type.value);
+            const atLimit = safeSelected.length >= 5 && !isSelected;
+            return (
+              <button
+                key={type.value}
+                onClick={() => !atLimit && onToggleType(type.value)}
+                disabled={atLimit}
+                className={`${styles.contentTypeCard} ${
+                  isSelected ? styles.contentTypeCardActive : ""
+                } ${atLimit ? styles.contentTypeCardDisabled : ""}`}
+              >
+                <div className={styles.contentTypeHeader}>
+                  <span className={styles.contentTypeLabel}>{type.label}</span>
+                </div>
+                <p className={styles.contentTypeDescription}>{type.description}</p>
+              </button>
+            );
+          })}
         </div>
+
+        {safeSelected.length >= 5 && (
+          <p className={styles.contentTypeLimitHint}>
+            Maximum of 5 content types selected
+          </p>
+        )}
 
         <div className={styles.previewTriggerRow}>
           <button

@@ -23,6 +23,3 @@ export async function toggleDigestStatus(): Promise<Digest> {
   return apiRequest<Digest>("/digest/toggle", { method: "PATCH" });
 }
 
-export async function deleteDigest(): Promise<void> {
-  return apiRequest<void>("/digest", { method: "DELETE" });
-}

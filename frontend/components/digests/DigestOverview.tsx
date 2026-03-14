@@ -9,7 +9,7 @@ interface DigestOverviewProps {
 }
 
 export default function DigestOverview({ digest }: DigestOverviewProps) {
-  const formatDate = (date?: Date) => {
+  const formatDate = (date?: string) => {
     if (!date) return "Not yet";
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
@@ -18,7 +18,7 @@ export default function DigestOverview({ digest }: DigestOverviewProps) {
     });
   };
 
-  const formatTime = (date?: Date) => {
+  const formatTime = (date?: string) => {
     if (!date) return "";
     return new Date(date).toLocaleTimeString("en-US", {
       hour: "2-digit",

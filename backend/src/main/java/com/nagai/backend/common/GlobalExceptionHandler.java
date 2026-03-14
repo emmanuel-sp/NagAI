@@ -1,5 +1,8 @@
 package com.nagai.backend.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationException(MethodArgumentNotValidException exception) {
@@ -164,17 +169,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AiServiceException.class)
     public ProblemDetail handleAiServiceException(AiServiceException exception) {
+        log.warn("AI service unavailable: {}", exception.getMessage());
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, exception.getMessage());
         detail.setProperty("description", "The AI service is currently unavailable");
+        detail.setProperty("correlationId", MDC.get("correlationId"));
         return detail;
     }
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnknown(Exception exception) {
-        // TODO: send to observability tool
-        exception.printStackTrace();
+        String correlationId = MDC.get("correlationId");
+        log.error("Unhandled exception [correlationId={}]: {} — {}",
+                correlationId, exception.getClass().getSimpleName(), exception.getMessage(), exception);
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
         detail.setProperty("description", "Internal server error");
+        detail.setProperty("correlationId", correlationId);
         return detail;
     }
 }

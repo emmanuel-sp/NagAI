@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +42,7 @@ class DigestServiceTest {
         user = new User();
         user.setUserId(1L);
         user.setEmail("test@example.com");
+        user.setTimezone("America/New_York");
 
         digest = new Digest();
         digest.setDigestId(10L);
@@ -142,7 +146,7 @@ class DigestServiceTest {
     }
 
     @Test
-    void toggleDigest_flipsActiveStatus() {
+    void toggleDigest_flipsActiveAndSetsNextDelivery() {
         when(userService.getCurrentUser()).thenReturn(user);
         when(digestRepository.findByUserId(1L)).thenReturn(Optional.of(digest));
         when(digestRepository.save(any(Digest.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -150,6 +154,22 @@ class DigestServiceTest {
         Digest result = digestService.toggleDigest();
 
         assertThat(result.isActive()).isTrue();
+        assertThat(result.getNextDeliveryAt()).isNotNull();
+    }
+
+    @Test
+    void toggleDigest_clearsNextDeliveryWhenTogglingOff() {
+        digest.setActive(true);
+        digest.setNextDeliveryAt(LocalDateTime.now());
+
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(digestRepository.findByUserId(1L)).thenReturn(Optional.of(digest));
+        when(digestRepository.save(any(Digest.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Digest result = digestService.toggleDigest();
+
+        assertThat(result.isActive()).isFalse();
+        assertThat(result.getNextDeliveryAt()).isNull();
     }
 
     @Test
@@ -171,5 +191,63 @@ class DigestServiceTest {
                 .isInstanceOf(DigestNotFoundException.class);
 
         verify(digestRepository, never()).delete(any());
+    }
+
+    @Test
+    void calculateNextDelivery_dailyMorningUTC() {
+        LocalDateTime result = digestService.calculateNextDelivery("daily", "morning", ZoneOffset.UTC);
+        assertThat(result).isNotNull();
+        assertThat(result.getHour()).isEqualTo(8);
+        assertThat(result).isAfter(LocalDateTime.now(ZoneOffset.UTC));
+    }
+
+    @Test
+    void calculateNextDelivery_weeklyAfternoon() {
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime result = digestService.calculateNextDelivery("weekly", "afternoon", ZoneOffset.UTC);
+        assertThat(result).isAfter(now.plusDays(6));
+    }
+
+    @Test
+    void calculateNextDelivery_respectsTimezone() {
+        ZoneId nyZone = ZoneId.of("America/New_York");
+        LocalDateTime result = digestService.calculateNextDelivery("daily", "morning", nyZone);
+        // Morning in NY (8 AM ET) should be 13:00 UTC (EST) or 12:00 UTC (EDT)
+        assertThat(result.getHour()).isIn(12, 13);
+    }
+
+    @Test
+    void mapDeliveryHour_allValues() {
+        assertThat(DigestService.mapDeliveryHour("morning")).isEqualTo(8);
+        assertThat(DigestService.mapDeliveryHour("afternoon")).isEqualTo(13);
+        assertThat(DigestService.mapDeliveryHour("evening")).isEqualTo(19);
+        assertThat(DigestService.mapDeliveryHour("unknown")).isEqualTo(8);
+    }
+
+    @Test
+    void resolveZone_validTimezone() {
+        assertThat(DigestService.resolveZone("America/New_York")).isEqualTo(ZoneId.of("America/New_York"));
+    }
+
+    @Test
+    void resolveZone_invalidFallsBackToUTC() {
+        assertThat(DigestService.resolveZone("Invalid/Zone")).isEqualTo(ZoneOffset.UTC);
+        assertThat(DigestService.resolveZone(null)).isEqualTo(ZoneOffset.UTC);
+        assertThat(DigestService.resolveZone("")).isEqualTo(ZoneOffset.UTC);
+    }
+
+    @Test
+    void markDelivered_updatesTimestamps() {
+        digest.setFrequency("daily");
+        digest.setDeliveryTime("morning");
+
+        when(digestRepository.save(any(Digest.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        digestService.markDelivered(digest, user);
+
+        assertThat(digest.getLastDeliveredAt()).isNotNull();
+        assertThat(digest.getNextDeliveryAt()).isNotNull();
+        assertThat(digest.getNextDeliveryAt()).isAfter(digest.getLastDeliveredAt());
+        verify(digestRepository).save(digest);
     }
 }

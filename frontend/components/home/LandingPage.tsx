@@ -92,7 +92,7 @@ const features = [
     description:
       "Create and monitor your personal and professional goals with detailed tracking. Set deadlines, track progress, and visualize your journey to success.",
     bullets: [
-      "Set short-term and long-term goals",
+      "Set short or long-term goals using the SMART framework",
       "Track progress with visual indicators",
       "Organize goals by category and priority",
     ],
@@ -191,6 +191,18 @@ export default function LandingPage() {
   return (
     <div className={styles.landing}>
       {!isLoggedIn && <LandingNav />}
+      <div
+        className={`${styles.scrollHint} ${heroScrolled ? styles.scrollHintHidden : ""}`}
+        aria-hidden="true"
+      >
+        <div className={styles.scrollTrack}>
+          {[...Array(2)].map((_, i) => (
+            <span key={i} className={styles.scrollTextLoop}>
+              {"Scroll to explore\u2003\u00B7\u2003".repeat(20)}
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* ─── Hero ─── */}
       <section
@@ -200,13 +212,13 @@ export default function LandingPage() {
         <div className={styles.heroContent}>
           <div className={styles.eyebrow}>AI-Powered Accountability</div>
           <h1 className={styles.headline}>
-            Set defined goals.
+            Set clear goals.
             <br />
-            <span className={styles.headlineAccent}><em>Personalize Support.</em></span>
+            <span className={styles.headlineAccent}><em>We&apos;ll get you there.</em></span>
           </h1>
           <p className={styles.subline}>
-            NagAI turns your goals into action with intelligent nudges, daily
-            digests, and an AI agent that holds you accountable.
+            NagAI turns your goals into action with AI-driven planning,
+            daily digests, and an agent that holds you accountable.
           </p>
           {!isLoggedIn && (
             <div className={styles.heroActions}>
@@ -218,14 +230,6 @@ export default function LandingPage() {
               </Link>
             </div>
           )}
-          <div
-            className={`${styles.scrollIndicator} ${heroScrolled ? styles.scrollIndicatorHidden : ""}`}
-            aria-hidden="true"
-          >
-            <div className={styles.scrollChevron} />
-            <div className={styles.scrollChevron} />
-            <div className={styles.scrollChevron} />
-          </div>
         </div>
         <div className={styles.heroMockupWrap}>
           <MockupPlaceholder

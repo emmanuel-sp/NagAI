@@ -41,9 +41,6 @@
   color: var(--text-primary);
 }
 
-.addModalTitle,
-.editModalTitle { color: var(--text-primary); }
-
 .modalSubtitle {
   font-size: var(--fs-xs);
   color: var(--text-muted);
@@ -295,70 +292,3 @@
 .createButton:disabled,
 .saveButton:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
-/* ─── Delete Confirm Dialog ─── */
-.confirmOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(10, 11, 8, 0.5);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  border-radius: var(--radius-xl);
-  animation: fadeIn 0.15s ease;
-}
-
-.confirmDialog {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  max-width: 340px;
-  width: calc(100% - 48px);
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  animation: scaleIn 0.2s ease;
-}
-
-.confirmTitle {
-  font-family: var(--font-display);
-  font-size: var(--fs-base);
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-
-.confirmMessage {
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-  line-height: 1.6;
-  font-weight: var(--fw-300);
-}
-
-.confirmActions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  margin-top: 4px;
-}
-
-.confirmDeleteButton {
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
-  color: var(--cream);
-  background: var(--error);
-  border: none;
-  padding: 8px 18px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background var(--transition-fast), transform var(--transition-fast);
-}
-
-.confirmDeleteButton:hover { background: color-mix(in srgb, var(--error), black 15%); }
-.confirmDeleteButton:active { transform: scale(0.97); }
-.confirmDeleteButton:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }

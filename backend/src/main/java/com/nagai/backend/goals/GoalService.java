@@ -31,6 +31,7 @@ public class GoalService {
         goal.setAttainable(goalAddRequest.getAttainable());
         goal.setRelevant(goalAddRequest.getRelevant());
         goal.setTimely(goalAddRequest.getTimely());
+        goal.setStepsTaken(goalAddRequest.getStepsTaken());
 
         return goalRepository.save(goal);
     }
@@ -49,12 +50,22 @@ public class GoalService {
         goal.setAttainable(goalUpdateRequest.getAttainable());
         goal.setRelevant(goalUpdateRequest.getRelevant());
         goal.setTimely(goalUpdateRequest.getTimely());
+        goal.setStepsTaken(goalUpdateRequest.getStepsTaken());
 
         return goalRepository.save(goal);
     }
 
     public Goal getGoal(Long goalId) {
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new GoalNotFoundException());
+        return goal;
+    }
+
+    public Goal getGoalForCurrentUser(Long goalId) {
+        Goal goal = goalRepository.findById(goalId).orElseThrow(GoalNotFoundException::new);
+        User currentUser = userService.getCurrentUser();
+        if (!currentUser.getUserId().equals(goal.getUserId())) {
+            throw new AccessDeniedException("You do not have permission to view this goal");
+        }
         return goal;
     }
 

@@ -33,6 +33,8 @@ public class Goal {
     private String attainable;
     private String relevant;
     private String timely;
+    @Column(name="steps_taken")
+    private String stepsTaken;
 
     @Column(name="created_at")
     @CreationTimestamp

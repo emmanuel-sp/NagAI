@@ -1,7 +1,7 @@
 /** ContextCard Component - Individual context display card. Parent: ContextList */
 "use client";
 import { AgentContext } from "@/types/agent";
-import { IoPencil, IoTrash, IoFlag, IoTime } from "@/components/icons";
+import { IoPencil, IoTrash, IoFlag } from "@/components/icons";
 import styles from "./agent-builder.module.css";
 
 interface ContextCardProps {
@@ -15,13 +15,6 @@ const messageTypeLabels = {
   nag: { label: "Nag", color: "#ff6b6b" },
   motivation: { label: "Motivation", color: "#ffa500" },
   guidance: { label: "Guidance", color: "#6d5dff" },
-};
-
-const frequencyLabels = {
-  daily: "Daily",
-  "twice-daily": "Twice Daily",
-  weekly: "Weekly",
-  "bi-weekly": "Bi-weekly",
 };
 
 export default function ContextCard({
@@ -62,12 +55,6 @@ export default function ContextCard({
           <IoFlag className={styles.detailIcon} />
           <span className={styles.detailLabel}>Goal:</span>
           <span className={styles.detailValue}>{context.goalName || "Unknown Goal"}</span>
-        </div>
-
-        <div className={styles.contextDetail}>
-          <IoTime className={styles.detailIcon} />
-          <span className={styles.detailLabel}>Frequency:</span>
-          <span className={styles.detailValue}>{frequencyLabels[context.messageFrequency]}</span>
         </div>
 
         {context.customInstructions && (

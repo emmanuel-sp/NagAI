@@ -13,10 +13,11 @@ export interface User {
   habits?: string[];
   age?: number;
   lifeContext?: string;
+  timezone?: string;
   createdAt?: string;
 }
 
-export interface UserProfile extends User {}
+export type UserProfile = User;
 
 export interface LoginCredentials {
   email: string;

@@ -384,15 +384,6 @@
   border-color: var(--border-strong);
 }
 
-/* Named field aliases */
-.fullName, .email, .phoneNumber, .userLocation, .career, .bio {
-}
-
-.value {
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-}
-
 @media (max-width: 600px) {
   .profileHero {
     flex-direction: column;

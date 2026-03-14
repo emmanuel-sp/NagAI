@@ -142,7 +142,7 @@ export default function DigestBuilderContainer() {
 
   if (loading) {
     return (
-      <div className={styles.agentBuilderContainer}>
+      <div className={styles.digestBuilderContainer}>
         <LoadingSpinner message="Loading digest..." />
       </div>
     );
@@ -150,8 +150,8 @@ export default function DigestBuilderContainer() {
 
   if (error) {
     return (
-      <div className={styles.agentBuilderContainer}>
-        <div className={styles.agentBuilderContent}>
+      <div className={styles.digestBuilderContainer}>
+        <div className={styles.digestBuilderContent}>
           <p className={styles.errorMessage}>{error}</p>
         </div>
       </div>
@@ -160,15 +160,15 @@ export default function DigestBuilderContainer() {
 
   if (notConfigured || creating) {
     return (
-      <div className={styles.agentBuilderContainer}>
+      <div className={styles.digestBuilderContainer}>
         <LoadingSpinner message="Setting up your digest..." />
       </div>
     );
   }
 
   return (
-    <div className={styles.agentBuilderContainer}>
-      <div className={styles.agentBuilderContent}>
+    <div className={styles.digestBuilderContainer}>
+      <div className={styles.digestBuilderContent}>
         <DigestOverview digest={digest!} />
 
         <DigestSettings

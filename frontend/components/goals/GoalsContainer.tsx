@@ -1,17 +1,3 @@
-/**
- * GoalsContainer Component
- *
- * Main container component for the Goals page that handles all business logic and state management.
- *
- * Component Hierarchy:
- * - GoalsContainer (this component)
- *   ├── GoalsHeader
- *   ├── EmptyState (when no goals)
- *   ├── GoalsList (when goals exist)
- *   ├── AddGoalModal
- *   └── EditGoalModal
- */
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -19,8 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { Goal, GoalWithDetails } from "@/types/goal";
 import GoalsList from "@/components/goals/GoalsList";
-import AddGoalModal from "@/components/goals/AddGoalModal";
-import EditGoalModal from "@/components/goals/EditGoalModal";
+import GoalFormModal from "@/components/goals/GoalFormModal";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Toast from "@/components/common/Toast";
@@ -152,19 +137,23 @@ export default function GoalsContainer() {
         <GoalsList goals={goals} onViewGoal={handleViewGoal} />
       )}
 
-      <AddGoalModal
+      <GoalFormModal
+        mode="create"
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
-        onAdd={handleCreateGoal}
+        onSubmit={handleCreateGoal}
       />
 
-      <EditGoalModal
-        goal={selectedGoal}
-        isOpen={isEditModalOpen}
-        onClose={handleCloseEditModal}
-        onSave={handleUpdateGoal}
-        onRemove={handleRemoveGoal}
-      />
+      {selectedGoal && (
+        <GoalFormModal
+          mode="edit"
+          isOpen={isEditModalOpen}
+          goal={selectedGoal}
+          onClose={handleCloseEditModal}
+          onSubmit={handleUpdateGoal}
+          onRemove={handleRemoveGoal}
+        />
+      )}
 
       {showToast && (
         <Toast

@@ -35,7 +35,7 @@ public class GoalController {
 
     @GetMapping("/{goalId}")
     public ResponseEntity<GoalResponse> getGoal(@PathVariable Long goalId) {
-        return ResponseEntity.ok(GoalResponse.fromEntity(goalService.getGoal(goalId)));
+        return ResponseEntity.ok(GoalResponse.fromEntity(goalService.getGoalForCurrentUser(goalId)));
     }
 
     @PostMapping

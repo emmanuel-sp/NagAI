@@ -13,8 +13,5 @@ public class AddContextRequest {
     @NotBlank(message = "messageType is required")
     private String messageType;
 
-    @NotBlank(message = "messageFrequency is required")
-    private String messageFrequency;
-
     private String customInstructions;
 }

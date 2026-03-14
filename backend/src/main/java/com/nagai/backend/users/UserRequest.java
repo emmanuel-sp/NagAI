@@ -14,4 +14,5 @@ public class UserRequest {
     private String[] habits;
     private Integer age;
     private String lifeContext;
+    private String timezone;
 }

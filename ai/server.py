@@ -7,12 +7,25 @@ from dotenv import load_dotenv
 # Load .env before importing ai_handlers (which reads ANTHROPIC_API_KEY on import)
 load_dotenv()
 
+from logging_config import setup_logging, correlation_id_var
+
+setup_logging()
+logger = logging.getLogger(__name__)
+
 import ai_service_pb2
 import ai_service_pb2_grpc
 import ai_handlers
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+class CorrelationIdInterceptor(grpc.ServerInterceptor):
+    """Extracts X-Correlation-ID from gRPC metadata into contextvars."""
+
+    def intercept_service(self, continuation, handler_call_details):
+        metadata = dict(handler_call_details.invocation_metadata)
+        cid = metadata.get("x-correlation-id", "-")
+        correlation_id_var.set(cid)
+        return continuation(handler_call_details)
 
 
 class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
@@ -77,8 +90,17 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
 
 def serve():
     port = os.environ.get("GRPC_PORT", "9090")
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
+    server = grpc.server(
+        futures.ThreadPoolExecutor(max_workers=4),
+        interceptors=[CorrelationIdInterceptor()],
+    )
     ai_service_pb2_grpc.add_AiServiceServicer_to_server(AiServiceServicer(), server)
+
+    # gRPC health check service
+    health_servicer = health.HealthServicer()
+    health_pb2_grpc.add_HealthServicer_to_server(health_servicer, server)
+    health_servicer.set("nagai.ai.AiService", health_pb2.HealthCheckResponse.SERVING)
+
     server.add_insecure_port(f"[::]:{port}")
     server.start()
     logger.info(f"NagAI gRPC server listening on port {port}")

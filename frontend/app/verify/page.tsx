@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { verifyEmail } from "@/services/authService";
 import Link from "next/link";
 import styles from "@/components/auth/login.module.css";
 
-export default function VerifyPage() {
+function VerifyContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -60,5 +60,24 @@ export default function VerifyPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className={styles.loginContainer}>
+          <div className={styles.loginCard}>
+            <div className={styles.loginHeader}>
+              <h1 className={styles.loginTitle}>Verifying...</h1>
+              <p className={styles.loginSubtitle}>Please wait while we verify your email.</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <VerifyContent />
+    </Suspense>
   );
 }

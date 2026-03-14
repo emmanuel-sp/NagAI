@@ -161,6 +161,29 @@ export function IoCheckmarkCircle({ size = 16, width, height, ...p }: IconProps)
   );
 }
 
+export function IoAlertCircle({ size = 16, width, height, ...p }: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={width ?? size}
+      height={height ?? size}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      {...p}
+    >
+      <circle cx="12" cy="12" r="10" fill="currentColor" />
+      <path
+        d="M12 8v4M12 16h.01"
+        fill="none"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export const IoEllipseOutline = S(<circle cx="12" cy="12" r="10" />);
 
 export const IoMail = S(
@@ -190,13 +213,6 @@ export function IoFlag({ size = 16, width, height, ...p }: IconProps) {
   );
 }
 
-export const IoFlagOutline = S(
-  <>
-    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-    <line x1="4" y1="22" x2="4" y2="15" />
-  </>
-);
-
 export const IoHome = S(
   <>
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -211,17 +227,6 @@ export const IoPerson = S(
   </>
 );
 
-export const IoTime = S(
-  <>
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="12 6 12 12 16 14" />
-  </>
-);
-
-export const IoConstruct = S(
-  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-);
-
 export const IoEye = S(
   <>
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -233,13 +238,6 @@ export const IoEyeOff = S(
   <>
     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
     <line x1="1" y1="1" x2="23" y2="23" />
-  </>
-);
-
-export const IoArrowBack = S(
-  <>
-    <line x1="19" y1="12" x2="5" y2="12" />
-    <polyline points="12 19 5 12 12 5" />
   </>
 );
 

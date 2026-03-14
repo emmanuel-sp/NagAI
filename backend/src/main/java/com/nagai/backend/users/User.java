@@ -69,6 +69,9 @@ public class User implements UserDetails{
     @Column(name = "life_context", columnDefinition = "TEXT")
     private String lifeContext;
 
+    @Column(length = 50)
+    private String timezone = "UTC";
+
     @Override
     public String getUsername() {
         return email;

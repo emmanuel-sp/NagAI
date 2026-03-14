@@ -3,7 +3,6 @@
  */
 
 export type MessageType = "nag" | "motivation" | "guidance";
-export type MessageFrequency = "daily" | "twice-daily" | "weekly" | "bi-weekly";
 export type CommunicationChannel = "email" | "phone";
 
 export interface AgentContext {
@@ -13,8 +12,8 @@ export interface AgentContext {
   goalId?: number | null;
   goalName?: string | null;
   messageType: MessageType;
-  messageFrequency: MessageFrequency;
   customInstructions?: string | null;
+  lastMessageSentAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,7 +33,6 @@ export interface CreateContextRequest {
   name: string;
   goalId?: number | null;
   messageType: MessageType;
-  messageFrequency: MessageFrequency;
   customInstructions?: string;
 }
 
@@ -42,6 +40,5 @@ export interface UpdateContextRequest {
   name?: string;
   goalId?: number | null;
   messageType?: MessageType;
-  messageFrequency?: MessageFrequency;
   customInstructions?: string;
 }

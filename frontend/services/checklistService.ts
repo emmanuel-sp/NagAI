@@ -20,12 +20,6 @@ export async function fetchChecklists(): Promise<Checklist[]> {
   return checklists;
 }
 
-export async function fetchChecklistByGoalId(
-  goalId: number
-): Promise<ChecklistItem[]> {
-  return apiRequest<ChecklistItem[]>(`/checklists/goal/${goalId}`);
-}
-
 export async function createChecklistItem(
   data: CreateChecklistItemDto
 ): Promise<ChecklistItem> {

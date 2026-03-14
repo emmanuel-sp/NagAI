@@ -20,6 +20,7 @@ public class UserResponse {
         this.habits = user.getHabits();
         this.age = user.getAge();
         this.lifeContext = user.getLifeContext();
+        this.timezone = user.getTimezone();
     }
 
     private Long id;
@@ -45,4 +46,5 @@ public class UserResponse {
     private String[] habits;
     private Integer age;
     private String lifeContext;
+    private String timezone;
 }

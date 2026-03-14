@@ -12,8 +12,7 @@
  *   │   └── ContextCard (for each context)
  *   ├── EmptyContextState (when no contexts)
  *   ├── DeploymentPanel
- *   ├── CreateContextModal
- *   └── EditContextModal
+ *   └── ContextFormModal (create/edit modes)
  *
  * Responsibilities:
  * - Fetch and manage agent data
@@ -46,8 +45,7 @@ import CommunicationSettings from "./CommunicationSettings";
 import ContextList from "./ContextList";
 import EmptyContextState from "./EmptyContextState";
 import DeploymentPanel from "./DeploymentPanel";
-import CreateContextModal from "./CreateContextModal";
-import EditContextModal from "./EditContextModal";
+import ContextFormModal from "./ContextFormModal";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import styles from "./agent-builder.module.css";
@@ -260,23 +258,27 @@ export default function AgentBuilderContainer() {
         />
       </div>
 
-      <CreateContextModal
+      <ContextFormModal
+        mode="create"
         isOpen={isCreateModalOpen}
         goals={goals}
         onClose={() => setIsCreateModalOpen(false)}
-        onCreate={handleCreateContext}
+        onSubmit={handleCreateContext}
       />
 
-      <EditContextModal
-        isOpen={isEditModalOpen}
-        context={selectedContext}
-        goals={goals}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedContext(null);
-        }}
-        onUpdate={handleUpdateContext}
-      />
+      {selectedContext && (
+        <ContextFormModal
+          mode="edit"
+          isOpen={isEditModalOpen}
+          goals={goals}
+          context={selectedContext}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedContext(null);
+          }}
+          onSubmit={handleUpdateContext}
+        />
+      )}
 
       <ConfirmDialog
         isOpen={!!confirmAction}

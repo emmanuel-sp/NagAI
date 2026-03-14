@@ -32,23 +32,24 @@ Python AI Service
 - **Java 21+** and **Maven**
 - **Node.js 18+**
 - **Python 3.12+**
-- **Docker** (for PostgreSQL and optionally Kafka)
+- **Docker** and **Docker Compose**
 
 ## Running Locally
 
-### 1. Database (PostgreSQL)
+### 1. Infrastructure (PostgreSQL + Kafka + Zookeeper)
 
 ```bash
-docker run -d \
-  --name postgres-nagai \
-  -e POSTGRES_DB=nagai \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=password \
-  -p 5432:5432 \
-  postgres:latest
+docker compose up -d
 ```
 
-To wipe and reset the schema (safe — no real users in dev):
+This starts PostgreSQL (port 5432), Kafka (port 9092), and Zookeeper (port 2181). To stop:
+
+```bash
+docker compose down        # keep data
+docker compose down -v     # wipe volumes (fresh DB)
+```
+
+To wipe and reset the schema only (safe — no real users in dev):
 ```bash
 cd backend && mvn flyway:clean
 ```
@@ -85,7 +86,7 @@ python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# Edit .env — set ANTHROPIC_API_KEY
+# Edit .env — set ANTHROPIC_API_KEY, SMTP credentials, DB credentials, NewsAPI key
 
 # Compile proto stubs (required after any .proto change)
 python -m grpc_tools.protoc \
@@ -94,26 +95,14 @@ python -m grpc_tools.protoc \
   --grpc_python_out=. \
   ../backend/src/main/proto/ai_service.proto
 
-# Start gRPC server
+# Start gRPC server (handles real-time AI requests)
 python server.py
 
-# Start Kafka consumer (separate terminal, requires Kafka running)
+# Start Kafka consumer (separate terminal — handles digest delivery + agent messages)
 python kafka_consumer.py
 ```
 
-### 5. Kafka (optional — needed for digest/agent scheduling)
-
-```bash
-# Zookeeper
-docker run -d --name zookeeper -p 2181:2181 zookeeper:latest
-
-# Kafka broker
-docker run -d --name kafka \
-  -p 9092:9092 \
-  -e KAFKA_ZOOKEEPER_CONNECT=localhost:2181 \
-  -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
-  confluentinc/cp-kafka:latest
-```
+The gRPC server and Kafka consumer are **separate processes** — both must be running for full functionality.
 
 ## Environment Variables
 
@@ -135,6 +124,22 @@ Google OAuth and email verification require real credentials — see comments in
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 GRPC_PORT=9090
 KAFKA_BOOTSTRAP=localhost:9092
+
+# Email delivery (Gmail SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+
+# Database (for sent digest/message persistence)
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=nagai
+DB_USER=postgres
+DB_PASSWORD=password
+
+# Web search (NewsAPI.org — for news content in digests)
+NEWSAPI_KEY=your_newsapi_key
 ```
 
 ## Project Structure
@@ -155,7 +160,7 @@ NagAI/
 │       ├── users/          User entity + profile endpoints
 │       ├── goals/          Goal CRUD
 │       ├── checklists/     Checklist items CRUD
-│       ├── digests/        Digest configuration CRUD
+│       ├── digests/        Digest CRUD + scheduled delivery (Kafka)
 │       ├── agents/         AI agent + context CRUD
 │       ├── ai/             gRPC client + AI REST endpoints
 │       ├── config/         Security, Kafka, gRPC config
@@ -164,13 +169,103 @@ NagAI/
 │       └── ai_service.proto   Shared gRPC contract (Java + Python)
 │
 ├── ai/                     Python AI service
-│   ├── server.py           gRPC server
+│   ├── server.py           gRPC server (real-time AI requests)
 │   ├── ai_handlers.py      Claude API call implementations
-│   ├── kafka_consumer.py   Async message consumer
+│   ├── kafka_consumer.py   Async message consumer (digests + agents)
+│   ├── digest_handler.py   Digest generation, HTML email rendering, SMTP delivery
+│   ├── web_search.py       NewsAPI.org integration for news content
 │   └── requirements.txt
 │
+├── docker-compose.yml      PostgreSQL + Kafka + Zookeeper
 └── TODO.md                 Development plan (remaining steps)
 ```
+
+## Observability
+
+### Health Checks
+
+**Backend (Spring Actuator)**:
+```bash
+curl http://localhost:8080/actuator/health
+# {"status":"UP","components":{"db":{"status":"UP"},"diskSpace":{"status":"UP"}}}
+```
+
+Other Actuator endpoints (require authentication):
+- `/actuator/metrics` — Micrometer metrics index
+- `/actuator/metrics/{metric.name}` — specific metric (e.g. `nagai.digests.sent`)
+- `/actuator/loggers` — view/change log levels at runtime
+- `/actuator/info` — app name + version
+
+**Python AI Service (gRPC health)**:
+```bash
+# requires grpc-health-probe or grpcurl
+grpcurl -plaintext localhost:9090 grpc.health.v1.Health/Check
+```
+
+**Docker containers**:
+Both Postgres and Kafka have built-in health checks in `docker-compose.yml`:
+```bash
+docker compose ps   # shows health status
+```
+
+### Logging
+
+All services emit structured JSON logs in production and human-readable logs in development.
+
+**Backend** — controlled by Spring profile:
+```bash
+# Dev (default) — human-readable with correlation IDs
+./mvnw spring-boot:run
+
+# Production — JSON to stdout
+SPRING_PROFILES_ACTIVE=prod ./mvnw spring-boot:run
+```
+
+**Python AI Service** — controlled by `LOG_FORMAT` env var:
+```bash
+# Dev (default) — human-readable
+python server.py
+
+# Production — JSON to stdout
+LOG_FORMAT=json python server.py
+```
+
+**Frontend** — API call timing logged to browser console in development (`console.debug`).
+
+### Correlation IDs
+
+Every request gets an `X-Correlation-ID` header (8-char UUID) that flows across all three services:
+
+```
+Frontend (generates ID) → Backend (MDC) → gRPC metadata → Python AI Service (contextvars)
+                                        → Kafka headers  → Python AI Service (contextvars)
+```
+
+All log lines include the correlation ID. Error responses from the backend include it in the JSON body (`correlationId` field) for debugging.
+
+### Custom Metrics
+
+Available at `/actuator/metrics/nagai.*`:
+
+| Metric | Type | Description |
+|---|---|---|
+| `nagai.digests.sent` | Counter | Digest emails successfully queued to Kafka |
+| `nagai.digests.failed` | Counter | Digest delivery failures |
+| `nagai.agent_messages.sent` | Counter | Agent messages successfully queued |
+| `nagai.agent_messages.failed` | Counter | Agent message failures |
+| `nagai.grpc.errors` | Counter | gRPC call failures to the Python service |
+
+### Error Tracking (Sentry)
+
+The frontend uses `@sentry/nextjs` for production error tracking. To enable:
+
+1. Create a free [Sentry](https://sentry.io) account and Next.js project
+2. Add the DSN to `frontend/.env.local`:
+   ```env
+   NEXT_PUBLIC_SENTRY_DSN=https://your-dsn@sentry.io/project-id
+   ```
+
+Sentry is disabled in development. Error boundaries (`error.tsx`, `global-error.tsx`) catch rendering errors and show a recovery UI instead of blank pages.
 
 ## Development Notes
 

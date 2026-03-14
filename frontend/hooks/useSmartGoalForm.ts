@@ -14,6 +14,7 @@ export interface SmartGoalFields {
   attainable: string;
   relevant: string;
   timely: string;
+  stepsTaken: string;
 }
 
 const emptyFields: SmartGoalFields = {
@@ -25,6 +26,7 @@ const emptyFields: SmartGoalFields = {
   attainable: "",
   relevant: "",
   timely: "",
+  stepsTaken: "",
 };
 
 export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {

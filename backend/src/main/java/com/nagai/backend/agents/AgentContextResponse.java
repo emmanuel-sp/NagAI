@@ -12,8 +12,8 @@ public class AgentContextResponse {
     private String goalName;
     private String name;
     private String messageType;
-    private String messageFrequency;
     private String customInstructions;
+    private LocalDateTime lastMessageSentAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -25,8 +25,8 @@ public class AgentContextResponse {
         response.setGoalName(goalName);
         response.setName(context.getName());
         response.setMessageType(context.getMessageType());
-        response.setMessageFrequency(context.getMessageFrequency());
         response.setCustomInstructions(context.getCustomInstructions());
+        response.setLastMessageSentAt(context.getLastMessageSentAt());
         response.setCreatedAt(context.getCreatedAt());
         response.setUpdatedAt(context.getUpdatedAt());
         return response;

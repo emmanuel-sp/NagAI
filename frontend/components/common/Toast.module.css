@@ -62,6 +62,14 @@
   color: var(--text-primary);
 }
 
+.toastError {
+  border-color: var(--error-border);
+}
+
+.toastIconError {
+  color: var(--error);
+}
+
 @media (max-width: 480px) {
   .toast {
     left: 16px;

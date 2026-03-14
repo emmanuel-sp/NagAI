@@ -59,6 +59,9 @@ public class UserService {
         currentUser.setHabits(request.getHabits());
         currentUser.setAge(request.getAge());
         currentUser.setLifeContext(request.getLifeContext());
+        if (request.getTimezone() != null && !request.getTimezone().isBlank()) {
+            currentUser.setTimezone(request.getTimezone());
+        }
         return userRepository.save(currentUser);
     }
 

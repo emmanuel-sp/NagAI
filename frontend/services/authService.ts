@@ -46,10 +46,6 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
-export async function isAuthenticated(): Promise<boolean> {
-  return (await getCurrentUser()) !== null;
-}
-
 export async function loginWithGoogle(idToken: string): Promise<void> {
   const response = await apiRequest<LoginResponse>("/auth/google", {
     method: "POST",

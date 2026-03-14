@@ -65,7 +65,7 @@ public class AgentService {
         AgentContext context = new AgentContext();
         context.setAgentId(agent.getAgentId());
         applyContextFields(context, request.getName(), request.getGoalId(),
-                request.getMessageType(), request.getMessageFrequency(), request.getCustomInstructions());
+                request.getMessageType(), request.getCustomInstructions());
         return buildContextResponse(agentContextRepository.save(context));
     }
 
@@ -79,7 +79,6 @@ public class AgentService {
         if (request.getName() != null) context.setName(request.getName());
         if (request.getGoalId() != null) context.setGoalId(request.getGoalId());
         if (request.getMessageType() != null) context.setMessageType(request.getMessageType());
-        if (request.getMessageFrequency() != null) context.setMessageFrequency(request.getMessageFrequency());
         if (request.getCustomInstructions() != null) context.setCustomInstructions(request.getCustomInstructions());
         return buildContextResponse(agentContextRepository.save(context));
     }
@@ -120,11 +119,10 @@ public class AgentService {
     }
 
     private void applyContextFields(AgentContext context, String name, Long goalId,
-                                     String messageType, String messageFrequency, String customInstructions) {
+                                     String messageType, String customInstructions) {
         context.setName(name);
         context.setGoalId(goalId);
         context.setMessageType(messageType);
-        context.setMessageFrequency(messageFrequency);
         context.setCustomInstructions(customInstructions);
     }
 }

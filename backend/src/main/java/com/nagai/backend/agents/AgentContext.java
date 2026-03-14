@@ -35,11 +35,11 @@ public class AgentContext {
     @Column(name = "message_type", nullable = false)
     private String messageType;
 
-    @Column(name = "message_frequency", nullable = false)
-    private String messageFrequency;
-
     @Column(name = "custom_instructions")
     private String customInstructions;
+
+    @Column(name = "last_message_sent_at")
+    private LocalDateTime lastMessageSentAt;
 
     @Column(name = "created_at")
     @CreationTimestamp
