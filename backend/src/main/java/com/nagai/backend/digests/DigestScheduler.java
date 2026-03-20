@@ -146,6 +146,7 @@ public class DigestScheduler {
                 .contentTypes(digest.getContentTypes())
                 .lastDeliveredAt(digest.getLastDeliveredAt() != null
                         ? digest.getLastDeliveredAt().toString() : null)
+                .unsubscribeToken(digest.getUnsubscribeToken())
                 .goals(goalPayloads)
                 .build();
     }

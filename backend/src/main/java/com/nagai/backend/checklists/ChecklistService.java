@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.nagai.backend.exceptions.ChecklistLimitException;
 import com.nagai.backend.exceptions.ChecklistNotFoundException;
 import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalService;
@@ -34,11 +35,18 @@ public class ChecklistService {
         return checklists.stream().map(ChecklistResponse::fromEntity).toList();
     }
 
+    private static final int MAX_CHECKLIST_ITEMS = 20;
+
     public ChecklistResponse addChecklistItem(ChecklistAddRequest request) {
         Goal goal = goalService.getGoal(request.getGoalId());
         User currentUser = userService.getCurrentUser();
         if (!currentUser.getUserId().equals(goal.getUserId())) {
             throw new AccessDeniedException("You do not have permission to add items to this goal's checklist");
+        }
+
+        List<ChecklistItem> existing = checklistRepository.findChecklistItemByGoalId(request.getGoalId());
+        if (existing.size() >= MAX_CHECKLIST_ITEMS) {
+            throw new ChecklistLimitException();
         }
 
         ChecklistItem item = new ChecklistItem();

@@ -213,6 +213,8 @@ export function IoFlag({ size = 16, width, height, ...p }: IconProps) {
   );
 }
 
+export const IoChevronDown = S(<polyline points="6 9 12 15 18 9" />);
+
 export const IoHome = S(
   <>
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />

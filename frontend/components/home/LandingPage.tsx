@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styles from "./LandingPage.module.css";
-import { IoCheckmarkCircle } from "@/components/icons";
+import {
+  IoCheckmarkCircle,
+  IoFlag,
+  IoListOutline,
+  IoMail,
+  IoRocket,
+} from "@/components/icons";
 
 /* ─── Scroll Reveal Hook ─── */
 function useScrollReveal(threshold = 0.15) {
@@ -29,7 +35,7 @@ function useScrollReveal(threshold = 0.15) {
   return { ref, isVisible };
 }
 
-/* ─── Landing Nav (only for logged-out users; logged-in users see the main NavBar) ─── */
+/* ─── Landing Nav ─── */
 function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
 
@@ -41,7 +47,9 @@ function LandingNav() {
   }, []);
 
   return (
-    <nav className={`${styles.landingNav} ${scrolled ? styles.landingNavScrolled : ""}`}>
+    <nav
+      className={`${styles.landingNav} ${scrolled ? styles.landingNavScrolled : ""}`}
+    >
       <Link href="/" className={styles.logoLink}>
         NagAI
       </Link>
@@ -87,6 +95,7 @@ function MockupPlaceholder({
 /* ─── Data ─── */
 const features = [
   {
+    id: "goals",
     label: "GOAL TRACKING",
     title: "Set structured goals with AI-assisted criteria",
     description:
@@ -100,6 +109,7 @@ const features = [
       "Goals page — goal cards with progress bars and SMART criteria",
   },
   {
+    id: "checklists",
     label: "SMART CHECKLISTS",
     title: "Break down goals into actionable steps",
     description:
@@ -113,6 +123,7 @@ const features = [
       "Checklists page — checklist items with checkboxes and linked goals",
   },
   {
+    id: "digests",
     label: "PERSONALIZED DIGESTS",
     title: "Curated content tailored to your journey",
     description:
@@ -127,6 +138,7 @@ const features = [
       "Digest builder — content type selection and delivery schedule",
   },
   {
+    id: "agent",
     label: "AI AGENT BUILDER",
     title: "Your personal AI accountability partner",
     description:
@@ -139,6 +151,13 @@ const features = [
     mockupLabel:
       "Agent builder — config panel with communication channels and deploy controls",
   },
+];
+
+const highlights = [
+  { Icon: IoFlag, text: "SMART Goals", id: "goals" },
+  { Icon: IoListOutline, text: "AI Checklists", id: "checklists" },
+  { Icon: IoMail, text: "Daily Digests", id: "digests" },
+  { Icon: IoRocket, text: "AI Agent", id: "agent" },
 ];
 
 const steps = [
@@ -167,14 +186,10 @@ const steps = [
 /* ─── Main Component ─── */
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [heroScrolled, setHeroScrolled] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<number | null>(null);
+  const [isStuck, setIsStuck] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const hero = useScrollReveal(0.1);
-
-  useEffect(() => {
-    const onScroll = () => setHeroScrolled(window.scrollY > 80);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
   const featureRefs = [
     useScrollReveal(0.12),
     useScrollReveal(0.12),
@@ -188,37 +203,90 @@ export default function LandingPage() {
     setIsLoggedIn(!!localStorage.getItem("authToken"));
   }, []);
 
+  /* Active feature section detection */
+  useEffect(() => {
+    const sectionIds = features.map((f) => f.id);
+    const sections = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+    if (sections.length === 0) return;
+
+    const intersecting = new Map<number, boolean>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const idx = sections.indexOf(entry.target as HTMLElement);
+          if (idx >= 0) intersecting.set(idx, entry.isIntersecting);
+        }
+
+        const viewportCenter = window.innerHeight / 2;
+        let best = -1;
+        let bestDist = Infinity;
+
+        intersecting.forEach((visible, idx) => {
+          if (!visible) return;
+          const rect = sections[idx].getBoundingClientRect();
+          const center = rect.top + rect.height / 2;
+          const dist = Math.abs(center - viewportCenter);
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = idx;
+          }
+        });
+
+        setActiveFeature(best >= 0 ? best : null);
+      },
+      {
+        threshold: [0, 0.2, 0.5, 0.8],
+        rootMargin: "-30% 0px -30% 0px",
+      }
+    );
+
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
+  }, []);
+
+  /* Sticky sentinel detection */
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsStuck(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToFeature = (id: string) => {
+    document
+      .getElementById(id)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className={styles.landing}>
       {!isLoggedIn && <LandingNav />}
-      <div
-        className={`${styles.scrollHint} ${heroScrolled ? styles.scrollHintHidden : ""}`}
-        aria-hidden="true"
-      >
-        <div className={styles.scrollTrack}>
-          {[...Array(2)].map((_, i) => (
-            <span key={i} className={styles.scrollTextLoop}>
-              {"Scroll to explore\u2003\u00B7\u2003".repeat(20)}
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* ─── Hero ─── */}
       <section
         ref={hero.ref}
         className={`${styles.heroSection} ${hero.isVisible ? styles.visible : ""}`}
       >
+        <div className={styles.heroGlow} aria-hidden="true" />
         <div className={styles.heroContent}>
-          <div className={styles.eyebrow}>AI-Powered Accountability</div>
           <h1 className={styles.headline}>
             Set clear goals.
             <br />
-            <span className={styles.headlineAccent}><em>We&apos;ll get you there.</em></span>
+            <span className={styles.headlineAccent}>
+              <em>We&apos;ll get you there.</em>
+            </span>
           </h1>
           <p className={styles.subline}>
-            NagAI turns your goals into action with AI-driven planning,
-            daily digests, and an agent that holds you accountable.
+            NagAI turns your goals into action with AI-driven planning, daily
+            digests, and an agent that holds you accountable.
           </p>
           {!isLoggedIn && (
             <div className={styles.heroActions}>
@@ -231,6 +299,7 @@ export default function LandingPage() {
             </div>
           )}
         </div>
+
         <div className={styles.heroMockupWrap}>
           <MockupPlaceholder
             label="Dashboard overview — goals, checklists, and digest summary at a glance"
@@ -240,21 +309,50 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ─── Sticky Feature Nav ─── */}
+      <div ref={sentinelRef} className={styles.featureNavSentinel} />
+      <div
+        className={`${styles.featureNav} ${hero.isVisible ? styles.visible : ""} ${isStuck ? styles.featureNavStuck : ""}`}
+      >
+        <div className={styles.highlightsBar}>
+          {highlights.map((h, i) => (
+            <button
+              key={h.text}
+              className={`${styles.highlightPill} ${activeFeature === i ? styles.highlightActive : ""}`}
+              onClick={() => scrollToFeature(h.id)}
+            >
+              <h.Icon size={15} />
+              <span>{h.text}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ─── Feature Sections ─── */}
       {features.map((feature, i) => {
         const reveal = featureRefs[i];
         const reversed = i % 2 === 1;
+        const isActive = activeFeature === i;
+        const isDimmed = activeFeature !== null && activeFeature !== i;
         return (
           <section
             key={feature.label}
+            id={feature.id}
             ref={reveal.ref}
-            className={`${styles.featureSection} ${reversed ? styles.featureReversed : ""} ${reveal.isVisible ? styles.visible : ""}`}
+            className={[
+              styles.featureSection,
+              reversed ? styles.featureReversed : "",
+              reversed ? styles.featureAlt : "",
+              reveal.isVisible ? styles.visible : "",
+              isActive ? styles.featureActive : "",
+              isDimmed ? styles.featureDimmed : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
           >
             <div className={styles.featureGrid}>
               <div className={styles.featureTextCol}>
-                <span className={styles.featureEyebrow}>
-                  {feature.label}
-                </span>
+                <span className={styles.featureEyebrow}>{feature.label}</span>
                 <h2 className={styles.featureTitle}>{feature.title}</h2>
                 <p className={styles.featureDescription}>
                   {feature.description}

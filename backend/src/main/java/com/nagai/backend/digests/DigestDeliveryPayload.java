@@ -17,6 +17,7 @@ public class DigestDeliveryPayload {
     private String userProfile;
     private String[] contentTypes;
     private String lastDeliveredAt;
+    private String unsubscribeToken;
     private List<GoalPayload> goals;
 
     @Data

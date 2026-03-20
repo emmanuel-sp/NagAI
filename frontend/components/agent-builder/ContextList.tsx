@@ -8,6 +8,7 @@ import styles from "./agent-builder.module.css";
 interface ContextListProps {
   contexts: AgentContext[];
   canEdit: boolean;
+  canCreate: boolean;
   onEdit: (context: AgentContext) => void;
   onDelete: (contextId: number) => void;
   onCreate: () => void;
@@ -16,6 +17,7 @@ interface ContextListProps {
 export default function ContextList({
   contexts,
   canEdit,
+  canCreate,
   onEdit,
   onDelete,
   onCreate,
@@ -23,8 +25,8 @@ export default function ContextList({
   return (
     <div className={styles.contextsSection}>
       <div className={styles.contextsSectionHeader}>
-        <h2 className={styles.cardTitle}>Agent Contexts</h2>
-        {canEdit && (
+        <h2 className={styles.cardTitle}>Agent Contexts ({contexts.length}/4)</h2>
+        {canEdit && canCreate && (
           <button onClick={onCreate} className={styles.addContextButton}>
             <IoAdd size={20} />
             Add Context

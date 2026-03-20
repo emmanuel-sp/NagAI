@@ -41,7 +41,7 @@ class AiGrpcClientServiceTest {
                 SmartFieldResponse.newBuilder().setSuggestion("Track 3 workouts per week").build());
 
         String result = service.suggestSmartField("measurable", "Get fit", "Exercise regularly",
-                Map.of("specific", "Go to the gym 4x per week"), "");
+                Map.of("specific", "Go to the gym 4x per week"), "", "");
 
         assertThat(result).isEqualTo("Track 3 workouts per week");
     }
@@ -84,7 +84,7 @@ class AiGrpcClientServiceTest {
                 .thenThrow(new StatusRuntimeException(
                         Status.UNAVAILABLE.withDescription("Connection refused")));
 
-        assertThatThrownBy(() -> service.suggestSmartField("specific", "Get fit", "Exercise", Map.of(), ""))
+        assertThatThrownBy(() -> service.suggestSmartField("specific", "Get fit", "Exercise", Map.of(), "", ""))
                 .isInstanceOf(AiServiceException.class)
                 .hasMessageContaining("Connection refused");
     }

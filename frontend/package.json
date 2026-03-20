@@ -10,9 +10,10 @@
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
     "@sentry/nextjs": "^10.43.0",
-    "next": "15.5.4",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "eslint-config-next": "^16.1.6",
+    "next": "^16.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -112,6 +112,13 @@
   gap: 12px;
 }
 
+.checklistTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .checklistGoalTitle {
   font-family: var(--font-display);
   font-size: var(--fs-xl);
@@ -119,6 +126,18 @@
   letter-spacing: -0.02em;
   color: var(--text-primary);
   line-height: 1.25;
+}
+
+.collapseIcon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.collapseIconCollapsed {
+  transform: rotate(-90deg);
 }
 
 /* ─── Progress bar ─── */
@@ -500,6 +519,11 @@
 .addItemButton:hover {
   background: var(--surface-hover);
   border-color: var(--border-strong);
+}
+
+.addItemButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .addItemButtonSecondary {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Checklist as ChecklistType } from "@/types/checklist";
 import ChecklistItem from "./ChecklistItem";
 import AddItemForm from "./AddItemForm";
-import { IoAdd, IoSparkles } from "@/components/icons";
+import { IoAdd, IoSparkles, IoChevronDown } from "@/components/icons";
 import styles from "./checklist.module.css";
 
 interface ChecklistProps {
@@ -31,6 +31,7 @@ export default function Checklist({
   isGenerating = false,
 }: ChecklistProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sortedItems = [...checklist.items].sort((a, b) => {
     if (a.completed != b.completed) return a.completed ? 1 : -1;
@@ -40,6 +41,7 @@ export default function Checklist({
   const totalCount = checklist.items.length;
   const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
   const shouldShowActions = filter !== "completed";
+  const atItemLimit = totalCount >= 20;
 
   const getEmptyStateMessage = () => {
     if (filter === "completed") return "No completed items yet.";
@@ -55,9 +57,14 @@ export default function Checklist({
   return (
     <div className={styles.checklist}>
       {/* Header with progress */}
-      <div className={styles.checklistHeader}>
+      <div className={styles.checklistHeader} onClick={() => setIsCollapsed(!isCollapsed)} style={{ cursor: "pointer" }}>
         <div className={styles.checklistHeaderInfo}>
-          <h2 className={styles.checklistGoalTitle}>{checklist.goalTitle || "Untitled Goal"}</h2>
+          <div className={styles.checklistTitleRow}>
+            <h2 className={styles.checklistGoalTitle}>{checklist.goalTitle || "Untitled Goal"}</h2>
+            <span className={`${styles.collapseIcon} ${isCollapsed ? styles.collapseIconCollapsed : ""}`}>
+              <IoChevronDown size={18} />
+            </span>
+          </div>
           {filter == "all" &&
           <div className={styles.checklistProgress}>
             <div className={styles.progressBar}>
@@ -72,24 +79,26 @@ export default function Checklist({
       </div>
 
       {/* Items */}
-      <div className={styles.checklistItems}>
-        {sortedItems.map((item) => (
-          <ChecklistItem key={item.checklistId} item={item} onToggle={onToggleItem} onUpdate={onUpdateItem} onDelete={onDeleteItem} />
-        ))}
+      {!isCollapsed && (
+        <>
+        <div className={styles.checklistItems}>
+          {sortedItems.map((item) => (
+            <ChecklistItem key={item.checklistId} item={item} onToggle={onToggleItem} onUpdate={onUpdateItem} onDelete={onDeleteItem} />
+          ))}
 
-        {sortedItems.length === 0 && !isAdding && !isGenerating && (
-          <div className={styles.emptyState}>
-            <p>{getEmptyStateMessage()}</p>
-          </div>
-        )}
+          {sortedItems.length === 0 && !isAdding && !isGenerating && (
+            <div className={styles.emptyState}>
+              <p>{getEmptyStateMessage()}</p>
+            </div>
+          )}
 
-        {isGenerating && (
-          <div className={styles.generatingState}>
-            <div className={styles.generatingSpinner}></div>
-            <p>AI is generating checklist items...</p>
-          </div>
-        )}
-      </div>
+          {isGenerating && (
+            <div className={styles.generatingState}>
+              <div className={styles.generatingSpinner}></div>
+              <p>AI is generating checklist items...</p>
+            </div>
+          )}
+        </div>
 
       {/* Actions */}
       {shouldShowActions && !isAdding && !isGenerating ? (
@@ -107,11 +116,11 @@ export default function Checklist({
             </>
           ) : (
             <>
-              <button onClick={() => setIsAdding(true)} className={styles.addItemButton}>
+              <button onClick={() => setIsAdding(true)} className={styles.addItemButton} disabled={atItemLimit}>
                 <IoAdd size={20} />
-                Add Item
+                {atItemLimit ? "Item Limit (20)" : "Add Item"}
               </button>
-              <button onClick={onGenerateItem || (() => {})} className={styles.generateItemButton} disabled={isGenerating}>
+              <button onClick={onGenerateItem || (() => {})} className={styles.generateItemButton} disabled={isGenerating || atItemLimit}>
                 <IoSparkles size={18} />
                 AI Suggest
               </button>
@@ -121,6 +130,8 @@ export default function Checklist({
       ) : shouldShowActions && isAdding ? (
         <AddItemForm onAdd={handleAdd} onCancel={() => setIsAdding(false)} />
       ) : null}
+        </>
+      )}
     </div>
   );
 }

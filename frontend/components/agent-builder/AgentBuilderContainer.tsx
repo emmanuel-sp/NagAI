@@ -220,6 +220,7 @@ export default function AgentBuilderContainer() {
   }
 
   const canDeploy = agent.contexts.length > 0 && !agent.deployed;
+  const canCreateContext = agent.contexts.length < 4;
 
   return (
     <div className={styles.agentBuilderContainer}>
@@ -230,13 +231,14 @@ export default function AgentBuilderContainer() {
 
         {agent.contexts.length === 0 ? (
           <EmptyContextState
-            canCreate={true}
+            canCreate={canCreateContext}
             onCreate={() => setIsCreateModalOpen(true)}
           />
         ) : (
           <ContextList
             contexts={agent.contexts}
             canEdit={true}
+            canCreate={canCreateContext}
             onEdit={handleEditContext}
             onDelete={handleDeleteContext}
             onCreate={() => setIsCreateModalOpen(true)}

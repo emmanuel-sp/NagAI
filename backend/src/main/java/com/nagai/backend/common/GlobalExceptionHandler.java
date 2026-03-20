@@ -13,16 +13,19 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.nagai.backend.exceptions.AgentContextLimitException;
 import com.nagai.backend.exceptions.AgentContextNotFoundException;
 import com.nagai.backend.exceptions.AgentException;
 import com.nagai.backend.exceptions.AiServiceException;
 import com.nagai.backend.exceptions.ChecklistException;
+import com.nagai.backend.exceptions.ChecklistLimitException;
 import com.nagai.backend.exceptions.ChecklistNotFoundException;
 import com.nagai.backend.exceptions.DigestAlreadyExistsException;
 import com.nagai.backend.exceptions.DigestException;
 import com.nagai.backend.exceptions.DigestNotFoundException;
 import com.nagai.backend.exceptions.EmailAlreadyExistsException;
 import com.nagai.backend.exceptions.GoalException;
+import com.nagai.backend.exceptions.GoalLimitException;
 import com.nagai.backend.exceptions.GoalNotFoundException;
 import com.nagai.backend.exceptions.EmailNotVerifiedException;
 import com.nagai.backend.exceptions.InvalidPasswordException;
@@ -54,6 +57,11 @@ public class GlobalExceptionHandler {
         if (exception instanceof GoalNotFoundException) {
             ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
             detail.setProperty("description", "The requested goal does not exist");
+            return detail;
+        }
+        if (exception instanceof GoalLimitException) {
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+            detail.setProperty("description", "Maximum number of goals reached");
             return detail;
         }
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
@@ -91,6 +99,11 @@ public class GlobalExceptionHandler {
             detail.setProperty("description", "The requested checklist item does not exist");
             return detail;
         }
+        if (exception instanceof ChecklistLimitException) {
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+            detail.setProperty("description", "Maximum number of checklist items per goal reached");
+            return detail;
+        }
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
         detail.setProperty("description", "A checklist-related error occurred");
         return detail;
@@ -118,6 +131,11 @@ public class GlobalExceptionHandler {
         if (exception instanceof AgentContextNotFoundException) {
             ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
             detail.setProperty("description", "The requested agent context does not exist");
+            return detail;
+        }
+        if (exception instanceof AgentContextLimitException) {
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+            detail.setProperty("description", "Maximum number of agent contexts reached");
             return detail;
         }
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());

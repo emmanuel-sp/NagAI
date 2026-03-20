@@ -42,6 +42,9 @@ public class Digest {
     @Column(nullable = false)
     private boolean active = false;
 
+    @Column(name = "unsubscribe_token", unique = true)
+    private String unsubscribeToken;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;

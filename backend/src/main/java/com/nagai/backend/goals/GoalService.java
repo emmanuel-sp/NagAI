@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.nagai.backend.exceptions.GoalLimitException;
 import com.nagai.backend.exceptions.GoalNotFoundException;
 import com.nagai.backend.users.User;
 import com.nagai.backend.users.UserService;
@@ -19,8 +20,14 @@ public class GoalService {
         this.userService = userService;
     }
 
+    private static final int MAX_GOALS = 10;
+
     public Goal addGoal(GoalAddRequest goalAddRequest) {
         User currentUser = userService.getCurrentUser();
+        List<Goal> existing = goalRepository.findAllByUserId(currentUser.getUserId());
+        if (existing.size() >= MAX_GOALS) {
+            throw new GoalLimitException();
+        }
         Goal goal = new Goal();
         goal.setUserId(currentUser.getUserId());
         goal.setTitle(goalAddRequest.getTitle());

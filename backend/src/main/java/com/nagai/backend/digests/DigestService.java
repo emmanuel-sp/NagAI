@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,7 @@ public class DigestService {
         }
         Digest digest = new Digest();
         digest.setUserId(user.getUserId());
+        digest.setUnsubscribeToken(UUID.randomUUID().toString());
         applyFields(digest, request.getName(), request.getDescription(),
                 request.getFrequency(), request.getDeliveryTime(), request.getContentTypes());
         if (digest.isActive()) {
@@ -72,6 +74,14 @@ public class DigestService {
             digest.setNextDeliveryAt(null);
         }
         return digestRepository.save(digest);
+    }
+
+    public void unsubscribeByToken(String token) {
+        Digest digest = digestRepository.findByUnsubscribeToken(token)
+                .orElseThrow(DigestNotFoundException::new);
+        digest.setActive(false);
+        digest.setNextDeliveryAt(null);
+        digestRepository.save(digest);
     }
 
     public void deleteDigest() {

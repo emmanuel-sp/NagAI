@@ -17,6 +17,7 @@ SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+BACKEND_BASE_URL = os.environ.get("BACKEND_BASE_URL", "http://localhost:8080")
 
 DB_HOST = os.environ.get("DB_HOST", "localhost")
 DB_PORT = os.environ.get("DB_PORT", "5432")
@@ -152,6 +153,7 @@ def handle_digest_delivery(value: str):
     user_profile = payload.get("userProfile", "")
     content_types = payload.get("contentTypes", [])
     last_delivered_at = payload.get("lastDeliveredAt")
+    unsubscribe_token = payload.get("unsubscribeToken", "")
     goals = payload.get("goals", [])
 
     content_labels = ", ".join(
@@ -174,10 +176,11 @@ def handle_digest_delivery(value: str):
     subject = result.get("subject", f"Your NagAI Digest")
     body = result.get("body", "")
 
-    html = render_email_html(subject, body, user_name)
+    unsubscribe_url = f"{BACKEND_BASE_URL}/digest/unsubscribe?token={unsubscribe_token}" if unsubscribe_token else ""
+    html = render_email_html(subject, body, user_name, unsubscribe_url)
 
     try:
-        _send_email(user_email, subject, html)
+        _send_email(user_email, subject, html, unsubscribe_url)
         logger.info(f"Digest email sent to {user_email} (digest={digest_id})")
     except Exception as e:
         logger.error(f"Failed to send digest email to {user_email}: {e}")
@@ -186,7 +189,7 @@ def handle_digest_delivery(value: str):
     _save_sent_digest(digest_id, user_id, subject, body)
 
 
-def _send_email(to_addr: str, subject: str, html_body: str):
+def _send_email(to_addr: str, subject: str, html_body: str, unsubscribe_url: str = ""):
     """Send an HTML email via SMTP."""
     if not SMTP_USER or not SMTP_PASSWORD:
         logger.warning("SMTP credentials not configured — skipping email send")
@@ -196,6 +199,9 @@ def _send_email(to_addr: str, subject: str, html_body: str):
     msg["Subject"] = subject
     msg["From"] = f"NagAI <{SMTP_USER}>"
     msg["To"] = to_addr
+    if unsubscribe_url:
+        msg["List-Unsubscribe"] = f"<{unsubscribe_url}>"
+        msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
     msg.attach(MIMEText(html_body, "html"))
 
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
@@ -204,7 +210,7 @@ def _send_email(to_addr: str, subject: str, html_body: str):
         server.sendmail(SMTP_USER, to_addr, msg.as_string())
 
 
-def render_email_html(subject: str, body: str, user_name: str) -> str:
+def render_email_html(subject: str, body: str, user_name: str, unsubscribe_url: str = "") -> str:
     """Render the digest body into a beautiful, light-themed HTML email."""
     sections_html = _markdown_to_sections(body)
 
@@ -250,6 +256,7 @@ def render_email_html(subject: str, body: str, user_name: str) -> str:
     You received this because you have an active digest on NagAI.<br>
     Manage your digest preferences in the app.
   </p>
+  {"" if not unsubscribe_url else f'<p style="margin:12px 0 0;font-size:12px;text-align:center;"><a href="{unsubscribe_url}" style="color:#9e605a;text-decoration:underline;">Unsubscribe from digest emails</a></p>'}
   <p style="margin:12px 0 0;font-size:11px;color:#b09a96;text-align:center;">
     Built with care by NagAI
   </p>

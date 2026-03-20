@@ -155,7 +155,7 @@ export default function GoalFormModal(props: GoalFormModalProps) {
               </h2>
               {!isCreate && (
                 <p className={styles.modalSubtitle}>
-                  Created on {(props as EditModeProps).goal.createdAt}
+                  Created on {new Date((props as EditModeProps).goal.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                 </p>
               )}
             </div>

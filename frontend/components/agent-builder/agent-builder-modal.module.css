@@ -100,7 +100,7 @@
 
 .required { color: var(--error); }
 
-.formTextarea { min-height: 88px; }
+.formTextarea { min-height: 88px; resize: none; }
 
 /* ─── Radio Group ─── */
 .radioGroup {

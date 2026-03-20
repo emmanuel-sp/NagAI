@@ -59,15 +59,19 @@ public class AiGrpcClientService {
     }
 
     public String suggestSmartField(String field, String goalTitle, String goalDescription,
-                                    Map<String, String> existingFields, String userProfile) {
+                                    Map<String, String> existingFields, String userProfile,
+                                    String stepsTaken) {
         try {
-            return stubWithCorrelation().suggestSmartField(SmartFieldRequest.newBuilder()
+            SmartFieldRequest.Builder builder = SmartFieldRequest.newBuilder()
                     .setField(field)
                     .setGoalTitle(goalTitle)
                     .setGoalDescription(goalDescription)
                     .putAllExistingFields(existingFields)
-                    .setUserProfile(userProfile)
-                    .build()).getSuggestion();
+                    .setUserProfile(userProfile);
+            if (stepsTaken != null && !stepsTaken.isBlank()) {
+                builder.setStepsTaken(stepsTaken);
+            }
+            return stubWithCorrelation().suggestSmartField(builder.build()).getSuggestion();
         } catch (StatusRuntimeException e) {
             if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
             log.error("gRPC call failed: {}", e.getStatus().getDescription());

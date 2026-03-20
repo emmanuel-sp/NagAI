@@ -115,9 +115,9 @@ export default function GoalsContainer() {
 
       {goals.length > 0 && (
         <div className={styles.goalsHeader}>
-          <button onClick={handleAddGoal} className={styles.addGoalButton}>
+          <button onClick={handleAddGoal} className={styles.addGoalButton} disabled={goals.length >= 10}>
             <IoAdd size={18} />
-            Add Goal
+            {goals.length >= 10 ? "Goal Limit Reached (10)" : "Add Goal"}
           </button>
         </div>
       )}

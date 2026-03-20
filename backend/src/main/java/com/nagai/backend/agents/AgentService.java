@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.nagai.backend.exceptions.AgentContextLimitException;
 import com.nagai.backend.exceptions.AgentContextNotFoundException;
 import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.users.User;
@@ -58,10 +59,16 @@ public class AgentService {
         return buildResponse(agentRepository.save(agent));
     }
 
+    private static final int MAX_CONTEXTS = 4;
+
     public AgentContextResponse addContext(AddContextRequest request) {
         User user = userService.getCurrentUser();
         Agent agent = agentRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> createDefaultAgent(user.getUserId()));
+        List<AgentContext> existing = agentContextRepository.findByAgentId(agent.getAgentId());
+        if (existing.size() >= MAX_CONTEXTS) {
+            throw new AgentContextLimitException();
+        }
         AgentContext context = new AgentContext();
         context.setAgentId(agent.getAgentId());
         applyContextFields(context, request.getName(), request.getGoalId(),

@@ -44,7 +44,8 @@ public class AiController {
         String suggestion = aiGrpcClientService.suggestSmartField(
                 request.field(), request.goalTitle(), request.goalDescription(),
                 request.existingFields() != null ? request.existingFields() : Map.of(),
-                ProfileUtils.buildUserProfile(user));
+                ProfileUtils.buildUserProfile(user),
+                request.stepsTaken());
         return ResponseEntity.ok(new SmartGoalSuggestionResponse(suggestion));
     }
 

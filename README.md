@@ -184,17 +184,17 @@ NagAI/
 
 ### Health Checks
 
-**Backend (Spring Actuator)**:
+**Backend (Spring Actuator)** — served on a separate management port (default `9091`), not exposed to users:
 ```bash
-curl http://localhost:8080/actuator/health
+curl http://localhost:9091/actuator/health
 # {"status":"UP","components":{"db":{"status":"UP"},"diskSpace":{"status":"UP"}}}
+
+curl http://localhost:9091/actuator/metrics/nagai.digests.sent
+curl http://localhost:9091/actuator/loggers
+curl http://localhost:9091/actuator/info
 ```
 
-Other Actuator endpoints (require authentication):
-- `/actuator/metrics` — Micrometer metrics index
-- `/actuator/metrics/{metric.name}` — specific metric (e.g. `nagai.digests.sent`)
-- `/actuator/loggers` — view/change log levels at runtime
-- `/actuator/info` — app name + version
+No authentication needed — the management port is separate from the main app (port 8080) and should never be exposed publicly. Override with `MANAGEMENT_PORT` env var.
 
 **Python AI Service (gRPC health)**:
 ```bash

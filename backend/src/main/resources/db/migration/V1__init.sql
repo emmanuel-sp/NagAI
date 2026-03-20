@@ -59,6 +59,7 @@ CREATE TABLE digests (
     delivery_time VARCHAR(30) NOT NULL,
     content_types TEXT[],
     active BOOLEAN NOT NULL DEFAULT FALSE,
+    unsubscribe_token VARCHAR(64) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_delivered_at TIMESTAMP,
     next_delivery_at TIMESTAMP,

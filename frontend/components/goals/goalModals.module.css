@@ -135,7 +135,7 @@
   margin: 0 0 8px;
 }
 
-.fieldTextarea { min-height: 72px; }
+.fieldTextarea { min-height: 72px; resize: none; }
 
 .charCount {
   font-size: var(--fs-2xs);
@@ -171,8 +171,43 @@
   white-space: nowrap;
 }
 
+.aiSuggestWrapper {
+  position: relative;
+}
+
 .aiSuggestButton:hover { background: var(--accent-light); }
 .aiSuggestButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.aiSuggestTooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-400);
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.aiSuggestTooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 16px;
+  border: 5px solid transparent;
+  border-top-color: var(--border);
+}
+
+.aiSuggestWrapper:hover .aiSuggestTooltip {
+  display: block;
+}
 
 .inputWithSuggestion {
   display: flex;

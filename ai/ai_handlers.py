@@ -49,12 +49,19 @@ def _completed_section(completed_items: list[str]) -> str:
     return f"\nAlready completed tasks (do NOT suggest these again):\n{completed}\n"
 
 
+def _steps_taken_section(steps_taken: str) -> str:
+    if not steps_taken or not steps_taken.strip():
+        return ""
+    return f"\nSteps already taken toward this goal:\n{steps_taken}\n"
+
+
 def suggest_smart_field(
     field: str,
     goal_title: str,
     goal_description: str,
     existing_fields: dict | None = None,
     user_profile: str = "",
+    steps_taken: str = "",
 ) -> str:
     field_order = ("specific", "measurable", "attainable", "relevant", "timely")
     context_lines = [
@@ -74,9 +81,11 @@ def suggest_smart_field(
         f"Goal title: {goal_title}\n"
         f"Goal description: {goal_description}\n"
         f"{_profile_section(user_profile)}"
+        f"{_steps_taken_section(steps_taken)}"
         f"{context_section}"
         f"Write a concise, specific value for the '{field}' dimension. "
         f"It must complement and not repeat ideas already covered in the other fields above. "
+        f"Account for any progress the user has already made. "
         f"Reply with only the suggestion — no preamble, no explanation."
     )
     message = _call_claude(prompt, 256, "suggest_smart_field")

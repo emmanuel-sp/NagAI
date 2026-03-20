@@ -7,5 +7,6 @@ public record SmartGoalSuggestionRequest(
         @NotBlank String field,
         @NotBlank String goalTitle,
         String goalDescription,
-        Map<String, String> existingFields
+        Map<String, String> existingFields,
+        String stepsTaken
 ) {}

@@ -39,15 +39,18 @@ export default function SmartFieldGroup({
     <div className={styles.fieldGroup}>
       <div className={styles.labelWithButton}>
         <label className={styles.fieldLabel}>{label}</label>
-        <button
-          type="button"
-          className={styles.aiSuggestButton}
-          onClick={onGenerateSuggestion}
-          disabled={isLoading || disabled}
-        >
-          <IoSparkles size={14} />
-          {isLoading ? "Generating..." : "AI Suggest"}
-        </button>
+        <div className={styles.aiSuggestWrapper}>
+          <button
+            type="button"
+            className={styles.aiSuggestButton}
+            onClick={onGenerateSuggestion}
+            disabled={isLoading || disabled}
+          >
+            <IoSparkles size={14} />
+            {isLoading ? "Generating..." : "AI Suggest"}
+          </button>
+          {disabled && <span className={styles.aiSuggestTooltip}>Enter a goal title first</span>}
+        </div>
       </div>
       <div className={styles.inputWithSuggestion}>
         <textarea

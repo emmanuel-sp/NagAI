@@ -36,6 +36,7 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
                 request.field, request.goal_title, request.goal_description,
                 dict(request.existing_fields),
                 request.user_profile,
+                request.steps_taken,
             )
             return ai_service_pb2.SmartFieldResponse(suggestion=suggestion)
         except Exception as e:
