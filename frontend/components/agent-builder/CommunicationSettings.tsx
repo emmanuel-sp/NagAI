@@ -7,13 +7,11 @@ import styles from "./agent-builder.module.css";
 interface CommunicationSettingsProps {
   currentChannel: CommunicationChannel;
   onChannelChange: (channel: CommunicationChannel) => void;
-  hasPhoneNumber: boolean;
 }
 
 export default function CommunicationSettings({
   currentChannel,
   onChannelChange,
-  hasPhoneNumber,
 }: CommunicationSettingsProps) {
   return (
     <div className={styles.settingsCard}>
@@ -34,14 +32,12 @@ export default function CommunicationSettings({
         </button>
 
         <button
-          onClick={() => hasPhoneNumber && onChannelChange("phone")}
-          disabled={!hasPhoneNumber}
-          className={`${styles.channelButton} ${
-            currentChannel === "phone" ? styles.channelButtonActive : ""
-          }`}
+          disabled
+          className={`${styles.channelButton} ${styles.channelButtonDisabled}`}
         >
           <IoCall size={24} />
-          <span>{hasPhoneNumber ? "Phone" : "Add phone in profile"}</span>
+          <span>Phone</span>
+          <span className={styles.comingSoonBadge}>Coming Soon</span>
         </button>
       </div>
     </div>

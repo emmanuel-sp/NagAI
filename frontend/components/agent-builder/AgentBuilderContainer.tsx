@@ -248,7 +248,6 @@ export default function AgentBuilderContainer() {
         <CommunicationSettings
           currentChannel={agent.communicationChannel}
           onChannelChange={handleCommunicationChange}
-          hasPhoneNumber={!!userProfile?.phoneNumber && userProfile.phoneNumber.trim() !== ""}
         />
 
         <DeploymentPanel

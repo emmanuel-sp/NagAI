@@ -84,7 +84,7 @@ const features: {
     bullets: [
       "Set short or long-term goals using the SMART framework",
       "Track progress with visual indicators",
-      "Organize goals by category and priority",
+      "Receive guidance from AI in creating well-defined goals",
     ],
   },
   {
@@ -97,7 +97,7 @@ const features: {
     bullets: [
       "AI-generated checklist suggestions",
       "Mark items as complete and track progress",
-      "Link checklists to specific goals",
+      "Checklists are linked to specific goals",
     ],
   },
   {
@@ -108,7 +108,7 @@ const features: {
     description:
       "Receive curated content tailored to your interests and goals. Choose what types of content you want and when you want to receive them.",
     bullets: [
-      "Nearby opportunities and events",
+      "Curated News related to your goals",
       "Motivational content and affirmations",
       "Knowledge snippets and practical tips",
       "Customizable delivery schedule",
