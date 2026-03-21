@@ -73,9 +73,9 @@ def suggest_smart_field(
     today = datetime.date.today().isoformat()
 
     field_definitions = {
-        "specific": "What exactly will I do? Narrow the goal to a clear action or outcome.",
+        "specific": "What exactly will I do? Narrow the goal to a clear outcome (not an action).",
         "measurable": "How will I track progress? State a concrete metric or quantity.",
-        "attainable": "How will I realistically accomplish this? "
+        "attainable": "Can this realistically be accomplished? "
                       "State the time/resource commitment that fits my situation.",
         "relevant": "Why does this matter to me? "
                     "Connect the goal to my broader life or career aspirations.",
