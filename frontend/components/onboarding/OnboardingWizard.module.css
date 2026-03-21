@@ -100,6 +100,14 @@
   color: var(--text-primary);
   margin-bottom: 10px;
   line-height: 1.05;
+  text-align: center;
+}
+
+.welcomeHeader {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .stepExplanation {
@@ -116,7 +124,8 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin: 32px 0 4px;
+  margin: 32px auto 4px;
+  max-width: 400px;
 }
 
 .featureItem {

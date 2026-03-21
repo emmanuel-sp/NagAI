@@ -10,7 +10,7 @@ export default function WelcomeStep({ userName }: WelcomeStepProps) {
 
   return (
     <div>
-      <div className={styles.stepHeader}>
+      <div className={`${styles.stepHeader} ${styles.welcomeHeader}`}>
         <h1 className={styles.welcomeTitle}>Welcome, {firstName}</h1>
         <p className={styles.stepExplanation}>
           Let&apos;s set up your profile so NagAI can give you personalized
