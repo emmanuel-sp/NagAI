@@ -45,7 +45,8 @@ public class AiController {
                 request.field(), request.goalTitle(), request.goalDescription(),
                 request.existingFields() != null ? request.existingFields() : Map.of(),
                 ProfileUtils.buildUserProfile(user),
-                request.stepsTaken());
+                request.stepsTaken(),
+                request.targetDate());
         return ResponseEntity.ok(new SmartGoalSuggestionResponse(suggestion));
     }
 

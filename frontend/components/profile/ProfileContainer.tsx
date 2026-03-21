@@ -231,7 +231,7 @@ export default function ProfileContainer() {
           <div className={styles.fieldGroup}>
             <label className={styles.fieldLabel}>Bio</label>
             {isEditing ? (
-              <textarea className={styles.fieldTextarea} value={profile.bio || ""} onChange={(e) => handleFieldChange("bio", e.target.value)} placeholder="A little about who you are..." />
+              <textarea className={styles.fieldTextarea} value={profile.bio || ""} onChange={(e) => handleFieldChange("bio", e.target.value)} placeholder="A little about who you are..." maxLength={500} />
             ) : (
               <div className={profile.bio ? styles.fieldValue : styles.fieldValueEmpty} style={{ minHeight: "48px", alignItems: "flex-start" }}>
                 {profile.bio || "Share a bit about yourself"}

@@ -145,8 +145,8 @@ export default function GoalFormModal(props: GoalFormModalProps) {
   const isCreate = mode === "create";
 
   return (
-    <div className={styles.modalOverlay} onClick={handleClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.modalOverlay} onMouseDown={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+      <div className={styles.modalContent}>
         <form onSubmit={handleSubmit}>
           <div className={styles.modalHeader}>
             <div>

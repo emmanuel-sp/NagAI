@@ -80,8 +80,8 @@ export default function DigestPreview({ selectedTypes, isOpen, onClose }: Digest
   const safeSelected = selectedTypes ?? [];
 
   const modal = (
-    <div className={styles.previewModalOverlay} onClick={onClose}>
-      <div className={styles.previewModalContent} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.previewModalOverlay} onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className={styles.previewModalContent}>
         <div className={styles.previewModalHeader}>
           <div>
             <h2 className={styles.previewModalTitle}>Digest Preview</h2>

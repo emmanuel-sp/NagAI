@@ -430,7 +430,7 @@
 /* ─── Hero Mockup ─── */
 .heroMockupWrap {
   width: 100%;
-  max-width: 960px;
+  max-width: 1100px;
   margin: 56px auto 0;
   padding: 0 24px;
   position: relative;
@@ -493,41 +493,10 @@
   border-color: var(--border-strong);
 }
 
-.mockupInner {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  gap: 16px;
-}
-
-.mockupDots {
-  position: absolute;
-  top: 14px;
-  left: 18px;
-  display: flex;
-  gap: 6px;
-}
-
-.mockupDots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--surface-hover);
-  border: 1px solid var(--border);
-}
-
-.mockupLabel {
-  font-family: var(--font-body);
-  font-size: var(--fs-sm);
-  color: var(--text-light);
-  text-align: center;
-  max-width: 320px;
-  line-height: 1.5;
-  font-weight: var(--fw-400);
+.mockupImage {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* ─── Feature Sections ─── */
@@ -574,10 +543,9 @@
 .featureGrid {
   max-width: 1100px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 72px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
   position: relative;
   z-index: 1;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -593,18 +561,14 @@
   opacity: 0.55;
 }
 
-.featureReversed .featureGrid {
-  direction: rtl;
-}
-
-.featureReversed .featureGrid > * {
-  direction: ltr;
-}
-
 .featureTextCol {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  text-align: center;
+  align-items: center;
+  max-width: 680px;
+  margin: 0 auto;
 }
 
 .featureEyebrow {
@@ -925,17 +889,7 @@
   }
 
   .featureGrid {
-    grid-template-columns: 1fr;
-    gap: 36px;
-  }
-
-  /* On mobile, always show mockup above text */
-  .featureReversed .featureGrid {
-    direction: ltr;
-  }
-
-  .featureMockup {
-    order: -1;
+    gap: 28px;
   }
 
   .howSection {

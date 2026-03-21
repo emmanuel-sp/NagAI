@@ -40,8 +40,8 @@ export default function ConfirmDialog({
   if (!isOpen) return null;
 
   const dialog = (
-    <div className={styles.overlay} onClick={onCancel}>
-      <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+      <div className={styles.dialog}>
         <div className={styles.header}>
           <h3 className={styles.title}>{title}</h3>
           <button type="button" onClick={onCancel} className={styles.closeButton}>

@@ -102,8 +102,8 @@ export default function ContextFormModal(props: ContextFormModalProps) {
   const isCreate = mode === "create";
 
   const modal = (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.modalOverlay} onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className={styles.modalContent}>
         <form onSubmit={handleSubmit}>
           <div className={styles.modalHeader}>
             <div>

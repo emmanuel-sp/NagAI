@@ -60,7 +60,7 @@ public class AiGrpcClientService {
 
     public String suggestSmartField(String field, String goalTitle, String goalDescription,
                                     Map<String, String> existingFields, String userProfile,
-                                    String stepsTaken) {
+                                    String stepsTaken, String targetDate) {
         try {
             SmartFieldRequest.Builder builder = SmartFieldRequest.newBuilder()
                     .setField(field)
@@ -70,6 +70,9 @@ public class AiGrpcClientService {
                     .setUserProfile(userProfile);
             if (stepsTaken != null && !stepsTaken.isBlank()) {
                 builder.setStepsTaken(stepsTaken);
+            }
+            if (targetDate != null && !targetDate.isBlank()) {
+                builder.setTargetDate(targetDate);
             }
             return stubWithCorrelation().suggestSmartField(builder.build()).getSuggestion();
         } catch (StatusRuntimeException e) {

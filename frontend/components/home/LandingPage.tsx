@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./LandingPage.module.css";
 import {
@@ -65,33 +66,6 @@ function LandingNav() {
   );
 }
 
-/* ─── Mockup Placeholder ─── */
-function MockupPlaceholder({
-  label,
-  aspectRatio = "16 / 9",
-  className,
-}: {
-  label: string;
-  aspectRatio?: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`${styles.mockup} ${className || ""}`}
-      style={{ aspectRatio }}
-    >
-      <div className={styles.mockupInner}>
-        <div className={styles.mockupDots}>
-          <span />
-          <span />
-          <span />
-        </div>
-        <p className={styles.mockupLabel}>{label}</p>
-      </div>
-    </div>
-  );
-}
-
 /* ─── Data ─── */
 const features = [
   {
@@ -105,8 +79,7 @@ const features = [
       "Track progress with visual indicators",
       "Organize goals by category and priority",
     ],
-    mockupLabel:
-      "Goals page — goal cards with progress bars and SMART criteria",
+    image: "/edit_goal.png",
   },
   {
     id: "checklists",
@@ -119,8 +92,7 @@ const features = [
       "Mark items as complete and track progress",
       "Link checklists to specific goals",
     ],
-    mockupLabel:
-      "Checklists page — checklist items with checkboxes and linked goals",
+    image: "/checklists.png",
   },
   {
     id: "digests",
@@ -134,8 +106,7 @@ const features = [
       "Knowledge snippets and practical tips",
       "Customizable delivery schedule",
     ],
-    mockupLabel:
-      "Digest builder — content type selection and delivery schedule",
+    image: "/digest builder.png",
   },
   {
     id: "agent",
@@ -148,8 +119,7 @@ const features = [
       "Define custom contexts for better assistance",
       "Deploy or pause your agent anytime",
     ],
-    mockupLabel:
-      "Agent builder — config panel with communication channels and deploy controls",
+    image: "/agent_builder.png",
   },
 ];
 
@@ -287,11 +257,16 @@ export default function LandingPage() {
         </div>
 
         <div className={styles.heroMockupWrap}>
-          <MockupPlaceholder
-            label="Dashboard overview — goals, checklists, and digest summary at a glance"
-            aspectRatio="16 / 9"
-            className={styles.heroMockup}
-          />
+          <div className={`${styles.mockup} ${styles.heroMockup}`}>
+            <Image
+              src="/dashboard.png"
+              alt="Dashboard overview"
+              width={960}
+              height={540}
+              className={styles.mockupImage}
+              priority
+            />
+          </div>
         </div>
       </section>
 
@@ -316,7 +291,6 @@ export default function LandingPage() {
       {/* ─── Feature Sections ─── */}
       {features.map((feature, i) => {
         const reveal = featureRefs[i];
-        const reversed = i % 2 === 1;
         const isActive = activeFeature === i;
         const isDimmed = activeFeature !== null && activeFeature !== i;
         return (
@@ -326,8 +300,7 @@ export default function LandingPage() {
             ref={reveal.ref}
             className={[
               styles.featureSection,
-              reversed ? styles.featureReversed : "",
-              reversed ? styles.featureAlt : "",
+              i % 2 === 1 ? styles.featureAlt : "",
               reveal.isVisible ? styles.visible : "",
               isActive ? styles.featureActive : "",
               isDimmed ? styles.featureDimmed : "",
@@ -351,11 +324,15 @@ export default function LandingPage() {
                   ))}
                 </ul>
               </div>
-              <MockupPlaceholder
-                label={feature.mockupLabel}
-                aspectRatio="4 / 3"
-                className={styles.featureMockup}
-              />
+              <div className={`${styles.mockup} ${styles.featureMockup}`}>
+                <Image
+                  src={feature.image}
+                  alt={feature.title}
+                  width={1100}
+                  height={550}
+                  className={styles.mockupImage}
+                />
+              </div>
             </div>
           </section>
         );

@@ -21,6 +21,7 @@ message SmartFieldRequest {
   map<string, string> existing_fields = 4;  // already-filled SMART fields for coherent suggestions
   string user_profile     = 5;  // user's career/interests/hobbies/habits for personalization
   string steps_taken      = 6;  // free-form text describing progress already made toward the goal
+  string target_date      = 7;  // user's target completion date (ISO format, e.g. 2026-09-01)
 }
 
 message SmartFieldResponse {

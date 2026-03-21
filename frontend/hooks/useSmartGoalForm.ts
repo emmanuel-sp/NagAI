@@ -65,7 +65,8 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
       const suggestion = await generateSmartGoalSuggestion(
         field, fields.title, fields.description,
         Object.keys(existingFields).length > 0 ? existingFields : undefined,
-        fields.stepsTaken.trim() || undefined
+        fields.stepsTaken.trim() || undefined,
+        fields.targetDate.trim() || undefined
       );
       setSuggestions((prev) => ({ ...prev, [field]: suggestion }));
     } catch (error) {

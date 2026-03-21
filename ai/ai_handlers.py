@@ -69,11 +69,13 @@ def suggest_smart_field(
     existing_fields: dict | None = None,
     user_profile: str = "",
     steps_taken: str = "",
+    target_date: str = "",
 ) -> str:
     today = datetime.date.today().isoformat()
 
     field_definitions = {
-        "specific": "What exactly will I do? Narrow the goal to a clear outcome (not an action).",
+        "specific": "What exactly will I do? Narrow the goal to a clear outcome. "
+                    "Do NOT include dates or deadlines — that belongs in the timely field.",
         "measurable": "How will I track progress? State a concrete metric or quantity.",
         "attainable": "Can this realistically be accomplished? "
                       "State the time/resource commitment that fits my situation.",
@@ -81,6 +83,10 @@ def suggest_smart_field(
                     "Connect the goal to my broader life or career aspirations.",
         "timely": "By when? Give a clear deadline or milestone dates.",
     }
+
+    target_date_line = ""
+    if target_date and target_date.strip():
+        target_date_line = f"\n- The user's target date is {target_date}. Use it to anchor any timelines."
 
     system = (
         "You help users fill in SMART goals. You write ONE field at a time.\n"
@@ -94,6 +100,7 @@ def suggest_smart_field(
         "- Complement already-defined fields without repeating their ideas.\n"
         "- Account for any progress the user has described.\n"
         f"- Today is {today}. All dates must be in the future."
+        f"{target_date_line}"
     )
 
     field_order = ("specific", "measurable", "attainable", "relevant", "timely")

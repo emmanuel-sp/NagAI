@@ -11,7 +11,7 @@ CREATE TABLE users (
     phone_number VARCHAR(64),
     user_location VARCHAR(64),
     career VARCHAR(64),
-    bio VARCHAR(255),
+    bio TEXT,
     interests TEXT[],
     hobbies TEXT[],
     habits TEXT[],

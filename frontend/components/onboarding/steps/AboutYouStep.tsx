@@ -1,7 +1,7 @@
 import styles from "../OnboardingWizard.module.css";
 
 const MAX_CAREER = 100;
-const MAX_BIO = 250;
+const MAX_BIO = 500;
 
 interface AboutYouStepProps {
   age: number | undefined;
