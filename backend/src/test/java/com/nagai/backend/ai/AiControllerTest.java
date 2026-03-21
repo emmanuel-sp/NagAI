@@ -63,12 +63,12 @@ class AiControllerTest {
     void suggestSmartField_returnsOkWithSuggestion() {
         when(userService.getCurrentUser()).thenReturn(user);
         when(aiGrpcClientService.suggestSmartField("measurable", "Run a marathon", "Complete 26.2 miles",
-                Map.of("specific", "Complete the NYC Marathon 2026"), "", null))
+                Map.of("specific", "Complete the NYC Marathon 2026"), "", null, null))
                 .thenReturn("Log weekly mileage and finish a sub-4-hour marathon by December");
 
         ResponseEntity<SmartGoalSuggestionResponse> response = controller.suggestSmartField(
                 new SmartGoalSuggestionRequest("measurable", "Run a marathon", "Complete 26.2 miles",
-                        Map.of("specific", "Complete the NYC Marathon 2026"), null));
+                        Map.of("specific", "Complete the NYC Marathon 2026"), null, null));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -79,11 +79,11 @@ class AiControllerTest {
     @Test
     void suggestSmartField_propagatesAiServiceException() {
         when(userService.getCurrentUser()).thenReturn(user);
-        when(aiGrpcClientService.suggestSmartField(any(), any(), any(), any(), any(), any()))
+        when(aiGrpcClientService.suggestSmartField(any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new AiServiceException("AI service unavailable: Connection refused"));
 
         assertThatThrownBy(() -> controller.suggestSmartField(
-                new SmartGoalSuggestionRequest("specific", "Get fit", "Exercise regularly", null, null)))
+                new SmartGoalSuggestionRequest("specific", "Get fit", "Exercise regularly", null, null, null)))
                 .isInstanceOf(AiServiceException.class)
                 .hasMessageContaining("Connection refused");
     }

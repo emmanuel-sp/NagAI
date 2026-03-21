@@ -132,12 +132,8 @@
 }
 
 /* Staggered children inside visible sections */
-.visible .featureTextCol {
+.visible .featureInner {
   animation: slideUp 0.7s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.visible .featureMockup {
-  animation: slideUp 0.7s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .visible .stepCard {
@@ -238,7 +234,7 @@
   align-items: center;
   justify-content: center;
   gap: 0;
-  padding: 140px 24px 48px;
+  padding: 160px 24px 120px;
   position: relative;
   z-index: 1;
 }
@@ -427,82 +423,10 @@
   color: var(--accent-dark);
 }
 
-/* ─── Hero Mockup ─── */
-.heroMockupWrap {
-  width: 100%;
-  max-width: 1100px;
-  margin: 56px auto 0;
-  padding: 0 24px;
-  position: relative;
-  z-index: 1;
-}
-
-/* Subtle glow behind the hero mockup */
-.heroMockupWrap::before {
-  content: "";
-  position: absolute;
-  inset: 20% 10%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(158, 96, 90, 0.10) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  filter: blur(60px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.heroMockup {
-  position: relative;
-  z-index: 1;
-  box-shadow:
-    0 8px 40px rgba(80, 65, 50, 0.15),
-    0 0 0 1px var(--border);
-}
-
-.visible .heroMockup {
-  animation: mockupRise 1s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes mockupRise {
-  from {
-    opacity: 0;
-    transform: translateY(40px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* ─── Mockup Placeholder (shared) ─── */
-.mockup {
-  width: 100%;
-  background: var(--bg-card);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-2xl);
-  overflow: hidden;
-  position: relative;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-.mockup:hover {
-  border-color: var(--border-strong);
-}
-
-.mockupImage {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
 /* ─── Feature Sections ─── */
 .featureSection {
   width: 100%;
-  padding: 120px 24px;
+  padding: 100px 24px;
   scroll-margin-top: 130px;
   position: relative;
   transition:
@@ -510,7 +434,7 @@
     transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Alternating background — applied explicitly via .featureAlt */
+/* Alternating background */
 .featureAlt {
   background: linear-gradient(
     180deg,
@@ -520,7 +444,7 @@
   );
 }
 
-/* Active feature — soft radial glow instead of flat background swap */
+/* Active feature glow */
 .featureActive::before {
   content: "";
   position: absolute;
@@ -540,35 +464,47 @@
   to { opacity: 1; }
 }
 
-.featureGrid {
-  max-width: 1100px;
+.featureInner {
+  max-width: 640px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
   position: relative;
   z-index: 1;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: center;
 }
 
-.featureActive .featureGrid {
+.featureActive .featureInner {
   transform: scale(1.02);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Dimmed feature — only after scroll reveal has fired */
+/* Dimmed feature */
 .visible.featureDimmed {
   opacity: 0.55;
 }
 
-.featureTextCol {
+/* ─── Feature Icon ─── */
+.featureIconWrap {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  text-align: center;
   align-items: center;
-  max-width: 680px;
-  margin: 0 auto;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-xl);
+  background: var(--accent-lighter);
+  color: var(--accent);
+  margin-bottom: 8px;
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.featureActive .featureIconWrap {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 8px rgba(158, 96, 90, 0.08);
 }
 
 .featureEyebrow {
@@ -582,7 +518,7 @@
 
 .featureTitle {
   font-family: var(--font-display);
-  font-size: clamp(32px, 4vw, 48px);
+  font-size: clamp(28px, 3.5vw, 40px);
   font-weight: 700;
   letter-spacing: -0.025em;
   color: var(--text-primary);
@@ -594,6 +530,7 @@
   color: var(--text-secondary);
   line-height: 1.7;
   font-weight: var(--fw-400);
+  max-width: 520px;
 }
 
 .featureList {
@@ -612,16 +549,13 @@
   color: var(--text-secondary);
   line-height: 1.6;
   font-weight: var(--fw-400);
+  text-align: left;
 }
 
 .featureList li svg {
   color: var(--accent);
   flex-shrink: 0;
   margin-top: 2px;
-}
-
-.featureMockup {
-  box-shadow: var(--shadow-lg);
 }
 
 /* ─── How It Works ─── */
@@ -853,11 +787,7 @@
 
 @media (max-width: 900px) {
   .featureSection {
-    padding: 96px 24px;
-  }
-
-  .featureGrid {
-    gap: 48px;
+    padding: 80px 24px;
   }
 
   .howSection {
@@ -871,12 +801,7 @@
 
 @media (max-width: 768px) {
   .heroContent {
-    padding: 100px 20px 40px;
-  }
-
-  .heroMockupWrap {
-    margin-top: 40px;
-    padding: 0 16px;
+    padding: 120px 20px 80px;
   }
 
   .heroGlow {
@@ -885,11 +810,7 @@
   }
 
   .featureSection {
-    padding: 72px 20px;
-  }
-
-  .featureGrid {
-    gap: 28px;
+    padding: 64px 20px;
   }
 
   .howSection {
@@ -912,11 +833,7 @@
   }
 
   .heroContent {
-    padding: 88px 16px 32px;
-  }
-
-  .heroMockupWrap {
-    padding: 0;
+    padding: 100px 16px 64px;
   }
 
   .subline {
@@ -951,11 +868,11 @@
   }
 
   .featureSection {
-    padding: 56px 16px;
+    padding: 48px 16px;
     scroll-margin-top: 110px;
   }
 
-  .featureActive .featureGrid {
+  .featureActive .featureInner {
     transform: scale(1.01);
   }
 

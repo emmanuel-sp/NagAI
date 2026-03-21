@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import styles from "./LandingPage.module.css";
 import {
@@ -67,9 +66,17 @@ function LandingNav() {
 }
 
 /* ─── Data ─── */
-const features = [
+const features: {
+  id: string;
+  Icon: React.ComponentType<{ size?: number | string }>;
+  label: string;
+  title: string;
+  description: string;
+  bullets: string[];
+}[] = [
   {
     id: "goals",
+    Icon: IoFlag,
     label: "GOAL TRACKING",
     title: "Set structured goals with AI-assisted criteria",
     description:
@@ -79,10 +86,10 @@ const features = [
       "Track progress with visual indicators",
       "Organize goals by category and priority",
     ],
-    image: "/edit_goal.png",
   },
   {
     id: "checklists",
+    Icon: IoListOutline,
     label: "SMART CHECKLISTS",
     title: "Break down goals into actionable steps",
     description:
@@ -92,10 +99,10 @@ const features = [
       "Mark items as complete and track progress",
       "Link checklists to specific goals",
     ],
-    image: "/checklists.png",
   },
   {
     id: "digests",
+    Icon: IoMail,
     label: "PERSONALIZED DIGESTS",
     title: "Curated content tailored to your journey",
     description:
@@ -106,10 +113,10 @@ const features = [
       "Knowledge snippets and practical tips",
       "Customizable delivery schedule",
     ],
-    image: "/digest builder.png",
   },
   {
     id: "agent",
+    Icon: IoRocket,
     label: "AI AGENT BUILDER",
     title: "Your personal AI accountability partner",
     description:
@@ -119,7 +126,6 @@ const features = [
       "Define custom contexts for better assistance",
       "Deploy or pause your agent anytime",
     ],
-    image: "/agent_builder.png",
   },
 ];
 
@@ -255,19 +261,6 @@ export default function LandingPage() {
             </div>
           )}
         </div>
-
-        <div className={styles.heroMockupWrap}>
-          <div className={`${styles.mockup} ${styles.heroMockup}`}>
-            <Image
-              src="/dashboard.png"
-              alt="Dashboard overview"
-              width={960}
-              height={540}
-              className={styles.mockupImage}
-              priority
-            />
-          </div>
-        </div>
       </section>
 
       {/* ─── Floating Feature Nav ─── */}
@@ -308,31 +301,23 @@ export default function LandingPage() {
               .filter(Boolean)
               .join(" ")}
           >
-            <div className={styles.featureGrid}>
-              <div className={styles.featureTextCol}>
-                <span className={styles.featureEyebrow}>{feature.label}</span>
-                <h2 className={styles.featureTitle}>{feature.title}</h2>
-                <p className={styles.featureDescription}>
-                  {feature.description}
-                </p>
-                <ul className={styles.featureList}>
-                  {feature.bullets.map((bullet) => (
-                    <li key={bullet}>
-                      <IoCheckmarkCircle size={18} />
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
+            <div className={styles.featureInner}>
+              <div className={styles.featureIconWrap}>
+                <feature.Icon size={32} />
               </div>
-              <div className={`${styles.mockup} ${styles.featureMockup}`}>
-                <Image
-                  src={feature.image}
-                  alt={feature.title}
-                  width={1100}
-                  height={550}
-                  className={styles.mockupImage}
-                />
-              </div>
+              <span className={styles.featureEyebrow}>{feature.label}</span>
+              <h2 className={styles.featureTitle}>{feature.title}</h2>
+              <p className={styles.featureDescription}>
+                {feature.description}
+              </p>
+              <ul className={styles.featureList}>
+                {feature.bullets.map((bullet) => (
+                  <li key={bullet}>
+                    <IoCheckmarkCircle size={18} />
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </section>
         );
