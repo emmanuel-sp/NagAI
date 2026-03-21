@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import logging
 import datetime
@@ -10,14 +11,20 @@ client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 MODEL = "claude-haiku-4-5-20251001"
 
 
-def _call_claude(prompt: str, max_tokens: int, operation: str):
+def _call_claude(prompt: str, max_tokens: int, operation: str,
+                 system: str = "", temperature: float | None = None):
     """Call Claude API with timing and token logging."""
     start = time.monotonic()
-    message = client.messages.create(
+    kwargs = dict(
         model=MODEL,
         max_tokens=max_tokens,
         messages=[{"role": "user", "content": prompt}],
     )
+    if system:
+        kwargs["system"] = system
+    if temperature is not None:
+        kwargs["temperature"] = temperature
+    message = client.messages.create(**kwargs)
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
     logger.info(
         "Claude API call: operation=%s model=%s input_tokens=%d output_tokens=%d latency_ms=%.1f",
@@ -63,6 +70,32 @@ def suggest_smart_field(
     user_profile: str = "",
     steps_taken: str = "",
 ) -> str:
+    today = datetime.date.today().isoformat()
+
+    field_definitions = {
+        "specific": "What exactly will I do? Narrow the goal to a clear action or outcome.",
+        "measurable": "How will I track progress? State a concrete metric or quantity.",
+        "attainable": "How will I realistically accomplish this? "
+                      "State the time/resource commitment that fits my situation.",
+        "relevant": "Why does this matter to me? "
+                    "Connect the goal to my broader life or career aspirations.",
+        "timely": "By when? Give a clear deadline or milestone dates.",
+    }
+
+    system = (
+        "You help users fill in SMART goals. You write ONE field at a time.\n"
+        "Write as if you ARE the user — first person, confident, concrete.\n"
+        "The user can edit your suggestion, so commit to specific numbers, metrics, "
+        "and dates rather than hedging. Do not give tips or advice — write goal content.\n\n"
+        f'The "{field}" field means: {field_definitions[field]}\n\n'
+        "Rules:\n"
+        "- Reply with ONLY the goal text (1-3 sentences, under 50 words).\n"
+        "- No field name, no label, no markdown, no bold, no headers, no bullets.\n"
+        "- Complement already-defined fields without repeating their ideas.\n"
+        "- Account for any progress the user has described.\n"
+        f"- Today is {today}. All dates must be in the future."
+    )
+
     field_order = ("specific", "measurable", "attainable", "relevant", "timely")
     context_lines = [
         f"  {f}: {existing_fields[f]}"
@@ -70,26 +103,33 @@ def suggest_smart_field(
         if f != field and existing_fields and existing_fields.get(f)
     ]
     context_section = (
-        "\nAlready defined SMART fields (your suggestion must be coherent with these):\n"
+        "\nAlready defined SMART fields:\n"
         + "\n".join(context_lines)
         + "\n"
         if context_lines
         else ""
     )
+
     prompt = (
-        f"You are helping a user build a SMART goal.\n"
-        f"Goal title: {goal_title}\n"
-        f"Goal description: {goal_description}\n"
+        f"Goal: {goal_title}\n"
+        f"Description: {goal_description}\n"
         f"{_profile_section(user_profile)}"
         f"{_steps_taken_section(steps_taken)}"
-        f"{context_section}"
-        f"Write a concise, specific value for the '{field}' dimension. "
-        f"It must complement and not repeat ideas already covered in the other fields above. "
-        f"Account for any progress the user has already made. "
-        f"Reply with only the suggestion — no preamble, no explanation."
+        f"{context_section}\n"
+        f'Suggest the "{field}" field.'
     )
-    message = _call_claude(prompt, 256, "suggest_smart_field")
-    return message.content[0].text.strip()
+
+    message = _call_claude(prompt, 150, "suggest_smart_field",
+                           system=system, temperature=0.7)
+    text = message.content[0].text.strip()
+
+    # Safety net: strip echoed field label (e.g., "**Relevant:** ..." or "Timely: ...")
+    text = re.sub(
+        r'^\*{0,2}\s*' + re.escape(field) + r'\s*:?\s*\*{0,2}\s*',
+        '', text, flags=re.IGNORECASE,
+    ).strip()
+
+    return text
 
 
 def generate_checklist_item(

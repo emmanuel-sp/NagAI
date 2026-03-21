@@ -106,7 +106,7 @@ export default function PrivacyPolicyPage() {
             For questions about this Privacy Policy, please visit{" "}
             <a href="https://www.emmanuelp.com" target="_blank" rel="noopener noreferrer">
               emmanuelp.com
-            </a>.
+            </a>, where you'll learn more about the developer and ways to reach out.
           </p>
         </section>
       </div>

@@ -25,12 +25,13 @@ export default function LayoutClient({
     getCurrentUser().then((user) => setShowNavbar(!!user));
   }, [pathname]);
 
-  // Landing page never gets pane wrapper or navbar padding, even for authenticated users
+  // Landing page and onboarding never get pane wrapper or navbar padding
   const isLandingPage = pathname === "/";
+  const isOnboardingPage = pathname === "/onboarding";
   const isProfilePage = pathname === "/profile";
   // Treat null (SSR / unknown) same as false so the landing page renders correctly
-  const paddingTop = showNavbar && !isLandingPage ? "112px" : "0";
-  const usePane = showNavbar === true && !isLandingPage && !isProfilePage;
+  const paddingTop = showNavbar && !isLandingPage && !isOnboardingPage ? "112px" : "0";
+  const usePane = showNavbar === true && !isLandingPage && !isProfilePage && !isOnboardingPage;
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>

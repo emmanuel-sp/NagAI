@@ -72,6 +72,9 @@ public class User implements UserDetails{
     @Column(length = 50)
     private String timezone = "UTC";
 
+    @Column(name = "onboarding_completed")
+    private boolean onboardingCompleted = false;
+
     @Override
     public String getUsername() {
         return email;

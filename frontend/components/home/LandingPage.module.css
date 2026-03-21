@@ -355,11 +355,6 @@
 }
 
 /* ─── Sticky Feature Nav ─── */
-.featureNavSentinel {
-  height: 0;
-  width: 100%;
-}
-
 .featureNav {
   position: sticky;
   top: 72px;
@@ -623,7 +618,7 @@
 
 .featureTitle {
   font-family: var(--font-display);
-  font-size: clamp(28px, 3.5vw, 40px);
+  font-size: clamp(32px, 4vw, 48px);
   font-weight: 700;
   letter-spacing: -0.025em;
   color: var(--text-primary);
@@ -631,7 +626,7 @@
 }
 
 .featureDescription {
-  font-size: var(--fs-base);
+  font-size: var(--fs-lg);
   color: var(--text-secondary);
   line-height: 1.7;
   font-weight: var(--fw-400);
@@ -649,9 +644,9 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.6;
   font-weight: var(--fw-400);
 }
 
@@ -668,7 +663,7 @@
 /* ─── How It Works ─── */
 .howSection {
   width: 100%;
-  padding: 80px 24px;
+  padding: 120px 24px;
 }
 
 .howInner {
@@ -676,7 +671,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 64px;
 }
 
 .sectionHeader {
@@ -688,14 +683,14 @@
 
 .sectionHeadline {
   font-family: var(--font-display);
-  font-size: clamp(32px, 4vw, 48px);
+  font-size: clamp(36px, 4.5vw, 56px);
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--text-primary);
 }
 
 .sectionSubline {
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xl);
   color: var(--text-secondary);
   font-weight: 300;
 }
@@ -746,14 +741,14 @@
 
 .stepTitle {
   font-family: var(--font-display);
-  font-size: var(--fs-base);
+  font-size: var(--fs-lg);
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--text-primary);
 }
 
 .stepText {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
   color: var(--text-secondary);
   line-height: 1.6;
   font-weight: var(--fw-400);
@@ -762,7 +757,7 @@
 /* ─── Final CTA ─── */
 .ctaSection {
   width: 100%;
-  padding: 48px 24px 96px;
+  padding: 80px 24px 120px;
 }
 
 .ctaInner {
@@ -826,7 +821,7 @@
 
 .ctaHeadline {
   font-family: var(--font-display);
-  font-size: clamp(28px, 3.5vw, 40px);
+  font-size: clamp(32px, 4vw, 48px);
   font-weight: 700;
   letter-spacing: -0.025em;
   color: var(--text-primary);
@@ -835,9 +830,9 @@
 }
 
 .ctaSubline {
-  font-size: var(--fs-base);
+  font-size: var(--fs-lg);
   color: var(--text-secondary);
-  max-width: 420px;
+  max-width: 460px;
   line-height: 1.6;
   font-weight: var(--fw-400);
   position: relative;
@@ -893,8 +888,16 @@
    ═══════════════════════════════════════════════ */
 
 @media (max-width: 900px) {
+  .featureSection {
+    padding: 96px 24px;
+  }
+
   .featureGrid {
-    gap: 40px;
+    gap: 48px;
+  }
+
+  .howSection {
+    padding: 96px 24px;
   }
 
   .stepsGrid {
@@ -918,12 +921,12 @@
   }
 
   .featureSection {
-    padding: 56px 20px;
+    padding: 72px 20px;
   }
 
   .featureGrid {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 36px;
   }
 
   /* On mobile, always show mockup above text */
@@ -936,7 +939,7 @@
   }
 
   .howSection {
-    padding: 56px 20px;
+    padding: 72px 20px;
   }
 
   .ctaInner {
@@ -994,7 +997,7 @@
   }
 
   .featureSection {
-    padding: 48px 16px;
+    padding: 56px 16px;
     scroll-margin-top: 110px;
   }
 
@@ -1007,11 +1010,11 @@
   }
 
   .howSection {
-    padding: 48px 16px;
+    padding: 56px 16px;
   }
 
   .ctaSection {
-    padding: 32px 16px 64px;
+    padding: 48px 16px 80px;
   }
 
   .ctaInner {

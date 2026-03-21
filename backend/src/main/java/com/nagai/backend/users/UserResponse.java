@@ -21,6 +21,7 @@ public class UserResponse {
         this.age = user.getAge();
         this.lifeContext = user.getLifeContext();
         this.timezone = user.getTimezone();
+        this.onboardingCompleted = user.isOnboardingCompleted();
     }
 
     private Long id;
@@ -47,4 +48,5 @@ public class UserResponse {
     private Integer age;
     private String lifeContext;
     private String timezone;
+    private boolean onboardingCompleted;
 }

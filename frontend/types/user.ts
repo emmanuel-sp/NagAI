@@ -14,6 +14,7 @@ export interface User {
   age?: number;
   lifeContext?: string;
   timezone?: string;
+  onboardingCompleted?: boolean;
   createdAt?: string;
 }
 

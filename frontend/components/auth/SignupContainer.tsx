@@ -122,7 +122,7 @@ export default function SignupContainer() {
             onSuccess={async (credentialResponse) => {
               try {
                 await loginWithGoogle(credentialResponse.credential!);
-                router.push("/profile");
+                router.push("/onboarding");
               } catch {
                 setError("Google sign-in failed. Please try again.");
               }

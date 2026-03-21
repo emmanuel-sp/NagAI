@@ -187,8 +187,6 @@ const steps = [
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
-  const [isStuck, setIsStuck] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const hero = useScrollReveal(0.1);
   const featureRefs = [
     useScrollReveal(0.12),
@@ -247,18 +245,6 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  /* Sticky sentinel detection */
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsStuck(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, []);
 
   const scrollToFeature = (id: string) => {
     document
@@ -309,10 +295,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Sticky Feature Nav ─── */}
-      <div ref={sentinelRef} className={styles.featureNavSentinel} />
+      {/* ─── Floating Feature Nav ─── */}
       <div
-        className={`${styles.featureNav} ${hero.isVisible ? styles.visible : ""} ${isStuck ? styles.featureNavStuck : ""}`}
+        className={`${styles.featureNav} ${hero.isVisible ? styles.visible : ""}`}
       >
         <div className={styles.highlightsBar}>
           {highlights.map((h, i) => (

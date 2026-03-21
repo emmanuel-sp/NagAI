@@ -90,6 +90,29 @@ public class UserService {
             );
     }
 
+    public User completeOnboarding(UserRequest profileData) {
+        User currentUser = getCurrentUser();
+        if (profileData.getFullName() != null) currentUser.setFullName(profileData.getFullName());
+        currentUser.setBio(profileData.getBio());
+        currentUser.setCareer(profileData.getCareer());
+        currentUser.setAge(profileData.getAge());
+        currentUser.setLifeContext(profileData.getLifeContext());
+        currentUser.setInterests(profileData.getInterests());
+        currentUser.setHobbies(profileData.getHobbies());
+        currentUser.setHabits(profileData.getHabits());
+        if (profileData.getTimezone() != null && !profileData.getTimezone().isBlank()) {
+            currentUser.setTimezone(profileData.getTimezone());
+        }
+        currentUser.setOnboardingCompleted(true);
+        return userRepository.save(currentUser);
+    }
+
+    public User skipOnboarding() {
+        User currentUser = getCurrentUser();
+        currentUser.setOnboardingCompleted(true);
+        return userRepository.save(currentUser);
+    }
+
     public void changePassword(PasswordChangeRequest request) {
         User user = getCurrentUser();
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {

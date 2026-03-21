@@ -33,7 +33,7 @@ export default function NavBar() {
   const active = (path: string) =>
     path === "/home" ? pathname === "/home" : pathname.startsWith(path);
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn || pathname === "/onboarding") return null;
 
   return (
     <nav className={`${styles.navbar} ${scrolled ? styles.navbarScrolled : ""} ${modalOpen ? styles.navbarDisabled : ""}`}>

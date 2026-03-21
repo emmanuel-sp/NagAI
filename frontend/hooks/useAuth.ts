@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { getCurrentUser } from "@/services/authService";
 import { UserProfile } from "@/types/user";
 
@@ -12,6 +12,7 @@ export function useAuth(options: UseAuthOptions = {}) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Fast path: if redirectIfAuth and a token exists, redirect immediately
@@ -36,10 +37,15 @@ export function useAuth(options: UseAuthOptions = {}) {
       if (options.redirectIfAuth && currentUser) {
         router.replace("/home");
       }
+
+      // Onboarding gate: redirect un-onboarded users to /onboarding
+      if (options.requireAuth && currentUser && !currentUser.onboardingCompleted && pathname !== "/onboarding") {
+        router.replace("/onboarding");
+      }
     };
 
     checkAuth();
-  }, [options.requireAuth, options.redirectIfAuth, router]);
+  }, [options.requireAuth, options.redirectIfAuth, router, pathname]);
 
   return { user, loading };
 }

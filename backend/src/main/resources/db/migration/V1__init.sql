@@ -17,7 +17,8 @@ CREATE TABLE users (
     habits TEXT[],
     age INTEGER,
     life_context TEXT,
-    timezone VARCHAR(50) DEFAULT 'UTC'
+    timezone VARCHAR(50) DEFAULT 'UTC',
+    onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE goals (

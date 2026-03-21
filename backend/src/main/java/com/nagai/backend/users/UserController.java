@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +38,18 @@ public class UserController {
     @PutMapping("/me")
     public ResponseEntity<UserResponse> putUser(@RequestBody UserRequest request) {
         User updated = userService.updateUser(request);
+        return ResponseEntity.ok(new UserResponse(updated));
+    }
+
+    @PostMapping("/me/onboarding/complete")
+    public ResponseEntity<UserResponse> completeOnboarding(@RequestBody UserRequest request) {
+        User updated = userService.completeOnboarding(request);
+        return ResponseEntity.ok(new UserResponse(updated));
+    }
+
+    @PostMapping("/me/onboarding/skip")
+    public ResponseEntity<UserResponse> skipOnboarding() {
+        User updated = userService.skipOnboarding();
         return ResponseEntity.ok(new UserResponse(updated));
     }
 
