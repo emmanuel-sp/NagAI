@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
@@ -40,6 +41,7 @@ class AgentSchedulerTest {
     @Mock private SentAgentMessageRepository sentAgentMessageRepository;
     @Mock private AgentReplyRepository agentReplyRepository;
     @Mock private KafkaTemplate<String, String> kafkaTemplate;
+    @Mock private TaskScheduler taskScheduler;
     @Mock private Counter agentMessagesSentCounter;
     @Mock private Counter agentMessagesFailedCounter;
 
@@ -56,7 +58,7 @@ class AgentSchedulerTest {
         agentScheduler = new AgentScheduler(
                 agentContextRepository, agentRepository, userRepository,
                 goalRepository, checklistRepository, sentAgentMessageRepository,
-                agentReplyRepository, kafkaTemplate,
+                agentReplyRepository, kafkaTemplate, taskScheduler,
                 agentMessagesSentCounter, agentMessagesFailedCounter);
 
         user = new User();
@@ -96,12 +98,13 @@ class AgentSchedulerTest {
 
     @Test
     void processAgentMessages_publishesToKafkaForDueContexts() {
-        when(agentContextRepository.findAllForDeployedAgents()).thenReturn(List.of(context));
-        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of(item));
+        when(agentContextRepository.findDueForDeployedAgents(any(LocalDateTime.class)))
+                .thenReturn(List.of(context));
         when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(goalRepository.findById(200L)).thenReturn(Optional.of(goal));
+        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of(item));
         when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
+        when(goalRepository.findById(200L)).thenReturn(Optional.of(goal));
         when(kafkaTemplate.send(any(ProducerRecord.class)))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
@@ -122,26 +125,23 @@ class AgentSchedulerTest {
 
         verify(agentContextRepository).save(context);
         assertThat(context.getLastMessageSentAt()).isNotNull();
+        assertThat(context.getNextMessageAt()).isNotNull();
     }
 
     @Test
-    void processAgentMessages_skipsContextsNotDue() {
-        context.setLastMessageSentAt(LocalDateTime.now(ZoneOffset.UTC).minusHours(1));
-
-        when(agentContextRepository.findAllForDeployedAgents()).thenReturn(List.of(context));
-        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
-        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
+    void processAgentMessages_nothingDue() {
+        when(agentContextRepository.findDueForDeployedAgents(any(LocalDateTime.class)))
+                .thenReturn(List.of());
 
         agentScheduler.processAgentMessages();
 
-        verify(kafkaTemplate, never()).send(any(ProducerRecord.class));
+        verifyNoInteractions(kafkaTemplate);
     }
 
     @Test
     void processAgentMessages_skipsWhenUserNotFound() {
-        when(agentContextRepository.findAllForDeployedAgents()).thenReturn(List.of(context));
-        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
-        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
+        when(agentContextRepository.findDueForDeployedAgents(any(LocalDateTime.class)))
+                .thenReturn(List.of(context));
         when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -160,13 +160,14 @@ class AgentSchedulerTest {
         context2.setMessageType("guidance");
         context2.setLastMessageSentAt(null);
 
-        when(agentContextRepository.findAllForDeployedAgents()).thenReturn(List.of(context, context2));
-        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
-        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(anyLong())).thenReturn(List.of());
+        when(agentContextRepository.findDueForDeployedAgents(any(LocalDateTime.class)))
+                .thenReturn(List.of(context, context2));
         when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
         when(userRepository.findById(1L))
                 .thenThrow(new RuntimeException("DB error"))
                 .thenReturn(Optional.of(user));
+        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
+        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(anyLong())).thenReturn(List.of());
         when(goalRepository.findById(200L)).thenReturn(Optional.of(goal));
         when(kafkaTemplate.send(any(ProducerRecord.class)))
                 .thenReturn(CompletableFuture.completedFuture(null));
@@ -181,55 +182,75 @@ class AgentSchedulerTest {
     }
 
     @Test
-    void processAgentMessages_nothingDeployed() {
-        when(agentContextRepository.findAllForDeployedAgents()).thenReturn(List.of());
+    void computeNextMessageAt_usesBaseIntervalForNag() {
+        context.setMessageType("nag");
+        LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
 
-        agentScheduler.processAgentMessages();
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 0, now);
 
-        verifyNoInteractions(kafkaTemplate);
+        assertThat(next).isEqualTo(now.plusHours(6));
     }
 
     @Test
-    void checkIfDue_returnsTrue_whenNeverSent() {
-        context.setLastMessageSentAt(null);
-        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
-        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
+    void computeNextMessageAt_usesBaseIntervalForMotivation() {
+        context.setMessageType("motivation");
+        LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
 
-        AgentScheduler.DueCheckResult result = agentScheduler.checkIfDue(context, LocalDateTime.now(ZoneOffset.UTC));
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 0, now);
 
-        assertThat(result.due()).isTrue();
-        assertThat(result.messagesSinceLastChange()).isEqualTo(0);
+        assertThat(next).isEqualTo(now.plusHours(24));
     }
 
     @Test
-    void checkIfDue_returnsFalse_whenRecentlySent() {
-        context.setMessageType("nag"); // base 6h
-        context.setLastMessageSentAt(LocalDateTime.now(ZoneOffset.UTC).minusHours(1));
-        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
-        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
+    void computeNextMessageAt_usesBaseIntervalForGuidance() {
+        context.setMessageType("guidance");
+        LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
 
-        AgentScheduler.DueCheckResult result = agentScheduler.checkIfDue(context, LocalDateTime.now(ZoneOffset.UTC));
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 0, now);
 
-        assertThat(result.due()).isFalse();
+        assertThat(next).isEqualTo(now.plusHours(48));
     }
 
     @Test
-    void checkIfDue_acceleratesForHighActivity() {
-        context.setMessageType("nag"); // base 6h, with 0.5x modifier = 3h effective
-        context.setLastMessageSentAt(LocalDateTime.now(ZoneOffset.UTC).minusHours(4));
+    void computeNextMessageAt_acceleratesForHighActivity() {
+        context.setMessageType("nag"); // base 6h, modifier 0.5 = 3h
+        LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
 
-        // 3 recent completions
-        String today = LocalDateTime.now(ZoneOffset.UTC).toString();
+        // 3 recent completions within 2 days
+        String today = now.toString();
         ChecklistItem c1 = new ChecklistItem(); c1.setCompleted(true); c1.setCompletedAt(today);
         ChecklistItem c2 = new ChecklistItem(); c2.setCompleted(true); c2.setCompletedAt(today);
         ChecklistItem c3 = new ChecklistItem(); c3.setCompleted(true); c3.setCompletedAt(today);
-        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of(c1, c2, c3));
-        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
 
-        AgentScheduler.DueCheckResult result = agentScheduler.checkIfDue(context, LocalDateTime.now(ZoneOffset.UTC));
+        LocalDateTime next = agentScheduler.computeNextMessageAt(
+                context, List.of(c1, c2, c3), 0, now);
 
-        // 4h > 3h effective, so should be due
-        assertThat(result.due()).isTrue();
+        // 6h * 0.5 = 3h
+        assertThat(next).isEqualTo(now.plusHours(3));
+    }
+
+    @Test
+    void computeNextMessageAt_backsOffForStaleMessages() {
+        context.setMessageType("nag"); // base 6h
+        LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
+
+        // messagesSinceLastChange=2, +1 for current send = 3 → staleMultiplier = 1.5
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 2, now);
+
+        // 6h * 1.5 = 9h
+        assertThat(next).isEqualTo(now.plusHours(9));
+    }
+
+    @Test
+    void computeNextMessageAt_capsAtMaxInterval() {
+        context.setMessageType("nag"); // base 6h, max 24h
+        LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
+
+        // messagesSinceLastChange=9, +1=10 → staleMultiplier = 1.0 + (10-2)*0.5 = 5.0
+        // effective = 6h * 5.0 = 30h, capped at max 24h
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 9, now);
+
+        assertThat(next).isEqualTo(now.plusHours(24));
     }
 
     @Test

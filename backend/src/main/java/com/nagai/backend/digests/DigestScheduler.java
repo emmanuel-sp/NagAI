@@ -1,10 +1,14 @@
 package com.nagai.backend.digests;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -12,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,13 +49,16 @@ public class DigestScheduler {
     private final SentDigestRepository sentDigestRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final TaskScheduler taskScheduler;
     private final Counter digestsSentCounter;
     private final Counter digestsFailedCounter;
+
+    private final Map<Long, ScheduledFuture<?>> timers = new ConcurrentHashMap<>();
 
     public DigestScheduler(DigestRepository digestRepository, DigestService digestService,
                            GoalRepository goalRepository, ChecklistRepository checklistRepository,
                            UserRepository userRepository, SentDigestRepository sentDigestRepository,
-                           KafkaTemplate<String, String> kafkaTemplate,
+                           KafkaTemplate<String, String> kafkaTemplate, TaskScheduler taskScheduler,
                            Counter digestsSentCounter, Counter digestsFailedCounter) {
         this.digestRepository = digestRepository;
         this.digestService = digestService;
@@ -60,11 +68,16 @@ public class DigestScheduler {
         this.sentDigestRepository = sentDigestRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = new ObjectMapper();
+        this.taskScheduler = taskScheduler;
         this.digestsSentCounter = digestsSentCounter;
         this.digestsFailedCounter = digestsFailedCounter;
     }
 
-    @Scheduled(fixedRate = 60000)
+    /**
+     * Safety sweep — catches missed timers, newly created digests, and startup recovery.
+     * Runs every 5 minutes instead of the old 60-second poll.
+     */
+    @Scheduled(fixedRate = 300_000, initialDelay = 30_000)
     @Transactional
     public void processDigests() {
         String correlationId = UUID.randomUUID().toString().substring(0, 8);
@@ -82,59 +95,110 @@ public class DigestScheduler {
                 true, LocalDateTime.now(ZoneOffset.UTC));
 
         if (dueDigests.isEmpty()) {
-            log.debug("No due digests found");
+            log.debug("Sweep: no due digests found");
             return;
         }
 
         log.info("Found {} due digest(s) to process", dueDigests.size());
 
         for (Digest digest : dueDigests) {
-            try {
-                User user = userRepository.findById(digest.getUserId())
-                        .orElse(null);
-                if (user == null) {
-                    log.warn("User {} not found for digest {}", digest.getUserId(), digest.getDigestId());
-                    continue;
-                }
-
-                // Detect whether any progress was made since last delivery
-                boolean hasProgress = hasProgressSinceLastDelivery(digest);
-                if (hasProgress) {
-                    digest.setStaleCount(0);
-                } else {
-                    digest.setStaleCount(digest.getStaleCount() + 1);
-                }
-
-                // Auto-pause after too many stale deliveries
-                if (digest.getStaleCount() >= STALE_PAUSE_THRESHOLD) {
-                    log.info("Auto-pausing digest {} for user {} — {} consecutive stale deliveries",
-                            digest.getDigestId(), user.getUserId(), digest.getStaleCount());
-                    digest.setActive(false);
-                    digest.setNextDeliveryAt(null);
-                    digest.setPauseReason("stale_progress");
-                    digestRepository.save(digest);
-                    continue;
-                }
-
-                DigestDeliveryPayload payload = buildPayload(digest, user, hasProgress);
-                String json = objectMapper.writeValueAsString(payload);
-                log.info("Publishing digest {} for user {} (email={}, staleCount={}) to Kafka...",
-                        digest.getDigestId(), user.getUserId(), user.getEmail(), digest.getStaleCount());
-
-                ProducerRecord<String, String> record = new ProducerRecord<>(
-                        KafkaConfig.TOPIC_DIGEST_DELIVERY, String.valueOf(user.getUserId()), json);
-                record.headers().add("x-correlation-id", correlationId.getBytes(StandardCharsets.UTF_8));
-                kafkaTemplate.send(record).get(10, java.util.concurrent.TimeUnit.SECONDS);
-
-                log.info("Kafka publish succeeded for digest {}", digest.getDigestId());
-                digestService.markDelivered(digest, user);
-                digestsSentCounter.increment();
-                log.info("Digest {} delivered and next delivery scheduled", digest.getDigestId());
-            } catch (Exception e) {
-                digestsFailedCounter.increment();
-                log.error("Failed to process digest {}: {}", digest.getDigestId(), e.getMessage(), e);
-            }
+            processDigest(digest, correlationId);
         }
+    }
+
+    /** Timer entry point — fired at the exact scheduled delivery time. */
+    void onDigestTimerFired(Long digestId) {
+        timers.remove(digestId);
+        String correlationId = UUID.randomUUID().toString().substring(0, 8);
+        MDC.put("correlationId", correlationId);
+
+        try {
+            Digest digest = digestRepository.findById(digestId).orElse(null);
+            if (digest == null || !digest.isActive()) return;
+            if (digest.getNextDeliveryAt() == null
+                    || digest.getNextDeliveryAt().isAfter(LocalDateTime.now(ZoneOffset.UTC))) {
+                return;
+            }
+
+            log.info("Timer: processing digest {}", digestId);
+            processDigest(digest, correlationId);
+        } catch (Exception e) {
+            digestsFailedCounter.increment();
+            log.error("Timer: failed to process digest {}: {}", digestId, e.getMessage(), e);
+        } finally {
+            MDC.remove("correlationId");
+        }
+    }
+
+    private void processDigest(Digest digest, String correlationId) {
+        try {
+            User user = userRepository.findById(digest.getUserId())
+                    .orElse(null);
+            if (user == null) {
+                log.warn("User {} not found for digest {}", digest.getUserId(), digest.getDigestId());
+                return;
+            }
+
+            // Detect whether any progress was made since last delivery
+            boolean hasProgress = hasProgressSinceLastDelivery(digest);
+            if (hasProgress) {
+                digest.setStaleCount(0);
+            } else {
+                digest.setStaleCount(digest.getStaleCount() + 1);
+            }
+
+            // Auto-pause after too many stale deliveries
+            if (digest.getStaleCount() >= STALE_PAUSE_THRESHOLD) {
+                log.info("Auto-pausing digest {} for user {} — {} consecutive stale deliveries",
+                        digest.getDigestId(), user.getUserId(), digest.getStaleCount());
+                digest.setActive(false);
+                digest.setNextDeliveryAt(null);
+                digest.setPauseReason("stale_progress");
+                digestRepository.save(digest);
+                cancelTimer(digest.getDigestId());
+                return;
+            }
+
+            DigestDeliveryPayload payload = buildPayload(digest, user, hasProgress);
+            String json = objectMapper.writeValueAsString(payload);
+            log.info("Publishing digest {} for user {} (email={}, staleCount={}) to Kafka...",
+                    digest.getDigestId(), user.getUserId(), user.getEmail(), digest.getStaleCount());
+
+            ProducerRecord<String, String> record = new ProducerRecord<>(
+                    KafkaConfig.TOPIC_DIGEST_DELIVERY, String.valueOf(user.getUserId()), json);
+            record.headers().add("x-correlation-id", correlationId.getBytes(StandardCharsets.UTF_8));
+            kafkaTemplate.send(record).get(10, java.util.concurrent.TimeUnit.SECONDS);
+
+            log.info("Kafka publish succeeded for digest {}", digest.getDigestId());
+            digestService.markDelivered(digest, user);
+            digestsSentCounter.increment();
+
+            // Schedule a precise timer for the next delivery
+            scheduleTimer(digest.getDigestId(), digest.getNextDeliveryAt());
+            log.info("Digest {} delivered, next at {}", digest.getDigestId(), digest.getNextDeliveryAt());
+        } catch (Exception e) {
+            digestsFailedCounter.increment();
+            log.error("Failed to process digest {}: {}", digest.getDigestId(), e.getMessage(), e);
+        }
+    }
+
+    void scheduleTimer(Long digestId, LocalDateTime nextDeliveryAt) {
+        cancelTimer(digestId);
+        if (nextDeliveryAt == null) return;
+        Instant fireAt = nextDeliveryAt.toInstant(ZoneOffset.UTC);
+        if (!fireAt.isAfter(Instant.now())) return;
+
+        ScheduledFuture<?> future = taskScheduler.schedule(
+                () -> onDigestTimerFired(digestId), fireAt);
+        if (future != null) {
+            timers.put(digestId, future);
+        }
+        log.debug("Scheduled timer for digest {} at {}", digestId, nextDeliveryAt);
+    }
+
+    private void cancelTimer(Long digestId) {
+        ScheduledFuture<?> existing = timers.remove(digestId);
+        if (existing != null) existing.cancel(false);
     }
 
     boolean hasProgressSinceLastDelivery(Digest digest) {

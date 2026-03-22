@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
@@ -39,6 +40,7 @@ class DigestSchedulerTest {
     @Mock private UserRepository userRepository;
     @Mock private SentDigestRepository sentDigestRepository;
     @Mock private KafkaTemplate<String, String> kafkaTemplate;
+    @Mock private TaskScheduler taskScheduler;
     @Mock private Counter digestsSentCounter;
     @Mock private Counter digestsFailedCounter;
 
@@ -54,7 +56,7 @@ class DigestSchedulerTest {
         digestScheduler = new DigestScheduler(
                 digestRepository, digestService, goalRepository,
                 checklistRepository, userRepository, sentDigestRepository,
-                kafkaTemplate, digestsSentCounter, digestsFailedCounter);
+                kafkaTemplate, taskScheduler, digestsSentCounter, digestsFailedCounter);
 
         user = new User();
         user.setUserId(1L);

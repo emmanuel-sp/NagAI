@@ -1,7 +1,7 @@
 package com.nagai.backend.agents;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,8 +61,11 @@ public class AgentScheduler {
     private final AgentReplyRepository agentReplyRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final TaskScheduler taskScheduler;
     private final Counter agentMessagesSentCounter;
     private final Counter agentMessagesFailedCounter;
+
+    private final Map<Long, ScheduledFuture<?>> timers = new ConcurrentHashMap<>();
 
     public AgentScheduler(AgentContextRepository agentContextRepository,
                           AgentRepository agentRepository,
@@ -69,6 +75,7 @@ public class AgentScheduler {
                           SentAgentMessageRepository sentAgentMessageRepository,
                           AgentReplyRepository agentReplyRepository,
                           KafkaTemplate<String, String> kafkaTemplate,
+                          TaskScheduler taskScheduler,
                           Counter agentMessagesSentCounter,
                           Counter agentMessagesFailedCounter) {
         this.agentContextRepository = agentContextRepository;
@@ -80,11 +87,16 @@ public class AgentScheduler {
         this.agentReplyRepository = agentReplyRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = new ObjectMapper();
+        this.taskScheduler = taskScheduler;
         this.agentMessagesSentCounter = agentMessagesSentCounter;
         this.agentMessagesFailedCounter = agentMessagesFailedCounter;
     }
 
-    @Scheduled(fixedRate = 60000)
+    /**
+     * Safety sweep — only loads contexts that are actually due (or newly deployed with null nextMessageAt).
+     * Runs every 5 minutes instead of the old 60-second poll that recomputed heuristics for ALL contexts.
+     */
+    @Scheduled(fixedRate = 300_000, initialDelay = 30_000)
     @Transactional
     public void processAgentMessages() {
         String correlationId = UUID.randomUUID().toString().substring(0, 8);
@@ -98,96 +110,105 @@ public class AgentScheduler {
     }
 
     private void processAgentMessagesInternal(String correlationId) {
-        List<AgentContext> contexts = agentContextRepository.findAllForDeployedAgents();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        List<AgentContext> dueContexts = agentContextRepository.findDueForDeployedAgents(now);
 
-        if (contexts.isEmpty()) {
-            log.debug("No deployed agent contexts found");
+        if (dueContexts.isEmpty()) {
+            log.debug("Sweep: no due agent contexts found");
             return;
         }
 
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-        log.info("Checking {} deployed agent context(s) for due messages", contexts.size());
+        log.info("Found {} due agent context(s) to process", dueContexts.size());
 
-        for (AgentContext context : contexts) {
-            try {
-                DueCheckResult dueCheck = checkIfDue(context, now);
-                if (!dueCheck.due()) continue;
-
-                Agent agent = agentRepository.findById(context.getAgentId()).orElse(null);
-                if (agent == null) continue;
-
-                User user = userRepository.findById(agent.getUserId()).orElse(null);
-                if (user == null) {
-                    log.warn("User not found for agent {}", agent.getAgentId());
-                    continue;
-                }
-
-                AgentMessagePayload payload = buildPayload(context, agent, user,
-                        dueCheck.checklistItems(), dueCheck.messagesSinceLastChange());
-                String json = objectMapper.writeValueAsString(payload);
-
-                ProducerRecord<String, String> record = new ProducerRecord<>(
-                        KafkaConfig.TOPIC_AGENT_MESSAGES, String.valueOf(user.getUserId()), json);
-                record.headers().add("x-correlation-id", correlationId.getBytes(StandardCharsets.UTF_8));
-                kafkaTemplate.send(record).get(10, TimeUnit.SECONDS);
-
-                context.setLastMessageSentAt(now);
-                agentContextRepository.save(context);
-                agentMessagesSentCounter.increment();
-
-                log.info("Agent message published for context {} user {}",
-                        context.getContextId(), user.getUserId());
-            } catch (Exception e) {
-                agentMessagesFailedCounter.increment();
-                log.error("Failed to process agent context {}: {}",
-                        context.getContextId(), e.getMessage(), e);
-            }
+        for (AgentContext context : dueContexts) {
+            processAgentContext(context, now, correlationId);
         }
     }
 
-    record DueCheckResult(boolean due, List<ChecklistItem> checklistItems, int messagesSinceLastChange) {}
+    /** Timer entry point — fired at the exact scheduled message time. */
+    void onAgentTimerFired(Long contextId) {
+        timers.remove(contextId);
+        String correlationId = UUID.randomUUID().toString().substring(0, 8);
+        MDC.put("correlationId", correlationId);
 
-    DueCheckResult checkIfDue(AgentContext context, LocalDateTime now) {
+        try {
+            AgentContext context = agentContextRepository.findById(contextId).orElse(null);
+            if (context == null) return;
+            if (context.getNextMessageAt() != null
+                    && context.getNextMessageAt().isAfter(LocalDateTime.now(ZoneOffset.UTC))) {
+                return;
+            }
+
+            // Verify agent is still deployed
+            Agent agent = agentRepository.findById(context.getAgentId()).orElse(null);
+            if (agent == null || !agent.isDeployed()) return;
+
+            log.info("Timer: processing agent context {}", contextId);
+            processAgentContext(context, LocalDateTime.now(ZoneOffset.UTC), correlationId);
+        } catch (Exception e) {
+            agentMessagesFailedCounter.increment();
+            log.error("Timer: failed for context {}: {}", contextId, e.getMessage(), e);
+        } finally {
+            MDC.remove("correlationId");
+        }
+    }
+
+    private void processAgentContext(AgentContext context, LocalDateTime now, String correlationId) {
+        try {
+            Agent agent = agentRepository.findById(context.getAgentId()).orElse(null);
+            if (agent == null) return;
+
+            User user = userRepository.findById(agent.getUserId()).orElse(null);
+            if (user == null) {
+                log.warn("User not found for agent {}", agent.getAgentId());
+                return;
+            }
+
+            // Load data needed for payload and next-schedule computation
+            List<ChecklistItem> checklistItems = (context.getGoalId() != null)
+                    ? checklistRepository.findChecklistItemByGoalId(context.getGoalId())
+                    : List.of();
+            int messagesSinceLastChange = computeMessagesSinceLastChange(context, checklistItems);
+
+            AgentMessagePayload payload = buildPayload(context, agent, user,
+                    checklistItems, messagesSinceLastChange);
+            String json = objectMapper.writeValueAsString(payload);
+
+            ProducerRecord<String, String> record = new ProducerRecord<>(
+                    KafkaConfig.TOPIC_AGENT_MESSAGES, String.valueOf(user.getUserId()), json);
+            record.headers().add("x-correlation-id", correlationId.getBytes(StandardCharsets.UTF_8));
+            kafkaTemplate.send(record).get(10, TimeUnit.SECONDS);
+
+            context.setLastMessageSentAt(now);
+
+            // Compute and persist the next message time (heuristic runs once per send, not per sweep)
+            LocalDateTime nextMessageAt = computeNextMessageAt(context, checklistItems,
+                    messagesSinceLastChange, now);
+            context.setNextMessageAt(nextMessageAt);
+            agentContextRepository.save(context);
+
+            // Schedule a precise timer for the next message
+            scheduleTimer(context.getContextId(), nextMessageAt);
+            agentMessagesSentCounter.increment();
+
+            log.info("Agent message published for context {} user {}, next at {}",
+                    context.getContextId(), user.getUserId(), nextMessageAt);
+        } catch (Exception e) {
+            agentMessagesFailedCounter.increment();
+            log.error("Failed to process agent context {}: {}",
+                    context.getContextId(), e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Computes when the next message should fire based on the current heuristic.
+     * Called once after each send — not on every sweep iteration.
+     */
+    LocalDateTime computeNextMessageAt(AgentContext context, List<ChecklistItem> items,
+                                        int messagesSinceLastChange, LocalDateTime now) {
         String type = context.getMessageType();
         long baseHours = BASE_INTERVALS.getOrDefault(type, 24L);
         long maxHours = MAX_INTERVALS.getOrDefault(type, 72L);
-
-        LocalDateTime lastSent = context.getLastMessageSentAt();
-        long hoursSinceLast;
-
-        if (lastSent == null) {
-            hoursSinceLast = maxHours;
-        } else {
-            hoursSinceLast = Duration.between(lastSent, now).toHours();
-        }
-
-        List<ChecklistItem> items = (context.getGoalId() != null)
-                ? checklistRepository.findChecklistItemByGoalId(context.getGoalId())
-                : List.of();
-
-        // Find the most recent checklist completion date
-        LocalDateTime lastChangeAt = items.stream()
-                .filter(ChecklistItem::isCompleted)
-                .filter(i -> i.getCompletedAt() != null)
-                .map(i -> {
-                    try { return LocalDateTime.parse(i.getCompletedAt()); }
-                    catch (Exception e) { return null; }
-                })
-                .filter(d -> d != null)
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
-
-        // Count messages sent since last progress change
-        List<SentAgentMessage> recentMessages = sentAgentMessageRepository
-                .findTop5ByContextIdOrderBySentAtDesc(context.getContextId());
-        int messagesSinceLastChange;
-        if (lastChangeAt == null) {
-            messagesSinceLastChange = recentMessages.size();
-        } else {
-            messagesSinceLastChange = (int) recentMessages.stream()
-                    .filter(m -> m.getSentAt() != null && m.getSentAt().isAfter(lastChangeAt))
-                    .count();
-        }
 
         double modifier = 1.0;
         if (!items.isEmpty()) {
@@ -206,19 +227,60 @@ public class AgentScheduler {
 
             if (recentCompletions >= 3) {
                 modifier = 0.5;
-            } else if (recentCompletions == 0 && hoursSinceLast > baseHours * 1.5) {
-                modifier = 0.75;
             }
         }
 
-        // Staleness multiplier: back off when messages pile up with no progress
-        if (messagesSinceLastChange >= 3) {
-            double staleMultiplier = 1.0 + (messagesSinceLastChange - 2) * 0.5; // 3→1.5x, 4→2x, 5→2.5x
+        // Account for the message we just sent (+1)
+        int adjustedCount = messagesSinceLastChange + 1;
+        if (adjustedCount >= 3) {
+            double staleMultiplier = 1.0 + (adjustedCount - 2) * 0.5;
             modifier = Math.max(modifier, staleMultiplier);
         }
 
         long effectiveHours = Math.max(2, Math.min(maxHours, (long) (baseHours * modifier)));
-        return new DueCheckResult(hoursSinceLast >= effectiveHours, items, messagesSinceLastChange);
+        return now.plusHours(effectiveHours);
+    }
+
+    int computeMessagesSinceLastChange(AgentContext context, List<ChecklistItem> items) {
+        LocalDateTime lastChangeAt = items.stream()
+                .filter(ChecklistItem::isCompleted)
+                .filter(i -> i.getCompletedAt() != null)
+                .map(i -> {
+                    try { return LocalDateTime.parse(i.getCompletedAt()); }
+                    catch (Exception e) { return null; }
+                })
+                .filter(d -> d != null)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+
+        List<SentAgentMessage> recentMessages = sentAgentMessageRepository
+                .findTop5ByContextIdOrderBySentAtDesc(context.getContextId());
+
+        if (lastChangeAt == null) {
+            return recentMessages.size();
+        }
+        return (int) recentMessages.stream()
+                .filter(m -> m.getSentAt() != null && m.getSentAt().isAfter(lastChangeAt))
+                .count();
+    }
+
+    void scheduleTimer(Long contextId, LocalDateTime nextMessageAt) {
+        cancelTimer(contextId);
+        if (nextMessageAt == null) return;
+        Instant fireAt = nextMessageAt.toInstant(ZoneOffset.UTC);
+        if (!fireAt.isAfter(Instant.now())) return;
+
+        ScheduledFuture<?> future = taskScheduler.schedule(
+                () -> onAgentTimerFired(contextId), fireAt);
+        if (future != null) {
+            timers.put(contextId, future);
+        }
+        log.debug("Scheduled timer for agent context {} at {}", contextId, nextMessageAt);
+    }
+
+    private void cancelTimer(Long contextId) {
+        ScheduledFuture<?> existing = timers.remove(contextId);
+        if (existing != null) existing.cancel(false);
     }
 
     AgentMessagePayload buildPayload(AgentContext context, Agent agent, User user,
