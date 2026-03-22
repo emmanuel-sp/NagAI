@@ -173,7 +173,7 @@ class DigestSchedulerTest {
         when(goalRepository.findAllByUserId(1L)).thenReturn(List.of(goal));
         when(checklistRepository.findChecklistItemByGoalId(100L)).thenReturn(List.of(item));
 
-        DigestDeliveryPayload payload = digestScheduler.buildPayload(digest, user);
+        DigestDeliveryPayload payload = digestScheduler.buildPayload(digest, user, true);
 
         assertThat(payload.getDigestId()).isEqualTo(10L);
         assertThat(payload.getUserEmail()).isEqualTo("test@example.com");
@@ -181,6 +181,7 @@ class DigestSchedulerTest {
         assertThat(payload.getUserLocation()).isEqualTo("New York");
         assertThat(payload.getUserProfile()).contains("Career: Engineer");
         assertThat(payload.getContentTypes()).containsExactly("tips", "progress_insights");
+        assertThat(payload.isProgressSinceLastDelivery()).isTrue();
         assertThat(payload.getGoals()).hasSize(1);
         assertThat(payload.getGoals().get(0).getTitle()).isEqualTo("Learn Spanish");
         assertThat(payload.getGoals().get(0).getSmartContext()).contains("Specific: Pass B2 exam");

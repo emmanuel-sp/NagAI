@@ -2,6 +2,7 @@
 "use client";
 
 import { Digest } from "@/types/digest";
+import { parseUtcDate } from "@/lib/dates";
 import styles from "./digest-builder.module.css";
 
 interface DigestOverviewProps {
@@ -11,7 +12,7 @@ interface DigestOverviewProps {
 export default function DigestOverview({ digest }: DigestOverviewProps) {
   const formatDate = (date?: string) => {
     if (!date) return "Not yet";
-    return new Date(date).toLocaleDateString("en-US", {
+    return parseUtcDate(date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -20,7 +21,7 @@ export default function DigestOverview({ digest }: DigestOverviewProps) {
 
   const formatTime = (date?: string) => {
     if (!date) return "";
-    return new Date(date).toLocaleTimeString("en-US", {
+    return parseUtcDate(date).toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });

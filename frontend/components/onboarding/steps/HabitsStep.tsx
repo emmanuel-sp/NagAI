@@ -21,7 +21,7 @@ export default function HabitsStep({ items, onToggle, onAdd, onRemove }: HabitsS
       <div className={styles.stepHeader}>
         <h1 className={styles.stepTitle}>Habits to build</h1>
         <p className={styles.stepExplanation}>
-          Your AI agent can help keep you accountable to the routines you're building. Or, it can help you lose those bad habits holding you back. What habits matter most to you?
+          Your AI agent can help keep you accountable to the routines you&apos;re building. Or, it can help you lose those bad habits holding you back. What habits matter most to you?
         </p>
       </div>
 

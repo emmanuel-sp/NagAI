@@ -1,12 +1,13 @@
 import styles from "./goalCard.module.css";
 import { Goal as GoalType } from "@/types/goal";
+import { parseUtcDate } from "@/lib/dates";
 
 interface GoalProps extends GoalType {
     onView?: (goalId: number) => void;
 }
 
 const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    parseUtcDate(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 export function Goal({ title, description, createdAt, targetDate, goalId, onView }: GoalProps) {
     return (

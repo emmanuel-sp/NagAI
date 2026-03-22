@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { getCurrentUser } from "@/services/authService";
+import { updateUserProfile } from "@/services/profileService";
 import { UserProfile } from "@/types/user";
 
 interface UseAuthOptions {
   requireAuth?: boolean;
   redirectIfAuth?: boolean;
+}
+
+let timezoneSynced = false;
+
+function getBrowserTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return "UTC";
+  }
 }
 
 export function useAuth(options: UseAuthOptions = {}) {
@@ -41,6 +52,15 @@ export function useAuth(options: UseAuthOptions = {}) {
       // Onboarding gate: redirect un-onboarded users to /onboarding
       if (options.requireAuth && currentUser && !currentUser.onboardingCompleted && pathname !== "/onboarding") {
         router.replace("/onboarding");
+      }
+
+      // Auto-sync browser timezone to backend (once per session)
+      if (currentUser && !timezoneSynced) {
+        timezoneSynced = true;
+        const browserTz = getBrowserTimezone();
+        if (browserTz && browserTz !== currentUser.timezone) {
+          updateUserProfile({ ...currentUser, timezone: browserTz }).catch(() => {});
+        }
       }
     };
 

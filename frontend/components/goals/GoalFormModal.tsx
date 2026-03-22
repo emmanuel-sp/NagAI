@@ -8,6 +8,7 @@ import { useModal } from "@/contexts/ModalContext";
 import { useSmartGoalForm, SmartField } from "@/hooks/useSmartGoalForm";
 import SmartFieldGroup from "@/components/goals/SmartFieldGroup";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { parseUtcDate } from "@/lib/dates";
 
 const SMART_FIELDS: SmartField[] = ["specific", "measurable", "attainable", "relevant", "timely"];
 
@@ -155,7 +156,7 @@ export default function GoalFormModal(props: GoalFormModalProps) {
               </h2>
               {!isCreate && (
                 <p className={styles.modalSubtitle}>
-                  Created on {new Date((props as EditModeProps).goal.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                  Created on {parseUtcDate((props as EditModeProps).goal.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                 </p>
               )}
             </div>

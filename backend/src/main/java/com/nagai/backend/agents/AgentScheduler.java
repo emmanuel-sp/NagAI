@@ -122,7 +122,8 @@ public class AgentScheduler {
                     continue;
                 }
 
-                AgentMessagePayload payload = buildPayload(context, agent, user, dueCheck.checklistItems());
+                AgentMessagePayload payload = buildPayload(context, agent, user,
+                        dueCheck.checklistItems(), dueCheck.messagesSinceLastChange());
                 String json = objectMapper.writeValueAsString(payload);
 
                 ProducerRecord<String, String> record = new ProducerRecord<>(
@@ -144,7 +145,7 @@ public class AgentScheduler {
         }
     }
 
-    record DueCheckResult(boolean due, List<ChecklistItem> checklistItems) {}
+    record DueCheckResult(boolean due, List<ChecklistItem> checklistItems, int messagesSinceLastChange) {}
 
     DueCheckResult checkIfDue(AgentContext context, LocalDateTime now) {
         String type = context.getMessageType();
@@ -163,6 +164,30 @@ public class AgentScheduler {
         List<ChecklistItem> items = (context.getGoalId() != null)
                 ? checklistRepository.findChecklistItemByGoalId(context.getGoalId())
                 : List.of();
+
+        // Find the most recent checklist completion date
+        LocalDateTime lastChangeAt = items.stream()
+                .filter(ChecklistItem::isCompleted)
+                .filter(i -> i.getCompletedAt() != null)
+                .map(i -> {
+                    try { return LocalDateTime.parse(i.getCompletedAt()); }
+                    catch (Exception e) { return null; }
+                })
+                .filter(d -> d != null)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+
+        // Count messages sent since last progress change
+        List<SentAgentMessage> recentMessages = sentAgentMessageRepository
+                .findTop5ByContextIdOrderBySentAtDesc(context.getContextId());
+        int messagesSinceLastChange;
+        if (lastChangeAt == null) {
+            messagesSinceLastChange = recentMessages.size();
+        } else {
+            messagesSinceLastChange = (int) recentMessages.stream()
+                    .filter(m -> m.getSentAt() != null && m.getSentAt().isAfter(lastChangeAt))
+                    .count();
+        }
 
         double modifier = 1.0;
         if (!items.isEmpty()) {
@@ -186,11 +211,18 @@ public class AgentScheduler {
             }
         }
 
+        // Staleness multiplier: back off when messages pile up with no progress
+        if (messagesSinceLastChange >= 3) {
+            double staleMultiplier = 1.0 + (messagesSinceLastChange - 2) * 0.5; // 3→1.5x, 4→2x, 5→2.5x
+            modifier = Math.max(modifier, staleMultiplier);
+        }
+
         long effectiveHours = Math.max(2, Math.min(maxHours, (long) (baseHours * modifier)));
-        return new DueCheckResult(hoursSinceLast >= effectiveHours, items);
+        return new DueCheckResult(hoursSinceLast >= effectiveHours, items, messagesSinceLastChange);
     }
 
-    AgentMessagePayload buildPayload(AgentContext context, Agent agent, User user, List<ChecklistItem> checklistItems) {
+    AgentMessagePayload buildPayload(AgentContext context, Agent agent, User user,
+                                      List<ChecklistItem> checklistItems, int messagesSinceLastChange) {
         AgentMessagePayload.GoalPayload goalPayload = null;
         if (context.getGoalId() != null) {
             Goal goal = goalRepository.findById(context.getGoalId()).orElse(null);
@@ -229,6 +261,10 @@ public class AgentScheduler {
 
         List<AgentMessagePayload.ConversationEntry> history = new ArrayList<>();
         List<String> previousMessageIds = new ArrayList<>();
+        List<String> previousSubjects = recentMessages.stream()
+                .map(SentAgentMessage::getSubject)
+                .filter(s -> s != null && !s.isBlank())
+                .collect(Collectors.toList());
 
         for (SentAgentMessage msg : recentMessages) {
             history.add(AgentMessagePayload.ConversationEntry.builder()
@@ -264,6 +300,8 @@ public class AgentScheduler {
                 .goal(goalPayload)
                 .conversationHistory(history)
                 .previousMessageIds(previousMessageIds)
+                .previousSubjects(previousSubjects)
+                .messagesSinceLastChange(messagesSinceLastChange)
                 .build();
     }
 

@@ -7,6 +7,7 @@ import Checklist from "./Checklist";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { IoListOutline } from "@/components/icons";
+import { parseUtcDate } from "@/lib/dates";
 import {
   fetchChecklists,
   createChecklistItem,
@@ -204,7 +205,7 @@ export default function ChecklistsContainer() {
   const getLatestCompletedAt = (checklist: ChecklistType): number => {
     const times = checklist.items
       .filter((i) => i.completed && i.completedAt)
-      .map((i) => new Date(i.completedAt!).getTime());
+      .map((i) => parseUtcDate(i.completedAt!).getTime());
     return times.length ? Math.max(...times) : 0;
   };
 

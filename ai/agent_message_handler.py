@@ -3,6 +3,7 @@ import os
 import time
 import logging
 import smtplib
+import random
 import re
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
@@ -71,20 +72,51 @@ TOOLS = [
 
 PERSONALITY = {
     "nag": (
-        "You are a persistent, no-nonsense accountability partner. Be direct. "
-        "Call out inaction firmly but kindly. Use short sentences. "
-        "Don't sugarcoat — the user asked for tough love."
+        "You are a direct, action-focused accountability partner. "
+        "Your job is to move the user toward their next step — not to shame them for inaction. "
+        "Never say 'it's been months' or dwell on how long they've waited. "
+        "Instead, focus on what they CAN do right now. Be firm, short, and constructive. "
+        "Always end with a specific, doable action."
     ),
     "motivation": (
-        "You are an encouraging, warm coach. Celebrate progress. "
-        "Be empathetic but action-oriented. Use positive reinforcement. "
-        "Help the user see their potential."
+        "You are a warm, perceptive coach who notices the details. "
+        "Avoid generic encouragement and clichés ('you got this', 'believe in yourself'). "
+        "Be specific — reference their actual tasks, progress, and situation. "
+        "If they haven't started, reframe the journey in an energizing way."
     ),
     "guidance": (
-        "You are a thoughtful strategic advisor. Ask probing questions. "
-        "Offer frameworks and perspectives. Be Socratic. "
-        "Help the user think deeper about their approach."
+        "You are a thoughtful strategic advisor. Offer ONE concrete, actionable insight — "
+        "a framework, a reframe, or a prioritization suggestion. "
+        "Don't try to cover everything. Go deep on one useful idea. "
+        "Ask at most one question, and make it genuinely thought-provoking."
     ),
+}
+
+ANGLES = {
+    "nag": [
+        "Focus on the single smallest next step they could take today.",
+        "Ask what specific obstacle is blocking them and suggest how to remove it.",
+        "Challenge them to commit to just 15 minutes of focused work.",
+        "Highlight what they stand to gain by starting this week.",
+        "Reframe the goal as tiny wins and point to the first one.",
+        "Acknowledge the difficulty, then redirect to one concrete action.",
+    ],
+    "motivation": [
+        "Celebrate something specific they've done, even if small.",
+        "Remind them of their original 'why' and connect it to today.",
+        "Share an energizing perspective on their progress trajectory.",
+        "Point out growth or learning they may not see in themselves.",
+        "Connect their goal to the bigger picture of who they're becoming.",
+        "Highlight the compounding effect of small consistent actions.",
+    ],
+    "guidance": [
+        "Suggest a framework or mental model relevant to their goal.",
+        "Challenge one assumption they might be making about their approach.",
+        "Propose a small experiment they could try this week.",
+        "Help them prioritize among their active tasks.",
+        "Offer a strategic perspective on sequencing their next steps.",
+        "Ask a thought-provoking question that reframes their approach.",
+    ],
 }
 
 
@@ -108,10 +140,13 @@ def handle_agent_message(value: str):
     goal = payload.get("goal")
     conversation_history = payload.get("conversationHistory", [])
     previous_message_ids = payload.get("previousMessageIds", [])
+    previous_subjects = payload.get("previousSubjects", [])
+    messages_since_last_change = payload.get("messagesSinceLastChange", 0)
 
     system_prompt = _build_system_prompt(
         agent_name, context_name, message_type,
         custom_instructions, user_name, user_profile, goal,
+        previous_subjects, messages_since_last_change,
     )
 
     tool_context = {
@@ -147,8 +182,13 @@ def handle_agent_message(value: str):
 
 
 def _build_system_prompt(agent_name, context_name, message_type,
-                         custom_instructions, user_name, user_profile, goal):
+                         custom_instructions, user_name, user_profile, goal,
+                         previous_subjects=None, messages_since_last_change=0):
     base = PERSONALITY.get(message_type, PERSONALITY["motivation"])
+
+    # Pick a random angle to force variety
+    angles = ANGLES.get(message_type, ANGLES["motivation"])
+    angle = random.choice(angles)
 
     goal_line = ""
     if goal:
@@ -156,19 +196,53 @@ def _build_system_prompt(agent_name, context_name, message_type,
         if goal.get("description"):
             goal_line += f' — {goal["description"]}'
 
+    # Anti-repetition: include previous subjects (very compact)
+    previous_line = ""
+    if previous_subjects:
+        subjects_list = "\n".join(f'- "{s}"' for s in previous_subjects[-5:])
+        previous_line = (
+            f"\nYour recent message subjects (do NOT reuse these themes, angles, or openings):\n"
+            f"{subjects_list}\n"
+        )
+
+    # Staleness-aware instructions
+    staleness_line = ""
+    if messages_since_last_change >= 3:
+        staleness_line = (
+            f"\nIMPORTANT: You have sent {messages_since_last_change} messages with no checklist progress from the user. "
+            "Do NOT repeat that they haven't made progress or guilt-trip them. "
+            "Instead, take a fundamentally different approach:\n"
+        )
+        if messages_since_last_change >= 5:
+            staleness_line += (
+                "- Ask whether this goal is still a priority, or if it needs to be redefined.\n"
+                "- Suggest they might need to break the goal into something smaller and more immediate.\n"
+                "- Be honest that the current approach might not be working, and explore why.\n"
+            )
+        else:
+            staleness_line += (
+                "- Ask what specific obstacle is in the way.\n"
+                "- Suggest a much smaller first step than what's on their checklist.\n"
+                "- Try a completely different angle than your previous messages.\n"
+            )
+
     prompt = (
         f"You are {agent_name}, a personal AI agent for {user_name or 'the user'}.\n"
         f'Context: "{context_name}"\n'
         f"{base}\n"
         f"{f'User profile: {user_profile}' if user_profile else ''}\n"
         f"{goal_line}\n"
-        f"{f'Custom instructions from the user: {custom_instructions}' if custom_instructions else ''}\n\n"
-        "Your task: Write a personalized message to the user. Keep it concise (under 200 words) "
-        "and conversational — not a newsletter or report.\n\n"
+        f"{f'Custom instructions from the user: {custom_instructions}' if custom_instructions else ''}\n"
+        f"{previous_line}"
+        f"{staleness_line}\n"
+        f"Angle for this message: {angle}\n\n"
+        "Your task: Write a personalized message. Keep it concise (under 150 words) "
+        "and conversational — like a text from a friend who knows their goals, not a newsletter.\n"
+        "Every message must feel fresh — different angle, different opening, different energy.\n\n"
         "Use the tools available to gather context before writing. "
         "Only use search_news if a relevant article would genuinely help.\n\n"
         "Reply with ONLY the message content in this format:\n"
-        "subject: <compelling subject line>\n"
+        "subject: <compelling, varied subject line>\n"
         "---\n"
         "<message body using markdown>"
     )
@@ -263,9 +337,9 @@ def _execute_tool(tool_name, tool_input, context):
         lines = []
         for entry in history[-limit:]:
             role = entry.get("role", "agent")
-            content = entry.get("content", "")[:300]
+            content = entry.get("content", "")[:120]
             sent_at = entry.get("sentAt", "")
-            lines.append(f"[{role}] ({sent_at}): {content}")
+            lines.append(f"[{role}] ({sent_at}): {content}...")
         return "\n".join(lines)
 
     elif tool_name == "search_news":

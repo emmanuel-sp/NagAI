@@ -20,6 +20,7 @@ export interface Digest {
   deliveryTime: DeliveryTime;
   contentTypes: DigestContentType[];
   active: boolean;
+  pauseReason?: string;
   createdAt: string;
   lastDeliveredAt?: string;
   nextDeliveryAt?: string;

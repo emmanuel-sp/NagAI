@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChecklistItem as ChecklistItemType } from "@/types/checklist";
+import { parseUtcDate } from "@/lib/dates";
 import styles from "./checklist.module.css";
 import {
   IoCheckmarkCircle,
@@ -54,10 +55,10 @@ export default function ChecklistItem({
   const isOverdue =
     item.deadline &&
     !item.completed &&
-    new Date(item.deadline) < new Date();
+    parseUtcDate(item.deadline) < new Date();
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString([], {
+    return parseUtcDate(dateStr).toLocaleDateString([], {
       month: "short",
       day: "numeric",
       year: "numeric",

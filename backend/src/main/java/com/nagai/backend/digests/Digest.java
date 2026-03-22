@@ -54,4 +54,10 @@ public class Digest {
 
     @Column(name = "next_delivery_at")
     private LocalDateTime nextDeliveryAt;
+
+    @Column(name = "stale_count", nullable = false)
+    private int staleCount = 0;
+
+    @Column(name = "pause_reason")
+    private String pauseReason;
 }

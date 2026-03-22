@@ -2,6 +2,7 @@
 "use client";
 
 import { Digest } from "@/types/digest";
+import { parseUtcDate } from "@/lib/dates";
 import styles from "./digest-builder.module.css";
 
 interface DigestStatusPanelProps {
@@ -13,32 +14,49 @@ export default function DigestStatusPanel({
   digest,
   onToggleStatus,
 }: DigestStatusPanelProps) {
+  const isPausedStale = !digest.active && digest.pauseReason === "stale_progress";
+
   return (
     <div className={styles.deploymentPanel}>
       <div className={styles.deploymentInfo}>
         <h2 className={styles.cardTitle}>
-          {digest.active ? "Digest Active" : "Digest Inactive"}
+          {digest.active
+            ? "Digest Active"
+            : isPausedStale
+              ? "Digest Paused"
+              : "Digest Inactive"}
         </h2>
         <p className={styles.cardSubtitle}>
           {digest.active
             ? "Your digest is currently active and will be delivered according to your schedule."
-            : "Activate your digest to start receiving personalized content."}
+            : isPausedStale
+              ? "Your digest was automatically paused due to inactivity."
+              : "Activate your digest to start receiving personalized content."}
         </p>
         {digest.active && digest.nextDeliveryAt && (
           <p className={styles.deploymentDate}>
             Next delivery:{" "}
-            {new Date(digest.nextDeliveryAt).toLocaleDateString("en-US", {
+            {parseUtcDate(digest.nextDeliveryAt).toLocaleDateString("en-US", {
               weekday: "long",
               month: "long",
               day: "numeric",
               year: "numeric",
             })}{" "}
             at{" "}
-            {new Date(digest.nextDeliveryAt).toLocaleTimeString("en-US", {
+            {parseUtcDate(digest.nextDeliveryAt).toLocaleTimeString("en-US", {
               hour: "2-digit",
               minute: "2-digit",
             })}
           </p>
+        )}
+        {isPausedStale && (
+          <div className={styles.pauseBanner}>
+            <p className={styles.pauseBannerTitle}>No progress detected</p>
+            <p className={styles.pauseBannerText}>
+              Your digest was paused because no checklist progress was made over
+              several deliveries. Complete a task or reactivate to resume.
+            </p>
+          </div>
         )}
       </div>
 
@@ -49,7 +67,11 @@ export default function DigestStatusPanel({
           className={digest.active ? styles.stopButton : styles.deployButton}
           title={!digest.active && !(digest.contentTypes?.length > 0) ? "Select at least one content type first" : undefined}
         >
-          {digest.active ? "Deactivate Digest" : "Activate Digest"}
+          {digest.active
+            ? "Deactivate Digest"
+            : isPausedStale
+              ? "Reactivate Digest"
+              : "Activate Digest"}
         </button>
       </div>
     </div>

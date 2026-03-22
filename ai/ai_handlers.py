@@ -193,7 +193,9 @@ def generate_digest_content(
     content_types: str,
     last_delivered_at: str,
     search_results: str,
-    previous_digest_excerpt: str,
+    previous_digest_subjects: list[str] | None = None,
+    stale_count: int = 0,
+    progress_since_last: bool = True,
 ) -> dict:
     """Generate personalized digest email content.
     Returns {"subject": "...", "body": "..."}.
@@ -201,31 +203,46 @@ def generate_digest_content(
     today = datetime.date.today().isoformat()
 
     previous_section = ""
-    if previous_digest_excerpt:
+    if previous_digest_subjects:
+        subjects_list = "\n".join(f'- "{s}"' for s in previous_digest_subjects)
         previous_section = (
-            f"\nPrevious digest excerpt (vary your tone and do NOT repeat this content):\n"
-            f'"{previous_digest_excerpt}"\n'
+            f"\nPrevious digest subjects (do NOT reuse these subjects or angles):\n"
+            f"{subjects_list}\n"
         )
 
     search_section = ""
     if search_results:
         search_section = (
-            f"\nWeb search results (incorporate real links where relevant):\n"
+            f"\nWeb search results (use ONLY these real links — do not invent URLs):\n"
             f"{search_results}\n"
+        )
+
+    staleness_section = ""
+    if not progress_since_last and stale_count >= 2:
+        staleness_section = (
+            f"\nNote: The user has not made any checklist progress in their last {stale_count + 1} digests. "
+            f"Do NOT repeat the same progress numbers or dwell on lack of progress. Instead:\n"
+            f"- Keep progress-dependent sections (Progress Insights) brief and forward-looking.\n"
+            f"- Lean into content that doesn't depend on progress: news, tips, resources, knowledge.\n"
+            f"- If appropriate, gently suggest revisiting or breaking down their goals.\n"
         )
 
     prompt = (
         f"You are writing a personalized digest email for {user_name}.\n"
         f"Today's date: {today}\n"
         f"{_profile_section(user_profile)}"
-        f"\nContent types to include (generate a section for EACH): {content_types}\n"
+        f"\nSections to include (generate one ## section for EACH):\n{content_types}\n"
         f"\nGoals and progress since {last_delivered_at}:\n{goals_context}\n"
         f"{search_section}"
         f"{previous_section}"
-        f"\nWrite a warm, concise digest email with a section for each content type listed above.\n"
-        f"Use ## headers for each section. Keep the total under 500 words.\n"
-        f"For sections with search results, include the real links as markdown links.\n"
-        f"Be encouraging and specific to their actual goals and progress.\n"
+        f"{staleness_section}"
+        f"\nGuidelines:\n"
+        f"- Write as a knowledgeable friend, not a corporate newsletter.\n"
+        f"- Reference their specific goals, tasks, and progress — never be generic.\n"
+        f"- Keep each section focused: 2-4 sentences or a short list. Total under 400 words.\n"
+        f"- Use ## headers for each section.\n"
+        f"- For news sections, only use links from the search results above. Never fabricate URLs.\n"
+        f"- Vary your tone and opening from previous digests.\n\n"
         f"Reply in exactly this format:\n"
         f"subject: <one compelling email subject line>\n"
         f"---\n"

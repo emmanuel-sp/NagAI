@@ -23,6 +23,8 @@ public class AgentMessagePayload {
     private GoalPayload goal;
     private List<ConversationEntry> conversationHistory;
     private List<String> previousMessageIds;
+    private List<String> previousSubjects;
+    private int messagesSinceLastChange;
 
     @Data
     @Builder

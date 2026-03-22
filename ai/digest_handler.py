@@ -33,24 +33,22 @@ def _get_db_connection():
     )
 
 
-def _get_previous_digest(user_id: int) -> str:
-    """Get excerpt of the user's most recent sent digest for variety."""
+def _get_previous_digest_subjects(user_id: int, limit: int = 3) -> list[str]:
+    """Get subjects of the user's recent sent digests for anti-repetition."""
     try:
         conn = _get_db_connection()
         cur = conn.cursor()
         cur.execute(
-            "SELECT content FROM sent_digests WHERE user_id = %s ORDER BY sent_at DESC LIMIT 1",
-            (user_id,),
+            "SELECT subject FROM sent_digests WHERE user_id = %s ORDER BY sent_at DESC LIMIT %s",
+            (user_id, limit),
         )
-        row = cur.fetchone()
+        rows = cur.fetchall()
         cur.close()
         conn.close()
-        if row and row[0]:
-            return row[0][:200]
-        return ""
+        return [row[0] for row in rows if row[0]]
     except Exception as e:
-        logger.error(f"Failed to fetch previous digest: {e}")
-        return ""
+        logger.error(f"Failed to fetch previous digest subjects: {e}")
+        return []
 
 
 def _save_sent_digest(digest_id: int, user_id: int, subject: str, content: str):
@@ -125,15 +123,15 @@ def _gather_search_results(content_types: list[str], goals: list[dict]) -> str:
     return results_text
 
 
-CONTENT_TYPE_LABELS = {
-    "affirmations": "Affirmations",
-    "news": "Curated News",
-    "knowledge_snippets": "Knowledge Snippets",
-    "tips": "Practical Tips",
-    "motivational_quotes": "Motivational Quotes",
-    "resource_recommendations": "Resource Recommendations",
-    "progress_insights": "Progress Insights",
-    "reflection_prompts": "Reflection Prompts",
+CONTENT_TYPE_DESCRIPTIONS = {
+    "affirmations": "Affirmations — Write 2-3 first-person 'I am/I will' statements tied to their specific goals.",
+    "news": "Curated News — Summarize 1-2 real articles from the search results with links. Only use provided links.",
+    "knowledge_snippets": "Knowledge Snippets — Share one useful fact or insight relevant to their goal domain.",
+    "tips": "Practical Tips — Give 1-2 specific, actionable tips they can apply today toward their goals.",
+    "motivational_quotes": "Motivational Quotes — Include one real quote from a notable person, relevant to their situation.",
+    "resource_recommendations": "Resource Recommendations — Suggest one specific book, course, tool, or community related to their goals.",
+    "progress_insights": "Progress Insights — Analyze their actual checklist progress. What's on track? What needs attention?",
+    "reflection_prompts": "Reflection Prompts — Ask 1-2 thoughtful questions that help them reflect on their approach.",
 }
 
 
@@ -156,21 +154,26 @@ def handle_digest_delivery(value: str):
     unsubscribe_token = payload.get("unsubscribeToken", "")
     goals = payload.get("goals", [])
 
-    content_labels = ", ".join(
-        CONTENT_TYPE_LABELS.get(ct, ct) for ct in content_types
+    stale_count = payload.get("staleCount", 0)
+    progress_since_last = payload.get("progressSinceLastDelivery", True)
+
+    content_descriptions = "\n".join(
+        CONTENT_TYPE_DESCRIPTIONS.get(ct, ct) for ct in content_types
     )
     goals_context = _build_goals_context(goals, last_delivered_at)
     search_results = _gather_search_results(content_types, goals)
-    previous_excerpt = _get_previous_digest(user_id)
+    previous_subjects = _get_previous_digest_subjects(user_id)
 
     result = ai_handlers.generate_digest_content(
         user_name=user_name,
         user_profile=user_profile,
         goals_context=goals_context,
-        content_types=content_labels,
+        content_types=content_descriptions,
         last_delivered_at=last_delivered_at or "first digest",
         search_results=search_results,
-        previous_digest_excerpt=previous_excerpt,
+        previous_digest_subjects=previous_subjects,
+        stale_count=stale_count,
+        progress_since_last=progress_since_last,
     )
 
     subject = result.get("subject", f"Your NagAI Digest")

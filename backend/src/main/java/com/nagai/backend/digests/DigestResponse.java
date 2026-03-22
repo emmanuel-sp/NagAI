@@ -13,6 +13,7 @@ public class DigestResponse {
     private String deliveryTime;
     private String[] contentTypes;
     private boolean active;
+    private String pauseReason;
     private LocalDateTime createdAt;
     private LocalDateTime lastDeliveredAt;
     private LocalDateTime nextDeliveryAt;
@@ -26,6 +27,7 @@ public class DigestResponse {
         response.setDeliveryTime(digest.getDeliveryTime());
         response.setContentTypes(digest.getContentTypes());
         response.setActive(digest.isActive());
+        response.setPauseReason(digest.getPauseReason());
         response.setCreatedAt(digest.getCreatedAt());
         response.setLastDeliveredAt(digest.getLastDeliveredAt());
         response.setNextDeliveryAt(digest.getNextDeliveryAt());

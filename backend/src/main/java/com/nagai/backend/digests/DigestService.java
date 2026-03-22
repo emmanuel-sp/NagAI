@@ -69,6 +69,8 @@ public class DigestService {
                 .orElseThrow(DigestNotFoundException::new);
         digest.setActive(!digest.isActive());
         if (digest.isActive()) {
+            digest.setStaleCount(0);
+            digest.setPauseReason(null);
             initializeNextDelivery(digest, user);
         } else {
             digest.setNextDeliveryAt(null);

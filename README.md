@@ -267,6 +267,139 @@ The frontend uses `@sentry/nextjs` for production error tracking. To enable:
 
 Sentry is disabled in development. Error boundaries (`error.tsx`, `global-error.tsx`) catch rendering errors and show a recovery UI instead of blank pages.
 
+## Production Deployment (AWS EC2)
+
+The backend, AI service, Kafka, Postgres, and Caddy run on a single EC2 instance via `docker-compose.prod.yml`. The frontend is deployed separately on Vercel.
+
+### Setup
+
+```bash
+# First time — copy and fill in secrets
+cp .env.example .env
+nano .env
+
+# Start everything
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+### Deploying Updates
+
+```bash
+cd ~/NagAI
+git pull
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Only images with code changes are rebuilt. Postgres/Kafka/Caddy are unaffected.
+
+### Container Status
+
+```bash
+# Overview of all containers
+docker compose -f docker-compose.prod.yml ps
+
+# Follow live logs (all services)
+docker compose -f docker-compose.prod.yml logs -f
+
+# Follow one service
+docker compose -f docker-compose.prod.yml logs -f backend
+docker compose -f docker-compose.prod.yml logs -f ai-service
+```
+
+### Health Checks
+
+```bash
+# Backend health (from inside the cluster — actuator is on port 9091, not exposed externally)
+docker compose -f docker-compose.prod.yml exec ai-service python -c "
+import urllib.request, urllib.error
+try:
+    print(urllib.request.urlopen('http://backend:9091/actuator/health').read().decode())
+except urllib.error.HTTPError as e:
+    print(e.read().decode())
+"
+
+# Quick HTTP status check from outside
+curl -s -o /dev/null -w "%{http_code}" https://52.6.69.187.nip.io/users/me
+# 403 = backend is up (no JWT token, so rejected by security filter)
+```
+
+### Debugging Logs
+
+```bash
+# Backend errors only
+docker compose -f docker-compose.prod.yml logs backend | grep -i "ERROR\|Exception\|Caused by"
+
+# AI service logs (digest/agent processing)
+docker compose -f docker-compose.prod.yml logs ai-service --tail 100
+
+# Caddy (TLS + reverse proxy)
+docker compose -f docker-compose.prod.yml logs caddy --tail 30
+
+# Kafka logs
+docker compose -f docker-compose.prod.yml logs kafka --tail 50
+```
+
+### Database
+
+```bash
+# Open psql shell
+docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai
+
+# Quick queries without entering shell
+docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT * FROM users;"
+docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT * FROM sent_digests ORDER BY sent_at DESC LIMIT 5;"
+docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT * FROM sent_agent_messages ORDER BY sent_at DESC LIMIT 5;"
+docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT digest_id, name, active, frequency, next_delivery_at FROM digests;"
+docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT context_id, name, message_type, last_message_sent_at FROM agent_contexts;"
+
+# Check Flyway migration status
+docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT * FROM flyway_schema_history;"
+```
+
+### Environment Variables
+
+```bash
+# Check what a container actually sees (useful for debugging .env issues)
+docker compose -f docker-compose.prod.yml exec backend printenv | grep -i "SMTP\|DB_\|JWT\|CORS\|APP_BASE"
+docker compose -f docker-compose.prod.yml exec ai-service printenv | grep -i "ANTHROPIC\|SMTP\|BACKEND\|NEWSAPI"
+```
+
+### Restart / Recreate
+
+```bash
+# Restart (keeps same container, just stops/starts process)
+docker compose -f docker-compose.prod.yml restart backend ai-service
+
+# Recreate (picks up .env changes — use this after editing .env)
+docker compose -f docker-compose.prod.yml up -d --force-recreate backend ai-service
+
+# Nuclear: wipe everything including database (DESTROYS ALL DATA)
+docker compose -f docker-compose.prod.yml down -v
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+### Resource Monitoring
+
+```bash
+# Container CPU/memory usage
+docker stats --no-stream
+
+# Disk usage
+df -h
+docker system df
+```
+
+### Kafka
+
+```bash
+# List topics
+docker compose -f docker-compose.prod.yml exec kafka kafka-topics.sh --bootstrap-server localhost:9092 --list
+
+# Read recent messages from a topic
+docker compose -f docker-compose.prod.yml exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic digest-delivery --from-beginning --max-messages 5
+docker compose -f docker-compose.prod.yml exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic agent-messages --from-beginning --max-messages 5
+```
+
 ## Development Notes
 
 ### Proto changes
@@ -287,7 +420,9 @@ python -m grpc_tools.protoc \
 The generated Python files (`ai_service_pb2*.py`) are build artifacts and not committed.
 
 ### Database migrations
-All schema lives in a single file: `backend/src/main/resources/db/migration/V1__init.sql`. Since there are no production users, edit it directly and wipe the DB with `mvn flyway:clean` to apply changes.
+The base schema lives in `backend/src/main/resources/db/migration/V1__init.sql`. **The app is deployed with real users** — never edit V1 directly. New schema changes must use incremental migration files (`V2__description.sql`, `V3__description.sql`, etc.). Flyway applies them automatically on startup.
+
+For local development, you can still wipe and reset with `mvn flyway:clean`.
 
 ### Running tests
 ```bash

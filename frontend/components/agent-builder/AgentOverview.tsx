@@ -1,6 +1,7 @@
 /** AgentOverview Component - Displays agent status and information. Parent: AgentBuilderContainer */
 "use client";
 import { Agent } from "@/types/agent";
+import { parseUtcDate } from "@/lib/dates";
 import styles from "./agent-builder.module.css";
 
 interface AgentOverviewProps {
@@ -30,7 +31,7 @@ export default function AgentOverview({ agent }: AgentOverviewProps) {
         <div className={styles.overviewStat}>
           <span className={styles.statLabel}>Last Updated</span>
           <span className={styles.statValue}>
-            {new Date(agent.updatedAt).toLocaleDateString()}
+            {parseUtcDate(agent.updatedAt).toLocaleDateString()}
           </span>
         </div>
       </div>

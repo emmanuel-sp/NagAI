@@ -33,6 +33,9 @@ public class DigestScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(DigestScheduler.class);
 
+    /** Auto-pause digest after this many consecutive stale deliveries. */
+    static final int STALE_PAUSE_THRESHOLD = 5;
+
     private final DigestRepository digestRepository;
     private final DigestService digestService;
     private final GoalRepository goalRepository;
@@ -91,10 +94,29 @@ public class DigestScheduler {
                     continue;
                 }
 
-                DigestDeliveryPayload payload = buildPayload(digest, user);
+                // Detect whether any progress was made since last delivery
+                boolean hasProgress = hasProgressSinceLastDelivery(digest);
+                if (hasProgress) {
+                    digest.setStaleCount(0);
+                } else {
+                    digest.setStaleCount(digest.getStaleCount() + 1);
+                }
+
+                // Auto-pause after too many stale deliveries
+                if (digest.getStaleCount() >= STALE_PAUSE_THRESHOLD) {
+                    log.info("Auto-pausing digest {} for user {} — {} consecutive stale deliveries",
+                            digest.getDigestId(), user.getUserId(), digest.getStaleCount());
+                    digest.setActive(false);
+                    digest.setNextDeliveryAt(null);
+                    digest.setPauseReason("stale_progress");
+                    digestRepository.save(digest);
+                    continue;
+                }
+
+                DigestDeliveryPayload payload = buildPayload(digest, user, hasProgress);
                 String json = objectMapper.writeValueAsString(payload);
-                log.info("Publishing digest {} for user {} (email={}) to Kafka...",
-                        digest.getDigestId(), user.getUserId(), user.getEmail());
+                log.info("Publishing digest {} for user {} (email={}, staleCount={}) to Kafka...",
+                        digest.getDigestId(), user.getUserId(), user.getEmail(), digest.getStaleCount());
 
                 ProducerRecord<String, String> record = new ProducerRecord<>(
                         KafkaConfig.TOPIC_DIGEST_DELIVERY, String.valueOf(user.getUserId()), json);
@@ -112,7 +134,28 @@ public class DigestScheduler {
         }
     }
 
-    DigestDeliveryPayload buildPayload(Digest digest, User user) {
+    boolean hasProgressSinceLastDelivery(Digest digest) {
+        LocalDateTime since = digest.getLastDeliveredAt();
+        if (since == null) {
+            return true; // first delivery — treat as fresh
+        }
+
+        String sinceStr = since.toLocalDate().toString(); // YYYY-MM-DD
+        List<Goal> goals = goalRepository.findAllByUserId(digest.getUserId());
+
+        for (Goal goal : goals) {
+            List<ChecklistItem> items = checklistRepository.findChecklistItemByGoalId(goal.getGoalId());
+            for (ChecklistItem item : items) {
+                if (item.isCompleted() && item.getCompletedAt() != null
+                        && item.getCompletedAt().compareTo(sinceStr) > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    DigestDeliveryPayload buildPayload(Digest digest, User user, boolean hasProgress) {
         List<Goal> goals = goalRepository.findAllByUserId(user.getUserId());
 
         List<DigestDeliveryPayload.GoalPayload> goalPayloads = goals.stream()
@@ -148,6 +191,8 @@ public class DigestScheduler {
                         ? digest.getLastDeliveredAt().toString() : null)
                 .unsubscribeToken(digest.getUnsubscribeToken())
                 .goals(goalPayloads)
+                .staleCount(digest.getStaleCount())
+                .progressSinceLastDelivery(hasProgress)
                 .build();
     }
 

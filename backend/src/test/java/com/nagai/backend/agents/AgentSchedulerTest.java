@@ -130,6 +130,7 @@ class AgentSchedulerTest {
 
         when(agentContextRepository.findAllForDeployedAgents()).thenReturn(List.of(context));
         when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
+        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
 
         agentScheduler.processAgentMessages();
 
@@ -140,6 +141,7 @@ class AgentSchedulerTest {
     void processAgentMessages_skipsWhenUserNotFound() {
         when(agentContextRepository.findAllForDeployedAgents()).thenReturn(List.of(context));
         when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
+        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
         when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -160,12 +162,12 @@ class AgentSchedulerTest {
 
         when(agentContextRepository.findAllForDeployedAgents()).thenReturn(List.of(context, context2));
         when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
+        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(anyLong())).thenReturn(List.of());
         when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
         when(userRepository.findById(1L))
                 .thenThrow(new RuntimeException("DB error"))
                 .thenReturn(Optional.of(user));
         when(goalRepository.findById(200L)).thenReturn(Optional.of(goal));
-        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(101L)).thenReturn(List.of());
         when(kafkaTemplate.send(any(ProducerRecord.class)))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
@@ -191,10 +193,12 @@ class AgentSchedulerTest {
     void checkIfDue_returnsTrue_whenNeverSent() {
         context.setLastMessageSentAt(null);
         when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
+        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
 
         AgentScheduler.DueCheckResult result = agentScheduler.checkIfDue(context, LocalDateTime.now(ZoneOffset.UTC));
 
         assertThat(result.due()).isTrue();
+        assertThat(result.messagesSinceLastChange()).isEqualTo(0);
     }
 
     @Test
@@ -202,6 +206,7 @@ class AgentSchedulerTest {
         context.setMessageType("nag"); // base 6h
         context.setLastMessageSentAt(LocalDateTime.now(ZoneOffset.UTC).minusHours(1));
         when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
+        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
 
         AgentScheduler.DueCheckResult result = agentScheduler.checkIfDue(context, LocalDateTime.now(ZoneOffset.UTC));
 
@@ -219,6 +224,7 @@ class AgentSchedulerTest {
         ChecklistItem c2 = new ChecklistItem(); c2.setCompleted(true); c2.setCompletedAt(today);
         ChecklistItem c3 = new ChecklistItem(); c3.setCompleted(true); c3.setCompletedAt(today);
         when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of(c1, c2, c3));
+        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
 
         AgentScheduler.DueCheckResult result = agentScheduler.checkIfDue(context, LocalDateTime.now(ZoneOffset.UTC));
 
@@ -231,7 +237,7 @@ class AgentSchedulerTest {
         when(goalRepository.findById(200L)).thenReturn(Optional.of(goal));
         when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
 
-        AgentMessagePayload payload = agentScheduler.buildPayload(context, agent, user, List.of(item));
+        AgentMessagePayload payload = agentScheduler.buildPayload(context, agent, user, List.of(item), 0);
 
         assertThat(payload.getContextId()).isEqualTo(100L);
         assertThat(payload.getUserEmail()).isEqualTo("test@example.com");
@@ -240,6 +246,7 @@ class AgentSchedulerTest {
         assertThat(payload.getAgentName()).isEqualTo("My AI Agent");
         assertThat(payload.getContextName()).isEqualTo("Morning Check");
         assertThat(payload.getMessageType()).isEqualTo("motivation");
+        assertThat(payload.getMessagesSinceLastChange()).isEqualTo(0);
         assertThat(payload.getGoal()).isNotNull();
         assertThat(payload.getGoal().getTitle()).isEqualTo("Learn Spanish");
         assertThat(payload.getGoal().getSmartContext()).contains("Specific: Pass B2 exam");
@@ -264,11 +271,12 @@ class AgentSchedulerTest {
         when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of(msg));
         when(agentReplyRepository.findBySentMessageIdIn(List.of(500L))).thenReturn(List.of());
 
-        AgentMessagePayload payload = agentScheduler.buildPayload(context, agent, user, List.of(item));
+        AgentMessagePayload payload = agentScheduler.buildPayload(context, agent, user, List.of(item), 0);
 
         assertThat(payload.getConversationHistory()).hasSize(1);
         assertThat(payload.getConversationHistory().get(0).getRole()).isEqualTo("agent");
         assertThat(payload.getConversationHistory().get(0).getContent()).isEqualTo("How's progress?");
         assertThat(payload.getPreviousMessageIds()).containsExactly("<agent-100-123@nagai.app>");
+        assertThat(payload.getPreviousSubjects()).containsExactly("Check in");
     }
 }
