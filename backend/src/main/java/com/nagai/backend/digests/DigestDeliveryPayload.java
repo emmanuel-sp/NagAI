@@ -19,6 +19,7 @@ public class DigestDeliveryPayload {
     private String lastDeliveredAt;
     private String unsubscribeToken;
     private List<GoalPayload> goals;
+    private List<String> previousSubjects;
     private int staleCount;
     private boolean progressSinceLastDelivery;
 

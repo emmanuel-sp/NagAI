@@ -41,6 +41,7 @@ public class DigestScheduler {
     private final GoalRepository goalRepository;
     private final ChecklistRepository checklistRepository;
     private final UserRepository userRepository;
+    private final SentDigestRepository sentDigestRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final Counter digestsSentCounter;
@@ -48,13 +49,15 @@ public class DigestScheduler {
 
     public DigestScheduler(DigestRepository digestRepository, DigestService digestService,
                            GoalRepository goalRepository, ChecklistRepository checklistRepository,
-                           UserRepository userRepository, KafkaTemplate<String, String> kafkaTemplate,
+                           UserRepository userRepository, SentDigestRepository sentDigestRepository,
+                           KafkaTemplate<String, String> kafkaTemplate,
                            Counter digestsSentCounter, Counter digestsFailedCounter) {
         this.digestRepository = digestRepository;
         this.digestService = digestService;
         this.goalRepository = goalRepository;
         this.checklistRepository = checklistRepository;
         this.userRepository = userRepository;
+        this.sentDigestRepository = sentDigestRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = new ObjectMapper();
         this.digestsSentCounter = digestsSentCounter;
@@ -179,6 +182,12 @@ public class DigestScheduler {
                 })
                 .collect(Collectors.toList());
 
+        List<String> previousSubjects = sentDigestRepository
+                .findTop3ByUserIdOrderBySentAtDesc(user.getUserId()).stream()
+                .map(SentDigest::getSubject)
+                .filter(s -> s != null && !s.isBlank())
+                .collect(Collectors.toList());
+
         return DigestDeliveryPayload.builder()
                 .digestId(digest.getDigestId())
                 .userId(user.getUserId())
@@ -191,6 +200,7 @@ public class DigestScheduler {
                         ? digest.getLastDeliveredAt().toString() : null)
                 .unsubscribeToken(digest.getUnsubscribeToken())
                 .goals(goalPayloads)
+                .previousSubjects(previousSubjects)
                 .staleCount(digest.getStaleCount())
                 .progressSinceLastDelivery(hasProgress)
                 .build();

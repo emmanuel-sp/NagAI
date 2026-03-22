@@ -10,7 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import anthropic
-import psycopg2
+import requests as http_requests
 
 import web_search
 
@@ -20,12 +20,7 @@ SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
-
-DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_PORT = os.environ.get("DB_PORT", "5432")
-DB_NAME = os.environ.get("DB_NAME", "nagai")
-DB_USER = os.environ.get("DB_USER", "")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+BACKEND_INTERNAL_URL = os.environ.get("BACKEND_INTERNAL_URL", "http://localhost:8080")
 
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 MODEL = "claude-haiku-4-5-20251001"
@@ -160,10 +155,9 @@ def handle_agent_message(value: str):
 
     # Thread follow-up emails
     is_followup = len(previous_message_ids) > 0
-    if is_followup:
-        original_subject = _get_original_subject(context_id)
-        if original_subject:
-            subject = f"Re: {original_subject}"
+    if is_followup and previous_subjects:
+        original_subject = previous_subjects[0].replace("Re: ", "")
+        subject = f"Re: {original_subject}"
 
     message_id = f"<agent-{context_id}-{int(datetime.now().timestamp())}@nagai.app>"
     references = " ".join(previous_message_ids) if previous_message_ids else None
@@ -375,46 +369,23 @@ def _default_subject(context_name, goal):
     return f"{context_name}: Check-in"
 
 
-def _get_original_subject(context_id):
-    try:
-        conn = _get_db_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT subject FROM sent_agent_messages WHERE context_id = %s ORDER BY sent_at ASC LIMIT 1",
-            (context_id,),
-        )
-        row = cur.fetchone()
-        cur.close()
-        conn.close()
-        if row and row[0]:
-            return row[0].replace("Re: ", "")
-        return None
-    except Exception as e:
-        logger.error(f"Failed to fetch original subject: {e}")
-        return None
-
-
-def _get_db_connection():
-    return psycopg2.connect(
-        host=DB_HOST, port=DB_PORT, dbname=DB_NAME,
-        user=DB_USER, password=DB_PASSWORD,
-    )
-
-
 def _save_sent_message(context_id, user_id, subject, content, email_message_id):
+    """Persist the sent agent message via backend callback."""
     try:
-        conn = _get_db_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO sent_agent_messages (context_id, user_id, subject, content, email_message_id) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            (context_id, user_id, subject, content, email_message_id),
+        resp = http_requests.post(
+            f"{BACKEND_INTERNAL_URL}/internal/sent-agent-messages",
+            json={
+                "contextId": context_id,
+                "userId": user_id,
+                "subject": subject,
+                "content": content,
+                "emailMessageId": email_message_id,
+            },
+            timeout=10,
         )
-        conn.commit()
-        cur.close()
-        conn.close()
+        resp.raise_for_status()
     except Exception as e:
-        logger.error(f"Failed to save sent agent message: {e}")
+        logger.error(f"Failed to save sent agent message via callback: {e}")
 
 
 def _send_email(to_addr, subject, html_body, message_id, in_reply_to=None, references=None):

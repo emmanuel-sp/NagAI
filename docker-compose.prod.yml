@@ -83,12 +83,8 @@ services:
       SMTP_PORT: 587
       SMTP_USER: ${SMTP_USER}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
       BACKEND_BASE_URL: ${BACKEND_BASE_URL}
+      BACKEND_INTERNAL_URL: http://backend:8080
     restart: unless-stopped
 
   caddy:

@@ -6,7 +6,7 @@ import re
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-import psycopg2
+import requests
 
 import ai_handlers
 import web_search
@@ -18,53 +18,20 @@ SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
 BACKEND_BASE_URL = os.environ.get("BACKEND_BASE_URL", "http://localhost:8080")
-
-DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_PORT = os.environ.get("DB_PORT", "5432")
-DB_NAME = os.environ.get("DB_NAME", "nagai")
-DB_USER = os.environ.get("DB_USER", "")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
-
-
-def _get_db_connection():
-    return psycopg2.connect(
-        host=DB_HOST, port=DB_PORT, dbname=DB_NAME,
-        user=DB_USER, password=DB_PASSWORD,
-    )
-
-
-def _get_previous_digest_subjects(user_id: int, limit: int = 3) -> list[str]:
-    """Get subjects of the user's recent sent digests for anti-repetition."""
-    try:
-        conn = _get_db_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT subject FROM sent_digests WHERE user_id = %s ORDER BY sent_at DESC LIMIT %s",
-            (user_id, limit),
-        )
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
-        return [row[0] for row in rows if row[0]]
-    except Exception as e:
-        logger.error(f"Failed to fetch previous digest subjects: {e}")
-        return []
+BACKEND_INTERNAL_URL = os.environ.get("BACKEND_INTERNAL_URL", "http://localhost:8080")
 
 
 def _save_sent_digest(digest_id: int, user_id: int, subject: str, content: str):
-    """Persist the sent digest to the database."""
+    """Persist the sent digest via backend callback."""
     try:
-        conn = _get_db_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO sent_digests (digest_id, user_id, subject, content) VALUES (%s, %s, %s, %s)",
-            (digest_id, user_id, subject, content),
+        resp = requests.post(
+            f"{BACKEND_INTERNAL_URL}/internal/sent-digests",
+            json={"digestId": digest_id, "userId": user_id, "subject": subject, "content": content},
+            timeout=10,
         )
-        conn.commit()
-        cur.close()
-        conn.close()
+        resp.raise_for_status()
     except Exception as e:
-        logger.error(f"Failed to save sent digest: {e}")
+        logger.error(f"Failed to save sent digest via callback: {e}")
 
 
 def _build_goals_context(goals: list[dict], last_delivered_at: str | None) -> str:
@@ -157,12 +124,14 @@ def handle_digest_delivery(value: str):
     stale_count = payload.get("staleCount", 0)
     progress_since_last = payload.get("progressSinceLastDelivery", True)
 
+    # Previous subjects now come from the Kafka payload (backend pre-loads them)
+    previous_subjects = payload.get("previousSubjects", [])
+
     content_descriptions = "\n".join(
         CONTENT_TYPE_DESCRIPTIONS.get(ct, ct) for ct in content_types
     )
     goals_context = _build_goals_context(goals, last_delivered_at)
     search_results = _gather_search_results(content_types, goals)
-    previous_subjects = _get_previous_digest_subjects(user_id)
 
     result = ai_handlers.generate_digest_content(
         user_name=user_name,

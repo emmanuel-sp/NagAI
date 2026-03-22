@@ -37,6 +37,7 @@ class DigestSchedulerTest {
     @Mock private GoalRepository goalRepository;
     @Mock private ChecklistRepository checklistRepository;
     @Mock private UserRepository userRepository;
+    @Mock private SentDigestRepository sentDigestRepository;
     @Mock private KafkaTemplate<String, String> kafkaTemplate;
     @Mock private Counter digestsSentCounter;
     @Mock private Counter digestsFailedCounter;
@@ -52,8 +53,8 @@ class DigestSchedulerTest {
     void setUp() {
         digestScheduler = new DigestScheduler(
                 digestRepository, digestService, goalRepository,
-                checklistRepository, userRepository, kafkaTemplate,
-                digestsSentCounter, digestsFailedCounter);
+                checklistRepository, userRepository, sentDigestRepository,
+                kafkaTemplate, digestsSentCounter, digestsFailedCounter);
 
         user = new User();
         user.setUserId(1L);
@@ -94,6 +95,7 @@ class DigestSchedulerTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(goalRepository.findAllByUserId(1L)).thenReturn(List.of(goal));
         when(checklistRepository.findChecklistItemByGoalId(100L)).thenReturn(List.of(item));
+        when(sentDigestRepository.findTop3ByUserIdOrderBySentAtDesc(1L)).thenReturn(List.of());
         when(kafkaTemplate.send(any(ProducerRecord.class)))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
@@ -144,6 +146,7 @@ class DigestSchedulerTest {
         when(userRepository.findById(1L)).thenThrow(new RuntimeException("DB error"));
         when(userRepository.findById(2L)).thenReturn(Optional.of(user2));
         when(goalRepository.findAllByUserId(2L)).thenReturn(List.of());
+        when(sentDigestRepository.findTop3ByUserIdOrderBySentAtDesc(2L)).thenReturn(List.of());
         when(kafkaTemplate.send(any(ProducerRecord.class)))
                 .thenReturn(CompletableFuture.completedFuture(null));
 
@@ -172,6 +175,7 @@ class DigestSchedulerTest {
     void buildPayload_containsAllFields() {
         when(goalRepository.findAllByUserId(1L)).thenReturn(List.of(goal));
         when(checklistRepository.findChecklistItemByGoalId(100L)).thenReturn(List.of(item));
+        when(sentDigestRepository.findTop3ByUserIdOrderBySentAtDesc(1L)).thenReturn(List.of());
 
         DigestDeliveryPayload payload = digestScheduler.buildPayload(digest, user, true);
 
