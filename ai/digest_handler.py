@@ -1,3 +1,4 @@
+import html as html_mod
 import json
 import os
 import logging
@@ -19,6 +20,7 @@ SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
 BACKEND_BASE_URL = os.environ.get("BACKEND_BASE_URL", "http://localhost:8080")
 BACKEND_INTERNAL_URL = os.environ.get("BACKEND_INTERNAL_URL", "http://localhost:8080")
+INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "")
 
 
 def _save_sent_digest(digest_id: int, user_id: int, subject: str, content: str):
@@ -27,6 +29,7 @@ def _save_sent_digest(digest_id: int, user_id: int, subject: str, content: str):
         resp = requests.post(
             f"{BACKEND_INTERNAL_URL}/internal/sent-digests",
             json={"digestId": digest_id, "userId": user_id, "subject": subject, "content": content},
+            headers={"X-Internal-Key": INTERNAL_API_KEY},
             timeout=10,
         )
         resp.raise_for_status()
@@ -185,13 +188,15 @@ def _send_email(to_addr: str, subject: str, html_body: str, unsubscribe_url: str
 def render_email_html(subject: str, body: str, user_name: str, unsubscribe_url: str = "") -> str:
     """Render the digest body into a beautiful, light-themed HTML email."""
     sections_html = _markdown_to_sections(body)
+    safe_subject = html_mod.escape(subject)
+    safe_user_name = html_mod.escape(user_name) if user_name else "there"
 
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{subject}</title>
+<title>{safe_subject}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#faf5f4;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#2a1f1e;line-height:1.6;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#faf5f4;">
@@ -209,7 +214,7 @@ def render_email_html(subject: str, body: str, user_name: str, unsubscribe_url: 
 <!-- Greeting -->
 <tr>
 <td style="padding:32px 40px 16px;">
-  <p style="margin:0;font-size:18px;color:#2a1f1e;font-weight:600;">Hey {user_name or "there"} &#128075;</p>
+  <p style="margin:0;font-size:18px;color:#2a1f1e;font-weight:600;">Hey {safe_user_name} &#128075;</p>
   <p style="margin:8px 0 0;font-size:15px;color:#6b5550;">Here's what's happening with your goals.</p>
 </td>
 </tr>
@@ -275,10 +280,10 @@ def _markdown_to_sections(body: str) -> str:
         stripped = line.strip()
         if stripped.startswith("## "):
             flush_section()
-            current_section_title = stripped[3:].strip()
+            current_section_title = html_mod.escape(stripped[3:].strip())
         elif stripped.startswith("# "):
             flush_section()
-            current_section_title = stripped[2:].strip()
+            current_section_title = html_mod.escape(stripped[2:].strip())
         else:
             current_lines.append(line)
 
@@ -318,16 +323,48 @@ def _render_lines(lines: list[str]) -> str:
 
 
 def _linkify(text: str) -> str:
-    """Convert markdown links [text](url) and bare URLs to HTML anchors."""
-    text = re.sub(
-        r'\[([^\]]+)\]\((https?://[^\)]+)\)',
-        r'<a href="\2" style="color:#9e605a;text-decoration:underline;">\1</a>',
-        text,
-    )
+    """Convert markdown links [text](url) and bare URLs to HTML anchors.
+
+    Escapes HTML entities first to prevent injection, then applies
+    markdown link/bold patterns on the safe text.
+    """
+    # Extract markdown links and bold before escaping so we can restore them
+    links = []
+    def _save_link(m):
+        idx = len(links)
+        links.append((m.group(1), m.group(2)))
+        return f"\x00LINK{idx}\x00"
+
+    bolds = []
+    def _save_bold(m):
+        idx = len(bolds)
+        bolds.append(m.group(1))
+        return f"\x00BOLD{idx}\x00"
+
+    # Save markdown constructs before escaping
+    text = re.sub(r'\[([^\]]+)\]\((https?://[^\)]+)\)', _save_link, text)
+    text = re.sub(r'\*\*([^*]+)\*\*', _save_bold, text)
+
+    # Escape HTML entities
+    text = html_mod.escape(text)
+
+    # Restore markdown links as safe HTML
+    for idx, (label, url) in enumerate(links):
+        safe_label = html_mod.escape(label)
+        safe_url = html_mod.escape(url)
+        text = text.replace(
+            f"\x00LINK{idx}\x00",
+            f'<a href="{safe_url}" style="color:#9e605a;text-decoration:underline;">{safe_label}</a>',
+        )
+
+    # Restore bold
+    for idx, content in enumerate(bolds):
+        text = text.replace(f"\x00BOLD{idx}\x00", f"<strong>{html_mod.escape(content)}</strong>")
+
+    # Convert bare URLs (already escaped, so &amp; etc. are safe)
     text = re.sub(
         r'(?<!\"|>)(https?://[^\s<\)]+)',
         r'<a href="\1" style="color:#9e605a;text-decoration:underline;">\1</a>',
         text,
     )
-    text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)
     return text

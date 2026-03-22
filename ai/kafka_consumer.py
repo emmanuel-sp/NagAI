@@ -22,7 +22,10 @@ def _extract_correlation_id(msg) -> str:
     headers = msg.headers() or []
     for key, value in headers:
         if key == "x-correlation-id":
-            return value.decode("utf-8")
+            try:
+                return value.decode("utf-8")
+            except (UnicodeDecodeError, AttributeError):
+                break
     return uuid.uuid4().hex[:8]
 
 

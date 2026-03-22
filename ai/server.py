@@ -41,9 +41,9 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
             )
             return ai_service_pb2.SmartFieldResponse(suggestion=suggestion)
         except Exception as e:
-            logger.error(f"SuggestSmartField error: {e}")
+            logger.error(f"SuggestSmartField error: {e}", exc_info=True)
             context.set_code(grpc.StatusCode.INTERNAL)
-            context.set_details(str(e))
+            context.set_details("Internal service error")
             return ai_service_pb2.SmartFieldResponse()
 
     def GenerateChecklistItem(self, request, context):
@@ -62,9 +62,9 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
                 deadline=item["deadline"],
             )
         except Exception as e:
-            logger.error(f"GenerateChecklistItem error: {e}")
+            logger.error(f"GenerateChecklistItem error: {e}", exc_info=True)
             context.set_code(grpc.StatusCode.INTERNAL)
-            context.set_details(str(e))
+            context.set_details("Internal service error")
             return ai_service_pb2.ChecklistItemResponse()
 
     def GenerateFullChecklist(self, request, context):
@@ -84,9 +84,9 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
             ]
             return ai_service_pb2.FullChecklistResponse(items=pb_items)
         except Exception as e:
-            logger.error(f"GenerateFullChecklist error: {e}")
+            logger.error(f"GenerateFullChecklist error: {e}", exc_info=True)
             context.set_code(grpc.StatusCode.INTERNAL)
-            context.set_details(str(e))
+            context.set_details("Internal service error")
             return ai_service_pb2.FullChecklistResponse()
 
 

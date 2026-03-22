@@ -1,7 +1,5 @@
 package com.nagai.backend.users;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,20 +27,14 @@ public class UserController {
         return ResponseEntity.ok(new UserResponse(currentUser));
     }
 
-    @GetMapping("/")
-    public ResponseEntity<List<User>> allUsers() {
-        List<User> users = userService.allUsers();
-        return ResponseEntity.ok(users);
-    }
-
     @PutMapping("/me")
-    public ResponseEntity<UserResponse> putUser(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> putUser(@Valid @RequestBody UserRequest request) {
         User updated = userService.updateUser(request);
         return ResponseEntity.ok(new UserResponse(updated));
     }
 
     @PostMapping("/me/onboarding/complete")
-    public ResponseEntity<UserResponse> completeOnboarding(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> completeOnboarding(@Valid @RequestBody UserRequest request) {
         User updated = userService.completeOnboarding(request);
         return ResponseEntity.ok(new UserResponse(updated));
     }

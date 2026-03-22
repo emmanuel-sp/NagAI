@@ -1,5 +1,9 @@
 package com.nagai.backend.auth;
 
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nagai.backend.exceptions.EmailAlreadyExistsException;
 import com.nagai.backend.users.User;
 
 import jakarta.validation.Valid;
@@ -16,6 +21,8 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final AuthService authService;
     private final JwtService jwtService;
@@ -26,9 +33,15 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        User user = authService.registerUser(registerRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        try {
+            authService.registerUser(registerRequest);
+        } catch (EmailAlreadyExistsException e) {
+            // Swallow — return same response to prevent user enumeration
+            log.debug("Registration attempted for existing email");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "If this email is not already registered, a verification email has been sent."));
     }
 
     @PostMapping("/login")

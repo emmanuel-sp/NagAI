@@ -13,6 +13,10 @@ import com.nagai.backend.agents.SentAgentMessageRepository;
 import com.nagai.backend.digests.SentDigest;
 import com.nagai.backend.digests.SentDigestRepository;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 @RestController
 @RequestMapping("/internal")
 public class InternalCallbackController {
@@ -29,7 +33,7 @@ public class InternalCallbackController {
     }
 
     @PostMapping("/sent-digests")
-    public ResponseEntity<Void> saveSentDigest(@RequestBody SentDigestRequest request) {
+    public ResponseEntity<Void> saveSentDigest(@Valid @RequestBody SentDigestRequest request) {
         SentDigest entity = new SentDigest();
         entity.setDigestId(request.digestId());
         entity.setUserId(request.userId());
@@ -41,7 +45,7 @@ public class InternalCallbackController {
     }
 
     @PostMapping("/sent-agent-messages")
-    public ResponseEntity<Void> saveSentAgentMessage(@RequestBody SentAgentMessageRequest request) {
+    public ResponseEntity<Void> saveSentAgentMessage(@Valid @RequestBody SentAgentMessageRequest request) {
         SentAgentMessage entity = new SentAgentMessage();
         entity.setContextId(request.contextId());
         entity.setUserId(request.userId());
@@ -53,7 +57,18 @@ public class InternalCallbackController {
         return ResponseEntity.ok().build();
     }
 
-    record SentDigestRequest(Long digestId, Long userId, String subject, String content) {}
+    record SentDigestRequest(
+        @NotNull Long digestId,
+        @NotNull Long userId,
+        @NotBlank String subject,
+        @NotBlank String content
+    ) {}
 
-    record SentAgentMessageRequest(Long contextId, Long userId, String subject, String content, String emailMessageId) {}
+    record SentAgentMessageRequest(
+        @NotNull Long contextId,
+        @NotNull Long userId,
+        @NotBlank String subject,
+        @NotBlank String content,
+        String emailMessageId
+    ) {}
 }

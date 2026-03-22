@@ -1,7 +1,5 @@
 package com.nagai.backend.users;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
@@ -33,12 +31,6 @@ public class UserService {
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException());
-    }
-
-    public List<User> allUsers() {
-        List<User> users = new ArrayList<>();
-        userRepository.findAll().forEach(users::add);
-        return users;
     }
 
     public User getCurrentUser() {

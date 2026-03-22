@@ -61,6 +61,7 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       APP_BASE_URL: ${APP_BASE_URL}
       CORS_ORIGINS: ${CORS_ORIGINS}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       GRPC_AI_HOST: ai-service
       GRPC_AI_PORT: 9090
       KAFKA_BOOTSTRAP: kafka:9092
@@ -85,6 +86,7 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
       BACKEND_BASE_URL: ${BACKEND_BASE_URL}
       BACKEND_INTERNAL_URL: http://backend:8080
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     restart: unless-stopped
 
   caddy:

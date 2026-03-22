@@ -14,8 +14,8 @@ Python AI Service
      ↕  Anthropic Claude API
 ```
 
-- **gRPC**: Real-time AI suggestions (SMART goal fields, checklist generation)
-- **Kafka**: Async scheduled delivery (digest emails/SMS, agent messages)
+- **gRPC**: Main synchronous communication between ai service and backend with strict typing.
+- **Kafka**: Kafka is used to support scheduled, high-latency AI workflows (digest emails and agent messaging), where each task may take several seconds and must be processed reliably without blocking the backend.
 
 ## Tech Stack
 
