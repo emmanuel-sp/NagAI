@@ -1,6 +1,7 @@
 package com.nagai.backend.agents;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -100,10 +101,18 @@ public class AgentService {
         agentContextRepository.delete(context);
     }
 
+    public void stopByToken(String token) {
+        Agent agent = agentRepository.findByUnsubscribeToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        agent.setDeployed(false);
+        agentRepository.save(agent);
+    }
+
     private Agent createDefaultAgent(Long userId) {
         Agent agent = new Agent();
         agent.setUserId(userId);
         agent.setName("My AI Agent");
+        agent.setUnsubscribeToken(UUID.randomUUID().toString());
         return agentRepository.save(agent);
     }
 

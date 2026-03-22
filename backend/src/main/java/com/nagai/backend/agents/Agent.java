@@ -35,6 +35,9 @@ public class Agent {
     @Column(name = "communication_channel", nullable = false)
     private String communicationChannel = "email";
 
+    @Column(name = "unsubscribe_token", unique = true, nullable = false)
+    private String unsubscribeToken;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;

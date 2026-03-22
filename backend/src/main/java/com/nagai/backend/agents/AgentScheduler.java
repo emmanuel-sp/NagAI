@@ -364,6 +364,7 @@ public class AgentScheduler {
                 .previousMessageIds(previousMessageIds)
                 .previousSubjects(previousSubjects)
                 .messagesSinceLastChange(messagesSinceLastChange)
+                .unsubscribeToken(agent.getUnsubscribeToken())
                 .build();
     }
 

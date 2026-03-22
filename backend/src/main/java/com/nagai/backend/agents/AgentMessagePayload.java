@@ -25,6 +25,7 @@ public class AgentMessagePayload {
     private List<String> previousMessageIds;
     private List<String> previousSubjects;
     private int messagesSinceLastChange;
+    private String unsubscribeToken;
 
     @Data
     @Builder

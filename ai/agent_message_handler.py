@@ -21,6 +21,7 @@ SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+BACKEND_BASE_URL = os.environ.get("BACKEND_BASE_URL", "http://localhost:8080")
 BACKEND_INTERNAL_URL = os.environ.get("BACKEND_INTERNAL_URL", "http://localhost:8080")
 INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "")
 
@@ -139,6 +140,7 @@ def handle_agent_message(value: str):
     previous_message_ids = payload.get("previousMessageIds", [])
     previous_subjects = payload.get("previousSubjects", [])
     messages_since_last_change = payload.get("messagesSinceLastChange", 0)
+    unsubscribe_token = payload.get("unsubscribeToken", "")
 
     system_prompt = _build_system_prompt(
         agent_name, context_name, message_type,
@@ -165,10 +167,11 @@ def handle_agent_message(value: str):
     references = " ".join(previous_message_ids) if previous_message_ids else None
     in_reply_to = previous_message_ids[-1] if previous_message_ids else None
 
-    html = _render_agent_email(body, agent_name, user_name)
+    unsubscribe_url = f"{BACKEND_BASE_URL}/agent/unsubscribe?token={unsubscribe_token}" if unsubscribe_token else ""
+    html = _render_agent_email(body, agent_name, user_name, unsubscribe_url)
 
     try:
-        _send_email(user_email, subject, html, message_id, in_reply_to, references)
+        _send_email(user_email, subject, html, message_id, in_reply_to, references, unsubscribe_url)
         logger.info(f"Agent message sent to {user_email} (context={context_id})")
     except Exception as e:
         logger.error(f"Failed to send agent email to {user_email}: {e}")
@@ -397,7 +400,7 @@ def _save_sent_message(context_id, user_id, subject, content, email_message_id):
         logger.error(f"Failed to save sent agent message via callback: {e}")
 
 
-def _send_email(to_addr, subject, html_body, message_id, in_reply_to=None, references=None):
+def _send_email(to_addr, subject, html_body, message_id, in_reply_to=None, references=None, unsubscribe_url=""):
     if not SMTP_USER or not SMTP_PASSWORD:
         logger.warning("SMTP credentials not configured — skipping email send")
         return
@@ -412,6 +415,9 @@ def _send_email(to_addr, subject, html_body, message_id, in_reply_to=None, refer
         msg["In-Reply-To"] = in_reply_to
     if references:
         msg["References"] = references
+    if unsubscribe_url:
+        msg["List-Unsubscribe"] = f"<{unsubscribe_url}>"
+        msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
 
     msg.attach(MIMEText(html_body, "html"))
 
@@ -421,10 +427,14 @@ def _send_email(to_addr, subject, html_body, message_id, in_reply_to=None, refer
         server.sendmail(SMTP_USER, to_addr, msg.as_string())
 
 
-def _render_agent_email(body, agent_name, user_name):
+def _render_agent_email(body, agent_name, user_name, unsubscribe_url=""):
     sections_html = _markdown_to_sections(body)
     safe_agent_name = html_mod.escape(agent_name) if agent_name else "NagAI Agent"
     safe_user_name = html_mod.escape(user_name) if user_name else "there"
+
+    unsubscribe_html = ""
+    if unsubscribe_url:
+        unsubscribe_html = f'<p style="margin:12px 0 0;font-size:12px;text-align:center;"><a href="{unsubscribe_url}" style="color:#9e605a;text-decoration:underline;">Stop receiving agent messages</a></p>'
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -456,10 +466,12 @@ def _render_agent_email(body, agent_name, user_name):
 <tr>
 <td style="background-color:#faf5f4;padding:20px 40px;border-top:1px solid #e8d8d5;">
   <p style="margin:0;font-size:12px;color:#8a706b;text-align:center;">
-    This message is from your NagAI agent. Reply to this email to continue the conversation.
-  </p>
-  <p style="margin:8px 0 0;font-size:11px;color:#b09a96;text-align:center;">
+    This message is from your NagAI agent.<br>
     Manage your agent in the NagAI app.
+  </p>
+  {unsubscribe_html}
+  <p style="margin:12px 0 0;font-size:11px;color:#b09a96;text-align:center;">
+    Built with care by NagAI
   </p>
 </td>
 </tr>
