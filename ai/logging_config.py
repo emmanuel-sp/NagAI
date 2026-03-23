@@ -2,7 +2,7 @@ import logging
 import os
 import contextvars
 
-# Shared context var for correlation ID — used by gRPC interceptor and Kafka consumer
+# Shared context var for correlation ID — used by gRPC interceptor and Redis consumer
 correlation_id_var = contextvars.ContextVar("correlation_id", default="-")
 
 

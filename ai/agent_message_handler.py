@@ -119,7 +119,7 @@ ANGLES = {
 
 
 def handle_agent_message(value: str):
-    """Main entry point: called by Kafka consumer with the JSON payload."""
+    """Main entry point: called by Redis consumer with the JSON payload."""
     try:
         payload = json.loads(value)
     except json.JSONDecodeError as e:

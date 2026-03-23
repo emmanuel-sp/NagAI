@@ -7,22 +7,22 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.data.redis.core.StreamOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.TaskScheduler;
 
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
-import com.nagai.backend.config.KafkaConfig;
+import com.nagai.backend.config.RedisStreamConfig;
 import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.users.User;
@@ -39,7 +39,9 @@ class DigestSchedulerTest {
     @Mock private ChecklistRepository checklistRepository;
     @Mock private UserRepository userRepository;
     @Mock private SentDigestRepository sentDigestRepository;
-    @Mock private KafkaTemplate<String, String> kafkaTemplate;
+    @Mock private StringRedisTemplate redisTemplate;
+    @SuppressWarnings("rawtypes")
+    @Mock private StreamOperations streamOps;
     @Mock private TaskScheduler taskScheduler;
     @Mock private Counter digestsSentCounter;
     @Mock private Counter digestsFailedCounter;
@@ -51,12 +53,15 @@ class DigestSchedulerTest {
     private Goal goal;
     private ChecklistItem item;
 
+    @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
+        lenient().when(redisTemplate.opsForStream()).thenReturn(streamOps);
+
         digestScheduler = new DigestScheduler(
                 digestRepository, digestService, goalRepository,
                 checklistRepository, userRepository, sentDigestRepository,
-                kafkaTemplate, taskScheduler, digestsSentCounter, digestsFailedCounter);
+                redisTemplate, taskScheduler, digestsSentCounter, digestsFailedCounter);
 
         user = new User();
         user.setUserId(1L);
@@ -90,35 +95,34 @@ class DigestSchedulerTest {
         item.setCompletedAt("2026-03-10");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    void processDigests_publishesToKafkaForDueDigests() {
+    void processDigests_publishesToRedisForDueDigests() {
         when(digestRepository.findByActiveAndNextDeliveryAtBefore(eq(true), any(LocalDateTime.class)))
                 .thenReturn(List.of(digest));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(goalRepository.findAllByUserId(1L)).thenReturn(List.of(goal));
         when(checklistRepository.findChecklistItemByGoalId(100L)).thenReturn(List.of(item));
         when(sentDigestRepository.findTop3ByUserIdOrderBySentAtDesc(1L)).thenReturn(List.of());
-        when(kafkaTemplate.send(any(ProducerRecord.class)))
-                .thenReturn(CompletableFuture.completedFuture(null));
 
         digestScheduler.processDigests();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<ProducerRecord<String, String>> recordCaptor =
-                ArgumentCaptor.forClass(ProducerRecord.class);
+        ArgumentCaptor<String> streamCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Map<String, String>> fieldsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(streamOps).add(streamCaptor.capture(), fieldsCaptor.capture());
 
-        verify(kafkaTemplate).send(recordCaptor.capture());
-        ProducerRecord<String, String> record = recordCaptor.getValue();
-        assertThat(record.topic()).isEqualTo(KafkaConfig.TOPIC_DIGEST_DELIVERY);
-        assertThat(record.key()).isEqualTo("1");
-        assertThat(record.value()).contains("Learn Spanish");
-        assertThat(record.value()).contains("test@example.com");
-        assertThat(record.value()).contains("Buy textbook");
-        assertThat(record.headers().lastHeader("x-correlation-id")).isNotNull();
+        assertThat(streamCaptor.getValue()).isEqualTo(RedisStreamConfig.STREAM_DIGEST_DELIVERY);
+        Map<String, String> fields = fieldsCaptor.getValue();
+        assertThat(fields.get("key")).isEqualTo("1");
+        assertThat(fields.get("payload")).contains("Learn Spanish");
+        assertThat(fields.get("payload")).contains("test@example.com");
+        assertThat(fields.get("payload")).contains("Buy textbook");
+        assertThat(fields.get("correlationId")).isNotNull();
 
         verify(digestService).markDelivered(digest, user);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void processDigests_skipsWhenUserNotFound() {
         when(digestRepository.findByActiveAndNextDeliveryAtBefore(eq(true), any(LocalDateTime.class)))
@@ -127,10 +131,11 @@ class DigestSchedulerTest {
 
         digestScheduler.processDigests();
 
-        verify(kafkaTemplate, never()).send(any(ProducerRecord.class));
+        verify(streamOps, never()).add(anyString(), any(Map.class));
         verify(digestService, never()).markDelivered(any(), any());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void processDigests_continuesAfterFailure() {
         Digest digest2 = new Digest();
@@ -149,17 +154,15 @@ class DigestSchedulerTest {
         when(userRepository.findById(2L)).thenReturn(Optional.of(user2));
         when(goalRepository.findAllByUserId(2L)).thenReturn(List.of());
         when(sentDigestRepository.findTop3ByUserIdOrderBySentAtDesc(2L)).thenReturn(List.of());
-        when(kafkaTemplate.send(any(ProducerRecord.class)))
-                .thenReturn(CompletableFuture.completedFuture(null));
 
         digestScheduler.processDigests();
 
         // Should still process digest2 despite digest1 failing
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<ProducerRecord<String, String>> captor = ArgumentCaptor.forClass(ProducerRecord.class);
-        verify(kafkaTemplate).send(captor.capture());
-        assertThat(captor.getValue().topic()).isEqualTo(KafkaConfig.TOPIC_DIGEST_DELIVERY);
-        assertThat(captor.getValue().key()).isEqualTo("2");
+        ArgumentCaptor<String> streamCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Map<String, String>> fieldsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(streamOps).add(streamCaptor.capture(), fieldsCaptor.capture());
+        assertThat(streamCaptor.getValue()).isEqualTo(RedisStreamConfig.STREAM_DIGEST_DELIVERY);
+        assertThat(fieldsCaptor.getValue().get("key")).isEqualTo("2");
     }
 
     @Test
@@ -169,7 +172,7 @@ class DigestSchedulerTest {
 
         digestScheduler.processDigests();
 
-        verifyNoInteractions(kafkaTemplate);
+        verifyNoInteractions(redisTemplate);
         verifyNoInteractions(digestService);
     }
 

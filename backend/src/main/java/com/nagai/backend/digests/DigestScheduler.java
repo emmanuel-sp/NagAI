@@ -1,6 +1,5 @@
 package com.nagai.backend.digests;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -11,11 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -25,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
 import com.nagai.backend.common.ProfileUtils;
-import com.nagai.backend.config.KafkaConfig;
+import com.nagai.backend.config.RedisStreamConfig;
 import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.users.User;
@@ -47,7 +45,7 @@ public class DigestScheduler {
     private final ChecklistRepository checklistRepository;
     private final UserRepository userRepository;
     private final SentDigestRepository sentDigestRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
     private final TaskScheduler taskScheduler;
     private final Counter digestsSentCounter;
@@ -58,7 +56,7 @@ public class DigestScheduler {
     public DigestScheduler(DigestRepository digestRepository, DigestService digestService,
                            GoalRepository goalRepository, ChecklistRepository checklistRepository,
                            UserRepository userRepository, SentDigestRepository sentDigestRepository,
-                           KafkaTemplate<String, String> kafkaTemplate, TaskScheduler taskScheduler,
+                           StringRedisTemplate redisTemplate, TaskScheduler taskScheduler,
                            Counter digestsSentCounter, Counter digestsFailedCounter) {
         this.digestRepository = digestRepository;
         this.digestService = digestService;
@@ -66,7 +64,7 @@ public class DigestScheduler {
         this.checklistRepository = checklistRepository;
         this.userRepository = userRepository;
         this.sentDigestRepository = sentDigestRepository;
-        this.kafkaTemplate = kafkaTemplate;
+        this.redisTemplate = redisTemplate;
         this.objectMapper = new ObjectMapper();
         this.taskScheduler = taskScheduler;
         this.digestsSentCounter = digestsSentCounter;
@@ -161,15 +159,16 @@ public class DigestScheduler {
 
             DigestDeliveryPayload payload = buildPayload(digest, user, hasProgress);
             String json = objectMapper.writeValueAsString(payload);
-            log.info("Publishing digest {} for user {} (email={}, staleCount={}) to Kafka...",
+            log.info("Publishing digest {} for user {} (email={}, staleCount={}) to Redis stream...",
                     digest.getDigestId(), user.getUserId(), user.getEmail(), digest.getStaleCount());
 
-            ProducerRecord<String, String> record = new ProducerRecord<>(
-                    KafkaConfig.TOPIC_DIGEST_DELIVERY, String.valueOf(user.getUserId()), json);
-            record.headers().add("x-correlation-id", correlationId.getBytes(StandardCharsets.UTF_8));
-            kafkaTemplate.send(record).get(10, java.util.concurrent.TimeUnit.SECONDS);
+            Map<String, String> fields = Map.of(
+                    "key", String.valueOf(user.getUserId()),
+                    "correlationId", correlationId,
+                    "payload", json);
+            redisTemplate.opsForStream().add(RedisStreamConfig.STREAM_DIGEST_DELIVERY, fields);
 
-            log.info("Kafka publish succeeded for digest {}", digest.getDigestId());
+            log.info("Redis publish succeeded for digest {}", digest.getDigestId());
             digestService.markDelivered(digest, user);
             digestsSentCounter.increment();
 

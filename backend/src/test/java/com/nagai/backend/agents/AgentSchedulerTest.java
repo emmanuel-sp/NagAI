@@ -7,22 +7,22 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.data.redis.core.StreamOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.TaskScheduler;
 
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
-import com.nagai.backend.config.KafkaConfig;
+import com.nagai.backend.config.RedisStreamConfig;
 import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.users.User;
@@ -40,7 +40,9 @@ class AgentSchedulerTest {
     @Mock private ChecklistRepository checklistRepository;
     @Mock private SentAgentMessageRepository sentAgentMessageRepository;
     @Mock private AgentReplyRepository agentReplyRepository;
-    @Mock private KafkaTemplate<String, String> kafkaTemplate;
+    @Mock private StringRedisTemplate redisTemplate;
+    @SuppressWarnings("rawtypes")
+    @Mock private StreamOperations streamOps;
     @Mock private TaskScheduler taskScheduler;
     @Mock private Counter agentMessagesSentCounter;
     @Mock private Counter agentMessagesFailedCounter;
@@ -53,12 +55,15 @@ class AgentSchedulerTest {
     private Goal goal;
     private ChecklistItem item;
 
+    @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
+        lenient().when(redisTemplate.opsForStream()).thenReturn(streamOps);
+
         agentScheduler = new AgentScheduler(
                 agentContextRepository, agentRepository, userRepository,
                 goalRepository, checklistRepository, sentAgentMessageRepository,
-                agentReplyRepository, kafkaTemplate, taskScheduler,
+                agentReplyRepository, redisTemplate, taskScheduler,
                 agentMessagesSentCounter, agentMessagesFailedCounter);
 
         user = new User();
@@ -96,8 +101,9 @@ class AgentSchedulerTest {
         item.setCompletedAt("2026-03-10T10:00:00");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    void processAgentMessages_publishesToKafkaForDueContexts() {
+    void processAgentMessages_publishesToRedisForDueContexts() {
         when(agentContextRepository.findDueForDeployedAgents(any(LocalDateTime.class)))
                 .thenReturn(List.of(context));
         when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
@@ -105,23 +111,20 @@ class AgentSchedulerTest {
         when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of(item));
         when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
         when(goalRepository.findById(200L)).thenReturn(Optional.of(goal));
-        when(kafkaTemplate.send(any(ProducerRecord.class)))
-                .thenReturn(CompletableFuture.completedFuture(null));
 
         agentScheduler.processAgentMessages();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<ProducerRecord<String, String>> recordCaptor =
-                ArgumentCaptor.forClass(ProducerRecord.class);
+        ArgumentCaptor<String> streamCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Map<String, String>> fieldsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(streamOps).add(streamCaptor.capture(), fieldsCaptor.capture());
 
-        verify(kafkaTemplate).send(recordCaptor.capture());
-        ProducerRecord<String, String> record = recordCaptor.getValue();
-        assertThat(record.topic()).isEqualTo(KafkaConfig.TOPIC_AGENT_MESSAGES);
-        assertThat(record.key()).isEqualTo("1");
-        assertThat(record.value()).contains("Learn Spanish");
-        assertThat(record.value()).contains("test@example.com");
-        assertThat(record.value()).contains("Morning Check");
-        assertThat(record.headers().lastHeader("x-correlation-id")).isNotNull();
+        assertThat(streamCaptor.getValue()).isEqualTo(RedisStreamConfig.STREAM_AGENT_MESSAGES);
+        Map<String, String> fields = fieldsCaptor.getValue();
+        assertThat(fields.get("key")).isEqualTo("1");
+        assertThat(fields.get("payload")).contains("Learn Spanish");
+        assertThat(fields.get("payload")).contains("test@example.com");
+        assertThat(fields.get("payload")).contains("Morning Check");
+        assertThat(fields.get("correlationId")).isNotNull();
 
         verify(agentContextRepository).save(context);
         assertThat(context.getLastMessageSentAt()).isNotNull();
@@ -135,9 +138,10 @@ class AgentSchedulerTest {
 
         agentScheduler.processAgentMessages();
 
-        verifyNoInteractions(kafkaTemplate);
+        verifyNoInteractions(redisTemplate);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void processAgentMessages_skipsWhenUserNotFound() {
         when(agentContextRepository.findDueForDeployedAgents(any(LocalDateTime.class)))
@@ -147,9 +151,10 @@ class AgentSchedulerTest {
 
         agentScheduler.processAgentMessages();
 
-        verify(kafkaTemplate, never()).send(any(ProducerRecord.class));
+        verify(streamOps, never()).add(anyString(), any(Map.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void processAgentMessages_continuesAfterFailure() {
         AgentContext context2 = new AgentContext();
@@ -169,16 +174,14 @@ class AgentSchedulerTest {
         when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
         when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(anyLong())).thenReturn(List.of());
         when(goalRepository.findById(200L)).thenReturn(Optional.of(goal));
-        when(kafkaTemplate.send(any(ProducerRecord.class)))
-                .thenReturn(CompletableFuture.completedFuture(null));
 
         agentScheduler.processAgentMessages();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<ProducerRecord<String, String>> captor = ArgumentCaptor.forClass(ProducerRecord.class);
-        verify(kafkaTemplate).send(captor.capture());
-        assertThat(captor.getValue().topic()).isEqualTo(KafkaConfig.TOPIC_AGENT_MESSAGES);
-        assertThat(captor.getValue().key()).isEqualTo("1");
+        ArgumentCaptor<String> streamCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Map<String, String>> fieldsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(streamOps).add(streamCaptor.capture(), fieldsCaptor.capture());
+        assertThat(streamCaptor.getValue()).isEqualTo(RedisStreamConfig.STREAM_AGENT_MESSAGES);
+        assertThat(fieldsCaptor.getValue().get("key")).isEqualTo("1");
     }
 
     @Test

@@ -1,6 +1,5 @@
 package com.nagai.backend.agents;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,14 +11,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -29,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
 import com.nagai.backend.common.ProfileUtils;
-import com.nagai.backend.config.KafkaConfig;
+import com.nagai.backend.config.RedisStreamConfig;
 import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.users.User;
@@ -59,7 +56,7 @@ public class AgentScheduler {
     private final ChecklistRepository checklistRepository;
     private final SentAgentMessageRepository sentAgentMessageRepository;
     private final AgentReplyRepository agentReplyRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
     private final TaskScheduler taskScheduler;
     private final Counter agentMessagesSentCounter;
@@ -74,7 +71,7 @@ public class AgentScheduler {
                           ChecklistRepository checklistRepository,
                           SentAgentMessageRepository sentAgentMessageRepository,
                           AgentReplyRepository agentReplyRepository,
-                          KafkaTemplate<String, String> kafkaTemplate,
+                          StringRedisTemplate redisTemplate,
                           TaskScheduler taskScheduler,
                           Counter agentMessagesSentCounter,
                           Counter agentMessagesFailedCounter) {
@@ -85,7 +82,7 @@ public class AgentScheduler {
         this.checklistRepository = checklistRepository;
         this.sentAgentMessageRepository = sentAgentMessageRepository;
         this.agentReplyRepository = agentReplyRepository;
-        this.kafkaTemplate = kafkaTemplate;
+        this.redisTemplate = redisTemplate;
         this.objectMapper = new ObjectMapper();
         this.taskScheduler = taskScheduler;
         this.agentMessagesSentCounter = agentMessagesSentCounter;
@@ -174,10 +171,11 @@ public class AgentScheduler {
                     checklistItems, messagesSinceLastChange);
             String json = objectMapper.writeValueAsString(payload);
 
-            ProducerRecord<String, String> record = new ProducerRecord<>(
-                    KafkaConfig.TOPIC_AGENT_MESSAGES, String.valueOf(user.getUserId()), json);
-            record.headers().add("x-correlation-id", correlationId.getBytes(StandardCharsets.UTF_8));
-            kafkaTemplate.send(record).get(10, TimeUnit.SECONDS);
+            Map<String, String> fields = Map.of(
+                    "key", String.valueOf(user.getUserId()),
+                    "correlationId", correlationId,
+                    "payload", json);
+            redisTemplate.opsForStream().add(RedisStreamConfig.STREAM_AGENT_MESSAGES, fields);
 
             context.setLastMessageSentAt(now);
 

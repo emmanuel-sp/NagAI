@@ -11,7 +11,7 @@ public class MetricsConfig {
     @Bean
     public Counter digestsSentCounter(MeterRegistry registry) {
         return Counter.builder("nagai.digests.sent")
-                .description("Number of digests successfully published to Kafka")
+                .description("Number of digests successfully published to stream")
                 .register(registry);
     }
 
@@ -25,7 +25,7 @@ public class MetricsConfig {
     @Bean
     public Counter agentMessagesSentCounter(MeterRegistry registry) {
         return Counter.builder("nagai.agent_messages.sent")
-                .description("Number of agent messages successfully published to Kafka")
+                .description("Number of agent messages successfully published to stream")
                 .register(registry);
     }
 

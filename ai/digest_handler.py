@@ -106,7 +106,7 @@ CONTENT_TYPE_DESCRIPTIONS = {
 
 
 def handle_digest_delivery(value: str):
-    """Main entry point: called by Kafka consumer with the JSON payload."""
+    """Main entry point: called by Redis consumer with the JSON payload."""
     try:
         payload = json.loads(value)
     except json.JSONDecodeError as e:
@@ -127,7 +127,7 @@ def handle_digest_delivery(value: str):
     stale_count = payload.get("staleCount", 0)
     progress_since_last = payload.get("progressSinceLastDelivery", True)
 
-    # Previous subjects now come from the Kafka payload (backend pre-loads them)
+    # Previous subjects now come from the stream payload (backend pre-loads them)
     previous_subjects = payload.get("previousSubjects", [])
 
     content_descriptions = "\n".join(

@@ -9,13 +9,13 @@ Frontend (Next.js)          port 3000
      ↕  REST/JSON
 Spring Boot Backend          port 8080
      ↕  gRPC (sync)         port 9090
-     ↕  Kafka (async)       port 9092
+     ↕  Redis Streams        port 6379
 Python AI Service
      ↕  Anthropic Claude API
 ```
 
 - **gRPC**: Main synchronous communication between ai service and backend with strict typing.
-- **Kafka**: Kafka is used to support scheduled, high-latency AI workflows (digest emails and agent messaging), where each task may take several seconds and must be processed reliably without blocking the backend.
+- **Redis Streams**: Used to support scheduled, high-latency AI workflows (digest emails and agent messaging), where each task may take several seconds and must be processed reliably without blocking the backend.
 
 ## Tech Stack
 
@@ -24,7 +24,7 @@ Python AI Service
 | Frontend | Next.js 15, React 19, TypeScript, CSS Modules |
 | Backend | Spring Boot 4, Java, Maven, Spring Security (JWT + Google OAuth) |
 | Database | PostgreSQL, Flyway migrations |
-| AI Service | Python, gRPC, Kafka consumer |
+| AI Service | Python, gRPC, Redis Streams consumer |
 | AI Model | Claude (Anthropic) via `anthropic` SDK |
 
 ## Prerequisites
@@ -36,13 +36,13 @@ Python AI Service
 
 ## Running Locally
 
-### 1. Infrastructure (PostgreSQL + Kafka + Zookeeper)
+### 1. Infrastructure (PostgreSQL + Redis)
 
 ```bash
 docker compose up -d
 ```
 
-This starts PostgreSQL (port 5432), Kafka (port 9092), and Zookeeper (port 2181). To stop:
+This starts PostgreSQL (port 5432) and Redis (port 6379). To stop:
 
 ```bash
 docker compose down        # keep data
@@ -86,7 +86,7 @@ python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# Edit .env — set ANTHROPIC_API_KEY, SMTP credentials, DB credentials, NewsAPI key
+# Edit .env — set ANTHROPIC_API_KEY, SMTP credentials, Redis host, NewsAPI key
 
 # Compile proto stubs (required after any .proto change)
 python -m grpc_tools.protoc \
@@ -98,11 +98,11 @@ python -m grpc_tools.protoc \
 # Start gRPC server (handles real-time AI requests)
 python server.py
 
-# Start Kafka consumer (separate terminal — handles digest delivery + agent messages)
-python kafka_consumer.py
+# Start Redis consumer (separate terminal — handles digest delivery + agent messages)
+python redis_consumer.py
 ```
 
-The gRPC server and Kafka consumer are **separate processes** — both must be running for full functionality.
+The gRPC server and Redis consumer are **separate processes** — both must be running for full functionality.
 
 ## Environment Variables
 
@@ -114,7 +114,8 @@ The defaults work for local development. Notable overrides via env vars:
 |---|---|---|
 | `GRPC_AI_HOST` | `localhost` | Python AI service host |
 | `GRPC_AI_PORT` | `9090` | Python AI service gRPC port |
-| `KAFKA_BOOTSTRAP` | `localhost:9092` | Kafka broker |
+| `REDIS_HOST` | `localhost` | Redis server host |
+| `REDIS_PORT` | `6379` | Redis server port |
 
 Google OAuth and email verification require real credentials — see comments in `application.properties`.
 
@@ -123,7 +124,8 @@ Google OAuth and email verification require real credentials — see comments in
 ```env
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 GRPC_PORT=9090
-KAFKA_BOOTSTRAP=localhost:9092
+REDIS_HOST=localhost
+REDIS_PORT=6379
 
 # Email delivery (Gmail SMTP)
 SMTP_HOST=smtp.gmail.com
@@ -131,12 +133,12 @@ SMTP_PORT=587
 SMTP_USER=your_email@gmail.com
 SMTP_PASSWORD=your_app_password
 
-# Database (for sent digest/message persistence)
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=nagai
-DB_USER=postgres
-DB_PASSWORD=password
+# Backend REST callback (for saving sent digests/messages — replaces direct DB access)
+BACKEND_INTERNAL_URL=http://localhost:8080
+INTERNAL_API_KEY=your_internal_api_key
+
+# Public backend URL (for email unsubscribe links)
+BACKEND_BASE_URL=http://localhost:8080
 
 # Web search (NewsAPI.org — for news content in digests)
 NEWSAPI_KEY=your_newsapi_key
@@ -160,10 +162,11 @@ NagAI/
 │       ├── users/          User entity + profile endpoints
 │       ├── goals/          Goal CRUD
 │       ├── checklists/     Checklist items CRUD
-│       ├── digests/        Digest CRUD + scheduled delivery (Kafka)
+│       ├── digests/        Digest CRUD + scheduled delivery (Redis Streams)
 │       ├── agents/         AI agent + context CRUD
 │       ├── ai/             gRPC client + AI REST endpoints
-│       ├── config/         Security, Kafka, gRPC config
+│       ├── config/         Security, Redis, gRPC, scheduling config
+│       ├── internal/       REST callback endpoints (AI service → backend)
 │       └── exceptions/     Domain exception classes
 │   └── src/main/proto/
 │       └── ai_service.proto   Shared gRPC contract (Java + Python)
@@ -171,12 +174,14 @@ NagAI/
 ├── ai/                     Python AI service
 │   ├── server.py           gRPC server (real-time AI requests)
 │   ├── ai_handlers.py      Claude API call implementations
-│   ├── kafka_consumer.py   Async message consumer (digests + agents)
+│   ├── redis_consumer.py   Async message consumer (digests + agents)
 │   ├── digest_handler.py   Digest generation, HTML email rendering, SMTP delivery
+│   ├── agent_message_handler.py  Agent message generation + tool-use loop
 │   ├── web_search.py       NewsAPI.org integration for news content
+│   ├── logging_config.py   Structured logging setup (JSON in prod)
 │   └── requirements.txt
 │
-├── docker-compose.yml      PostgreSQL + Kafka + Zookeeper
+├── docker-compose.yml      PostgreSQL + Redis
 └── TODO.md                 Development plan (remaining steps)
 ```
 
@@ -203,7 +208,7 @@ grpcurl -plaintext localhost:9090 grpc.health.v1.Health/Check
 ```
 
 **Docker containers**:
-Both Postgres and Kafka have built-in health checks in `docker-compose.yml`:
+Both Postgres and Redis have built-in health checks in `docker-compose.yml`:
 ```bash
 docker compose ps   # shows health status
 ```
@@ -238,7 +243,7 @@ Every request gets an `X-Correlation-ID` header (8-char UUID) that flows across 
 
 ```
 Frontend (generates ID) → Backend (MDC) → gRPC metadata → Python AI Service (contextvars)
-                                        → Kafka headers  → Python AI Service (contextvars)
+                                        → Redis Streams  → Python AI Service (contextvars)
 ```
 
 All log lines include the correlation ID. Error responses from the backend include it in the JSON body (`correlationId` field) for debugging.
@@ -249,7 +254,7 @@ Available at `/actuator/metrics/nagai.*`:
 
 | Metric | Type | Description |
 |---|---|---|
-| `nagai.digests.sent` | Counter | Digest emails successfully queued to Kafka |
+| `nagai.digests.sent` | Counter | Digest emails successfully queued to stream |
 | `nagai.digests.failed` | Counter | Digest delivery failures |
 | `nagai.agent_messages.sent` | Counter | Agent messages successfully queued |
 | `nagai.agent_messages.failed` | Counter | Agent message failures |
@@ -269,7 +274,7 @@ Sentry is disabled in development. Error boundaries (`error.tsx`, `global-error.
 
 ## Production Deployment (AWS EC2)
 
-The backend, AI service, Kafka, Postgres, and Caddy run on a single EC2 instance via `docker-compose.prod.yml`. The frontend is deployed separately on Vercel.
+The backend, AI service, Redis, Postgres, and Caddy run on a single EC2 instance via `docker-compose.prod.yml`. The frontend is deployed separately on Vercel.
 
 ### Setup
 
@@ -290,7 +295,7 @@ git pull
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-Only images with code changes are rebuilt. Postgres/Kafka/Caddy are unaffected.
+Only images with code changes are rebuilt. Postgres/Redis/Caddy are unaffected.
 
 ### Container Status
 
@@ -335,8 +340,8 @@ docker compose -f docker-compose.prod.yml logs ai-service --tail 100
 # Caddy (TLS + reverse proxy)
 docker compose -f docker-compose.prod.yml logs caddy --tail 30
 
-# Kafka logs
-docker compose -f docker-compose.prod.yml logs kafka --tail 50
+# Redis logs
+docker compose -f docker-compose.prod.yml logs redis --tail 50
 ```
 
 ### Database
@@ -350,7 +355,7 @@ docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d naga
 docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT * FROM sent_digests ORDER BY sent_at DESC LIMIT 5;"
 docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT * FROM sent_agent_messages ORDER BY sent_at DESC LIMIT 5;"
 docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT digest_id, name, active, frequency, next_delivery_at FROM digests;"
-docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT context_id, name, message_type, last_message_sent_at FROM agent_contexts;"
+docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT context_id, name, message_type, last_message_sent_at, next_message_at FROM agent_contexts;"
 
 # Check Flyway migration status
 docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT * FROM flyway_schema_history;"
@@ -389,15 +394,20 @@ df -h
 docker system df
 ```
 
-### Kafka
+### Redis Streams
 
 ```bash
-# List topics
-docker compose -f docker-compose.prod.yml exec kafka kafka-topics.sh --bootstrap-server localhost:9092 --list
+# Check stream lengths
+docker compose -f docker-compose.prod.yml exec redis redis-cli XLEN digest-delivery
+docker compose -f docker-compose.prod.yml exec redis redis-cli XLEN agent-messages
 
-# Read recent messages from a topic
-docker compose -f docker-compose.prod.yml exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic digest-delivery --from-beginning --max-messages 5
-docker compose -f docker-compose.prod.yml exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic agent-messages --from-beginning --max-messages 5
+# Read recent messages from a stream
+docker compose -f docker-compose.prod.yml exec redis redis-cli XRANGE digest-delivery - + COUNT 5
+docker compose -f docker-compose.prod.yml exec redis redis-cli XRANGE agent-messages - + COUNT 5
+
+# Check consumer group status
+docker compose -f docker-compose.prod.yml exec redis redis-cli XINFO GROUPS digest-delivery
+docker compose -f docker-compose.prod.yml exec redis redis-cli XINFO GROUPS agent-messages
 ```
 
 ## Development Notes

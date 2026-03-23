@@ -15,27 +15,16 @@ services:
       retries: 5
     restart: unless-stopped
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.6.0
-    container_name: nagai-zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-    restart: unless-stopped
-
-  kafka:
-    image: confluentinc/cp-kafka:7.6.0
-    container_name: nagai-kafka
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  redis:
+    image: redis:7-alpine
+    container_name: nagai-redis
+    volumes:
+      - redisdata:/data
+    command: redis-server --appendonly yes
     healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "kafka:9092"]
-      interval: 15s
-      timeout: 10s
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
       retries: 5
     restart: unless-stopped
 
@@ -47,7 +36,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      kafka:
+      redis:
         condition: service_healthy
     environment:
       DB_HOST: postgres
@@ -64,7 +53,7 @@ services:
       INTERNAL_API_KEY: ${INTERNAL_API_KEY}
       GRPC_AI_HOST: ai-service
       GRPC_AI_PORT: 9090
-      KAFKA_BOOTSTRAP: kafka:9092
+      REDIS_HOST: redis
     restart: unless-stopped
 
   ai-service:
@@ -73,13 +62,13 @@ services:
       dockerfile: Dockerfile
     container_name: nagai-ai-service
     depends_on:
-      kafka:
+      redis:
         condition: service_healthy
     environment:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       NEWSAPI_KEY: ${NEWSAPI_KEY}
       GRPC_PORT: 9090
-      KAFKA_BOOTSTRAP: kafka:9092
+      REDIS_HOST: redis
       SMTP_HOST: smtp.gmail.com
       SMTP_PORT: 587
       SMTP_USER: ${SMTP_USER}
@@ -105,5 +94,6 @@ services:
 
 volumes:
   pgdata:
+  redisdata:
   caddy_data:
   caddy_config:
