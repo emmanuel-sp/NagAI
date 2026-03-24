@@ -139,6 +139,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 DESIGN.md
+TODO.md
 
 env/*
 env/

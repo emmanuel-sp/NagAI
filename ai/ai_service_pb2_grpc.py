@@ -49,6 +49,11 @@ class AiServiceStub(object):
                 request_serializer=ai__service__pb2.FullChecklistRequest.SerializeToString,
                 response_deserializer=ai__service__pb2.FullChecklistResponse.FromString,
                 _registered_method=True)
+        self.GenerateDailyChecklist = channel.unary_unary(
+                '/nagai.ai.AiService/GenerateDailyChecklist',
+                request_serializer=ai__service__pb2.DailyChecklistRequest.SerializeToString,
+                response_deserializer=ai__service__pb2.DailyChecklistResponse.FromString,
+                _registered_method=True)
 
 
 class AiServiceServicer(object):
@@ -72,6 +77,12 @@ class AiServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GenerateDailyChecklist(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AiServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -89,6 +100,11 @@ def add_AiServiceServicer_to_server(servicer, server):
                     servicer.GenerateFullChecklist,
                     request_deserializer=ai__service__pb2.FullChecklistRequest.FromString,
                     response_serializer=ai__service__pb2.FullChecklistResponse.SerializeToString,
+            ),
+            'GenerateDailyChecklist': grpc.unary_unary_rpc_method_handler(
+                    servicer.GenerateDailyChecklist,
+                    request_deserializer=ai__service__pb2.DailyChecklistRequest.FromString,
+                    response_serializer=ai__service__pb2.DailyChecklistResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -172,6 +188,33 @@ class AiService(object):
             '/nagai.ai.AiService/GenerateFullChecklist',
             ai__service__pb2.FullChecklistRequest.SerializeToString,
             ai__service__pb2.FullChecklistResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GenerateDailyChecklist(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/nagai.ai.AiService/GenerateDailyChecklist',
+            ai__service__pb2.DailyChecklistRequest.SerializeToString,
+            ai__service__pb2.DailyChecklistResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -1,0 +1,555 @@
+/* ─── Card (matches .checklist in checklist.module.css) ─── */
+.card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+/* ─── Card Header (matches .checklistHeader) ─── */
+.cardHeader {
+  background: var(--surface);
+  padding: 20px 24px 18px;
+}
+
+.cardHeaderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.cardTitleActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.settingsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.settingsButton:hover {
+  color: var(--text-secondary);
+  background: var(--surface-hover);
+  border-color: var(--border);
+}
+
+.collapseIcon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.collapseIconCollapsed {
+  transform: rotate(-90deg);
+}
+
+/* ─── Progress (matches .checklistProgress) ─── */
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressText {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Loading body ─── */
+.loadingBody {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: var(--radius-full);
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.spinnerSmall {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Error banner ─── */
+.errorBanner {
+  padding: 12px 24px;
+  font-size: var(--fs-xs);
+  color: #ef9a9a;
+  background: rgba(198, 40, 40, 0.08);
+  border-bottom: 1px solid rgba(198, 40, 40, 0.15);
+  line-height: 1.5;
+}
+
+/* ─── Empty body ─── */
+.emptyBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.emptyText {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-weight: var(--fw-300);
+  max-width: 380px;
+}
+
+.generateButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+
+.generateButton:hover:not(:disabled) {
+  background: var(--accent-dark);
+}
+
+.generateButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Items list (matches .checklistItems) ─── */
+.itemsList {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Individual item (matches .checklistItem) ─── */
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 24px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background var(--transition-fast);
+  position: relative;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item:hover {
+  background: var(--surface);
+}
+
+.itemCompleted {
+  opacity: 0.55;
+}
+
+/* ─── Checkbox (matches .itemCheckbox) ─── */
+.itemCheckbox {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  transition: color var(--transition-fast), transform 120ms ease;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.itemCheckbox:hover {
+  color: var(--accent);
+  transform: scale(1.08);
+}
+
+.checkboxChecked {
+  color: var(--accent);
+}
+
+.checkboxUnchecked {
+  color: var(--text-light);
+}
+
+/* ─── Item Content (matches .itemContent) ─── */
+.itemContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.itemTitle {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-400);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.itemCompleted .itemTitle {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.itemNotes {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-weight: var(--fw-300);
+}
+
+.itemMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ─── Time Badge ─── */
+.timeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-500);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+}
+
+/* ─── Goal Pill ─── */
+.goalPill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: var(--fw-500);
+  color: var(--text-light);
+  background: rgba(252, 252, 255, 0.05);
+  border: 1px solid var(--border);
+  padding: 1px 8px;
+  border-radius: 100px;
+}
+
+/* ─── Item Actions (matches .itemActions) ─── */
+.itemActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.item:hover .itemActions {
+  opacity: 1;
+}
+
+.itemActionDelete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.itemActionDelete:hover {
+  color: var(--error);
+  background: var(--error-light);
+  border-color: var(--error-border);
+}
+
+/* ─── Config Panel (inside card body) ─── */
+.configPanel {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--surface);
+}
+
+.configFooter {
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.configSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.configLabel {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.configHint {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.configInput {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-size: var(--fs-sm);
+  width: 100%;
+  transition: border-color var(--transition-fast);
+}
+
+.configInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.configInput[type="number"] {
+  width: 72px;
+}
+
+/* ─── Recurring Anchors (chip + inline input) ─── */
+.anchorWrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  min-height: 40px;
+  cursor: text;
+  transition: border-color var(--transition-fast);
+}
+
+.anchorWrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.anchorChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: var(--text-primary);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  padding: 3px 8px 3px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.anchorChipRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 1px;
+  border-radius: var(--radius-full);
+  transition: color var(--transition-fast);
+}
+
+.anchorChipRemove:hover {
+  color: var(--error);
+}
+
+.anchorInput {
+  flex: 1;
+  min-width: 120px;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  padding: 2px 0;
+}
+
+.anchorInput::placeholder {
+  color: var(--text-light);
+}
+
+/* ─── Goal Pills (toggle chips) ─── */
+.goalPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.goalPillToggle {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.goalPillToggle:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+}
+
+.goalPillToggleActive {
+  color: var(--accent);
+  background: var(--accent-lighter);
+  border-color: var(--accent-border);
+}
+
+.goalPillToggleActive:hover {
+  background: var(--accent-light);
+}
+
+/* ─── Save Button ─── */
+.saveButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 48px;
+  background: var(--accent);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--accent-dark);
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 600px) {
+  .item .itemActions {
+    opacity: 1;
+  }
+
+  .cardHeader {
+    padding: 16px 18px 14px;
+  }
+
+  .item {
+    padding: 13px 18px;
+  }
+
+  .emptyBody {
+    padding: 24px 18px;
+  }
+
+  .configPanel {
+    padding: 14px 18px;
+  }
+}

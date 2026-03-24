@@ -7,9 +7,10 @@ option java_outer_classname = "AiServiceProto";
 option java_multiple_files = true;
 
 service AiService {
-  rpc SuggestSmartField     (SmartFieldRequest)    returns (SmartFieldResponse);
-  rpc GenerateChecklistItem (ChecklistItemRequest) returns (ChecklistItemResponse);
-  rpc GenerateFullChecklist (FullChecklistRequest) returns (FullChecklistResponse);
+  rpc SuggestSmartField      (SmartFieldRequest)       returns (SmartFieldResponse);
+  rpc GenerateChecklistItem  (ChecklistItemRequest)    returns (ChecklistItemResponse);
+  rpc GenerateFullChecklist  (FullChecklistRequest)    returns (FullChecklistResponse);
+  rpc GenerateDailyChecklist (DailyChecklistRequest)   returns (DailyChecklistResponse);
 }
 
 // --- SuggestSmartField ---
@@ -63,4 +64,36 @@ message ChecklistItem {
 
 message FullChecklistResponse {
   repeated ChecklistItem items = 1;
+}
+
+// --- GenerateDailyChecklist ---
+
+message DailyChecklistCandidate {
+  string label              = 1;  // "[G5-23]" — encodes goalId-checklistId
+  string title              = 2;
+  string notes              = 3;
+  bool   completed          = 4;
+  string goal_title         = 5;
+  string goal_smart_context = 6;  // SMART field breakdown for richer context
+}
+
+message DailyChecklistRequest {
+  repeated DailyChecklistCandidate candidates = 1;  // goal checklist items as labeled candidates
+  repeated string recurring_items             = 2;  // user-defined recurring anchors
+  int32  max_items                            = 3;
+  string current_time                         = 4;  // "14:30" in user's timezone
+  string user_profile                         = 5;
+  string day_of_week                          = 6;  // "Monday"
+  string plan_date                            = 7;  // "2026-03-23"
+}
+
+message DailyChecklistItemSuggestion {
+  string label          = 1;  // "[G5-23]", "[R]", or "[NEW]"
+  string title          = 2;
+  string notes          = 3;
+  string scheduled_time = 4;  // "09:00"
+}
+
+message DailyChecklistResponse {
+  repeated DailyChecklistItemSuggestion items = 1;
 }

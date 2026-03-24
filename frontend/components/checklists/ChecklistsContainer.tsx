@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Checklist as ChecklistType } from "@/types/checklist";
+import { Goal } from "@/types/goal";
 import Checklist from "./Checklist";
+import DailyChecklistContainer from "./DailyChecklistContainer";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { IoListOutline } from "@/components/icons";
 import { parseUtcDate } from "@/lib/dates";
+import { fetchGoals } from "@/services/goalService";
 import {
   fetchChecklists,
   createChecklistItem,
@@ -24,6 +27,7 @@ import styles from "./checklist.module.css";
 export default function ChecklistsContainer() {
   const { loading: authLoading } = useAuth({ requireAuth: true });
   const [checklists, setChecklists] = useState<ChecklistType[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
@@ -39,8 +43,12 @@ export default function ChecklistsContainer() {
     try {
       setIsLoading(true);
       setLoadError(null);
-      const data = await fetchChecklists();
+      const [data, goalsData] = await Promise.all([
+        fetchChecklists(),
+        fetchGoals(),
+      ]);
       setChecklists(data);
+      setGoals(goalsData);
     } catch (error) {
       console.error("Failed to load checklists:", error);
       setLoadError("Failed to load checklists. Please refresh the page.");
@@ -245,8 +253,11 @@ export default function ChecklistsContainer() {
       <div className={styles.checklistsContainer}>
         {loadError && <div className={styles.loadError}>{loadError}</div>}
 
-        {/* Filter buttons */}
-        <div className={styles.pageHeader}>
+        {/* Daily plan card — always at top */}
+        <DailyChecklistContainer goals={goals} />
+
+        {/* Goal checklist filters */}
+        <div className={styles.filterRow}>
           <div className={styles.filterButtons}>
             {(["all", "active", "completed"] as const).map((f) => (
               <button

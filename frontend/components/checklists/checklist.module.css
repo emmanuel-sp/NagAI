@@ -32,6 +32,13 @@
   gap: 24px;
 }
 
+/* ─── Filter Row (centered between daily card and goal checklists) ─── */
+.filterRow {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-sm);
+}
+
 .headerTitle {
   font-family: var(--font-display);
   font-size: clamp(40px, 5vw, 72px);
@@ -265,8 +272,8 @@
   align-items: flex-start;
   gap: 5px;
   font-size: var(--fs-xs);
-  color: var(--text-muted);
-  line-height: 1.45;
+  color: var(--text-secondary);
+  line-height: 1.5;
   font-weight: var(--fw-300);
 }
 

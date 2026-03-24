@@ -18,6 +18,9 @@ import com.nagai.backend.exceptions.AgentContextNotFoundException;
 import com.nagai.backend.exceptions.AgentException;
 import com.nagai.backend.exceptions.AiServiceException;
 import com.nagai.backend.exceptions.ChecklistException;
+import com.nagai.backend.exceptions.DailyChecklistAlreadyExistsException;
+import com.nagai.backend.exceptions.DailyChecklistException;
+import com.nagai.backend.exceptions.DailyChecklistItemNotFoundException;
 import com.nagai.backend.exceptions.ChecklistLimitException;
 import com.nagai.backend.exceptions.ChecklistNotFoundException;
 import com.nagai.backend.exceptions.DigestAlreadyExistsException;
@@ -140,6 +143,23 @@ public class GlobalExceptionHandler {
         }
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
         detail.setProperty("description", "An agent-related error occurred");
+        return detail;
+    }
+
+    @ExceptionHandler(DailyChecklistException.class)
+    public ProblemDetail handleDailyChecklistException(DailyChecklistException exception) {
+        if (exception instanceof DailyChecklistItemNotFoundException) {
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+            detail.setProperty("description", "The requested daily checklist item does not exist");
+            return detail;
+        }
+        if (exception instanceof DailyChecklistAlreadyExistsException) {
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+            detail.setProperty("description", "A daily checklist already exists for today");
+            return detail;
+        }
+        ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+        detail.setProperty("description", "A daily checklist error occurred");
         return detail;
     }
 

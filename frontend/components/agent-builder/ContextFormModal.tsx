@@ -141,18 +141,25 @@ export default function ContextFormModal(props: ContextFormModalProps) {
 
             <div className={styles.formSection}>
               <label className={styles.formLabel}>Goal</label>
-              <select
-                value={goalId}
-                onChange={(e) => setGoalId(e.target.value)}
-                className={styles.formSelect}
-              >
-                <option value="">Select a goal...</option>
-                {goals.map((goal) => (
-                  <option key={goal.goalId} value={goal.goalId}>
-                    {goal.title}
-                  </option>
-                ))}
-              </select>
+              <div className={styles.goalPills}>
+                {goals.length > 0 ? (
+                  goals.map((goal) => {
+                    const selected = goalId === String(goal.goalId);
+                    return (
+                      <button
+                        key={goal.goalId}
+                        type="button"
+                        className={`${styles.goalPill} ${selected ? styles.goalPillActive : ""}`}
+                        onClick={() => setGoalId(selected ? "" : String(goal.goalId))}
+                      >
+                        {goal.title}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <span className={styles.radioDescription}>No goals created yet</span>
+                )}
+              </div>
             </div>
 
             <div className={styles.formSection}>

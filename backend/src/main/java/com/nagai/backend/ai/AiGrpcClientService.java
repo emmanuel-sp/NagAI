@@ -3,6 +3,9 @@ package com.nagai.backend.ai;
 import com.nagai.ai.AiServiceGrpc;
 import com.nagai.ai.ChecklistItemRequest;
 import com.nagai.ai.ChecklistItemResponse;
+import com.nagai.ai.DailyChecklistCandidate;
+import com.nagai.ai.DailyChecklistRequest;
+import com.nagai.ai.DailyChecklistResponse;
 import com.nagai.ai.FullChecklistRequest;
 import com.nagai.ai.FullChecklistResponse;
 import com.nagai.ai.SmartFieldRequest;
@@ -112,6 +115,27 @@ public class AiGrpcClientService {
                     .setUserProfile(userProfile)
                     .addAllCompletedItems(completedItems)
                     .setGoalSmartContext(goalSmartContext)
+                    .build());
+        } catch (StatusRuntimeException e) {
+            if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
+            log.error("gRPC call failed: {}", e.getStatus().getDescription());
+            throw new AiServiceException("AI service unavailable: " + e.getStatus().getDescription(), e);
+        }
+    }
+
+    public DailyChecklistResponse generateDailyChecklist(
+            List<DailyChecklistCandidate> candidates, List<String> recurringItems,
+            int maxItems, String currentTime, String userProfile,
+            String dayOfWeek, String planDate) {
+        try {
+            return stubWithCorrelation().generateDailyChecklist(DailyChecklistRequest.newBuilder()
+                    .addAllCandidates(candidates)
+                    .addAllRecurringItems(recurringItems)
+                    .setMaxItems(maxItems)
+                    .setCurrentTime(currentTime)
+                    .setUserProfile(userProfile)
+                    .setDayOfWeek(dayOfWeek)
+                    .setPlanDate(planDate)
                     .build());
         } catch (StatusRuntimeException e) {
             if (grpcErrorsCounter != null) grpcErrorsCounter.increment();

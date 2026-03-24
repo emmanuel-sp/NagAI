@@ -89,6 +89,44 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
             context.set_details("Internal service error")
             return ai_service_pb2.FullChecklistResponse()
 
+    def GenerateDailyChecklist(self, request, context):
+        try:
+            candidates = [
+                {
+                    "label": c.label,
+                    "title": c.title,
+                    "notes": c.notes,
+                    "completed": c.completed,
+                    "goal_title": c.goal_title,
+                    "goal_smart_context": c.goal_smart_context,
+                }
+                for c in request.candidates
+            ]
+            items = ai_handlers.generate_daily_checklist(
+                candidates,
+                list(request.recurring_items),
+                request.max_items,
+                request.current_time,
+                request.user_profile,
+                request.day_of_week,
+                request.plan_date,
+            )
+            pb_items = [
+                ai_service_pb2.DailyChecklistItemSuggestion(
+                    label=i["label"],
+                    title=i["title"],
+                    notes=i.get("notes", ""),
+                    scheduled_time=i.get("scheduled_time", ""),
+                )
+                for i in items
+            ]
+            return ai_service_pb2.DailyChecklistResponse(items=pb_items)
+        except Exception as e:
+            logger.error(f"GenerateDailyChecklist error: {e}", exc_info=True)
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details("Internal service error")
+            return ai_service_pb2.DailyChecklistResponse()
+
 
 def serve():
     port = os.environ.get("GRPC_PORT", "9090")
