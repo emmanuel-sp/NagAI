@@ -35,7 +35,7 @@ export default function ContextCard({
               <button onClick={onEdit} className={styles.iconButton} title="Edit context">
                 <IoPencil size={18} />
               </button>
-              <button onClick={onDelete} className={styles.iconButtonDanger} title="Delete context">
+              <button onClick={onDelete} className={`${styles.iconButton} ${styles.iconButtonDanger}`} title="Delete context">
                 <IoTrash size={18} />
               </button>
             </div>

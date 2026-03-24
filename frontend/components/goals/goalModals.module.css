@@ -1,36 +1,53 @@
-/* ─── Goal Modals ─── */
+/* ─── Side Panel Overlay ─── */
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(80, 65, 50, 0.25);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: rgba(80, 65, 50, 0.2);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 200;
-  padding: 40px 24px;
-  overflow-y: auto;
   animation: fadeIn 0.2s ease;
 }
 
+/* ─── Panel ─── */
 .modalContent {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 500px;
+  max-width: 100%;
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 680px;
-  box-shadow: var(--shadow-2xl);
-  animation: scaleIn 0.2s ease both;
-  overflow: hidden;
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 201;
+  animation: slideInFromRight 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* Form wraps header/body/footer — must participate in flex layout */
+.modalContent form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* ─── Header ─── */
 .modalHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 24px 24px 0;
+  padding: 24px 28px 20px;
   gap: 16px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
 }
 
 .modalTitle {
@@ -70,14 +87,17 @@
   background: var(--surface);
 }
 
-/* ─── Body ─── */
+/* ─── Scrollable Body ─── */
 .modalBody {
-  padding: 20px 24px;
+  padding: 24px 28px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-height: 60vh;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .formSection {
@@ -104,6 +124,29 @@
   font-weight: var(--fw-300);
 }
 
+.smartToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  gap: 8px;
+}
+
+.smartToggleIcon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.smartToggleIconOpen {
+  transform: rotate(180deg);
+}
+
 /* ─── Form Fields ─── */
 .fieldGroup {
   display: flex;
@@ -123,10 +166,10 @@
 .formError {
   background: var(--error-light);
   border: 1px solid var(--error-border);
-  border-top: none;
-  padding: 10px 20px;
+  padding: 10px 28px;
   color: var(--error);
   font-size: var(--fs-sm);
+  flex-shrink: 0;
 }
 
 .deleteError {
@@ -252,14 +295,16 @@
 
 .useSuggestionButton:hover { background: var(--surface); }
 
-/* ─── Footer ─── */
+/* ─── Footer (pinned bottom) ─── */
 .modalFooter {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  padding: 16px 24px;
+  padding: 16px 28px;
   background: var(--surface);
+  border-top: 1px solid var(--border-light);
+  flex-shrink: 0;
 }
 
 .deleteButton {
@@ -327,3 +372,25 @@
 .createButton:disabled,
 .saveButton:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
+/* ─── Mobile ─── */
+@media (max-width: 600px) {
+  .modalContent {
+    width: 100%;
+  }
+
+  .modalHeader {
+    padding: 20px 20px 16px;
+  }
+
+  .modalBody {
+    padding: 20px;
+  }
+
+  .modalFooter {
+    padding: 14px 20px;
+  }
+
+  .formError {
+    padding: 10px 20px;
+  }
+}

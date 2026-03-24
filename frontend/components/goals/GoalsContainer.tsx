@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Goal, GoalWithDetails } from "@/types/goal";
 import GoalsList from "@/components/goals/GoalsList";
 import GoalFormModal from "@/components/goals/GoalFormModal";
+import GoalViewModal from "@/components/goals/GoalViewModal";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Toast from "@/components/common/Toast";
@@ -27,6 +28,7 @@ export default function GoalsContainer() {
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<GoalWithDetails | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -60,11 +62,21 @@ export default function GoalsContainer() {
     try {
       const goal = await fetchGoalById(goalId);
       setSelectedGoal(goal);
-      setIsEditModalOpen(true);
+      setIsViewModalOpen(true);
     } catch (error) {
       console.error("Failed to fetch goal details:", error);
       setLoadError("Failed to open goal. Please try again.");
     }
+  };
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedGoal(null);
+  };
+
+  const handleViewToEdit = () => {
+    setIsViewModalOpen(false);
+    setIsEditModalOpen(true);
   };
 
   const handleCloseAddModal = () => {
@@ -150,6 +162,16 @@ export default function GoalsContainer() {
         onClose={handleCloseAddModal}
         onSubmit={handleCreateGoal}
       />
+
+      {selectedGoal && (
+        <GoalViewModal
+          isOpen={isViewModalOpen}
+          goal={selectedGoal}
+          checklist={checklists.find((c) => c.goalId === selectedGoal.goalId)}
+          onClose={handleCloseViewModal}
+          onEdit={handleViewToEdit}
+        />
+      )}
 
       {selectedGoal && (
         <GoalFormModal

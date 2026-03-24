@@ -1,0 +1,310 @@
+/* ─── View Panel Overlay ─── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(80, 65, 50, 0.2);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ─── Panel ─── */
+.modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 520px;
+  max-width: 100%;
+  background: var(--bg-elevated);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 201;
+  animation: slideInFromRight 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* ─── Header ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.targetBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--accent);
+  background: var(--accent-lighter);
+  border: 1px solid var(--accent-border);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.createdDate {
+  font-size: var(--fs-2xs);
+  color: var(--text-light);
+  font-weight: var(--fw-400);
+  white-space: nowrap;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
+/* ─── Scrollable Body ─── */
+.body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─── Title & Description ─── */
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+
+.description {
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-weight: var(--fw-300);
+}
+
+/* ─── Progress ─── */
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.progressLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-700);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.progressCount {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+}
+
+.progressTrack {
+  height: 6px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nextItemText {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  font-weight: var(--fw-400);
+  font-family: var(--font-body);
+  line-height: 1.4;
+}
+
+/* ─── Generic Section (steps taken) ─── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-700);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sectionText {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-weight: var(--fw-300);
+  white-space: pre-wrap;
+}
+
+/* ─── SMART Framework ─── */
+.smartSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.smartHeading {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-700);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.smartGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.smartCard {
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.smartCardLabel {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.smartCardText {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  font-weight: var(--fw-300);
+  white-space: pre-wrap;
+}
+
+/* ─── Footer ─── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px 28px;
+  background: var(--surface);
+  border-top: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.editButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-600);
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform 80ms ease;
+  letter-spacing: 0.005em;
+}
+
+.editButton:hover {
+  background: var(--accent-dark);
+}
+
+.editButton:active {
+  transform: scale(0.97);
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 600px) {
+  .modal {
+    width: 100%;
+  }
+
+  .header {
+    padding: 18px 20px;
+  }
+
+  .body {
+    padding: 24px 20px;
+  }
+
+  .footer {
+    padding: 14px 20px;
+  }
+
+  .headerLeft {
+    gap: 8px;
+  }
+}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./goalModals.module.css";
 import { GoalWithDetails } from "@/types/goal";
-import { IoClose, IoTrash } from "@/components/icons";
+import { IoClose, IoTrash, IoChevronDown } from "@/components/icons";
 import { useModal } from "@/contexts/ModalContext";
 import { useSmartGoalForm, SmartField } from "@/hooks/useSmartGoalForm";
 import SmartFieldGroup from "@/components/goals/SmartFieldGroup";
@@ -45,6 +45,7 @@ export default function GoalFormModal(props: GoalFormModalProps) {
   const { isOpen, onClose, mode } = props;
   const { fields, setField, resetFields, loadingSuggestion, suggestions, suggestionError, generateSuggestion, useSuggestion } =
     useSmartGoalForm();
+  const [smartOpen, setSmartOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -68,6 +69,7 @@ export default function GoalFormModal(props: GoalFormModalProps) {
   useEffect(() => {
     if (!isOpen) {
       resetFields();
+      setSmartOpen(false);
       return;
     }
     if (mode === "edit") {
@@ -83,6 +85,8 @@ export default function GoalFormModal(props: GoalFormModalProps) {
         timely: goal.timely || "",
         stepsTaken: goal.stepsTaken || "",
       });
+      const hasSmartContent = !!(goal.specific || goal.measurable || goal.attainable || goal.relevant || goal.timely);
+      setSmartOpen(hasSmartContent);
     }
   }, [isOpen]);
 
@@ -221,26 +225,41 @@ export default function GoalFormModal(props: GoalFormModalProps) {
             </div>
 
             <div className={styles.formSection}>
-              <span className={styles.sectionTitle}>SMART Goals Framework</span>
+              <button
+                type="button"
+                className={styles.smartToggle}
+                onClick={() => setSmartOpen((o) => !o)}
+              >
+                <span className={styles.sectionTitle}>SMART Goals Framework</span>
+                <span className={`${styles.smartToggleIcon} ${smartOpen ? styles.smartToggleIconOpen : ""}`}>
+                  <IoChevronDown size={16} />
+                </span>
+              </button>
               <p className={styles.sectionDescription}>
-                Use AI to help {isCreate ? "you create" : "refine your"} specific, measurable, attainable, relevant, and timely goals
+                {smartOpen
+                  ? `Use AI to help ${isCreate ? "you create" : "refine your"} specific, measurable, attainable, relevant, and timely goals`
+                  : "Optional — expand to define SMART criteria with AI assistance"}
               </p>
 
-              {suggestionError && <p className={styles.deleteError}>{suggestionError}</p>}
+              {smartOpen && (
+                <>
+                  {suggestionError && <p className={styles.deleteError}>{suggestionError}</p>}
 
-              {SMART_FIELDS.map((field) => (
-                <SmartFieldGroup
-                  key={field}
-                  field={field}
-                  value={fields[field]}
-                  onChange={(v) => setField(field, v)}
-                  suggestion={suggestions[field]}
-                  isLoading={loadingSuggestion === field}
-                  disabled={!fields.title.trim()}
-                  onGenerateSuggestion={() => generateSuggestion(field)}
-                  onUseSuggestion={() => useSuggestion(field)}
-                />
-              ))}
+                  {SMART_FIELDS.map((field) => (
+                    <SmartFieldGroup
+                      key={field}
+                      field={field}
+                      value={fields[field]}
+                      onChange={(v) => setField(field, v)}
+                      suggestion={suggestions[field]}
+                      isLoading={loadingSuggestion === field}
+                      disabled={!fields.title.trim()}
+                      onGenerateSuggestion={() => generateSuggestion(field)}
+                      onUseSuggestion={() => useSuggestion(field)}
+                    />
+                  ))}
+                </>
+              )}
             </div>
           </div>
 

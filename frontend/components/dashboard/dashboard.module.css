@@ -216,6 +216,10 @@
 
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
+  .dashboardContent {
+    gap: var(--space-xl);
+  }
+
   .goalCardsGrid {
     grid-template-columns: 1fr;
   }
@@ -226,6 +230,22 @@
 }
 
 @media (max-width: 600px) {
+  .dashboardContent {
+    gap: var(--space-lg);
+  }
+
+  .header {
+    padding-bottom: var(--space-sm);
+  }
+
+  .greeting {
+    font-size: clamp(26px, 7vw, 36px);
+  }
+
+  .dateLine {
+    margin-bottom: 8px;
+  }
+
   .goalCard {
     padding: 16px;
   }
