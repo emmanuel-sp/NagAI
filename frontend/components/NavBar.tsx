@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { getCurrentUser } from "@/services/authService";
 import { useModal } from "@/contexts/ModalContext";
 import styles from "./NavBar.module.css";
 import { IoMenuOutline, IoCloseOutline, IoHome, IoPerson } from "@/components/icons";
@@ -16,7 +15,10 @@ export default function NavBar() {
   const { modalOpen } = useModal();
 
   useEffect(() => {
-    getCurrentUser().then((user) => setIsLoggedIn(!!user));
+    // Use localStorage token presence — avoids redundant API calls on every
+    // route change and prevents navbar flickering when backend is unreachable.
+    const hasToken = !!localStorage.getItem("authToken");
+    setIsLoggedIn(hasToken);
   }, [pathname]);
 
   useEffect(() => {

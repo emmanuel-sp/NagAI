@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import NavBar from "@/components/NavBar";
 import ConditionalFooter from "@/components/ConditionalFooter";
-import { getCurrentUser } from "@/services/authService";
 import { ModalProvider } from "@/contexts/ModalContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import styles from "./PagePane.module.css";
@@ -18,11 +17,11 @@ export default function LayoutClient({
   const [showNavbar, setShowNavbar] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Synchronous localStorage check first — eliminates the layout flash
+    // Use localStorage token presence for navbar visibility.
+    // Page-level useAuth handles actual validation and redirects on expired tokens.
+    // This avoids redundant API calls and prevents layout thrashing on backend failures.
     const hasToken = !!localStorage.getItem("authToken");
     setShowNavbar(hasToken);
-    // Then validate with the API in case the token is expired
-    getCurrentUser().then((user) => setShowNavbar(!!user));
   }, [pathname]);
 
   // Landing page and onboarding never get pane wrapper or navbar padding

@@ -36,13 +36,15 @@ export async function getCurrentUser(): Promise<User | null> {
   try {
     return await apiRequest<User>("/users/me");
   } catch (error) {
-    // Only invalidate the stored token on auth failures — not on 5xx or network errors
     if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+      // Genuine auth failure — clear stale token
       if (typeof window !== "undefined") {
         localStorage.removeItem("authToken");
       }
+      return null;
     }
-    return null;
+    // Server/network error — rethrow so callers can distinguish from "not authenticated"
+    throw error;
   }
 }
 

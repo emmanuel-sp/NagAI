@@ -22,6 +22,7 @@ function getBrowserTimezone(): string {
 export function useAuth(options: UseAuthOptions = {}) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [backendError, setBackendError] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -37,35 +38,43 @@ export function useAuth(options: UseAuthOptions = {}) {
     }
 
     const checkAuth = async () => {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-      setLoading(false);
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+        setBackendError(false);
+        setLoading(false);
 
-      if (options.requireAuth && !currentUser) {
-        router.push("/login");
-      }
-
-      if (options.redirectIfAuth && currentUser) {
-        router.replace("/home");
-      }
-
-      // Onboarding gate: redirect un-onboarded users to /onboarding
-      if (options.requireAuth && currentUser && !currentUser.onboardingCompleted && pathname !== "/onboarding") {
-        router.replace("/onboarding");
-      }
-
-      // Auto-sync browser timezone to backend (once per session)
-      if (currentUser && !timezoneSynced) {
-        timezoneSynced = true;
-        const browserTz = getBrowserTimezone();
-        if (browserTz && browserTz !== currentUser.timezone) {
-          updateUserProfile({ ...currentUser, timezone: browserTz }).catch(() => {});
+        if (options.requireAuth && !currentUser) {
+          router.push("/login");
         }
+
+        if (options.redirectIfAuth && currentUser) {
+          router.replace("/home");
+        }
+
+        // Onboarding gate: redirect un-onboarded users to /onboarding
+        if (options.requireAuth && currentUser && !currentUser.onboardingCompleted && pathname !== "/onboarding") {
+          router.replace("/onboarding");
+        }
+
+        // Auto-sync browser timezone to backend (once per session)
+        if (currentUser && !timezoneSynced) {
+          timezoneSynced = true;
+          const browserTz = getBrowserTimezone();
+          if (browserTz && browserTz !== currentUser.timezone) {
+            updateUserProfile({ ...currentUser, timezone: browserTz }).catch(() => {});
+          }
+        }
+      } catch {
+        // Server/network error — do NOT redirect to login.
+        // The user likely still has a valid session; the backend is just unreachable.
+        setBackendError(true);
+        setLoading(false);
       }
     };
 
     checkAuth();
   }, [options.requireAuth, options.redirectIfAuth, router, pathname]);
 
-  return { user, loading };
+  return { user, loading, backendError };
 }
