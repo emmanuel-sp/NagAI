@@ -32,6 +32,10 @@ export default function ChecklistsContainer() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
   const [generatingGoalId, setGeneratingGoalId] = useState<number | null>(null);
+  const [linkedToggle, setLinkedToggle] = useState<{
+    checklistId: number;
+    completed: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -91,14 +95,16 @@ export default function ChecklistsContainer() {
         prev.map((c) =>
           c.goalId === goalId
             ? {
-                ...c,
-                items: c.items.map((i) =>
-                  i.checklistId === checklistId ? updated : i
-                ),
-              }
+              ...c,
+              items: c.items.map((i) =>
+                i.checklistId === checklistId ? updated : i
+              ),
+            }
             : c
         )
       );
+      // Mirror to daily plan locally
+      setLinkedToggle({ checklistId, completed: updated.completed });
     } catch (error) {
       console.error("Failed to toggle item:", error);
     }
@@ -126,11 +132,11 @@ export default function ChecklistsContainer() {
         prev.map((c) =>
           c.goalId === goalId
             ? {
-                ...c,
-                items: c.items.map((i) =>
-                  i.checklistId === checklistId ? updated : i
-                ),
-              }
+              ...c,
+              items: c.items.map((i) =>
+                i.checklistId === checklistId ? updated : i
+              ),
+            }
             : c
         )
       );
@@ -146,9 +152,9 @@ export default function ChecklistsContainer() {
         prev.map((c) =>
           c.goalId === goalId
             ? {
-                ...c,
-                items: c.items.filter((i) => i.checklistId !== checklistId),
-              }
+              ...c,
+              items: c.items.filter((i) => i.checklistId !== checklistId),
+            }
             : c
         )
       );
@@ -254,7 +260,22 @@ export default function ChecklistsContainer() {
         {loadError && <div className={styles.loadError}>{loadError}</div>}
 
         {/* Daily plan card — always at top */}
-        <DailyChecklistContainer goals={goals} />
+        <DailyChecklistContainer
+          goals={goals}
+          linkedToggle={linkedToggle}
+          onLinkedItemToggled={(parentChecklistId, completed) => {
+            setChecklists((prev) =>
+              prev.map((c) => ({
+                ...c,
+                items: c.items.map((i) =>
+                  i.checklistId === parentChecklistId
+                    ? { ...i, completed, completedAt: completed ? new Date().toISOString() : undefined }
+                    : i
+                ),
+              }))
+            );
+          }}
+        />
 
         {/* Goal checklist filters */}
         <div className={styles.filterRow}>

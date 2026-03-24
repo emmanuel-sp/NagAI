@@ -340,12 +340,14 @@ def generate_daily_checklist(
         "- Afternoon generation (12:00-17:00): skip morning routines, plan afternoon + evening + tomorrow prep.\n"
         "- Evening generation (after 17:00): wind-down + tomorrow planning only.\n"
         f"- Maximum {max_items} items. Quality over quantity — a focused day, not an overwhelming list.\n"
-        "- Use [G{id}-{id}] labels ONLY for verbatim goal items (simple, directly completable). "
-        "For breakdowns or inspired items, use [NEW].\n"
+        "- Use [G{goalId}-{checklistId}] labels ONLY for verbatim goal items (simple, directly completable). "
+        "For breakdowns or inspired items, use [NEW]. "
+        "Do NOT put the label inside the title — it goes on the label: line only.\n"
         "- Use [R] for the user's recurring anchors. Skip if too late in the day.\n"
         "- Order items chronologically by scheduled_time.\n"
         "- Reply with ONLY items in this exact format, separated by ---:\n"
-        "  {label} {title}\n"
+        "  label: [G5-23]\n"
+        "  title: Deep work session on thesis\n"
         "  scheduled_time: HH:mm\n"
         "  notes: optional brief context\n"
         "  ---"
@@ -377,7 +379,7 @@ def generate_daily_checklist(
 
 def _parse_daily_items(text: str) -> list[dict]:
     """Parse AI response into list of daily item dicts."""
-    label_pattern = re.compile(r'^\s*(\[(?:G\d+-\d+|R|NEW)\])\s*(.+)')
+    label_pattern = re.compile(r'\[(?:G\d+-\d+|R|NEW)\]')
     items = []
 
     for block in text.split("---"):
@@ -386,24 +388,24 @@ def _parse_daily_items(text: str) -> list[dict]:
             continue
 
         item = {"label": "[NEW]", "title": "", "notes": "", "scheduled_time": ""}
-        lines = block.splitlines()
 
-        for line in lines:
+        for line in block.splitlines():
             line = line.strip()
             if not line:
                 continue
 
-            label_match = label_pattern.match(line)
-            if label_match and not item["title"]:
-                item["label"] = label_match.group(1)
-                item["title"] = label_match.group(2).strip()
-            elif line.lower().startswith("scheduled_time:"):
+            low = line.lower()
+            if low.startswith("label:"):
+                raw = line.split(":", 1)[1].strip()
+                m = label_pattern.search(raw)
+                if m:
+                    item["label"] = m.group(0)
+            elif low.startswith("title:"):
+                item["title"] = line.split(":", 1)[1].strip()
+            elif low.startswith("scheduled_time:"):
                 item["scheduled_time"] = line.split(":", 1)[1].strip()
-            elif line.lower().startswith("notes:"):
+            elif low.startswith("notes:"):
                 item["notes"] = line.split(":", 1)[1].strip()
-            elif not item["title"]:
-                # Fallback: treat as title if no label found
-                item["title"] = line
 
         if item["title"]:
             items.append(item)

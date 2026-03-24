@@ -21,10 +21,14 @@ import styles from "./dailyChecklist.module.css";
 
 interface DailyChecklistContainerProps {
   goals: Goal[];
+  linkedToggle?: { checklistId: number; completed: boolean } | null;
+  onLinkedItemToggled?: (parentChecklistId: number, completed: boolean) => void;
 }
 
 export default function DailyChecklistContainer({
   goals,
+  linkedToggle,
+  onLinkedItemToggled,
 }: DailyChecklistContainerProps) {
   const [checklist, setChecklist] = useState<DailyChecklist | null>(null);
   const [config, setConfig] = useState<ConfigType | null>(null);
@@ -56,6 +60,20 @@ export default function DailyChecklistContainer({
     }
   };
 
+  // Mirror linked goal toggle into daily items locally
+  useEffect(() => {
+    if (!linkedToggle || !checklist) return;
+    const { checklistId, completed } = linkedToggle;
+    setChecklist({
+      ...checklist,
+      items: checklist.items.map((item) =>
+        item.parentChecklistId === checklistId
+          ? { ...item, completed, completedAt: completed ? new Date().toISOString() : undefined }
+          : item
+      ),
+    });
+  }, [linkedToggle]);
+
   const handleGenerate = async () => {
     setIsGenerating(true);
     setError(null);
@@ -82,6 +100,11 @@ export default function DailyChecklistContainer({
           item.dailyItemId === dailyItemId ? updated : item
         ),
       });
+      // If this daily item is linked to a goal checklist item, notify parent
+      const toggledItem = checklist.items.find((i) => i.dailyItemId === dailyItemId);
+      if (toggledItem?.parentChecklistId && onLinkedItemToggled) {
+        onLinkedItemToggled(toggledItem.parentChecklistId, updated.completed);
+      }
     } catch (err) {
       console.error("Failed to toggle item:", err);
     }
@@ -131,10 +154,10 @@ export default function DailyChecklistContainer({
 
   const dateLabel = checklist
     ? new Date(checklist.planDate + "T00:00:00").toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-      })
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    })
     : "Today";
 
   return (

@@ -6,6 +6,9 @@ import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.nagai.backend.dailychecklist.DailyChecklistItem;
+import com.nagai.backend.dailychecklist.DailyChecklistItemRepository;
+
 import com.nagai.backend.exceptions.ChecklistLimitException;
 import com.nagai.backend.exceptions.ChecklistNotFoundException;
 import com.nagai.backend.goals.Goal;
@@ -18,11 +21,14 @@ public class ChecklistService {
     private final ChecklistRepository checklistRepository;
     private final GoalService goalService;
     private final UserService userService;
+    private final DailyChecklistItemRepository dailyItemRepository;
 
-    public ChecklistService(ChecklistRepository checklistRepository, GoalService goalService, UserService userService) {
+    public ChecklistService(ChecklistRepository checklistRepository, GoalService goalService, UserService userService,
+                            DailyChecklistItemRepository dailyItemRepository) {
         this.checklistRepository = checklistRepository;
         this.goalService = goalService;
         this.userService = userService;
+        this.dailyItemRepository = dailyItemRepository;
     }
 
     public List<ChecklistResponse> fetchGoalChecklist(Long goalId) {
@@ -110,7 +116,20 @@ public class ChecklistService {
         boolean newState = !item.isCompleted();
         item.setCompleted(newState);
         item.setCompletedAt(newState ? LocalDateTime.now().toString() : null);
+        checklistRepository.save(item);
 
-        return ChecklistResponse.fromEntity(checklistRepository.save(item));
+        // Reverse sync: propagate to linked daily checklist items
+        syncLinkedDailyItems(checklistId, newState);
+
+        return ChecklistResponse.fromEntity(item);
+    }
+
+    private void syncLinkedDailyItems(Long checklistId, boolean newState) {
+        List<DailyChecklistItem> linkedItems = dailyItemRepository.findByParentChecklistId(checklistId);
+        for (DailyChecklistItem dailyItem : linkedItems) {
+            dailyItem.setCompleted(newState);
+            dailyItem.setCompletedAt(newState ? LocalDateTime.now().toString() : null);
+        }
+        dailyItemRepository.saveAll(linkedItems);
     }
 }

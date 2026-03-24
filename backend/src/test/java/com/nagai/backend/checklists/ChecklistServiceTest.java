@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.nagai.backend.dailychecklist.DailyChecklistItem;
+import com.nagai.backend.dailychecklist.DailyChecklistItemRepository;
 import com.nagai.backend.exceptions.ChecklistNotFoundException;
 import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalService;
@@ -33,6 +35,9 @@ class ChecklistServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private DailyChecklistItemRepository dailyItemRepository;
 
     @InjectMocks
     private ChecklistService checklistService;
@@ -213,5 +218,51 @@ class ChecklistServiceTest {
                 .isInstanceOf(AccessDeniedException.class);
 
         verify(checklistRepository, never()).delete(any());
+    }
+
+    @Test
+    void toggleComplete_syncsLinkedDailyItems() {
+        DailyChecklistItem dailyItem = new DailyChecklistItem();
+        dailyItem.setDailyItemId(100L);
+        dailyItem.setParentChecklistId(20L);
+        dailyItem.setCompleted(false);
+
+        when(checklistRepository.findById(20L)).thenReturn(Optional.of(item));
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(goalService.getGoal(5L)).thenReturn(goal);
+        when(checklistRepository.save(any(ChecklistItem.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(dailyItemRepository.findByParentChecklistId(20L)).thenReturn(List.of(dailyItem));
+
+        ChecklistResponse result = checklistService.toggleComplete(20L);
+
+        assertThat(result.isCompleted()).isTrue();
+        assertThat(dailyItem.isCompleted()).isTrue();
+        assertThat(dailyItem.getCompletedAt()).isNotNull();
+        verify(dailyItemRepository).saveAll(List.of(dailyItem));
+    }
+
+    @Test
+    void toggleComplete_unsyncsLinkedDailyItems() {
+        item.setCompleted(true);
+        item.setCompletedAt("2025-01-01T00:00:00");
+
+        DailyChecklistItem dailyItem = new DailyChecklistItem();
+        dailyItem.setDailyItemId(100L);
+        dailyItem.setParentChecklistId(20L);
+        dailyItem.setCompleted(true);
+        dailyItem.setCompletedAt("2025-01-01T00:00:00");
+
+        when(checklistRepository.findById(20L)).thenReturn(Optional.of(item));
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(goalService.getGoal(5L)).thenReturn(goal);
+        when(checklistRepository.save(any(ChecklistItem.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(dailyItemRepository.findByParentChecklistId(20L)).thenReturn(List.of(dailyItem));
+
+        ChecklistResponse result = checklistService.toggleComplete(20L);
+
+        assertThat(result.isCompleted()).isFalse();
+        assertThat(dailyItem.isCompleted()).isFalse();
+        assertThat(dailyItem.getCompletedAt()).isNull();
+        verify(dailyItemRepository).saveAll(List.of(dailyItem));
     }
 }
