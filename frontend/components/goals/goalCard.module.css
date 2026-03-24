@@ -55,6 +55,56 @@
   overflow: hidden;
 }
 
+/* ─── Progress ─── */
+.goalProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progressTrack {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressText {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.nextItem {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-300);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* ─── Meta ─── */
 .goalMeta {
   display: flex;

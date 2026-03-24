@@ -18,10 +18,13 @@ import {
   createGoal,
   deleteGoal,
 } from "@/services/goalService";
+import { Checklist } from "@/types/checklist";
+import { fetchChecklists } from "@/services/checklistService";
 
 export default function GoalsContainer() {
   const { loading: authLoading } = useAuth({ requireAuth: true });
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<GoalWithDetails | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -39,8 +42,12 @@ export default function GoalsContainer() {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const fetchedGoals = await fetchGoals();
+      const [fetchedGoals, fetchedChecklists] = await Promise.all([
+        fetchGoals(),
+        fetchChecklists(),
+      ]);
       setGoals(fetchedGoals);
+      setChecklists(fetchedChecklists);
     } catch (error) {
       console.error("Failed to fetch goals:", error);
       setLoadError("Failed to load goals. Please refresh the page.");
@@ -134,7 +141,7 @@ export default function GoalsContainer() {
           }
         />
       ) : (
-        <GoalsList goals={goals} onViewGoal={handleViewGoal} />
+        <GoalsList goals={goals} checklists={checklists} onViewGoal={handleViewGoal} />
       )}
 
       <GoalFormModal

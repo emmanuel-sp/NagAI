@@ -1,6 +1,3 @@
-/**
- * DashboardContainer - Main dashboard for logged-in users
- */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -15,7 +12,9 @@ import { fetchDigest } from "@/services/digestService";
 import { fetchAgent } from "@/services/agentService";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import DashboardHeader from "./DashboardHeader";
-import DashboardOverview from "./DashboardOverview";
+import DailyChecklistContainer from "@/components/checklists/DailyChecklistContainer";
+import GoalProgressCards from "./GoalProgressCards";
+import SystemStatusRow from "./SystemStatusRow";
 import styles from "./dashboard.module.css";
 
 interface DashboardContainerProps {
@@ -66,12 +65,9 @@ export default function DashboardContainer({ userProfile }: DashboardContainerPr
     <div className={styles.dashboardContainer}>
       <div className={styles.dashboardContent}>
         <DashboardHeader userName={userProfile.fullName.split(" ")[0]} />
-        <DashboardOverview
-          goals={goals}
-          checklists={checklists}
-          digest={digest}
-          agent={agent}
-        />
+        <DailyChecklistContainer goals={goals} />
+        <GoalProgressCards goals={goals} checklists={checklists} />
+        <SystemStatusRow digest={digest} agent={agent} />
       </div>
     </div>
   );

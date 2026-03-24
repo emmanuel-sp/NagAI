@@ -34,53 +34,14 @@
   animation: fadeInUp 0.4s ease both;
 }
 
-/* ─── Overview ─── */
-.overview {
+/* ─── Goal Progress Cards ─── */
+.goalCardsSection {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: 14px;
 }
 
-/* ─── Stats ─── */
-.statsRow {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.statBlock {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 28px 28px 24px;
-  background: var(--surface);
-  border-radius: 12px;
-  overflow: hidden;
-  text-decoration: none;
-  cursor: default;
-  transition: background var(--transition-base), box-shadow var(--transition-base);
-}
-
-a.statBlock {
-  cursor: pointer;
-}
-
-a.statBlock:hover {
-  background: var(--surface-hover);
-  box-shadow: var(--shadow-md);
-}
-
-.statNumber {
-  font-family: var(--font-display);
-  font-size: clamp(40px, 5vw, 64px);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.statName {
+.sectionHeading {
   font-family: var(--font-body);
   font-size: var(--fs-xs);
   font-weight: var(--fw-600);
@@ -89,136 +50,187 @@ a.statBlock:hover {
   text-transform: uppercase;
 }
 
-/* ─── Progress ─── */
-.progressSection {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-xs);
-  display: flex;
-  flex-direction: column;
+.goalCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
-.progressHeader {
+.goalCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background var(--transition-base),
+              border-color var(--transition-base),
+              box-shadow var(--transition-base),
+              transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.3s ease both;
+}
+
+.goalCard:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.goalCardTitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.goalCardProgressRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
 }
 
-.progressLabel {
-  font-family: var(--font-body);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-600);
-  color: var(--text-secondary);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.progressValue {
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-500);
-  color: var(--text-muted);
-  font-family: var(--font-body);
-}
-
-.progressTrack {
+.goalCardProgressTrack {
+  flex: 1;
   height: 4px;
-  background: var(--surface);
+  background: var(--border);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
-.progressFill {
+.goalCardProgressFill {
   height: 100%;
   background: var(--accent);
   border-radius: var(--radius-full);
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ─── Quick Links ─── */
-.quickLinks {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--bg-card);
-  box-shadow: var(--shadow-xs);
+.goalCardProgressText {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
 }
 
-.quickLink {
+.goalCardNextItem {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-300);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── CTA Card (no goals) ─── */
+.goalCardCta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 22px 28px;
-  background: transparent;
+  padding: 22px 24px;
+  background: var(--bg-card);
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
   text-decoration: none;
-  transition: background var(--transition-base);
-  gap: 16px;
-  border-bottom: 1px solid var(--border-light);
+  transition: background var(--transition-base),
+              border-color var(--transition-base);
 }
 
-.quickLink:last-child {
-  border-bottom: none;
+.goalCardCta:hover {
+  background: var(--surface-hover);
+  border-color: var(--accent-border);
 }
 
-.quickLink:hover {
-  background: var(--surface);
-}
-
-.quickLinkContent {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.quickLinkTitle {
+.goalCardCtaText {
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: -0.01em;
 }
 
-.quickLinkMeta {
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
-  font-family: var(--font-body);
-  font-weight: var(--fw-300);
-}
-
-.quickLinkArrow {
+.goalCardCtaArrow {
   font-size: 18px;
   color: var(--text-muted);
-  flex-shrink: 0;
   transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
-.quickLink:hover .quickLinkArrow {
-  color: var(--text-primary);
+.goalCardCta:hover .goalCardCtaArrow {
+  color: var(--accent);
   transform: translateX(3px);
 }
 
+/* ─── System Status Row ─── */
+.systemStatusRow {
+  display: flex;
+  gap: 12px;
+}
+
+.statusPill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background var(--transition-base),
+              border-color var(--transition-base);
+}
+
+.statusPill:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+
+.statusPillLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--text-light);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.statusPillValue {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-400);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ─── Responsive ─── */
 @media (max-width: 768px) {
-  .statsRow {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+  .goalCardsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .systemStatusRow {
+    flex-direction: column;
   }
 }
 
 @media (max-width: 600px) {
-  .statBlock {
-    padding: 20px 16px 18px;
+  .goalCard {
+    padding: 16px;
   }
 
-  .statNumber {
-    font-size: 36px;
-  }
-
-  .quickLink {
-    padding: 18px 20px;
+  .statusPill {
+    padding: 14px 16px;
   }
 }
