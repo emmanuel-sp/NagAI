@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Figtree, Raleway } from "next/font/google";
 import "./globals.css";
 import LayoutClient from "@/components/LayoutClient";
 
-const inter = Inter({
-  variable: "--font-inter",
+const figtree = Figtree({
+  variable: "--font-figtree",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
   style: ["normal", "italic"],
   display: "swap",
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const raleway = Raleway({
+  variable: "--font-raleway",
   subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  weight: ["200", "300", "400", "500"],
   display: "swap",
 });
 
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
+    <html lang="en" className={`${figtree.variable} ${raleway.variable}`}>
       <body>
         <LayoutClient>{children}</LayoutClient>
       </body>

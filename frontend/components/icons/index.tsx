@@ -50,6 +50,13 @@ export const IoMenuOutline = S(
   </>
 );
 
+export const IoSidebarPanel = S(
+  <>
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <line x1="9" y1="3" x2="9" y2="21" />
+  </>
+);
+
 export const IoCloseOutline = S(<path d="M18 6 6 18M6 6l12 12" />);
 export const IoClose = S(<path d="M18 6 6 18M6 6l12 12" />);
 export const IoAdd = S(

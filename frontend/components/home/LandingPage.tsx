@@ -3,13 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styles from "./LandingPage.module.css";
-import {
-  IoCheckmarkCircle,
-  IoFlag,
-  IoListOutline,
-  IoMail,
-  IoRocket,
-} from "@/components/icons";
+
 
 /* ─── Scroll Reveal Hook ─── */
 function useScrollReveal(threshold = 0.15) {
@@ -68,7 +62,6 @@ function LandingNav() {
 /* ─── Data ─── */
 const features: {
   id: string;
-  Icon: React.ComponentType<{ size?: number | string }>;
   label: string;
   title: string;
   description: string;
@@ -76,7 +69,6 @@ const features: {
 }[] = [
   {
     id: "goals",
-    Icon: IoFlag,
     label: "GOAL TRACKING",
     title: "Set structured goals with AI-assisted criteria",
     description:
@@ -89,7 +81,6 @@ const features: {
   },
   {
     id: "checklists",
-    Icon: IoListOutline,
     label: "SMART CHECKLISTS",
     title: "Break down goals into actionable steps",
     description:
@@ -102,7 +93,6 @@ const features: {
   },
   {
     id: "digests",
-    Icon: IoMail,
     label: "PERSONALIZED DIGESTS",
     title: "Curated content tailored to your journey",
     description:
@@ -116,7 +106,6 @@ const features: {
   },
   {
     id: "agent",
-    Icon: IoRocket,
     label: "AI AGENT BUILDER",
     title: "Your personal AI accountability partner",
     description:
@@ -130,10 +119,10 @@ const features: {
 ];
 
 const highlights = [
-  { Icon: IoFlag, text: "SMART Goals", id: "goals" },
-  { Icon: IoListOutline, text: "AI Checklists", id: "checklists" },
-  { Icon: IoMail, text: "Daily Digests", id: "digests" },
-  { Icon: IoRocket, text: "AI Agent", id: "agent" },
+  { text: "SMART Goals", id: "goals" },
+  { text: "AI Checklists", id: "checklists" },
+  { text: "Daily Digests", id: "digests" },
+  { text: "AI Agent", id: "agent" },
 ];
 
 const steps = [
@@ -274,7 +263,6 @@ export default function LandingPage() {
               className={`${styles.highlightPill} ${activeFeature === i ? styles.highlightActive : ""}`}
               onClick={() => scrollToFeature(h.id)}
             >
-              <h.Icon size={15} />
               <span>{h.text}</span>
             </button>
           ))}
@@ -302,9 +290,6 @@ export default function LandingPage() {
               .join(" ")}
           >
             <div className={styles.featureInner}>
-              <div className={styles.featureIconWrap}>
-                <feature.Icon size={32} />
-              </div>
               <span className={styles.featureEyebrow}>{feature.label}</span>
               <h2 className={styles.featureTitle}>{feature.title}</h2>
               <p className={styles.featureDescription}>
@@ -313,7 +298,6 @@ export default function LandingPage() {
               <ul className={styles.featureList}>
                 {feature.bullets.map((bullet) => (
                   <li key={bullet}>
-                    <IoCheckmarkCircle size={18} />
                     <span>{bullet}</span>
                   </li>
                 ))}

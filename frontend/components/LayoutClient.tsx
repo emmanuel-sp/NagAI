@@ -6,7 +6,7 @@ import NavBar from "@/components/NavBar";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import { ModalProvider } from "@/contexts/ModalContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import styles from "./PagePane.module.css";
+import styles from "./LayoutClient.module.css";
 
 export default function LayoutClient({
   children,
@@ -15,33 +15,29 @@ export default function LayoutClient({
 }) {
   const pathname = usePathname();
   const [showNavbar, setShowNavbar] = useState<boolean | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    // Use localStorage token presence for navbar visibility.
-    // Page-level useAuth handles actual validation and redirects on expired tokens.
-    // This avoids redundant API calls and prevents layout thrashing on backend failures.
     const hasToken = !!localStorage.getItem("authToken");
     setShowNavbar(hasToken);
   }, [pathname]);
 
-  // Landing page and onboarding never get pane wrapper or navbar padding
   const isLandingPage = pathname === "/";
   const isOnboardingPage = pathname === "/onboarding";
-  const isProfilePage = pathname === "/profile";
-  // Treat null (SSR / unknown) same as false so the landing page renders correctly
-  const paddingTop = showNavbar && !isLandingPage && !isOnboardingPage ? "112px" : "0";
-  const usePane = showNavbar === true && !isLandingPage && !isProfilePage && !isOnboardingPage;
+  const hasSidebar = showNavbar === true && !isLandingPage && !isOnboardingPage;
+
+  const mainClass = !hasSidebar
+    ? styles.main
+    : sidebarCollapsed
+      ? styles.mainCollapsed
+      : styles.mainWithSidebar;
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
       <ModalProvider>
-        <NavBar />
-        <main style={{ flex: 1, paddingTop, display: "flex", flexDirection: "column", alignItems: "stretch" }}>
-          {usePane ? (
-            <div className={styles.pane}>{children}</div>
-          ) : (
-            children
-          )}
+        <NavBar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+        <main className={mainClass}>
+          {children}
         </main>
         <ConditionalFooter />
       </ModalProvider>

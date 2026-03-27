@@ -2,7 +2,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(80, 65, 50, 0.25);
+  background: rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   z-index: 200;
@@ -42,7 +42,7 @@
 .modalTitle {
   font-family: var(--font-display);
   font-size: var(--fs-xl);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--text-primary);
 }
@@ -93,7 +93,7 @@
 
 .formLabel {
   font-size: var(--fs-xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-secondary);
   letter-spacing: 0.01em;
 }
@@ -145,7 +145,7 @@
 
 .radioLabel span:first-child {
   font-size: var(--fs-xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-primary);
 }
 
@@ -224,7 +224,7 @@
   display: inline-flex;
   align-items: center;
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-inverse);
   background: var(--accent);
   border: none;

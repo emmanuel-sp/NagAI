@@ -2,7 +2,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(80, 65, 50, 0.2);
+  background: rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   z-index: 200;
@@ -53,7 +53,7 @@
 .modalTitle {
   font-family: var(--font-display);
   font-size: var(--fs-xl);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--text-primary);
 }
@@ -109,7 +109,7 @@
 .sectionTitle {
   font-family: var(--font-body);
   font-size: var(--fs-xs);
-  font-weight: var(--fw-700);
+  font-weight: var(--fw-500);
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -156,7 +156,7 @@
 
 .fieldLabel {
   font-size: var(--fs-xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-secondary);
   letter-spacing: 0.01em;
 }
@@ -202,7 +202,7 @@
   align-items: center;
   gap: 5px;
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--accent);
   background: var(--accent-lighter);
   border: 1px solid var(--accent-border);
@@ -281,7 +281,7 @@
   display: inline-flex;
   align-items: center;
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-secondary);
   background: none;
   border: 1px solid var(--border);
@@ -352,7 +352,7 @@
   display: inline-flex;
   align-items: center;
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-inverse);
   background: var(--accent);
   border: none;

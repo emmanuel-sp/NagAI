@@ -6,7 +6,7 @@
   margin: 0 auto 16px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   padding: var(--space-xl) clamp(24px, 5%, 80px) var(--space-2xl);
@@ -17,7 +17,7 @@
   .pane {
     width: calc(100% - 24px);
     margin: 0 12px 12px;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     padding: var(--space-md) 16px var(--space-xl);
   }
 }

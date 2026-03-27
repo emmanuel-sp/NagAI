@@ -28,7 +28,7 @@
 .agentTitle {
   font-family: var(--font-display);
   font-size: var(--fs-4xl);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.03em;
   color: var(--text-primary);
   margin-bottom: 6px;
@@ -51,14 +51,13 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-2xl);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-base);
+  transition: border-color var(--transition-base);
 }
 
 .overviewCard:hover,
 .settingsCard:hover,
 .contextsSection:hover {
-  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
 }
 
 .overviewHeader,
@@ -76,7 +75,7 @@
 .cardTitle {
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--text-primary);
 }
@@ -95,7 +94,7 @@
   align-items: center;
   gap: 5px;
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   padding: 4px 10px;
   border-radius: var(--radius-full);
   letter-spacing: 0.04em;
@@ -137,7 +136,7 @@
 .statLabel {
   font-family: var(--font-body);
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -146,7 +145,7 @@
 .statValue {
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-primary);
   letter-spacing: -0.015em;
   line-height: 1.2;
@@ -158,7 +157,7 @@
   align-items: center;
   gap: 8px;
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-primary);
   background: var(--surface);
   border: 1px solid var(--border);
@@ -224,7 +223,7 @@
 
 .contextName {
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-primary);
   letter-spacing: -0.01em;
 }
@@ -233,7 +232,7 @@
   display: inline-flex;
   align-items: center;
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-700);
+  font-weight: var(--fw-500);
   color: var(--text-muted);
   background: var(--surface-hover);
   border: 1px solid var(--border);
@@ -303,7 +302,7 @@
 .detailLabel {
   font-family: var(--font-body);
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -365,7 +364,7 @@
 .emptyStateTitle {
   font-family: var(--font-display);
   font-size: var(--fs-xl);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--text-primary);
 }
@@ -416,7 +415,7 @@
 }
 
 .channelButtonActive {
-  color: var(--cream);
+  color: var(--text-inverse);
   background: var(--accent);
   border-color: var(--accent);
   box-shadow: 0 2px 10px var(--accent-shadow);
@@ -435,7 +434,7 @@
 
 .comingSoonBadge {
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--accent);
@@ -446,7 +445,7 @@
 
 .checkmark {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   color: inherit;
 }
 
@@ -494,8 +493,8 @@
   align-items: center;
   gap: 8px;
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
-  color: var(--cream);
+  font-weight: var(--fw-500);
+  color: var(--text-inverse);
   background: var(--accent);
   border: none;
   padding: 13px 28px;
@@ -527,7 +526,7 @@
   align-items: center;
   gap: 8px;
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--error);
   background: var(--error-light);
   border: 1.5px solid var(--error-border);
@@ -556,7 +555,7 @@
   width: 14px;
   height: 14px;
   border: 2px solid rgba(255, 248, 231, 0.3);
-  border-top-color: var(--cream);
+  border-top-color: var(--border);
   border-radius: var(--radius-full);
   animation: spin 0.7s linear infinite;
 }
@@ -574,7 +573,7 @@
   align-items: center;
   gap: 6px;
   font-size: var(--fs-xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-inverse);
   background: var(--accent);
   border: none;

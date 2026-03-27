@@ -2,21 +2,31 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useModal } from "@/contexts/ModalContext";
 import styles from "./NavBar.module.css";
-import { IoMenuOutline, IoCloseOutline, IoHome, IoPerson } from "@/components/icons";
+import { IoSidebarPanel } from "@/components/icons";
 
-export default function NavBar() {
+const navLinks = [
+  { href: "/home", label: "Dashboard" },
+  { href: "/goals", label: "Goals" },
+  { href: "/checklists", label: "Checklists" },
+  { href: "/digests", label: "Digests" },
+  { href: "/agent", label: "Agent" },
+];
+
+interface NavBarProps {
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+}
+
+export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const { modalOpen } = useModal();
 
   useEffect(() => {
-    // Use localStorage token presence — avoids redundant API calls on every
-    // route change and prevents navbar flickering when backend is unreachable.
     const hasToken = !!localStorage.getItem("authToken");
     setIsLoggedIn(hasToken);
   }, [pathname]);
@@ -25,55 +35,71 @@ export default function NavBar() {
     setMobileOpen(false);
   }, [pathname]);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   const active = (path: string) =>
     path === "/home" ? pathname === "/home" : pathname.startsWith(path);
+
+  const handleToggle = useCallback(() => {
+    if (window.innerWidth <= 768) {
+      setMobileOpen((v) => !v);
+    } else {
+      onToggleCollapse();
+    }
+  }, [onToggleCollapse]);
 
   if (!isLoggedIn || pathname === "/onboarding") return null;
 
   return (
-    <nav className={`${styles.navbar} ${scrolled ? styles.navbarScrolled : ""} ${modalOpen ? styles.navbarDisabled : ""}`}>
+    <>
+      {/* Backdrop (mobile only) */}
+      {mobileOpen && (
+        <div
+          className={styles.backdrop}
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <nav
+        className={`${styles.sidebar} ${mobileOpen ? styles.sidebarOpen : ""} ${collapsed ? styles.sidebarCollapsed : ""} ${modalOpen ? styles.sidebarDisabled : ""}`}
+      >
+        {/* Brand */}
+        <div className={styles.brandRow}>
+          <span className={styles.brandText}>NagAI</span>
+        </div>
+
+        {/* Nav links */}
+        <div className={styles.navLinks}>
+          {navLinks.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`${styles.navLink} ${active(href) ? styles.navLinkActive : ""}`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Spacer */}
+        <div className={styles.spacer} />
+
+        {/* Profile */}
+        <Link
+          href="/profile"
+          className={`${styles.navLink} ${styles.profileLink} ${active("/profile") ? styles.navLinkActive : ""}`}
+        >
+          Profile
+        </Link>
+      </nav>
+
+      {/* Toggle button — after nav so we can use ~ sibling selector on mobile */}
       <button
-        className={styles.mobileToggle}
-        onClick={() => setMobileOpen(!mobileOpen)}
-        aria-label="Toggle menu"
+        className={`${styles.toggleButton} ${collapsed && !mobileOpen ? styles.toggleCollapsed : ""}`}
+        onClick={handleToggle}
+        aria-label="Toggle sidebar"
       >
-        {mobileOpen ? <IoCloseOutline size={22} /> : <IoMenuOutline size={22} />}
+        <IoSidebarPanel size={18} />
       </button>
-
-      {/* Dashboard - left */}
-      <Link
-        href="/home"
-        className={`${styles.navIconLink} ${active("/home") ? styles.navLinkActive : ""}`}
-        aria-label="Home"
-        title="Home"
-      >
-        <IoHome size={18} />
-      </Link>
-
-      {/* Center links */}
-      <div className={`${styles.navCenter} ${mobileOpen ? styles.navCenterOpen : ""}`}>
-        <Link href="/goals" className={`${styles.navLink} ${active("/goals") ? styles.navLinkActive : ""}`}>Goals</Link>
-        <Link href="/checklists" className={`${styles.navLink} ${active("/checklists") ? styles.navLinkActive : ""}`}>Checklists</Link>
-        <Link href="/digests" className={`${styles.navLink} ${active("/digests") ? styles.navLinkActive : ""}`}>Digests</Link>
-        <Link href="/agent" className={`${styles.navLink} ${active("/agent") ? styles.navLinkActive : ""}`}>Agent</Link>
-      </div>
-
-      {/* Profile - right */}
-      <Link
-        href="/profile"
-        className={`${styles.navIconLink} ${styles.navIconRight} ${active("/profile") ? styles.navLinkActive : ""}`}
-        aria-label="Profile"
-        title="Profile"
-      >
-        <IoPerson size={18} />
-      </Link>
-    </nav>
+    </>
   );
 }

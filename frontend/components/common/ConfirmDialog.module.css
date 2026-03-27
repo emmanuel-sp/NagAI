@@ -34,7 +34,7 @@
 .title {
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--text-primary);
 }
@@ -97,7 +97,7 @@
   display: inline-flex;
   align-items: center;
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-inverse);
   background: var(--accent);
   border: none;
@@ -115,7 +115,7 @@
   display: inline-flex;
   align-items: center;
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: #fff;
   background: var(--error, #c0392b);
   border: none;

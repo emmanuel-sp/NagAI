@@ -5,29 +5,29 @@
 .dashboardContent {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xl);
+  gap: var(--space-xl);
 }
 
 /* ─── Header ─── */
 .header {
-  padding-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
 }
 
 .dateLine {
   display: block;
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-600);
-  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-500);
+  color: var(--accent);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-family: var(--font-body);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .greeting {
   font-family: var(--font-display);
-  font-size: clamp(32px, 5vw, 60px);
-  font-weight: 450;
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 500;
   letter-spacing: -0.04em;
   color: var(--text-primary);
   line-height: 1.0;
@@ -43,9 +43,9 @@
 
 .sectionHeading {
   font-family: var(--font-body);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-600);
-  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -53,7 +53,7 @@
 .goalCardsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 14px;
 }
 
 .goalCard {
@@ -63,26 +63,21 @@
   padding: 20px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   text-decoration: none;
-  transition: background var(--transition-base),
-              border-color var(--transition-base),
-              box-shadow var(--transition-base),
+  transition: border-color var(--transition-base),
               transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
   animation: fadeInUp 0.3s ease both;
 }
 
 .goalCard:hover {
-  background: var(--surface-hover);
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
 }
 
 .goalCardTitle {
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--text-primary);
   line-height: 1.25;
@@ -115,8 +110,8 @@
 
 .goalCardProgressText {
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-600);
-  color: var(--text-muted);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
   font-family: var(--font-body);
   white-space: nowrap;
   letter-spacing: 0.04em;
@@ -124,7 +119,7 @@
 
 .goalCardNextItem {
   font-size: var(--fs-xs);
-  font-weight: var(--fw-300);
+  font-weight: var(--fw-400);
   color: var(--text-muted);
   font-family: var(--font-body);
   line-height: 1.4;
@@ -142,7 +137,7 @@
   padding: 22px 24px;
   background: var(--bg-card);
   border: 1px dashed var(--border-strong);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   text-decoration: none;
   transition: background var(--transition-base),
               border-color var(--transition-base);
@@ -156,7 +151,7 @@
 .goalCardCtaText {
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-secondary);
   letter-spacing: -0.01em;
 }
@@ -175,7 +170,7 @@
 /* ─── System Status Row ─── */
 .systemStatusRow {
   display: flex;
-  gap: 12px;
+  gap: 14px;
 }
 
 .statusPill {
@@ -186,22 +181,20 @@
   padding: 16px 20px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   text-decoration: none;
-  transition: background var(--transition-base),
-              border-color var(--transition-base);
+  transition: border-color var(--transition-base);
 }
 
 .statusPill:hover {
-  background: var(--surface-hover);
   border-color: var(--border-strong);
 }
 
 .statusPillLabel {
   font-family: var(--font-body);
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-600);
-  color: var(--text-light);
+  font-weight: var(--fw-500);
+  color: var(--text-muted);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -209,15 +202,15 @@
 .statusPillValue {
   font-family: var(--font-body);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-400);
-  color: var(--text-secondary);
+  font-weight: var(--fw-500);
+  color: var(--text-primary);
   line-height: 1.4;
 }
 
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   .dashboardContent {
-    gap: var(--space-xl);
+    gap: var(--space-lg);
   }
 
   .goalCardsGrid {
@@ -231,19 +224,19 @@
 
 @media (max-width: 600px) {
   .dashboardContent {
-    gap: var(--space-lg);
+    gap: var(--space-md);
   }
 
   .header {
-    padding-bottom: var(--space-sm);
+    padding-bottom: var(--space-xs);
   }
 
   .greeting {
-    font-size: clamp(26px, 7vw, 36px);
+    font-size: clamp(24px, 7vw, 34px);
   }
 
   .dateLine {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .goalCard {

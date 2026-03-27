@@ -27,7 +27,7 @@
   align-items: center;
   gap: 7px;
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: var(--text-inverse);
   background: var(--accent);
   border: none;
@@ -58,7 +58,7 @@
 
 /* ─── Toast link ─── */
 .toastLink {
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   text-decoration: underline;
   text-underline-offset: 2px;
   color: inherit;

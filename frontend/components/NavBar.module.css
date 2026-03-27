@@ -1,194 +1,176 @@
-.navbar {
+/* ─── Sidebar ─── */
+.sidebar {
   position: fixed;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
   z-index: 100;
-  height: 48px;
-  background: transparent;
-  display: grid;
-  grid-template-columns: 36px 1fr 36px;
-  align-items: center;
-  padding: 0 12px;
-  width: clamp(500px, 60vw, 720px);
-  transition: background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  background: #f7f7f7;
+  padding: 24px 16px 20px;
+  overflow-y: auto;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.navbarScrolled {
-  background: rgba(245, 238, 230, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-lg);
-  padding: 0 16px;
+.sidebarCollapsed {
+  width: 0;
+  padding: 24px 0 20px;
+  overflow: hidden;
 }
 
-.navbarDisabled {
+.sidebarDisabled {
   pointer-events: none;
   opacity: 0.5;
 }
 
-@media (max-width: 768px) {
-  .navbarDisabled {
-    opacity: 0;
-    visibility: hidden;
-  }
+/* ─── Brand Row ─── */
+.brandRow {
+  display: flex;
+  align-items: center;
+  padding: 0 8px 28px;
+  white-space: nowrap;
 }
 
-.navCenter {
+.brandText {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-500);
+  color: var(--accent);
+  letter-spacing: -0.03em;
+}
+
+/* ─── Toggle Button — single button, desktop + mobile ─── */
+.toggleButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  position: fixed;
+  top: 28px;
+  left: calc(var(--sidebar-width) - 46px);
+  z-index: 110;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast),
+              border-color var(--transition-fast), left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* When sidebar is collapsed on desktop, move toggle to far left */
+.toggleCollapsed {
+  left: 14px;
+}
+
+.toggleButton:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.06);
+  border-color: var(--border);
+}
+
+/* ─── Nav Links ─── */
+.navLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .navLink {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-400);
-  color: var(--text-muted);
-  padding: 8px 14px;
-  border-radius: var(--radius-full);
-  transition: color var(--transition-base), background var(--transition-base);
-  letter-spacing: 0.02em;
-  background: none;
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast), background var(--transition-fast);
   white-space: nowrap;
 }
 
 .navLink:hover {
   color: var(--text-primary);
-  background: var(--surface);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .navLinkActive {
-  color: var(--text-primary);
-  font-weight: var(--fw-600);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
+  color: var(--accent);
+  background: var(--accent-lighter);
+  font-weight: var(--fw-500);
 }
 
-.navIconLink {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-full);
-  color: var(--text-muted);
-  transition: color var(--transition-base), background var(--transition-base);
-  flex-shrink: 0;
+.navLinkActive:hover {
+  color: var(--accent);
+  background: var(--accent-light);
 }
 
-.navIconLink:hover {
-  color: var(--text-primary);
-  background: var(--surface);
+/* ─── Profile Link — floating, no hairline ─── */
+.profileLink {
+  margin-top: 8px;
 }
 
-.navIconLink.navLinkActive {
-  color: var(--text-primary);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
+/* ─── Spacer ─── */
+.spacer {
+  flex: 1;
 }
 
-.navIconRight {
-  justify-self: end;
-}
-
-.mobileToggle {
+/* ─── Backdrop ─── */
+.backdrop {
   display: none;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.mobileToggle:hover {
-  background: var(--surface);
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
 }
 
 /* ─── Mobile ─── */
 @media (max-width: 768px) {
-  .navbar {
-    top: 0;
-    left: 0;
-    right: 0;
-    transform: none;
-    width: 100%;
-    padding: 0 16px;
-    height: 56px;
-    background: rgba(245, 238, 230, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border-light);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+    z-index: 101;
   }
 
-  .navbarScrolled {
-    background: rgba(245, 238, 230, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: none;
-    border-bottom: 1px solid var(--border);
-    border-radius: 0;
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+  .sidebarOpen {
+    transform: translateX(0);
+    box-shadow: var(--shadow-xl);
   }
 
-  .mobileToggle {
-    display: flex;
-    order: -1;
+  .sidebarCollapsed {
+    width: var(--sidebar-width);
+    padding: 24px 16px 20px;
+    overflow-y: auto;
   }
 
-  .navIconLink {
+  /* On mobile: button sits at a fixed spot when sidebar is closed,
+     slides to sidebar edge when open */
+  .toggleButton {
+    left: 14px;
+    top: 18px;
     width: 36px;
     height: 36px;
+    background: var(--bg-page);
+    border: 1px solid transparent;
+    color: var(--text-primary);
   }
 
-  .navIconRight {
-    margin-left: auto;
+  /* When mobile sidebar is open, reposition toggle to sidebar's top-right */
+  .sidebarOpen ~ .toggleButton {
+    left: calc(var(--sidebar-width) - 50px);
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-muted);
   }
 
-  .navCenter {
-    display: none;
-    position: fixed;
-    top: 56px;
-    left: 0;
-    right: 0;
-    height: auto;
-    background: var(--bg-elevated);
-    padding: 8px 12px 12px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 2px;
-    border-bottom: 1px solid var(--border);
-    border-radius: 0 0 16px 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-    animation: fadeInDown 0.15s ease;
-    z-index: 99;
-  }
-
-  .navCenterOpen {
-    display: flex;
-  }
-
-  .navLink {
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: var(--radius-lg);
-    font-size: var(--fs-base);
-  }
-
-  .navLinkActive {
-    background: var(--surface);
-    border: 1px solid var(--border);
+  .backdrop {
+    display: block;
   }
 }

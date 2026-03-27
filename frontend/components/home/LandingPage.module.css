@@ -30,27 +30,20 @@
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-full);
-  box-shadow:
-    0 1px 3px rgba(80, 65, 50, 0.06),
-    0 4px 16px rgba(80, 65, 50, 0.04);
   transition:
     background var(--transition-base),
-    border-color var(--transition-base),
-    box-shadow var(--transition-base);
+    border-color var(--transition-base);
 }
 
 .landingNavScrolled {
   background: rgba(255, 255, 255, 0.88);
   border-color: var(--border);
-  box-shadow:
-    0 2px 8px rgba(80, 65, 50, 0.08),
-    0 8px 24px rgba(80, 65, 50, 0.06);
 }
 
 .logoLink {
   font-family: var(--font-display);
   font-size: var(--fs-base);
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: -0.03em;
   color: var(--text-primary);
   transition: color var(--transition-fast);
@@ -86,7 +79,7 @@
 .navSignup {
   font-family: var(--font-body);
   font-size: var(--fs-xs);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: #fff;
   background: var(--accent);
   padding: 7px 18px;
@@ -99,7 +92,7 @@
 
 .navSignup:hover {
   background: var(--accent-dark);
-  box-shadow: 0 2px 8px rgba(158, 96, 90, 0.25);
+  box-shadow: 0 2px 8px rgba(138, 59, 70, 0.25);
 }
 
 .navSignup:active {
@@ -174,13 +167,13 @@
 
 @keyframes ringPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(158, 96, 90, 0.35);
+    box-shadow: 0 0 0 0 rgba(138, 59, 70, 0.35);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(158, 96, 90, 0);
+    box-shadow: 0 0 0 10px rgba(138, 59, 70, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(158, 96, 90, 0);
+    box-shadow: 0 0 0 0 rgba(138, 59, 70, 0);
   }
 }
 
@@ -204,8 +197,8 @@
   height: 500px;
   background: radial-gradient(
     ellipse at center,
-    rgba(158, 96, 90, 0.10) 0%,
-    rgba(158, 96, 90, 0.04) 40%,
+    rgba(138, 59, 70, 0.10) 0%,
+    rgba(138, 59, 70, 0.04) 40%,
     transparent 70%
   );
   border-radius: 50%;
@@ -280,7 +273,7 @@
   align-items: center;
   font-family: var(--font-body);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: #fff;
   background: var(--accent);
   padding: 14px 32px;
@@ -319,7 +312,7 @@
 
 .primaryCta:hover {
   background: var(--accent-dark);
-  box-shadow: 0 4px 24px rgba(158, 96, 90, 0.2);
+  box-shadow: 0 4px 24px rgba(138, 59, 70, 0.2);
 }
 
 .primaryCta:active {
@@ -390,18 +383,11 @@
   cursor: pointer;
   outline: none;
   pointer-events: auto;
-  box-shadow: 0 2px 8px rgba(80, 65, 50, 0.06);
   transition:
     border-color var(--transition-fast),
     background var(--transition-fast),
     color var(--transition-fast),
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-.highlightPill svg {
-  color: var(--accent);
-  flex-shrink: 0;
+    transform var(--transition-fast);
 }
 
 .highlightPill:hover {
@@ -409,7 +395,6 @@
   background: var(--accent-lighter);
   color: var(--text-primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(158, 96, 90, 0.08);
 }
 
 /* Active pill — matches current section in view */
@@ -417,10 +402,6 @@
   border-color: var(--accent-border);
   background: var(--accent-lighter);
   color: var(--text-primary);
-}
-
-.highlightActive svg {
-  color: var(--accent-dark);
 }
 
 /* ─── Feature Sections ─── */
@@ -439,7 +420,7 @@
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(158, 96, 90, 0.02) 50%,
+    rgba(138, 59, 70, 0.02) 50%,
     transparent 100%
   );
 }
@@ -451,8 +432,8 @@
   inset: 0;
   background: radial-gradient(
     ellipse 70% 60% at 50% 50%,
-    rgba(158, 96, 90, 0.05) 0%,
-    rgba(158, 96, 90, 0.02) 40%,
+    rgba(138, 59, 70, 0.05) 0%,
+    rgba(138, 59, 70, 0.02) 40%,
     transparent 75%
   );
   pointer-events: none;
@@ -486,31 +467,10 @@
   opacity: 0.55;
 }
 
-/* ─── Feature Icon ─── */
-.featureIconWrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-xl);
-  background: var(--accent-lighter);
-  color: var(--accent);
-  margin-bottom: 8px;
-  transition:
-    transform var(--transition-base),
-    box-shadow var(--transition-base);
-}
-
-.featureActive .featureIconWrap {
-  transform: scale(1.1);
-  box-shadow: 0 0 0 8px rgba(158, 96, 90, 0.08);
-}
-
 .featureEyebrow {
   font-family: var(--font-display);
   font-size: var(--fs-2xs);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
@@ -519,7 +479,7 @@
 .featureTitle {
   font-family: var(--font-display);
   font-size: clamp(28px, 3.5vw, 40px);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.025em;
   color: var(--text-primary);
   line-height: 1.15;
@@ -552,10 +512,14 @@
   text-align: left;
 }
 
-.featureList li svg {
-  color: var(--accent);
+.featureList li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 9px;
 }
 
 /* ─── How It Works ─── */
@@ -582,7 +546,7 @@
 .sectionHeadline {
   font-family: var(--font-display);
   font-size: clamp(36px, 4.5vw, 56px);
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: -0.03em;
   color: var(--text-primary);
 }
@@ -609,17 +573,12 @@
   gap: 14px;
   transition:
     border-color var(--transition-fast),
-    transform var(--transition-base),
-    box-shadow var(--transition-base);
-  box-shadow: var(--shadow-xs);
+    transform var(--transition-base);
 }
 
 .stepCard:hover {
   border-color: var(--accent-border);
   transform: translateY(-4px);
-  box-shadow:
-    var(--shadow-md),
-    0 0 0 1px var(--accent-border);
 }
 
 .stepNumber {
@@ -633,14 +592,14 @@
   color: var(--accent);
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  font-weight: 800;
+  font-weight: 500;
   flex-shrink: 0;
 }
 
 .stepTitle {
   font-family: var(--font-display);
   font-size: var(--fs-lg);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--text-primary);
 }
@@ -664,7 +623,7 @@
   background: linear-gradient(
     135deg,
     var(--surface) 0%,
-    rgba(158, 96, 90, 0.06) 100%
+    rgba(138, 59, 70, 0.06) 100%
   );
   border: 1.5px solid var(--border);
   border-radius: var(--radius-2xl);
@@ -690,7 +649,7 @@
   height: 120%;
   background: radial-gradient(
     ellipse at center,
-    rgba(158, 96, 90, 0.06) 0%,
+    rgba(138, 59, 70, 0.06) 0%,
     transparent 60%
   );
   pointer-events: none;
@@ -720,7 +679,7 @@
 .ctaHeadline {
   font-family: var(--font-display);
   font-size: clamp(32px, 4vw, 48px);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.025em;
   color: var(--text-primary);
   line-height: 1.15;
@@ -741,7 +700,7 @@
   align-items: center;
   justify-content: center;
   font-size: var(--fs-sm);
-  font-weight: var(--fw-600);
+  font-weight: var(--fw-500);
   color: #fff;
   background: var(--accent);
   padding: 14px 32px;
@@ -757,7 +716,7 @@
 
 .ctaButton:hover {
   background: var(--accent-dark);
-  box-shadow: 0 4px 24px rgba(158, 96, 90, 0.2);
+  box-shadow: 0 4px 24px rgba(138, 59, 70, 0.2);
 }
 
 .ctaButton:active {
