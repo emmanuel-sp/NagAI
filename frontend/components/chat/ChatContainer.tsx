@@ -13,7 +13,6 @@ import {
   fetchContextSummary,
 } from "@/services/chatService";
 import SessionDropdown from "./SessionDropdown";
-import ContextPicker from "./ContextPicker";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import PresetPrompts from "./PresetPrompts";
@@ -23,7 +22,7 @@ import styles from "./chat.module.css";
 export default function ChatContainer() {
   const { user, loading: authLoading } = useAuth({ requireAuth: true });
   const searchParams = useSearchParams();
-  const { agent } = useAgentData();
+  const { agent, goals } = useAgentData();
 
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
@@ -31,8 +30,9 @@ export default function ChatContainer() {
   const [sending, setSending] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(true);
 
-  // Selected context for chat
+  // Selected context / goal for chat
   const [selectedContextId, setSelectedContextId] = useState<number | null>(null);
+  const [selectedGoalId, setSelectedGoalId] = useState<number | null>(null);
   const contextSummaryCache = useRef<Map<number, string>>(new Map());
 
   // fromContext: stored from email link, attached to first message only
@@ -112,6 +112,10 @@ export default function ChatContainer() {
     }
   }, []);
 
+  const handleSelectGoal = useCallback((goalId: number | null) => {
+    setSelectedGoalId(goalId);
+  }, []);
+
   const handleSend = useCallback(
     async (text: string) => {
       if (!text.trim() || sending) return;
@@ -134,6 +138,14 @@ export default function ChatContainer() {
         // If a context is selected and no fromContext, attach the cached summary
         if (!contextSummary && selectedContextId) {
           contextSummary = contextSummaryCache.current.get(selectedContextId);
+        }
+
+        // If a goal is selected, build a context string from the goal
+        if (!contextSummary && selectedGoalId) {
+          const goal = goals.find((g) => g.goalId === selectedGoalId);
+          if (goal) {
+            contextSummary = `The user wants to discuss their goal: "${goal.title}" — ${goal.description}`;
+          }
         }
 
         const response = await sendMessage({
@@ -173,7 +185,7 @@ export default function ChatContainer() {
         setSending(false);
       }
     },
-    [activeSessionId, sending, selectedContextId]
+    [activeSessionId, sending, selectedContextId, selectedGoalId, goals]
   );
 
   const handleNewChat = useCallback(() => {
@@ -218,9 +230,20 @@ export default function ChatContainer() {
 
   const contexts = agent?.contexts ?? [];
 
+  const chatInputProps = {
+    onSend: handleSend,
+    disabled: sending,
+    contexts,
+    goals,
+    selectedContextId,
+    selectedGoalId,
+    onSelectContext: handleSelectContext,
+    onSelectGoal: handleSelectGoal,
+  };
+
   return (
-    <div className={styles.chatScroll}>
-      <div className={styles.chatPage}>
+    <div className={`${styles.chatScroll} ${!hasMessages && !sending ? styles.chatScrollEmpty : ""}`}>
+      <div className={`${styles.chatPage} ${!hasMessages && !sending ? styles.chatPageEmpty : ""}`}>
         <div className={styles.topBar}>
           <div className={styles.topBarLeft}>
             <SessionDropdown
@@ -232,13 +255,6 @@ export default function ChatContainer() {
             />
           </div>
           <div className={styles.topBarRight}>
-            {contexts.length > 0 && (
-              <ContextPicker
-                contexts={contexts}
-                selectedContextId={selectedContextId}
-                onSelect={handleSelectContext}
-              />
-            )}
             <button className={styles.newChatButton} onClick={handleNewChat}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <path d="M12 5v14M5 12h14" />
@@ -249,17 +265,21 @@ export default function ChatContainer() {
         </div>
 
         {hasMessages || sending ? (
-          <MessageList
-            messages={messages}
-            sending={sending}
-            messagesEndRef={messagesEndRef}
-            userInitials={initials}
-          />
+          <>
+            <MessageList
+              messages={messages}
+              sending={sending}
+              messagesEndRef={messagesEndRef}
+              userInitials={initials}
+            />
+            <ChatInput {...chatInputProps} />
+          </>
         ) : (
-          <PresetPrompts onSelect={handleSend} />
+          <div className={styles.emptyCentered}>
+            <PresetPrompts onSelect={handleSend} />
+            <ChatInput {...chatInputProps} centered />
+          </div>
         )}
-
-        <ChatInput onSend={handleSend} disabled={sending} />
       </div>
     </div>
   );

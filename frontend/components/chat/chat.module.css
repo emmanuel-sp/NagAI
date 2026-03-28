@@ -7,6 +7,10 @@
   scrollbar-color: var(--border-strong) transparent;
 }
 
+.chatScrollEmpty {
+  overflow: hidden;
+}
+
 .chatScroll::-webkit-scrollbar {
   width: 6px;
 }
@@ -28,6 +32,23 @@
   max-width: 1060px;
   margin: 0 auto;
   padding: 0 var(--space-xl);
+}
+
+.chatPageEmpty {
+  height: calc(100vh - 32px);
+  overflow: hidden;
+}
+
+/* ─── Empty Centered Layout ─── */
+
+.emptyCentered {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding: 0 0 var(--space-xl);
 }
 
 /* ─── Top Bar ─── */
@@ -220,7 +241,7 @@
 
 .messagesArea {
   flex: 1;
-  padding: var(--space-lg) 0 var(--space-md);
+  padding: var(--space-lg) 0 calc(var(--space-md) + 20px);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -417,14 +438,12 @@
 /* ─── Empty State / Preset Prompts ─── */
 
 .emptyState {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: var(--space-lg);
-  padding: var(--space-xl) 0;
   position: relative;
+  width: 100%;
 }
 
 .emptyGlow {
@@ -525,27 +544,43 @@
 /* ─── Chat Input ─── */
 
 .inputArea {
-  padding: 4px 0 8px;
   flex-shrink: 0;
   position: sticky;
   bottom: 0;
   z-index: 10;
-  background: var(--bg-page);
+  padding: 36px 0 14px;
+  background: linear-gradient(to bottom, transparent 0%, var(--bg-page) 36px);
+  pointer-events: none;
+}
+
+.inputAreaCentered {
+  position: relative;
+  padding: var(--space-lg) 0 0;
+  background: none;
+  width: 100%;
+  max-width: 680px;
+}
+
+.inputWrapper {
+  position: relative;
+  pointer-events: all;
 }
 
 .inputPill {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  border-radius: 24px;
+  border-radius: 28px;
   background: var(--bg-elevated);
-  padding: 6px 6px 6px 16px;
+  padding: 8px 8px 8px 6px;
   border: 1px solid var(--border);
-  transition: border-color 0.2s ease-in-out, border-radius 0.15s ease;
+  transition: border-color 0.2s ease-in-out, border-radius 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02);
 }
 
 .inputPill:focus-within {
   border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 .inputPrimary {
@@ -562,13 +597,13 @@
   resize: none;
   background: transparent;
   font-family: var(--font-body);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
   color: var(--text-primary);
-  line-height: 1.45;
+  line-height: 1.5;
   min-height: unset;
-  max-height: 120px;
-  height: 30px;
-  padding: 5px 0;
+  max-height: 140px;
+  height: 36px;
+  padding: 8px 0;
   overflow-y: hidden;
 }
 
@@ -584,7 +619,7 @@
 .inputTrailing {
   display: flex;
   align-items: center;
-  height: 30px;
+  height: 36px;
   flex-shrink: 0;
 }
 
@@ -592,8 +627,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border: none;
   border-radius: 50%;
   background: var(--accent);
@@ -614,11 +649,182 @@
 }
 
 .sendIcon {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
 }
 
-/* ─── Context Picker ─── */
+/* ─── Plus Button & Attachment Menu ─── */
+
+.inputLeading {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.plusButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.plusButton:hover {
+  color: var(--text-primary);
+  background: var(--surface);
+}
+
+.plusButtonOpen {
+  color: var(--accent);
+  transform: rotate(45deg);
+}
+
+.plusButtonOpen:hover {
+  color: var(--accent);
+}
+
+.plusIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.plusMenu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 240px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 60;
+  animation: plusMenuIn 0.15s ease;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+@keyframes plusMenuIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.plusMenuSection {
+  padding: 6px 0;
+}
+
+.plusMenuSection + .plusMenuSection {
+  border-top: 1px solid var(--border);
+}
+
+.plusMenuLabel {
+  padding: 6px 14px 4px;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-500);
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-body);
+}
+
+.plusMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+}
+
+.plusMenuItem:hover {
+  background: var(--surface);
+}
+
+.plusMenuItemActive {
+  color: var(--accent);
+}
+
+.plusMenuItemIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+}
+
+.plusMenuItemActive .plusMenuItemIcon {
+  opacity: 0.8;
+}
+
+.plusMenuItemName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.plusMenuItemCheck {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+}
+
+/* ─── Attachment Chip ─── */
+
+.attachmentChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-2xs);
+  font-family: var(--font-body);
+  color: var(--accent);
+  font-weight: var(--fw-500);
+  margin-bottom: 4px;
+  animation: presetFadeIn 0.2s ease both;
+}
+
+.attachmentChipRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.attachmentChipRemove:hover {
+  opacity: 1;
+}
+
+/* ─── Context Picker (legacy — kept for reference) ─── */
 
 .contextPicker {
   position: relative;
@@ -755,5 +961,9 @@
 
   .emptyTitle {
     font-size: clamp(24px, 5vw, 36px);
+  }
+
+  .plusMenu {
+    width: 200px;
   }
 }

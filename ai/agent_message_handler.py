@@ -22,7 +22,7 @@ SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
 BACKEND_BASE_URL = os.environ.get("BACKEND_BASE_URL", "http://localhost:8080")
 BACKEND_INTERNAL_URL = os.environ.get("BACKEND_INTERNAL_URL", "http://localhost:8080")
-FRONTEND_BASE_URL = os.environ.get("FRONTEND_BASE_URL", "http://localhost:3000")
+APP_BASE_URL = os.environ.get("APP_BASE_URL", "http://localhost:3000")
 INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "")
 
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
@@ -78,7 +78,7 @@ def handle_agent_message(value: str):
     in_reply_to = previous_message_ids[-1] if previous_message_ids else None
 
     unsubscribe_url = f"{BACKEND_BASE_URL}/agent/unsubscribe?token={unsubscribe_token}" if unsubscribe_token else ""
-    chat_url = f"{FRONTEND_BASE_URL}/chat?fromContext={context_id}" if context_id else ""
+    chat_url = f"{APP_BASE_URL}/chat?fromContext={context_id}" if context_id else ""
     html = _render_agent_email(body, agent_name, user_name, unsubscribe_url, chat_url)
 
     try:

@@ -1,4 +1,5 @@
 import os
+import time
 import uuid
 import logging
 from dotenv import load_dotenv
@@ -18,6 +19,9 @@ STREAMS = ["digest-delivery", "agent-messages"]
 GROUP = "nagai-ai-consumer"
 CONSUMER = "worker-1"
 
+MAX_RETRIES = 10
+INITIAL_BACKOFF = 2  # seconds
+
 
 def dispatch(stream: str, key: str, value: str):
     """Route a Redis stream message to the appropriate handler."""
@@ -29,16 +33,24 @@ def dispatch(stream: str, key: str, value: str):
         agent_message_handler.handle_agent_message(value)
 
 
-def consume():
-    redis_host = os.environ.get("REDIS_HOST", "localhost")
-    redis_port = int(os.environ.get("REDIS_PORT", "6379"))
-    logger.info(f"Connecting to Redis at {redis_host}:{redis_port}...")
+def connect_with_retry(redis_host: str, redis_port: int) -> redis.Redis:
+    """Connect to Redis with exponential backoff."""
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            r = redis.Redis(host=redis_host, port=redis_port, decode_responses=False)
+            r.ping()
+            logger.info("Redis connection established")
+            return r
+        except (redis.exceptions.ConnectionError, OSError) as e:
+            if attempt == MAX_RETRIES:
+                raise
+            backoff = min(INITIAL_BACKOFF * (2 ** (attempt - 1)), 30)
+            logger.warning(f"Redis not reachable (attempt {attempt}/{MAX_RETRIES}): {e} — retrying in {backoff}s")
+            time.sleep(backoff)
 
-    r = redis.Redis(host=redis_host, port=redis_port, decode_responses=False)
-    r.ping()
-    logger.info("Redis connection established")
 
-    # Create consumer groups (idempotent — ignores BUSYGROUP if already exists)
+def ensure_consumer_groups(r: redis.Redis):
+    """Create consumer groups (idempotent — ignores BUSYGROUP if already exists)."""
     for stream in STREAMS:
         try:
             r.xgroup_create(stream, GROUP, id="0", mkstream=True)
@@ -49,16 +61,38 @@ def consume():
             else:
                 raise
 
+
+def consume():
+    redis_host = os.environ.get("REDIS_HOST", "localhost")
+    redis_port = int(os.environ.get("REDIS_PORT", "6379"))
+    logger.info(f"Connecting to Redis at {redis_host}:{redis_port}...")
+
+    r = connect_with_retry(redis_host, redis_port)
+    ensure_consumer_groups(r)
+
     logger.info(f"Redis consumer listening on streams: {STREAMS} — waiting for messages...")
     try:
         while True:
-            results = r.xreadgroup(
-                groupname=GROUP,
-                consumername=CONSUMER,
-                streams={s: ">" for s in STREAMS},
-                count=1,
-                block=1000,
-            )
+            try:
+                results = r.xreadgroup(
+                    groupname=GROUP,
+                    consumername=CONSUMER,
+                    streams={s: ">" for s in STREAMS},
+                    count=1,
+                    block=1000,
+                )
+            except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as e:
+                logger.warning(f"Redis connection lost: {e} — reconnecting...")
+                r.close()
+                r = connect_with_retry(redis_host, redis_port)
+                ensure_consumer_groups(r)
+                continue
+            except redis.exceptions.ResponseError as e:
+                if "NOGROUP" in str(e):
+                    logger.warning(f"Consumer group missing: {e} — re-creating...")
+                    ensure_consumer_groups(r)
+                    continue
+                raise
 
             for stream_name, messages in results:
                 for msg_id, fields in messages:
