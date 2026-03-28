@@ -141,6 +141,24 @@ public class ChatService {
         chatSessionRepository.delete(session);
     }
 
+    public AgentMessageResponse getAgentMessage(Long sentMessageId) {
+        User user = userService.getCurrentUser();
+        SentAgentMessage msg = sentAgentMessageRepository.findById(sentMessageId).orElse(null);
+        if (msg == null || !msg.getUserId().equals(user.getUserId())) return null;
+
+        // Get context name for display
+        String contextName = "";
+        AgentContext context = agentContextRepository.findById(msg.getContextId()).orElse(null);
+        if (context != null) contextName = context.getName();
+
+        return new AgentMessageResponse(
+                msg.getSentMessageId(), msg.getSubject(), msg.getContent(),
+                contextName, msg.getSentAt() != null ? msg.getSentAt().toString() : "");
+    }
+
+    public record AgentMessageResponse(Long sentMessageId, String subject, String content,
+                                        String contextName, String sentAt) {}
+
     public String getContextSummary(Long contextId) {
         User user = userService.getCurrentUser();
         AgentContext context = agentContextRepository.findById(contextId).orElse(null);

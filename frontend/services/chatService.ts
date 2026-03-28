@@ -1,5 +1,6 @@
 import { apiRequest } from "@/lib/api";
 import {
+  AgentMessageDetail,
   ChatMessage,
   ChatSession,
   SendMessageRequest,
@@ -29,6 +30,14 @@ export async function fetchSessionMessages(
 
 export async function deleteSession(sessionId: number): Promise<void> {
   await apiRequest(`/chat/sessions/${sessionId}`, { method: "DELETE" });
+}
+
+export async function fetchAgentMessage(
+  sentMessageId: number
+): Promise<AgentMessageDetail> {
+  return await apiRequest<AgentMessageDetail>(
+    `/chat/agent-message/${sentMessageId}`
+  );
 }
 
 export async function fetchContextSummary(

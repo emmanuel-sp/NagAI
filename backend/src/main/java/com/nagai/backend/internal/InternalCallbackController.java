@@ -1,5 +1,7 @@
 package com.nagai.backend.internal;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -45,16 +47,16 @@ public class InternalCallbackController {
     }
 
     @PostMapping("/sent-agent-messages")
-    public ResponseEntity<Void> saveSentAgentMessage(@Valid @RequestBody SentAgentMessageRequest request) {
+    public ResponseEntity<Map<String, Long>> saveSentAgentMessage(@Valid @RequestBody SentAgentMessageRequest request) {
         SentAgentMessage entity = new SentAgentMessage();
         entity.setContextId(request.contextId());
         entity.setUserId(request.userId());
         entity.setSubject(request.subject());
         entity.setContent(request.content());
         entity.setEmailMessageId(request.emailMessageId());
-        sentAgentMessageRepository.save(entity);
-        log.info("Saved sent agent message for context={} user={}", request.contextId(), request.userId());
-        return ResponseEntity.ok().build();
+        entity = sentAgentMessageRepository.save(entity);
+        log.info("Saved sent agent message id={} for context={} user={}", entity.getSentMessageId(), request.contextId(), request.userId());
+        return ResponseEntity.ok(Map.of("sentMessageId", entity.getSentMessageId()));
     }
 
     record SentDigestRequest(

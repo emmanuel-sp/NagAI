@@ -24,6 +24,9 @@ public class DailyChecklistItem {
     @Column(name = "parent_checklist_id")
     private Long parentChecklistId;
 
+    @Column(name = "parent_goal_id")
+    private Long parentGoalId;
+
     @Column(name = "sort_order")
     private int sortOrder;
 

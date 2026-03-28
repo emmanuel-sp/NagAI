@@ -13,12 +13,11 @@ public record DailyChecklistItemResponse(
         String completedAt) {
 
     public static DailyChecklistItemResponse fromEntity(DailyChecklistItem item,
-                                                         Long parentGoalId,
                                                          String parentGoalTitle) {
         return new DailyChecklistItemResponse(
                 item.getDailyItemId(),
                 item.getParentChecklistId(),
-                parentGoalId,
+                item.getParentGoalId(),
                 parentGoalTitle,
                 item.getSortOrder(),
                 item.getTitle(),

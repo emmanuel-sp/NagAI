@@ -89,7 +89,7 @@ message DailyChecklistRequest {
 }
 
 message DailyChecklistItemSuggestion {
-  string label          = 1;  // "[G5-23]", "[R]", or "[NEW]"
+  string label          = 1;  // "[G5-23]" (verbatim link), "[G5]" (goal tag), "[R]" (recurring), "[NEW]" (connective)
   string title          = 2;
   string notes          = 3;
   string scheduled_time = 4;  // "09:00"

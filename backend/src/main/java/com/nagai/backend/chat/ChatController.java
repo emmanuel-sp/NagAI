@@ -52,4 +52,11 @@ public class ChatController {
         String summary = chatService.getContextSummary(contextId);
         return ResponseEntity.ok(Map.of("summary", summary));
     }
+
+    @GetMapping("/agent-message/{sentMessageId}")
+    public ResponseEntity<ChatService.AgentMessageResponse> getAgentMessage(@PathVariable Long sentMessageId) {
+        var result = chatService.getAgentMessage(sentMessageId);
+        if (result == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(result);
+    }
 }

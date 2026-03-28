@@ -4,12 +4,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgentData } from "@/contexts/AgentDataContext";
-import { ChatMessage, ChatSession } from "@/types/chat";
+import { AgentMessageDetail, ChatMessage, ChatSession } from "@/types/chat";
 import {
   sendMessage,
   fetchSessions,
   fetchSessionMessages,
   deleteSession,
+  fetchAgentMessage,
   fetchContextSummary,
 } from "@/services/chatService";
 import SessionDropdown from "./SessionDropdown";
@@ -38,6 +39,9 @@ export default function ChatContainer() {
   // fromContext: stored from email link, attached to first message only
   const fromContextRef = useRef<string>("");
 
+  // Specific agent message loaded from email link (?msg=ID)
+  const [linkedAgentMessage, setLinkedAgentMessage] = useState<AgentMessageDetail | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load sessions on mount
@@ -46,7 +50,7 @@ export default function ChatContainer() {
     loadSessions();
   }, [user]);
 
-  // Handle fromContext query param (email-to-chat link)
+  // Handle fromContext + msg query params (email-to-chat link)
   useEffect(() => {
     if (!user) return;
     const fromContext = searchParams.get("fromContext");
@@ -55,14 +59,37 @@ export default function ChatContainer() {
     if (isNaN(contextId)) return;
 
     setSelectedContextId(contextId);
-    fetchContextSummary(contextId)
-      .then((summary) => {
-        if (summary) {
-          fromContextRef.current = summary;
-          contextSummaryCache.current.set(contextId, summary);
-        }
-      })
-      .catch(() => {});
+
+    const msgParam = searchParams.get("msg");
+    const msgId = msgParam ? parseInt(msgParam, 10) : NaN;
+
+    if (!isNaN(msgId)) {
+      // Specific message: fetch it, show as first message, use as focused context
+      fetchAgentMessage(msgId)
+        .then((detail) => {
+          if (detail) {
+            setLinkedAgentMessage(detail);
+            const summary =
+              `The user clicked "Continue in Chat" on this specific agent email:\n` +
+              `Context: ${detail.contextName}\n` +
+              `Subject: ${detail.subject}\n` +
+              `---\n${detail.content}`;
+            fromContextRef.current = summary;
+            contextSummaryCache.current.set(contextId, summary);
+          }
+        })
+        .catch(() => {});
+    } else {
+      // Fallback: no specific message, load general context summary
+      fetchContextSummary(contextId)
+        .then((summary) => {
+          if (summary) {
+            fromContextRef.current = summary;
+            contextSummaryCache.current.set(contextId, summary);
+          }
+        })
+        .catch(() => {});
+    }
   }, [user, searchParams]);
 
   const loadSessions = async () => {
@@ -156,6 +183,7 @@ export default function ChatContainer() {
 
         // If new session, set it as active and add to list
         if (!activeSessionId) {
+          setLinkedAgentMessage(null);
           setActiveSessionId(response.sessionId);
           setSessions((prev) => [
             {
@@ -191,6 +219,7 @@ export default function ChatContainer() {
   const handleNewChat = useCallback(() => {
     setActiveSessionId(null);
     setMessages([]);
+    setLinkedAgentMessage(null);
     fromContextRef.current = "";
   }, []);
 
@@ -222,7 +251,19 @@ export default function ChatContainer() {
     );
   }
 
-  const hasMessages = messages.length > 0;
+  // Prepend the linked agent message as an assistant message when in a new chat
+  const displayMessages: ChatMessage[] = [];
+  if (linkedAgentMessage && !activeSessionId) {
+    displayMessages.push({
+      messageId: -1,
+      role: "assistant",
+      content: linkedAgentMessage.content,
+      createdAt: linkedAgentMessage.sentAt || new Date().toISOString(),
+    });
+  }
+  displayMessages.push(...messages);
+
+  const hasMessages = displayMessages.length > 0;
 
   const initials = user?.fullName
     ? user.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -267,7 +308,7 @@ export default function ChatContainer() {
         {hasMessages || sending ? (
           <>
             <MessageList
-              messages={messages}
+              messages={displayMessages}
               sending={sending}
               messagesEndRef={messagesEndRef}
               userInitials={initials}

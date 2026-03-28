@@ -78,7 +78,16 @@ def handle_agent_message(value: str):
     in_reply_to = previous_message_ids[-1] if previous_message_ids else None
 
     unsubscribe_url = f"{BACKEND_BASE_URL}/agent/unsubscribe?token={unsubscribe_token}" if unsubscribe_token else ""
-    chat_url = f"{APP_BASE_URL}/chat?fromContext={context_id}" if context_id else ""
+
+    # Save message first so we can include the DB ID in the email's chat link
+    sent_message_id = _save_sent_message(context_id, user_id, subject, body, message_id)
+
+    chat_url = ""
+    if context_id:
+        chat_url = f"{APP_BASE_URL}/chat?fromContext={context_id}"
+        if sent_message_id:
+            chat_url += f"&msg={sent_message_id}"
+
     html = _render_agent_email(body, agent_name, user_name, unsubscribe_url, chat_url)
 
     try:
@@ -87,8 +96,6 @@ def handle_agent_message(value: str):
     except Exception as e:
         logger.error(f"Failed to send agent email to {user_email}: {e}")
         return
-
-    _save_sent_message(context_id, user_id, subject, body, message_id)
 
 
 def _build_system_prompt(agent_name, context_name, message_type,
@@ -188,7 +195,7 @@ def _default_subject(context_name, goal):
 
 
 def _save_sent_message(context_id, user_id, subject, content, email_message_id):
-    """Persist the sent agent message via backend callback."""
+    """Persist the sent agent message via backend callback. Returns the sentMessageId or None."""
     try:
         resp = http_requests.post(
             f"{BACKEND_INTERNAL_URL}/internal/sent-agent-messages",
@@ -203,8 +210,11 @@ def _save_sent_message(context_id, user_id, subject, content, email_message_id):
             timeout=10,
         )
         resp.raise_for_status()
+        data = resp.json()
+        return data.get("sentMessageId")
     except Exception as e:
         logger.error(f"Failed to save sent agent message via callback: {e}")
+        return None
 
 
 def _send_email(to_addr, subject, html_body, message_id, in_reply_to=None, references=None, unsubscribe_url=""):

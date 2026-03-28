@@ -12,6 +12,14 @@ export interface ChatSession {
   updatedAt: string;
 }
 
+export interface AgentMessageDetail {
+  sentMessageId: number;
+  subject: string;
+  content: string;
+  contextName: string;
+  sentAt: string;
+}
+
 export interface SendMessageRequest {
   sessionId?: number;
   message: string;

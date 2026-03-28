@@ -34,6 +34,7 @@ import com.nagai.backend.exceptions.DailyChecklistAlreadyExistsException;
 import com.nagai.backend.exceptions.DailyChecklistException;
 import com.nagai.backend.exceptions.DailyChecklistItemNotFoundException;
 import com.nagai.backend.goals.Goal;
+import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.goals.GoalService;
 import com.nagai.backend.users.User;
 import com.nagai.backend.users.UserService;
@@ -43,12 +44,14 @@ public class DailyChecklistService {
 
     private static final Logger log = LoggerFactory.getLogger(DailyChecklistService.class);
     private static final Pattern GOAL_LABEL = Pattern.compile("\\[G(\\d+)-(\\d+)]");
+    private static final Pattern GOAL_TAG = Pattern.compile("\\[G(\\d+)]");
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private final DailyChecklistConfigRepository configRepository;
     private final DailyChecklistRepository dailyChecklistRepository;
     private final DailyChecklistItemRepository dailyItemRepository;
     private final ChecklistRepository checklistRepository;
+    private final GoalRepository goalRepository;
     private final GoalService goalService;
     private final UserService userService;
     private final AiGrpcClientService aiGrpcClientService;
@@ -59,6 +62,7 @@ public class DailyChecklistService {
             DailyChecklistRepository dailyChecklistRepository,
             DailyChecklistItemRepository dailyItemRepository,
             ChecklistRepository checklistRepository,
+            GoalRepository goalRepository,
             GoalService goalService,
             UserService userService,
             AiGrpcClientService aiGrpcClientService,
@@ -67,6 +71,7 @@ public class DailyChecklistService {
         this.dailyChecklistRepository = dailyChecklistRepository;
         this.dailyItemRepository = dailyItemRepository;
         this.checklistRepository = checklistRepository;
+        this.goalRepository = goalRepository;
         this.goalService = goalService;
         this.userService = userService;
         this.aiGrpcClientService = aiGrpcClientService;
@@ -201,13 +206,20 @@ public class DailyChecklistService {
             item.setSortOrder(sortOrder++);
             item.setCompleted(false);
 
-            // Resolve parent link from label
-            Matcher m = GOAL_LABEL.matcher(suggestion.getLabel());
-            if (m.matches()) {
-                Long checklistId = Long.parseLong(m.group(2));
-                // Verify the checklist item exists before linking
+            // Resolve parent link and goal tag from label
+            Matcher fullLink = GOAL_LABEL.matcher(suggestion.getLabel());
+            Matcher goalOnly = GOAL_TAG.matcher(suggestion.getLabel());
+            if (fullLink.matches()) {
+                Long goalId = Long.parseLong(fullLink.group(1));
+                Long checklistId = Long.parseLong(fullLink.group(2));
                 if (checklistRepository.existsById(checklistId)) {
                     item.setParentChecklistId(checklistId);
+                    item.setParentGoalId(goalId);
+                }
+            } else if (goalOnly.matches()) {
+                Long goalId = Long.parseLong(goalOnly.group(1));
+                if (goalRepository.existsById(goalId)) {
+                    item.setParentGoalId(goalId);
                 }
             }
 
@@ -300,22 +312,16 @@ public class DailyChecklistService {
     }
 
     private DailyChecklistItemResponse resolveItemResponse(DailyChecklistItem item) {
-        Long parentGoalId = null;
         String parentGoalTitle = null;
-        if (item.getParentChecklistId() != null) {
-            ChecklistItem parent = checklistRepository.findById(item.getParentChecklistId())
-                    .orElse(null);
-            if (parent != null) {
-                parentGoalId = parent.getGoalId();
-                try {
-                    Goal goal = goalService.getGoal(parent.getGoalId());
-                    parentGoalTitle = goal.getTitle();
-                } catch (Exception e) {
-                    // Goal may have been deleted
-                }
+        if (item.getParentGoalId() != null) {
+            try {
+                Goal goal = goalService.getGoal(item.getParentGoalId());
+                parentGoalTitle = goal.getTitle();
+            } catch (Exception e) {
+                // Goal may have been deleted
             }
         }
-        return DailyChecklistItemResponse.fromEntity(item, parentGoalId, parentGoalTitle);
+        return DailyChecklistItemResponse.fromEntity(item, parentGoalTitle);
     }
 
     private LocalDate todayInUserTimezone(User user) {

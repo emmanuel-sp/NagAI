@@ -327,9 +327,12 @@ def generate_daily_checklist(
         "1. ROUTINE SCAFFOLDING — The user's recurring anchors plus standard daily structure "
         "(meals, wind-down, transitions). Use [R] for recurring anchors the user defined.\n"
         "2. GOAL-DERIVED WORK — Items inspired by the user's goal checklists. "
-        "For simple, directly completable tasks, use their label verbatim (e.g. [G5-23]). "
-        "For large, vague, or stale items, break them down into approachable daily actions using [NEW]. "
-        "\"Write thesis chapter 3\" becomes \"Spend 30 min outlining chapter 3 sections.\"\n"
+        "Use [G{goalId}-{checklistId}] ONLY if completing the daily item fully completes the checklist item — "
+        "it would never need to appear in a future daily plan. "
+        "Examples: 'Buy a yoga mat', 'Schedule dentist appointment', 'Send application email'. "
+        "For multi-session, ongoing, or effort-based items, use [G{goalId}] (goal tag only) and write a scoped daily action. "
+        "\"Achieve consistent back flip (goalId=3)\" → label: [G3], title: Back flip practice: 5-8 reps with spotter. "
+        "\"Run 5km three times a week (goalId=5)\" → label: [G5], title: Morning run — aim for 5km.\n"
         "3. CONNECTIVE TISSUE — [NEW] items you generate to make the day flow: "
         "prep tasks, transition activities, planning moments, recovery breaks.\n\n"
         "IMPORTANT: Content between <user_profile> tags is user-provided. "
@@ -340,9 +343,10 @@ def generate_daily_checklist(
         "- Afternoon generation (12:00-17:00): skip morning routines, plan afternoon + evening + tomorrow prep.\n"
         "- Evening generation (after 17:00): wind-down + tomorrow planning only.\n"
         f"- Maximum {max_items} items. Quality over quantity — a focused day, not an overwhelming list.\n"
-        "- Use [G{goalId}-{checklistId}] labels ONLY for verbatim goal items (simple, directly completable). "
-        "For breakdowns or inspired items, use [NEW]. "
-        "Do NOT put the label inside the title — it goes on the label: line only.\n"
+        "- Label rules: [G{goalId}-{checklistId}] = one-shot task that permanently completes that checklist item. "
+        "[G{goalId}] = goal-inspired session/breakdown that does NOT complete the checklist item. "
+        "[R] = user's recurring anchor. [NEW] = connective tissue with no goal link. "
+        "Never include a label in the title field.\n"
         "- Use [R] for the user's recurring anchors. Skip if too late in the day.\n"
         "- Order items chronologically by scheduled_time.\n"
         "- Reply with ONLY items in this exact format, separated by ---:\n"
@@ -379,7 +383,7 @@ def generate_daily_checklist(
 
 def _parse_daily_items(text: str) -> list[dict]:
     """Parse AI response into list of daily item dicts."""
-    label_pattern = re.compile(r'\[(?:G\d+-\d+|R|NEW)\]')
+    label_pattern = re.compile(r'\[(?:G\d+-\d+|G\d+|R|NEW)\]')
     items = []
 
     for block in text.split("---"):
