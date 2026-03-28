@@ -11,6 +11,7 @@ service AiService {
   rpc GenerateChecklistItem  (ChecklistItemRequest)    returns (ChecklistItemResponse);
   rpc GenerateFullChecklist  (FullChecklistRequest)    returns (FullChecklistResponse);
   rpc GenerateDailyChecklist (DailyChecklistRequest)   returns (DailyChecklistResponse);
+  rpc AgentChat              (AgentChatRequest)        returns (AgentChatResponse);
 }
 
 // --- SuggestSmartField ---
@@ -96,4 +97,32 @@ message DailyChecklistItemSuggestion {
 
 message DailyChecklistResponse {
   repeated DailyChecklistItemSuggestion items = 1;
+}
+
+// --- AgentChat ---
+
+message ChatHistoryEntry {
+  string role    = 1;  // "user" or "assistant"
+  string content = 2;
+}
+
+message ChatGoalSummary {
+  string title                   = 1;
+  string description             = 2;
+  string smart_context           = 3;
+  int32  completed_items         = 4;
+  int32  total_items             = 5;
+  repeated string active_items   = 6;
+}
+
+message AgentChatRequest {
+  string user_message                    = 1;
+  string user_profile                    = 2;
+  repeated ChatGoalSummary goals         = 3;
+  repeated ChatHistoryEntry history      = 4;
+  string from_context_summary            = 5;  // optional: last nag context when linked from email
+}
+
+message AgentChatResponse {
+  string assistant_message = 1;
 }

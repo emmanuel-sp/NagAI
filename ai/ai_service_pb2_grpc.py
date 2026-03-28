@@ -54,6 +54,11 @@ class AiServiceStub(object):
                 request_serializer=ai__service__pb2.DailyChecklistRequest.SerializeToString,
                 response_deserializer=ai__service__pb2.DailyChecklistResponse.FromString,
                 _registered_method=True)
+        self.AgentChat = channel.unary_unary(
+                '/nagai.ai.AiService/AgentChat',
+                request_serializer=ai__service__pb2.AgentChatRequest.SerializeToString,
+                response_deserializer=ai__service__pb2.AgentChatResponse.FromString,
+                _registered_method=True)
 
 
 class AiServiceServicer(object):
@@ -83,6 +88,12 @@ class AiServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def AgentChat(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AiServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -105,6 +116,11 @@ def add_AiServiceServicer_to_server(servicer, server):
                     servicer.GenerateDailyChecklist,
                     request_deserializer=ai__service__pb2.DailyChecklistRequest.FromString,
                     response_serializer=ai__service__pb2.DailyChecklistResponse.SerializeToString,
+            ),
+            'AgentChat': grpc.unary_unary_rpc_method_handler(
+                    servicer.AgentChat,
+                    request_deserializer=ai__service__pb2.AgentChatRequest.FromString,
+                    response_serializer=ai__service__pb2.AgentChatResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -215,6 +231,33 @@ class AiService(object):
             '/nagai.ai.AiService/GenerateDailyChecklist',
             ai__service__pb2.DailyChecklistRequest.SerializeToString,
             ai__service__pb2.DailyChecklistResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AgentChat(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/nagai.ai.AiService/AgentChat',
+            ai__service__pb2.AgentChatRequest.SerializeToString,
+            ai__service__pb2.AgentChatResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -1,7 +1,6 @@
 import html as html_mod
 import json
 import os
-import time
 import logging
 import smtplib
 import random
@@ -13,7 +12,7 @@ from email.mime.text import MIMEText
 import anthropic
 import requests as http_requests
 
-import web_search
+from agent_tools import PERSONALITY, ANGLES, run_agent_loop
 
 logger = logging.getLogger(__name__)
 
@@ -23,100 +22,11 @@ SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
 BACKEND_BASE_URL = os.environ.get("BACKEND_BASE_URL", "http://localhost:8080")
 BACKEND_INTERNAL_URL = os.environ.get("BACKEND_INTERNAL_URL", "http://localhost:8080")
+FRONTEND_BASE_URL = os.environ.get("FRONTEND_BASE_URL", "http://localhost:3000")
 INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "")
 
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 MODEL = "claude-haiku-4-5-20251001"
-
-TOOLS = [
-    {
-        "name": "get_user_progress",
-        "description": "Get the user's goal progress including checklist completion status, SMART breakdown, and recent activity.",
-        "input_schema": {
-            "type": "object",
-            "properties": {},
-            "required": [],
-        },
-    },
-    {
-        "name": "get_previous_messages",
-        "description": "Get the conversation history between the agent and user for this context.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "limit": {
-                    "type": "integer",
-                    "description": "Max messages to retrieve (default 5).",
-                },
-            },
-            "required": [],
-        },
-    },
-    {
-        "name": "search_news",
-        "description": "Search for relevant news articles related to a topic. Only use if a relevant article would genuinely help the user.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Search query for finding relevant news.",
-                },
-            },
-            "required": ["query"],
-        },
-    },
-]
-
-PERSONALITY = {
-    "nag": (
-        "You are a direct, action-focused accountability partner. "
-        "Your job is to move the user toward their next step — not to shame them for inaction. "
-        "Never say 'it's been months' or dwell on how long they've waited. "
-        "Instead, focus on what they CAN do right now. Be firm, short, and constructive. "
-        "Always end with a specific, doable action."
-    ),
-    "motivation": (
-        "You are a warm, perceptive coach who notices the details. "
-        "Avoid generic encouragement and clichés ('you got this', 'believe in yourself'). "
-        "Be specific — reference their actual tasks, progress, and situation. "
-        "If they haven't started, reframe the journey in an energizing way."
-    ),
-    "guidance": (
-        "You are a thoughtful strategic advisor. Offer ONE concrete, actionable insight — "
-        "a framework, a reframe, or a prioritization suggestion. "
-        "Don't try to cover everything. Go deep on one useful idea. "
-        "Ask at most one question, and make it genuinely thought-provoking."
-    ),
-}
-
-ANGLES = {
-    "nag": [
-        "Focus on the single smallest next step they could take today.",
-        "Ask what specific obstacle is blocking them and suggest how to remove it.",
-        "Challenge them to commit to just 15 minutes of focused work.",
-        "Highlight what they stand to gain by starting this week.",
-        "Reframe the goal as tiny wins and point to the first one.",
-        "Acknowledge the difficulty, then redirect to one concrete action.",
-    ],
-    "motivation": [
-        "Celebrate something specific they've done, even if small.",
-        "Remind them of their original 'why' and connect it to today.",
-        "Share an energizing perspective on their progress trajectory.",
-        "Point out growth or learning they may not see in themselves.",
-        "Connect their goal to the bigger picture of who they're becoming.",
-        "Highlight the compounding effect of small consistent actions.",
-    ],
-    "guidance": [
-        "Suggest a framework or mental model relevant to their goal.",
-        "Challenge one assumption they might be making about their approach.",
-        "Propose a small experiment they could try this week.",
-        "Help them prioritize among their active tasks.",
-        "Offer a strategic perspective on sequencing their next steps.",
-        "Ask a thought-provoking question that reframes their approach.",
-    ],
-}
-
 
 def handle_agent_message(value: str):
     """Main entry point: called by Redis consumer with the JSON payload."""
@@ -153,7 +63,7 @@ def handle_agent_message(value: str):
         "conversation_history": conversation_history,
     }
 
-    result = _run_agent_loop(system_prompt, tool_context)
+    result = run_agent_loop(client, MODEL, system_prompt, tool_context)
 
     subject, body = _parse_response(result, context_name, goal)
 
@@ -168,7 +78,8 @@ def handle_agent_message(value: str):
     in_reply_to = previous_message_ids[-1] if previous_message_ids else None
 
     unsubscribe_url = f"{BACKEND_BASE_URL}/agent/unsubscribe?token={unsubscribe_token}" if unsubscribe_token else ""
-    html = _render_agent_email(body, agent_name, user_name, unsubscribe_url)
+    chat_url = f"{FRONTEND_BASE_URL}/chat?fromContext={context_id}" if context_id else ""
+    html = _render_agent_email(body, agent_name, user_name, unsubscribe_url, chat_url)
 
     try:
         _send_email(user_email, subject, html, message_id, in_reply_to, references, unsubscribe_url)
@@ -254,110 +165,6 @@ def _build_system_prompt(agent_name, context_name, message_type,
     return prompt
 
 
-def _run_agent_loop(system_prompt, tool_context, max_iterations=5):
-    messages = [{"role": "user", "content": "Generate a personalized message for the user now."}]
-    loop_start = time.monotonic()
-    total_input_tokens = 0
-    total_output_tokens = 0
-
-    for iteration in range(max_iterations):
-        call_start = time.monotonic()
-        response = client.messages.create(
-            model=MODEL,
-            max_tokens=512,
-            system=system_prompt,
-            tools=TOOLS,
-            messages=messages,
-        )
-        call_ms = round((time.monotonic() - call_start) * 1000, 1)
-        total_input_tokens += response.usage.input_tokens
-        total_output_tokens += response.usage.output_tokens
-
-        tool_use_blocks = [b for b in response.content if b.type == "tool_use"]
-
-        if not tool_use_blocks:
-            text_blocks = [b.text for b in response.content if b.type == "text"]
-            total_ms = round((time.monotonic() - loop_start) * 1000, 1)
-            logger.info(
-                "Agent loop complete: iterations=%d input_tokens=%d output_tokens=%d total_ms=%.1f",
-                iteration + 1, total_input_tokens, total_output_tokens, total_ms,
-            )
-            return "\n".join(text_blocks)
-
-        tool_names = ", ".join(b.name for b in tool_use_blocks)
-        logger.info(
-            "Agent loop iteration %d: %d tool call(s) [%s] latency_ms=%.1f",
-            iteration + 1, len(tool_use_blocks), tool_names, call_ms,
-        )
-
-        messages.append({"role": "assistant", "content": response.content})
-
-        tool_results = []
-        for tool_block in tool_use_blocks:
-            result = _execute_tool(tool_block.name, tool_block.input, tool_context)
-            tool_results.append({
-                "type": "tool_result",
-                "tool_use_id": tool_block.id,
-                "content": result,
-            })
-
-        messages.append({"role": "user", "content": tool_results})
-
-    total_ms = round((time.monotonic() - loop_start) * 1000, 1)
-    logger.warning(
-        "Agent loop hit max iterations (%d): input_tokens=%d output_tokens=%d total_ms=%.1f",
-        max_iterations, total_input_tokens, total_output_tokens, total_ms,
-    )
-    return "I wanted to check in with you today. How are things going with your goals?"
-
-
-def _execute_tool(tool_name, tool_input, context):
-    if tool_name == "get_user_progress":
-        goal = context.get("goal")
-        if not goal:
-            return "No specific goal is linked to this context."
-        items = goal.get("checklistItems", [])
-        total = len(items)
-        completed = sum(1 for i in items if i.get("completed"))
-        active = [i["title"] for i in items if not i.get("completed")]
-        recent = [i["title"] for i in items if i.get("completed") and i.get("completedAt")]
-
-        result = f"Goal: {goal['title']}\n"
-        if goal.get("description"):
-            result += f"Description: {goal['description']}\n"
-        if goal.get("smartContext"):
-            result += f"SMART breakdown:\n{goal['smartContext']}\n"
-        result += f"Progress: {completed}/{total} tasks complete\n"
-        if recent:
-            result += f"Recently completed: {', '.join(recent[-3:])}\n"
-        if active:
-            result += f"Still active: {', '.join(active[:5])}\n"
-        return result
-
-    elif tool_name == "get_previous_messages":
-        history = context.get("conversation_history", [])
-        if not history:
-            return "This is the first message in this conversation. No previous messages."
-        limit = tool_input.get("limit", 5)
-        lines = []
-        for entry in history[-limit:]:
-            role = entry.get("role", "agent")
-            content = entry.get("content", "")[:120]
-            sent_at = entry.get("sentAt", "")
-            lines.append(f"[{role}] ({sent_at}): {content}...")
-        return "\n".join(lines)
-
-    elif tool_name == "search_news":
-        query = tool_input.get("query", "")
-        results = web_search.search_news(query)
-        if not results:
-            return "No relevant news found."
-        lines = []
-        for r in results[:3]:
-            lines.append(f"- {r['title']}: {r['link']}\n  {r['snippet']}")
-        return "\n".join(lines)
-
-    return "Unknown tool."
 
 
 def _parse_response(text, context_name, goal):
@@ -427,7 +234,7 @@ def _send_email(to_addr, subject, html_body, message_id, in_reply_to=None, refer
         server.sendmail(SMTP_USER, to_addr, msg.as_string())
 
 
-def _render_agent_email(body, agent_name, user_name, unsubscribe_url=""):
+def _render_agent_email(body, agent_name, user_name, unsubscribe_url="", chat_url=""):
     sections_html = _markdown_to_sections(body)
     safe_agent_name = html_mod.escape(agent_name) if agent_name else "NagAI Agent"
     safe_user_name = html_mod.escape(user_name) if user_name else "there"
@@ -435,6 +242,15 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url=""):
     unsubscribe_html = ""
     if unsubscribe_url:
         unsubscribe_html = f'<p style="margin:12px 0 0;font-size:12px;text-align:center;"><a href="{unsubscribe_url}" style="color:#9e605a;text-decoration:underline;">Stop receiving agent messages</a></p>'
+
+    chat_html = ""
+    if chat_url:
+        chat_html = (
+            f'<p style="margin:16px 0 0;text-align:center;">'
+            f'<a href="{chat_url}" style="display:inline-block;padding:10px 24px;'
+            f'background:#2a1f1e;color:#d4918b;border-radius:6px;text-decoration:none;'
+            f'font-size:14px;font-weight:600;">Continue in Chat</a></p>'
+        )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -465,7 +281,8 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url=""):
 <!-- Footer -->
 <tr>
 <td style="background-color:#faf5f4;padding:20px 40px;border-top:1px solid #e8d8d5;">
-  <p style="margin:0;font-size:12px;color:#8a706b;text-align:center;">
+  {chat_html}
+  <p style="margin:12px 0 0;font-size:12px;color:#8a706b;text-align:center;">
     This message is from your NagAI agent.<br>
     Manage your agent in the NagAI app.
   </p>

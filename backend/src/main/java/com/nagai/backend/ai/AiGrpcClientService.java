@@ -1,6 +1,10 @@
 package com.nagai.backend.ai;
 
+import com.nagai.ai.AgentChatRequest;
+import com.nagai.ai.AgentChatResponse;
 import com.nagai.ai.AiServiceGrpc;
+import com.nagai.ai.ChatGoalSummary;
+import com.nagai.ai.ChatHistoryEntry;
 import com.nagai.ai.ChecklistItemRequest;
 import com.nagai.ai.ChecklistItemResponse;
 import com.nagai.ai.DailyChecklistCandidate;
@@ -137,6 +141,29 @@ public class AiGrpcClientService {
                     .setDayOfWeek(dayOfWeek)
                     .setPlanDate(planDate)
                     .build());
+        } catch (StatusRuntimeException e) {
+            if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
+            log.error("gRPC call failed: {}", e.getStatus().getDescription());
+            throw new AiServiceException("AI service unavailable: " + e.getStatus().getDescription(), e);
+        }
+    }
+
+    public AgentChatResponse agentChat(String userMessage, String userProfile,
+                                        List<ChatGoalSummary> goals,
+                                        List<ChatHistoryEntry> history,
+                                        String fromContextSummary) {
+        try {
+            AgentChatRequest.Builder builder = AgentChatRequest.newBuilder()
+                    .setUserMessage(userMessage)
+                    .setUserProfile(userProfile)
+                    .addAllGoals(goals)
+                    .addAllHistory(history);
+            if (fromContextSummary != null && !fromContextSummary.isBlank()) {
+                builder.setFromContextSummary(fromContextSummary);
+            }
+            return stubWithCorrelation()
+                    .withDeadlineAfter(30, java.util.concurrent.TimeUnit.SECONDS)
+                    .agentChat(builder.build());
         } catch (StatusRuntimeException e) {
             if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
             log.error("gRPC call failed: {}", e.getStatus().getDescription());

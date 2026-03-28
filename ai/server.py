@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 import ai_service_pb2
 import ai_service_pb2_grpc
 import ai_handlers
+import chat_handler
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
 
@@ -126,6 +127,37 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details("Internal service error")
             return ai_service_pb2.DailyChecklistResponse()
+
+    def AgentChat(self, request, context):
+        try:
+            goals = [
+                {
+                    "title": g.title,
+                    "description": g.description,
+                    "smart_context": g.smart_context,
+                    "completed_items": g.completed_items,
+                    "total_items": g.total_items,
+                    "active_items": list(g.active_items),
+                }
+                for g in request.goals
+            ]
+            history = [
+                {"role": e.role, "content": e.content}
+                for e in request.history
+            ]
+            response_text = chat_handler.handle_chat(
+                request.user_message,
+                request.user_profile,
+                goals,
+                history,
+                request.from_context_summary,
+            )
+            return ai_service_pb2.AgentChatResponse(assistant_message=response_text)
+        except Exception as e:
+            logger.error(f"AgentChat error: {e}", exc_info=True)
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details("Internal service error")
+            return ai_service_pb2.AgentChatResponse()
 
 
 def serve():

@@ -9,6 +9,7 @@
   --accent-border: color-mix(in srgb, var(--accent), transparent 80%);
   --accent-shadow: color-mix(in srgb, var(--accent), transparent 70%);
   --accent-selection: color-mix(in srgb, var(--accent), transparent 85%);
+  --accent-tint: color-mix(in srgb, var(--accent), transparent 82%);
 
   /* Semantic aliases */
   --primary: var(--accent-dark);

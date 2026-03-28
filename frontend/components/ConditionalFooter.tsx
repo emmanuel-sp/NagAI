@@ -7,7 +7,7 @@ export default function ConditionalFooter() {
   const pathname = usePathname();
 
   // Hide footer on goals and checklists pages
-  const hideFooter = pathname === "/goals" || pathname === "/checklists";
+  const hideFooter = pathname === "/goals" || pathname === "/checklists" || pathname === "/chat";
 
   if (hideFooter) {
     return null;

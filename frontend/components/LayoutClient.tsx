@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import NavBar from "@/components/NavBar";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import { ModalProvider } from "@/contexts/ModalContext";
+import { AgentDataProvider } from "@/contexts/AgentDataContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import styles from "./LayoutClient.module.css";
 
@@ -25,6 +26,7 @@ export default function LayoutClient({
   const isLandingPage = pathname === "/";
   const isOnboardingPage = pathname === "/onboarding";
   const hasSidebar = showNavbar === true && !isLandingPage && !isOnboardingPage;
+  const isLoggedIn = showNavbar === true;
 
   const mainClass = !hasSidebar
     ? styles.main
@@ -35,11 +37,13 @@ export default function LayoutClient({
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
       <ModalProvider>
-        <NavBar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
-        <main className={mainClass}>
-          {children}
-        </main>
-        <ConditionalFooter />
+        <AgentDataProvider isLoggedIn={isLoggedIn}>
+          <NavBar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+          <main className={mainClass}>
+            {children}
+          </main>
+          <ConditionalFooter />
+        </AgentDataProvider>
       </ModalProvider>
     </GoogleOAuthProvider>
   );
