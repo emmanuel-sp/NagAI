@@ -8,7 +8,7 @@
   z-index: 100;
   display: flex;
   flex-direction: column;
-  background: #f7f7f7;
+  background: var(--bg-elevated);
   padding: 24px 16px 20px;
   overflow-y: auto;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
@@ -70,7 +70,7 @@
 
 .toggleButton:hover {
   color: var(--text-primary);
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--surface-hover);
   border-color: var(--border);
 }
 
@@ -97,7 +97,7 @@
 
 .navLink:hover {
   color: var(--text-primary);
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--surface-hover);
 }
 
 .navLinkActive {
@@ -134,7 +134,7 @@
 
 .bellBtn:hover {
   color: var(--text-primary);
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--surface-hover);
 }
 
 .bellLabel {
@@ -173,7 +173,7 @@
 .contextsSection {
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  border-top: 1px solid var(--border);
 }
 
 /* Section header — clickable row */
@@ -192,7 +192,7 @@
 }
 
 .contextsSectionHeader:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--surface);
 }
 
 .contextsSectionChevron {
@@ -240,7 +240,7 @@
 
 .contextsSectionBtn:hover {
   color: var(--text-primary);
-  background: rgba(0, 0, 0, 0.07);
+  background: var(--surface-hover);
 }
 
 .deployedBtn {
@@ -343,7 +343,7 @@
   width: 100%;
   padding: 8px 12px;
   background: none;
-  border: 1px dashed rgba(0, 0, 0, 0.12);
+  border: 1px dashed var(--border-medium);
   border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: var(--fs-xs);
@@ -355,8 +355,8 @@
 
 .contextsEmpty:hover {
   color: var(--text-secondary);
-  border-color: rgba(0, 0, 0, 0.2);
-  background: rgba(0, 0, 0, 0.02);
+  border-color: var(--border-strong);
+  background: var(--surface);
 }
 
 /* Individual context row */
@@ -370,7 +370,7 @@
 }
 
 .contextRow:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--surface);
 }
 
 .contextName {
@@ -415,11 +415,100 @@
 
 .contextActionBtn:hover {
   color: var(--text-primary);
-  background: rgba(0, 0, 0, 0.07);
+  background: var(--surface-hover);
 }
 
 .contextDeleteBtn:hover {
   color: var(--error);
+}
+
+/* ─── Theme Switcher ─── */
+.themeSection {
+  padding: 10px 8px 4px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+.themeLabel {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 4px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.modePicker {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.modeBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.modeBtn:hover {
+  color: var(--text-secondary);
+  background: var(--surface-hover);
+}
+
+.modeBtnActive {
+  background: var(--accent-lighter);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.modeBtnActive:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.accentPicker {
+  display: flex;
+  gap: 8px;
+  padding: 0 4px;
+  align-items: center;
+}
+
+.accentSwatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  outline: 2px solid transparent;
+  outline-offset: 1px;
+  transition: transform var(--transition-fast), outline-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.accentSwatch:hover {
+  transform: scale(1.2);
+}
+
+.accentSwatchActive {
+  outline-color: var(--text-primary);
+  transform: scale(1.1);
 }
 
 /* ─── Mobile ─── */

@@ -8,7 +8,8 @@ import { useAgentData } from "@/contexts/AgentDataContext";
 import { AgentContext, CreateContextRequest } from "@/types/agent";
 import ContextFormModal from "@/components/agent-builder/ContextFormModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import { IoSidebarPanel, IoAdd, IoSettings, IoChevronDown, IoBell, IoPerson } from "@/components/icons";
+import { IoSidebarPanel, IoAdd, IoSettings, IoChevronDown, IoBell, IoPerson, IoSun, IoMoon } from "@/components/icons";
+import { useTheme, ACCENT_CONFIGS, type AccentKey } from "@/contexts/ThemeContext";
 import MessageInboxPanel from "@/components/inbox/MessageInboxPanel";
 import styles from "./NavBar.module.css";
 
@@ -30,6 +31,7 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { modalOpen } = useModal();
+  const { mode, accent, setMode, setAccent } = useTheme();
 
   // Nag Contexts section state
   const {
@@ -283,6 +285,45 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
           <IoPerson size={15} />
           <span className={styles.navLinkLabel}>Profile</span>
         </Link>
+
+        {/* Theme Switcher */}
+        <div className={styles.themeSection}>
+          <span className={styles.themeLabel}>Appearance</span>
+          <div className={styles.modePicker}>
+            <button
+              className={`${styles.modeBtn} ${mode === "light" ? styles.modeBtnActive : ""}`}
+              onClick={() => setMode("light")}
+            >
+              <IoSun size={12} />
+              Light
+            </button>
+            <button
+              className={`${styles.modeBtn} ${mode === "dark" ? styles.modeBtnActive : ""}`}
+              onClick={() => setMode("dark")}
+            >
+              <IoMoon size={12} />
+              Dark
+            </button>
+          </div>
+          <div className={styles.accentPicker}>
+            {(Object.entries(ACCENT_CONFIGS) as [AccentKey, typeof ACCENT_CONFIGS[AccentKey]][]).map(
+              ([key, cfg]) => (
+                <button
+                  key={key}
+                  className={`${styles.accentSwatch} ${accent === key ? styles.accentSwatchActive : ""}`}
+                  style={
+                    key === "mono"
+                      ? { background: "conic-gradient(#1a1a1a 180deg, #e0e0e0 180deg)" }
+                      : { background: cfg.swatch }
+                  }
+                  title={cfg.label}
+                  onClick={() => setAccent(key)}
+                  aria-label={`${cfg.label} accent`}
+                />
+              )
+            )}
+          </div>
+        </div>
       </nav>
 
       <MessageInboxPanel isOpen={inboxOpen} onClose={() => setInboxOpen(false)} />

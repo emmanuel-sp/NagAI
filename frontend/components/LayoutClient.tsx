@@ -6,6 +6,7 @@ import NavBar from "@/components/NavBar";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import { ModalProvider } from "@/contexts/ModalContext";
 import { AgentDataProvider } from "@/contexts/AgentDataContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import styles from "./LayoutClient.module.css";
 
@@ -36,6 +37,7 @@ export default function LayoutClient({
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+      <ThemeProvider>
       <ModalProvider>
         <AgentDataProvider isLoggedIn={isLoggedIn}>
           <NavBar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
@@ -45,6 +47,7 @@ export default function LayoutClient({
           <ConditionalFooter />
         </AgentDataProvider>
       </ModalProvider>
+      </ThemeProvider>
     </GoogleOAuthProvider>
   );
 }

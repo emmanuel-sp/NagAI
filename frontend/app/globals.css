@@ -1,6 +1,7 @@
 :root {
-  /* ─── Vibrant Coral Color System ─── */
-  --accent: #69aaff;
+  /* ─── Color System ─── */
+  --accent: #8a3b46;
+  --accent-foreground: #ffffff;
   --accent-dark: color-mix(in srgb, var(--accent), black 15%);
   --accent-darker: color-mix(in srgb, var(--accent), black 30%);
   --accent-light: color-mix(in srgb, var(--accent), transparent 90%);
@@ -302,7 +303,7 @@ button:not([class]) {
   border: none;
   font-size: var(--fs-sm);
   background: var(--accent);
-  color: var(--text-inverse);
+  color: var(--accent-foreground);
   letter-spacing: 0.005em;
 }
 
@@ -344,4 +345,41 @@ main {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.22);
+}
+
+/* ─── Dark Mode Tokens ─── */
+[data-theme="dark"] {
+  --text-primary: #f0f0f0;
+  --text-secondary: #b0b0b0;
+  --text-muted: #707080;
+  --text-light: #4a4a5a;
+  --text-inverse: #111111;
+
+  --bg-page: #080808;
+  --bg-card: #0e0e0e;
+  --bg-elevated: #121212;
+  --bg-dark: #030303;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.08);
+  --surface-elevated: #171717;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --border-light: rgba(255, 255, 255, 0.04);
+  --border-medium: rgba(255, 255, 255, 0.10);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-2xl: 0 24px 56px rgba(0, 0, 0, 0.8), 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
