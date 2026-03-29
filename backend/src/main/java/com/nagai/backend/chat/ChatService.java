@@ -2,10 +2,15 @@ package com.nagai.backend.chat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nagai.ai.ActionSuggestion;
 import com.nagai.ai.AgentChatResponse;
+import com.nagai.ai.ChatChecklistItem;
 import com.nagai.ai.ChatGoalSummary;
 import com.nagai.ai.ChatHistoryEntry;
 import com.nagai.backend.agents.AgentContext;
@@ -87,15 +92,20 @@ public class ChatService {
         String contextSummary = request.getFromContextSummary() != null
                 ? request.getFromContextSummary() : "";
         AgentChatResponse aiResponse = aiGrpcClientService.agentChat(
-                request.getMessage(), userProfile, goalSummaries, history, contextSummary);
+                request.getMessage(), userProfile, goalSummaries, history, contextSummary,
+                user.getUserId());
 
         String assistantContent = aiResponse.getAssistantMessage();
+
+        // Serialize suggestions from gRPC response
+        String suggestionsJson = serializeSuggestions(aiResponse.getSuggestionsList());
 
         // Save assistant message
         ChatMessage assistantMessage = new ChatMessage();
         assistantMessage.setSessionId(session.getSessionId());
         assistantMessage.setRole("assistant");
         assistantMessage.setContent(assistantContent);
+        assistantMessage.setSuggestions(suggestionsJson);
         chatMessageRepository.save(assistantMessage);
 
         // Auto-generate title from first user message
@@ -113,6 +123,7 @@ public class ChatService {
                 .messageId(assistantMessage.getMessageId())
                 .content(assistantContent)
                 .sessionTitle(session.getTitle())
+                .suggestions(suggestionsJson)
                 .build();
     }
 
@@ -197,6 +208,53 @@ public class ChatService {
         return sb.toString();
     }
 
+    public void updateSuggestionStatus(Long messageId, String suggestionId, String status) {
+        User user = userService.getCurrentUser();
+        ChatMessage message = chatMessageRepository.findById(messageId)
+                .orElseThrow(() -> new RuntimeException("Message not found"));
+
+        // Verify ownership via session
+        ChatSession session = chatSessionRepository.findById(message.getSessionId())
+                .filter(s -> s.getUserId().equals(user.getUserId()))
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        String json = message.getSuggestions();
+        if (json == null || json.isBlank()) return;
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            List<java.util.Map<String, Object>> suggestions = mapper.readValue(json,
+                    mapper.getTypeFactory().constructCollectionType(List.class, java.util.Map.class));
+            for (var s : suggestions) {
+                if (suggestionId.equals(s.get("suggestionId"))) {
+                    s.put("status", status);
+                    break;
+                }
+            }
+            message.setSuggestions(mapper.writeValueAsString(suggestions));
+            chatMessageRepository.save(message);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to update suggestion status", e);
+        }
+    }
+
+    private String serializeSuggestions(List<ActionSuggestion> suggestions) {
+        if (suggestions == null || suggestions.isEmpty()) return null;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            List<java.util.Map<String, String>> list = suggestions.stream().map(s -> java.util.Map.of(
+                    "suggestionId", s.getSuggestionId(),
+                    "type", s.getType(),
+                    "displayText", s.getDisplayText(),
+                    "paramsJson", s.getParamsJson(),
+                    "status", "pending"
+            )).collect(Collectors.toList());
+            return mapper.writeValueAsString(list);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+    }
+
     private List<ChatGoalSummary> buildGoalSummaries(Long userId) {
         List<Goal> goals = goalRepository.findAllByUserId(userId);
         List<ChatGoalSummary> summaries = new ArrayList<>();
@@ -210,13 +268,23 @@ public class ChatService {
                     .toList();
             int completedCount = (int) items.stream().filter(ChecklistItem::isCompleted).count();
 
+            List<ChatChecklistItem> checklistItemProtos = items.stream()
+                    .map(i -> ChatChecklistItem.newBuilder()
+                            .setChecklistId(i.getChecklistId())
+                            .setTitle(i.getTitle())
+                            .setCompleted(i.isCompleted())
+                            .build())
+                    .toList();
+
             summaries.add(ChatGoalSummary.newBuilder()
+                    .setGoalId(goal.getGoalId())
                     .setTitle(goal.getTitle())
                     .setDescription(goal.getDescription() != null ? goal.getDescription() : "")
                     .setSmartContext(ProfileUtils.buildGoalSmartContext(goal))
                     .setCompletedItems(completedCount)
                     .setTotalItems(items.size())
                     .addAllActiveItems(activeItems)
+                    .addAllChecklistItems(checklistItemProtos)
                     .build());
         }
         return summaries;

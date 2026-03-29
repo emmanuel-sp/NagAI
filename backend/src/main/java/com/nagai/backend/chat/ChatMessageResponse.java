@@ -10,6 +10,7 @@ public class ChatMessageResponse {
     private String role;
     private String content;
     private LocalDateTime createdAt;
+    private String suggestions;  // raw JSON, frontend parses
 
     public static ChatMessageResponse fromEntity(ChatMessage message) {
         ChatMessageResponse response = new ChatMessageResponse();
@@ -17,6 +18,7 @@ public class ChatMessageResponse {
         response.setRole(message.getRole());
         response.setContent(message.getContent());
         response.setCreatedAt(message.getCreatedAt());
+        response.setSuggestions(message.getSuggestions());
         return response;
     }
 }

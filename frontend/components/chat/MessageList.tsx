@@ -2,6 +2,8 @@
 
 import { RefObject } from "react";
 import { ChatMessage } from "@/types/chat";
+import ActionCard from "./ActionCard";
+import QuizCard from "./QuizCard";
 import styles from "./chat.module.css";
 
 interface MessageListProps {
@@ -9,6 +11,13 @@ interface MessageListProps {
   sending: boolean;
   messagesEndRef: RefObject<HTMLDivElement | null>;
   userInitials: string;
+  onSuggestionStatusChange: (
+    messageId: number,
+    suggestionId: string,
+    status: "accepted" | "rejected"
+  ) => void;
+  onDataRefresh: () => void;
+  onQuizSelect: (messageId: number, suggestionId: string, answer: string) => void;
 }
 
 export default function MessageList({
@@ -16,6 +25,9 @@ export default function MessageList({
   sending,
   messagesEndRef,
   userInitials,
+  onSuggestionStatusChange,
+  onDataRefresh,
+  onQuizSelect,
 }: MessageListProps) {
   return (
     <div className={styles.messagesArea}>
@@ -41,7 +53,31 @@ export default function MessageList({
             }`}
           >
             {msg.role === "assistant" ? (
-              <MarkdownContent content={msg.content} />
+              <>
+                <MarkdownContent content={msg.content} />
+                {msg.suggestions?.map((s) =>
+                  s.type === "quiz" ? (
+                    <QuizCard
+                      key={s.suggestionId}
+                      suggestion={s}
+                      onSelect={(answer) =>
+                        onQuizSelect(msg.messageId, s.suggestionId, answer)
+                      }
+                      disabled={sending}
+                    />
+                  ) : (
+                    <ActionCard
+                      key={s.suggestionId}
+                      suggestion={s}
+                      messageId={msg.messageId}
+                      onStatusChange={(suggestionId, status) =>
+                        onSuggestionStatusChange(msg.messageId, suggestionId, status)
+                      }
+                      onDataRefresh={onDataRefresh}
+                    />
+                  )
+                )}
+              </>
             ) : (
               msg.content
             )}
@@ -76,6 +112,10 @@ function MarkdownContent({ content }: { content: string }) {
 
   // Bold
   processed = processed.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+
+  // Italic (single * or _)
+  processed = processed.replace(/(?<!\w)\*([^*]+)\*(?!\w)/g, "<em>$1</em>");
+  processed = processed.replace(/(?<!\w)_([^_]+)_(?!\w)/g, "<em>$1</em>");
 
   // Links
   processed = processed.replace(

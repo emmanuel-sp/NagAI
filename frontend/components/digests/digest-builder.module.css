@@ -214,7 +214,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 11px 22px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-2xl);
   cursor: pointer;
   transition:
     color var(--transition-fast),

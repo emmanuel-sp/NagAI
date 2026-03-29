@@ -8,19 +8,19 @@ interface PresetPromptsProps {
 
 const PRESETS = [
   {
-    icon: "◆",
+    icon: "✦",
     label: "Help me define a goal",
     prompt:
       "I'd like help defining a new goal. Can you walk me through making it SMART?",
   },
   {
-    icon: "◎",
+    icon: "✦",
     label: "Review my progress",
     prompt:
       "Can you review my current goals and checklist progress? Let me know where I stand and what to focus on.",
   },
   {
-    icon: "▸",
+    icon: "✦",
     label: "What should I focus on today?",
     prompt:
       "Based on my goals and checklists, what should I prioritize today?",

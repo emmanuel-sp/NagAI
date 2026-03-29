@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,5 +59,18 @@ public class ChatController {
         var result = chatService.getAgentMessage(sentMessageId);
         if (result == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("/messages/{messageId}/suggestions/{suggestionId}")
+    public ResponseEntity<Void> updateSuggestionStatus(
+            @PathVariable Long messageId,
+            @PathVariable String suggestionId,
+            @RequestBody Map<String, String> body) {
+        String status = body.get("status");
+        if (status == null || (!status.equals("accepted") && !status.equals("rejected"))) {
+            return ResponseEntity.badRequest().build();
+        }
+        chatService.updateSuggestionStatus(messageId, suggestionId, status);
+        return ResponseEntity.noContent().build();
     }
 }

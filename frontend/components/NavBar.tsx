@@ -8,7 +8,8 @@ import { useAgentData } from "@/contexts/AgentDataContext";
 import { AgentContext, CreateContextRequest } from "@/types/agent";
 import ContextFormModal from "@/components/agent-builder/ContextFormModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import { IoSidebarPanel, IoAdd, IoSettings, IoChevronDown } from "@/components/icons";
+import { IoSidebarPanel, IoAdd, IoSettings, IoChevronDown, IoBell, IoPerson } from "@/components/icons";
+import MessageInboxPanel from "@/components/inbox/MessageInboxPanel";
 import styles from "./NavBar.module.css";
 
 const navLinks = [
@@ -47,6 +48,7 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedContext, setSelectedContext] = useState<AgentContext | null>(null);
   const [isDeploying, setIsDeploying] = useState(false);
+  const [inboxOpen, setInboxOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
     title: string;
     message: string;
@@ -262,14 +264,28 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
         {/* Spacer */}
         <div className={styles.spacer} />
 
+        {/* Notification bell */}
+        <button
+          className={styles.bellBtn}
+          onClick={() => setInboxOpen(true)}
+          aria-label="Open message inbox"
+          title="Messages"
+        >
+          <IoBell size={15} />
+          <span className={styles.bellLabel}>Messages</span>
+        </button>
+
         {/* Profile */}
         <Link
           href="/profile"
           className={`${styles.navLink} ${styles.profileLink} ${active("/profile") ? styles.navLinkActive : ""}`}
         >
-          Profile
+          <IoPerson size={15} />
+          <span className={styles.navLinkLabel}>Profile</span>
         </Link>
       </nav>
+
+      <MessageInboxPanel isOpen={inboxOpen} onClose={() => setInboxOpen(false)} />
 
       <button
         className={`${styles.toggleButton} ${collapsed && !mobileOpen ? styles.toggleCollapsed : ""}`}

@@ -151,7 +151,8 @@ public class AiGrpcClientService {
     public AgentChatResponse agentChat(String userMessage, String userProfile,
                                         List<ChatGoalSummary> goals,
                                         List<ChatHistoryEntry> history,
-                                        String fromContextSummary) {
+                                        String fromContextSummary,
+                                        Long userId) {
         try {
             AgentChatRequest.Builder builder = AgentChatRequest.newBuilder()
                     .setUserMessage(userMessage)
@@ -160,6 +161,9 @@ public class AiGrpcClientService {
                     .addAllHistory(history);
             if (fromContextSummary != null && !fromContextSummary.isBlank()) {
                 builder.setFromContextSummary(fromContextSummary);
+            }
+            if (userId != null) {
+                builder.setUserId(userId);
             }
             return stubWithCorrelation()
                     .withDeadlineAfter(30, java.util.concurrent.TimeUnit.SECONDS)

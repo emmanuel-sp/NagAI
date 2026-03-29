@@ -138,6 +138,15 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
                     "completed_items": g.completed_items,
                     "total_items": g.total_items,
                     "active_items": list(g.active_items),
+                    "goal_id": g.goal_id,
+                    "checklist_items": [
+                        {
+                            "checklist_id": ci.checklist_id,
+                            "title": ci.title,
+                            "completed": ci.completed,
+                        }
+                        for ci in g.checklist_items
+                    ],
                 }
                 for g in request.goals
             ]
@@ -145,14 +154,27 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
                 {"role": e.role, "content": e.content}
                 for e in request.history
             ]
-            response_text = chat_handler.handle_chat(
+            response_text, suggestions = chat_handler.handle_chat(
                 request.user_message,
                 request.user_profile,
                 goals,
                 history,
                 request.from_context_summary,
+                user_id=request.user_id,
             )
-            return ai_service_pb2.AgentChatResponse(assistant_message=response_text)
+            pb_suggestions = [
+                ai_service_pb2.ActionSuggestion(
+                    suggestion_id=s["suggestion_id"],
+                    type=s["type"],
+                    display_text=s["display_text"],
+                    params_json=s["params_json"],
+                )
+                for s in suggestions
+            ]
+            return ai_service_pb2.AgentChatResponse(
+                assistant_message=response_text,
+                suggestions=pb_suggestions,
+            )
         except Exception as e:
             logger.error(f"AgentChat error: {e}", exc_info=True)
             context.set_code(grpc.StatusCode.INTERNAL)

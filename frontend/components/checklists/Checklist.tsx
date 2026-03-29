@@ -106,7 +106,7 @@ export default function Checklist({
           {sortedItems.length === 0 ? (
             <>
               <button onClick={onGenerateFullChecklist || (() => {})} className={styles.generateFullButton} disabled={isGenerating}>
-                <IoSparkles size={20} />
+                
                 Generate Checklist with AI
               </button>
               <button onClick={() => setIsAdding(true)} className={styles.addItemButtonSecondary}>
@@ -121,7 +121,6 @@ export default function Checklist({
                 {atItemLimit ? "Item Limit (20)" : "Add Item"}
               </button>
               <button onClick={onGenerateItem || (() => {})} className={styles.generateItemButton} disabled={isGenerating || atItemLimit}>
-                <IoSparkles size={18} />
                 AI Suggest
               </button>
             </>

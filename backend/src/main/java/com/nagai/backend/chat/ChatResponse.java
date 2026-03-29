@@ -10,4 +10,5 @@ public class ChatResponse {
     private Long messageId;
     private String content;
     private String sessionTitle;
+    private String suggestions;  // JSON string of ActionSuggestion list
 }

@@ -1,6 +1,6 @@
 :root {
   /* ─── Vibrant Coral Color System ─── */
-  --accent: #8a3b46;
+  --accent: #69aaff;
   --accent-dark: color-mix(in srgb, var(--accent), black 15%);
   --accent-darker: color-mix(in srgb, var(--accent), black 30%);
   --accent-light: color-mix(in srgb, var(--accent), transparent 90%);

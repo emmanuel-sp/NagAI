@@ -238,6 +238,15 @@ export const IoSettings = S(
 
 export const IoCheck = S(<polyline points="20 6 9 17 4 12" />);
 
+export const IoBell = S(
+  <>
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </>
+);
+
+export const IoChevronRight = S(<polyline points="9 18 15 12 9 6" />);
+
 export const IoCompass = S(
   <>
     <circle cx="12" cy="12" r="10" />

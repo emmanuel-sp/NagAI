@@ -244,7 +244,7 @@ export default function DailyChecklistContainer({
                   </>
                 ) : (
                   <>
-                    <IoSparkles size={16} />
+                  
                     Generate Daily Plan
                   </>
                 )}

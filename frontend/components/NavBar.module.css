@@ -111,6 +111,41 @@
   background: var(--accent-light);
 }
 
+/* ─── Notification Bell ─── */
+.bellBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  margin-bottom: 2px;
+}
+
+.bellBtn:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.bellLabel {
+  font-size: var(--fs-sm);
+}
+
+/* ─── Nav link label — spacing only, no hover ─── */
+.navLinkLabel {
+  margin-left: 8px;
+}
+
 /* ─── Profile Link — floating, no hairline ─── */
 .profileLink {
   margin-top: 8px;

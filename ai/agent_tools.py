@@ -1,6 +1,8 @@
 """Shared tools and personalities for agent email and chat handlers."""
 
+import json
 import logging
+import uuid
 
 import web_search
 
@@ -47,6 +49,170 @@ TOOLS = [
                 },
             },
             "required": ["query"],
+        },
+    },
+]
+
+QUIZ_TOOLS = [
+    {
+        "name": "present_quiz",
+        "description": (
+            "Present an interactive quiz question to the user with clickable option chips. "
+            "Use this to gather information step-by-step when helping the user create a goal, "
+            "clarify their intent, or explore what they want to work on. "
+            "The user will see clickable buttons for each option and can also type a free response. "
+            "After calling this tool, briefly introduce the question in your text response — "
+            "don't repeat all the options since the card already shows them.\n\n"
+            "CRITICAL: Call this tool exactly ONCE per response with ALL options in a single "
+            "'options' array. Do NOT call it multiple times or put one option per call. "
+            "Example: {\"question\": \"What area?\", \"options\": [{\"label\": \"Career\"}, {\"label\": \"Health\"}]}"
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "question": {
+                    "type": "string",
+                    "description": "The question to ask the user.",
+                },
+                "options": {
+                    "type": "array",
+                    "description": "2-6 clickable options for the user to choose from.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "label": {
+                                "type": "string",
+                                "description": "Short display label (e.g., 'Career growth').",
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Optional one-line description shown below the label.",
+                            },
+                        },
+                        "required": ["label"],
+                    },
+                },
+                "allow_free_response": {
+                    "type": "boolean",
+                    "description": "Whether to show a free-text input below the options. Default true.",
+                },
+                "free_response_placeholder": {
+                    "type": "string",
+                    "description": "Placeholder text for the free-text input (e.g., 'Or describe your own...').",
+                },
+            },
+            "required": ["question", "options"],
+        },
+    },
+]
+
+SUGGEST_TOOLS = [
+    {
+        "name": "suggest_create_goal",
+        "description": (
+            "Suggest creating a new goal for the user. The user will see an interactive card "
+            "and can accept or reject the suggestion. Optionally include initial checklist items. "
+            "ALWAYS fill in the SMART fields (specific, measurable, attainable, relevant, timely) "
+            "based on your understanding of the user's intent. Fill in as many as you can."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Goal title (max 200 chars).",
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Goal description (max 1000 chars).",
+                },
+                "specific": {
+                    "type": "string",
+                    "description": "SMART: What exactly will be accomplished? Be precise.",
+                },
+                "measurable": {
+                    "type": "string",
+                    "description": "SMART: How will progress and completion be measured?",
+                },
+                "attainable": {
+                    "type": "string",
+                    "description": "SMART: Why is this goal realistic and achievable?",
+                },
+                "relevant": {
+                    "type": "string",
+                    "description": "SMART: Why does this goal matter to the user?",
+                },
+                "timely": {
+                    "type": "string",
+                    "description": "SMART: What is the timeframe or deadline?",
+                },
+                "target_date": {
+                    "type": "string",
+                    "description": "Target completion date in ISO format (e.g., 2026-06-01). Optional.",
+                },
+                "checklist_items": {
+                    "type": "array",
+                    "description": "Optional initial checklist items for the goal.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {"type": "string", "description": "Item title."},
+                        },
+                        "required": ["title"],
+                    },
+                },
+            },
+            "required": ["title"],
+        },
+    },
+    {
+        "name": "suggest_update_goal",
+        "description": (
+            "Suggest updating an existing goal. Use goal_id from get_user_progress. "
+            "The user will see an interactive card and can accept or reject."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "goal_id": {"type": "integer", "description": "The goal ID to update."},
+                "goal_title": {"type": "string", "description": "Current goal title (for display)."},
+                "title": {"type": "string", "description": "New title (optional)."},
+                "description": {"type": "string", "description": "New description (optional)."},
+                "target_date": {"type": "string", "description": "New target date ISO format (optional)."},
+            },
+            "required": ["goal_id", "goal_title"],
+        },
+    },
+    {
+        "name": "suggest_add_checklist_item",
+        "description": (
+            "Suggest adding a checklist item to an existing goal. Use goal_id from get_user_progress. "
+            "The user will see an interactive card and can accept or reject."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "goal_id": {"type": "integer", "description": "The goal to add the item to."},
+                "goal_title": {"type": "string", "description": "Goal title (for display)."},
+                "title": {"type": "string", "description": "Checklist item title (max 200 chars)."},
+                "notes": {"type": "string", "description": "Optional notes (max 500 chars)."},
+            },
+            "required": ["goal_id", "goal_title", "title"],
+        },
+    },
+    {
+        "name": "suggest_complete_checklist_item",
+        "description": (
+            "Suggest marking a checklist item as complete. Use checklist_id from get_user_progress. "
+            "The user will see an interactive card and can accept or reject."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "checklist_id": {"type": "integer", "description": "The checklist item ID to complete."},
+                "title": {"type": "string", "description": "Item title (for display)."},
+            },
+            "required": ["checklist_id", "title"],
         },
     },
 ]
@@ -131,10 +297,17 @@ def execute_tool(tool_name, tool_input, context):
             items = goal.get("checklistItems", [])
             total = len(items)
             completed = sum(1 for i in items if i.get("completed"))
-            active = [i["title"] for i in items if not i.get("completed")]
-            recent = [i["title"] for i in items if i.get("completed") and i.get("completedAt")]
+            active = [
+                f"[ID={i.get('checklistId', '?')}] {i['title']}"
+                for i in items if not i.get("completed")
+            ]
+            recent = [
+                f"[ID={i.get('checklistId', '?')}] {i['title']}"
+                for i in items if i.get("completed") and i.get("completedAt")
+            ]
 
-            part = f"Goal: {goal['title']}\n"
+            goal_id = goal.get("goalId", "?")
+            part = f"Goal [ID={goal_id}]: {goal['title']}\n"
             if goal.get("description"):
                 part += f"Description: {goal['description']}\n"
             if goal.get("smartContext"):
@@ -172,18 +345,162 @@ def execute_tool(tool_name, tool_input, context):
             lines.append(f"- {r['title']}: {r['link']}\n  {r['snippet']}")
         return "\n".join(lines)
 
+    # --- Suggest tools (chat only) ---
+
+    elif tool_name == "suggest_create_goal":
+        title = tool_input.get("title", "")
+        description = tool_input.get("description", "")
+        checklist_items = tool_input.get("checklist_items", [])
+        params = {"title": title, "description": description}
+        # SMART fields
+        for field in ("specific", "measurable", "attainable", "relevant", "timely"):
+            if tool_input.get(field):
+                params[field] = tool_input[field]
+        if tool_input.get("target_date"):
+            params["targetDate"] = tool_input["target_date"]
+        if checklist_items:
+            params["checklist_items"] = checklist_items
+
+        display = f"Create goal: \"{title}\""
+        if checklist_items:
+            display += f" with {len(checklist_items)} checklist item(s)"
+
+        suggestions = context.setdefault("_suggestions", [])
+        suggestions.append({
+            "suggestion_id": str(uuid.uuid4()),
+            "type": "create_goal",
+            "display_text": display,
+            "params_json": json.dumps(params),
+        })
+        return f"Suggestion queued: {display}. The user will see an accept/reject card."
+
+    elif tool_name == "suggest_update_goal":
+        goal_id = tool_input.get("goal_id")
+        goal_title = tool_input.get("goal_title", "")
+        updates = {}
+        if tool_input.get("title"):
+            updates["title"] = tool_input["title"]
+        if tool_input.get("description"):
+            updates["description"] = tool_input["description"]
+        if tool_input.get("target_date"):
+            updates["targetDate"] = tool_input["target_date"]
+
+        if not updates:
+            return "No updates specified. Include at least one field to update."
+
+        params = {"goalId": goal_id, "goalTitle": goal_title, "updates": updates}
+        display = f"Update goal: \"{goal_title}\" — change {', '.join(updates.keys())}"
+
+        suggestions = context.setdefault("_suggestions", [])
+        suggestions.append({
+            "suggestion_id": str(uuid.uuid4()),
+            "type": "update_goal",
+            "display_text": display,
+            "params_json": json.dumps(params),
+        })
+        return f"Suggestion queued: {display}. The user will see an accept/reject card."
+
+    elif tool_name == "suggest_add_checklist_item":
+        goal_id = tool_input.get("goal_id")
+        goal_title = tool_input.get("goal_title", "")
+        title = tool_input.get("title", "")
+        notes = tool_input.get("notes", "")
+
+        params = {"goalId": goal_id, "goalTitle": goal_title, "title": title}
+        if notes:
+            params["notes"] = notes
+
+        display = f"Add to \"{goal_title}\": {title}"
+
+        suggestions = context.setdefault("_suggestions", [])
+        suggestions.append({
+            "suggestion_id": str(uuid.uuid4()),
+            "type": "add_checklist_item",
+            "display_text": display,
+            "params_json": json.dumps(params),
+        })
+        return f"Suggestion queued: {display}. The user will see an accept/reject card."
+
+    elif tool_name == "suggest_complete_checklist_item":
+        checklist_id = tool_input.get("checklist_id")
+        title = tool_input.get("title", "")
+
+        params = {"checklistId": checklist_id, "title": title}
+        display = f"Mark complete: \"{title}\""
+
+        suggestions = context.setdefault("_suggestions", [])
+        suggestions.append({
+            "suggestion_id": str(uuid.uuid4()),
+            "type": "complete_checklist_item",
+            "display_text": display,
+            "params_json": json.dumps(params),
+        })
+        return f"Suggestion queued: {display}. The user will see an accept/reject card."
+
+    elif tool_name == "present_quiz":
+        # Only allow one quiz per response — ignore duplicates
+        suggestions = context.setdefault("_suggestions", [])
+        if any(s["type"] == "quiz" for s in suggestions):
+            return (
+                "ERROR: A quiz has already been presented in this response. "
+                "Do NOT call present_quiz again. Only one quiz per message."
+            )
+
+        question = tool_input.get("question", "")
+        options = tool_input.get("options", [])
+        allow_free = tool_input.get("allow_free_response", True)
+        placeholder = tool_input.get("free_response_placeholder", "Or type your own...")
+
+        # Validate options is a proper array of objects with "label" keys
+        if not isinstance(options, list) or len(options) < 2:
+            return (
+                "ERROR: 'options' must be a JSON array with 2-6 objects. "
+                "Each object needs a 'label' string. Example: "
+                '[{"label": "Option A"}, {"label": "Option B", "description": "Details"}]. '
+                "Do NOT put each option in a separate tool call."
+            )
+        valid_options = []
+        for opt in options:
+            if isinstance(opt, dict) and isinstance(opt.get("label"), str) and opt["label"].strip():
+                valid_options.append(opt)
+        if len(valid_options) < 2:
+            return (
+                "ERROR: Each option must be an object with a 'label' string. "
+                "Found malformed options. Retry with proper format: "
+                '[{"label": "Option A"}, {"label": "Option B"}].'
+            )
+
+        params = {
+            "question": question,
+            "options": valid_options,
+            "allowFreeResponse": allow_free,
+            "freeResponsePlaceholder": placeholder,
+        }
+
+        suggestions.append({
+            "suggestion_id": str(uuid.uuid4()),
+            "type": "quiz",
+            "display_text": question,
+            "params_json": json.dumps(params),
+        })
+        return f"Quiz presented to user: \"{question}\" with {len(valid_options)} options. Wait for their response."
+
     return "Unknown tool."
 
 
 def run_agent_loop(client, model, system_prompt, tool_context,
                    initial_message="Generate a personalized message for the user now.",
-                   max_tokens=512, max_iterations=5, prior_messages=None):
+                   max_tokens=512, max_iterations=5, prior_messages=None,
+                   tools=None):
     """Run the Claude tool-use loop. Returns the final text response.
 
     prior_messages: optional list of {"role": "user"|"assistant", "content": str}
         to prepend as conversation history before the initial_message.
+    tools: optional list of tool definitions. Defaults to TOOLS (read-only).
     """
     import time
+
+    active_tools = tools or TOOLS
 
     messages = []
     if prior_messages:
@@ -199,7 +516,7 @@ def run_agent_loop(client, model, system_prompt, tool_context,
             model=model,
             max_tokens=max_tokens,
             system=system_prompt,
-            tools=TOOLS,
+            tools=active_tools,
             messages=messages,
         )
         call_ms = round((time.monotonic() - call_start) * 1000, 1)

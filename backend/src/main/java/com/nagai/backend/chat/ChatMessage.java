@@ -31,6 +31,9 @@ public class ChatMessage {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(columnDefinition = "TEXT")
+    private String suggestions;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;

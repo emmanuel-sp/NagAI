@@ -48,3 +48,14 @@ export async function fetchContextSummary(
   );
   return result.summary;
 }
+
+export async function updateSuggestionStatus(
+  messageId: number,
+  suggestionId: string,
+  status: "accepted" | "rejected"
+): Promise<void> {
+  await apiRequest(`/chat/messages/${messageId}/suggestions/${suggestionId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}

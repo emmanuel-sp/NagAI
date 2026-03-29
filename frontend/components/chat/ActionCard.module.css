@@ -1,0 +1,130 @@
+.card {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-top: 10px;
+  background: var(--bg-card);
+  animation: cardFadeIn 0.3s ease both;
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cardDone {
+  opacity: 0.6;
+  border-color: var(--border);
+}
+
+.cardRejected {
+  opacity: 0.45;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.label {
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-600);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusBadge {
+  margin-left: auto;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: #6ee07a;
+  background: rgba(110, 224, 122, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.statusRejected {
+  color: var(--text-muted);
+  background: rgba(135, 136, 152, 0.1);
+}
+
+.body {
+  margin-bottom: 4px;
+}
+
+.displayText {
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.subItems {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  list-style: disc;
+}
+
+.subItems li {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.error {
+  font-size: var(--fs-xs);
+  color: #ef6b73;
+  margin: 6px 0 2px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.acceptBtn,
+.rejectBtn {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+  border: none;
+}
+
+.acceptBtn {
+  background: var(--accent);
+  color: var(--bg-page);
+}
+
+.acceptBtn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.acceptBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rejectBtn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.rejectBtn:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.rejectBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

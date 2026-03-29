@@ -15,6 +15,7 @@ import DashboardHeader from "./DashboardHeader";
 import DailyChecklistContainer from "@/components/checklists/DailyChecklistContainer";
 import GoalProgressCards from "./GoalProgressCards";
 import SystemStatusRow from "./SystemStatusRow";
+import AgentChatCard from "./AgentChatCard";
 import styles from "./dashboard.module.css";
 
 interface DashboardContainerProps {
@@ -67,6 +68,7 @@ export default function DashboardContainer({ userProfile }: DashboardContainerPr
         <DashboardHeader userName={userProfile.fullName.split(" ")[0]} />
         <DailyChecklistContainer goals={goals} />
         <GoalProgressCards goals={goals} checklists={checklists} />
+        <AgentChatCard />
         <SystemStatusRow digest={digest} agent={agent} />
       </div>
     </div>

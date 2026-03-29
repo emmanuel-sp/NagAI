@@ -46,7 +46,6 @@ export default function SmartFieldGroup({
             onClick={onGenerateSuggestion}
             disabled={isLoading || disabled}
           >
-            <IoSparkles size={14} />
             {isLoading ? "Generating..." : "AI Suggest"}
           </button>
           {disabled && <span className={styles.aiSuggestTooltip}>Enter a goal title first</span>}

@@ -4,7 +4,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgentData } from "@/contexts/AgentDataContext";
-import { AgentMessageDetail, ChatMessage, ChatSession } from "@/types/chat";
+import {
+  ActionSuggestion,
+  AgentMessageDetail,
+  ChatMessage,
+  ChatSession,
+} from "@/types/chat";
 import {
   sendMessage,
   fetchSessions,
@@ -23,7 +28,7 @@ import styles from "./chat.module.css";
 export default function ChatContainer() {
   const { user, loading: authLoading } = useAuth({ requireAuth: true });
   const searchParams = useSearchParams();
-  const { agent, goals } = useAgentData();
+  const { agent, goals, refreshAgent } = useAgentData();
 
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
@@ -115,7 +120,12 @@ export default function ChatContainer() {
   const loadMessages = async (sessionId: number) => {
     try {
       const data = await fetchSessionMessages(sessionId);
-      setMessages(data);
+      // Parse suggestions JSON from backend into typed objects
+      const parsed = data.map((msg) => ({
+        ...msg,
+        suggestions: parseSuggestions(msg.suggestions),
+      }));
+      setMessages(parsed);
     } catch {
       setMessages([]);
     }
@@ -196,12 +206,13 @@ export default function ChatContainer() {
           ]);
         }
 
-        // Add assistant message
+        // Add assistant message with suggestions
         const assistantMsg: ChatMessage = {
           messageId: response.messageId,
           role: "assistant",
           content: response.content,
           createdAt: new Date().toISOString(),
+          suggestions: parseSuggestions(response.suggestions),
         };
         setMessages((prev) => [...prev, assistantMsg]);
       } catch {
@@ -241,6 +252,43 @@ export default function ChatContainer() {
       }
     },
     [activeSessionId]
+  );
+
+  const handleSuggestionStatusChange = useCallback(
+    (messageId: number, suggestionId: string, status: "accepted" | "rejected") => {
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (msg.messageId !== messageId) return msg;
+          return {
+            ...msg,
+            suggestions: msg.suggestions?.map((s) =>
+              s.suggestionId === suggestionId ? { ...s, status } : s
+            ),
+          };
+        })
+      );
+    },
+    []
+  );
+
+  const handleQuizSelect = useCallback(
+    (messageId: number, suggestionId: string, answer: string) => {
+      // Mark the quiz as answered
+      setMessages((prev) =>
+        prev.map((msg) => {
+          if (msg.messageId !== messageId) return msg;
+          return {
+            ...msg,
+            suggestions: msg.suggestions?.map((s) =>
+              s.suggestionId === suggestionId ? { ...s, status: "accepted" as const } : s
+            ),
+          };
+        })
+      );
+      // Send the answer as the user's next message
+      handleSend(answer);
+    },
+    [handleSend]
   );
 
   if (authLoading || loadingSessions) {
@@ -312,6 +360,9 @@ export default function ChatContainer() {
               sending={sending}
               messagesEndRef={messagesEndRef}
               userInitials={initials}
+              onSuggestionStatusChange={handleSuggestionStatusChange}
+              onDataRefresh={refreshAgent}
+              onQuizSelect={handleQuizSelect}
             />
             <ChatInput {...chatInputProps} />
           </>
@@ -324,4 +375,20 @@ export default function ChatContainer() {
       </div>
     </div>
   );
+}
+
+/**
+ * Parse suggestions from backend (either JSON string or already-parsed array).
+ */
+function parseSuggestions(
+  raw: string | ActionSuggestion[] | undefined | null
+): ActionSuggestion[] | undefined {
+  if (!raw) return undefined;
+  if (Array.isArray(raw)) return raw.length > 0 ? raw : undefined;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
 }
