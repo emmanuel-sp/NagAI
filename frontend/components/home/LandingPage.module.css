@@ -2,7 +2,6 @@
    Landing Page — 2026 redesign
    ═══════════════════════════════════════════════ */
 
-/* ─── Layout ─── */
 .landing {
   width: 100%;
   min-height: 100vh;
@@ -12,7 +11,6 @@
   background: var(--bg-page);
 }
 
-/* ─── Landing Nav ─── */
 .landingNav {
   position: fixed;
   top: 20px;
@@ -46,11 +44,6 @@
   font-weight: 500;
   letter-spacing: -0.03em;
   color: var(--text-primary);
-  transition: color var(--transition-fast);
-}
-
-.logoLink:hover {
-  color: var(--accent);
 }
 
 .navActions {
@@ -99,16 +92,19 @@
   transform: scale(0.97);
 }
 
-/* ─── Scroll Reveal ─── */
 .featureSection,
 .howSection,
-.ctaSection {
+.ctaSection,
+.showcaseSection {
   opacity: 0;
   transform: translateY(32px);
 }
 
+.featureSection,
 .howSection,
-.ctaSection {
+.ctaSection,
+.showcaseSection,
+.heroSection {
   transition:
     opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -116,7 +112,6 @@
 
 .heroSection {
   opacity: 0;
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .visible {
@@ -124,8 +119,8 @@
   transform: translateY(0);
 }
 
-/* Staggered children inside visible sections */
-.visible .featureInner {
+.visible .featureInner,
+.visible .showcaseInner {
   animation: slideUp 0.7s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -138,17 +133,6 @@
 .visible .stepCard:nth-child(3) { animation-delay: 0.19s; }
 .visible .stepCard:nth-child(4) { animation-delay: 0.26s; }
 
-/* Staggered highlight pills */
-.visible .highlightPill {
-  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.visible .highlightPill:nth-child(1) { animation-delay: 0.1s; }
-.visible .highlightPill:nth-child(2) { animation-delay: 0.17s; }
-.visible .highlightPill:nth-child(3) { animation-delay: 0.24s; }
-.visible .highlightPill:nth-child(4) { animation-delay: 0.31s; }
-
-/* Step number ring pulse on reveal */
 .visible .stepCard:nth-child(1) .stepNumber { animation: ringPulse 1.2s 0.2s ease-out both; }
 .visible .stepCard:nth-child(2) .stepNumber { animation: ringPulse 1.2s 0.32s ease-out both; }
 .visible .stepCard:nth-child(3) .stepNumber { animation: ringPulse 1.2s 0.44s ease-out both; }
@@ -177,7 +161,6 @@
   }
 }
 
-/* ─── Hero Section ─── */
 .heroSection {
   display: flex;
   flex-direction: column;
@@ -187,7 +170,6 @@
   overflow: hidden;
 }
 
-/* Animated accent glow behind hero */
 .heroGlow {
   position: absolute;
   top: 5%;
@@ -220,23 +202,30 @@
 }
 
 .heroContent {
-  max-width: 720px;
+  max-width: 760px;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  padding: 160px 24px 120px;
+  padding: 160px 24px 108px;
   position: relative;
   z-index: 1;
+}
+
+.heroEyebrow {
+  margin-bottom: 16px;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 .headline {
   font-family: var(--font-display);
   font-weight: 100;
   font-size: clamp(48px, 6vw, 72px);
-  line-height: 1.0;
+  line-height: 1;
   letter-spacing: -0.04em;
   color: var(--text-primary);
   margin-bottom: 28px;
@@ -254,10 +243,27 @@
   font-size: var(--fs-xl);
   line-height: 1.7;
   color: var(--text-secondary);
-  max-width: 560px;
-  margin-bottom: 44px;
+  max-width: 620px;
+  margin-bottom: 28px;
   font-weight: 300;
   letter-spacing: 0.01em;
+}
+
+.heroMeta {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.heroMeta span {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  font-size: 12px;
 }
 
 .heroActions {
@@ -268,26 +274,34 @@
   flex-wrap: wrap;
 }
 
-.primaryCta {
+.primaryCta,
+.secondaryCta,
+.ctaButton {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   font-family: var(--font-body);
   font-size: var(--fs-sm);
-  font-weight: var(--fw-500);
-  color: #fff;
-  background: var(--accent);
-  padding: 14px 32px;
-  border-radius: var(--radius-md);
   letter-spacing: 0.01em;
-  position: relative;
-  overflow: hidden;
+  border-radius: var(--radius-md);
   transition:
     background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast),
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
 }
 
-/* Shimmer sweep on primary CTA */
+.primaryCta,
+.ctaButton {
+  font-weight: var(--fw-500);
+  color: #fff;
+  background: var(--accent);
+  padding: 14px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
 .primaryCta::after {
   content: "";
   position: absolute;
@@ -310,31 +324,24 @@
   35% { transform: translateX(100%); }
 }
 
-.primaryCta:hover {
+.primaryCta:hover,
+.ctaButton:hover {
   background: var(--accent-dark);
   box-shadow: 0 4px 24px rgba(138, 59, 70, 0.2);
 }
 
-.primaryCta:active {
+.primaryCta:active,
+.ctaButton:active,
+.navSignup:active {
   transform: scale(0.97);
 }
 
 .secondaryCta {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-body);
-  font-size: var(--fs-sm);
   font-weight: var(--fw-400);
   color: var(--text-muted);
   background: transparent;
   border: 1px solid var(--border);
   padding: 14px 28px;
-  border-radius: var(--radius-md);
-  letter-spacing: 0.005em;
-  transition:
-    color var(--transition-fast),
-    border-color var(--transition-fast),
-    background var(--transition-fast);
 }
 
 .secondaryCta:hover {
@@ -343,68 +350,31 @@
   background: var(--surface);
 }
 
-/* ─── Sticky Feature Nav ─── */
-.featureNav {
-  position: sticky;
-  top: 72px;
-  z-index: 50;
+.showcaseSection {
+  width: 100%;
+  padding: 0 24px 72px;
+}
+
+.showcaseInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 44px;
+  border-radius: 34px;
+  background:
+    linear-gradient(180deg, rgba(249, 245, 245, 0.98), rgba(255, 255, 255, 0.92));
+  border: 1px solid rgba(138, 59, 70, 0.10);
+  box-shadow:
+    0 24px 58px rgba(36, 20, 23, 0.08),
+    0 8px 18px rgba(36, 20, 23, 0.04);
   display: flex;
-  justify-content: center;
-  padding: 16px 24px;
-  margin-top: 24px;
-  pointer-events: none;
+  flex-direction: column;
+  gap: 28px;
 }
 
-
-/* ─── Highlights Bar ─── */
-.highlightsBar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
+.showcaseVisual {
+  margin-top: 8px;
 }
 
-.highlightPill {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 18px;
-  background: var(--surface-elevated);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-full);
-  font-family: var(--font-body);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-500);
-  color: var(--text-secondary);
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  outline: none;
-  pointer-events: auto;
-  transition:
-    border-color var(--transition-fast),
-    background var(--transition-fast),
-    color var(--transition-fast),
-    transform var(--transition-fast);
-}
-
-.highlightPill:hover {
-  border-color: var(--accent-border);
-  background: var(--accent-lighter);
-  color: var(--text-primary);
-  transform: translateY(-2px);
-}
-
-/* Active pill — matches current section in view */
-.highlightActive {
-  border-color: var(--accent-border);
-  background: var(--accent-lighter);
-  color: var(--text-primary);
-}
-
-/* ─── Feature Sections ─── */
 .featureSection {
   width: 100%;
   padding: 100px 24px;
@@ -415,7 +385,6 @@
     transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Alternating background */
 .featureAlt {
   background: linear-gradient(
     180deg,
@@ -425,16 +394,11 @@
   );
 }
 
-/* Active feature glow */
 .featureActive::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    circle at 50% 50%,
-    var(--accent-glow) 0%,
-    transparent 15%
-  );
+  background: radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 15%);
   pointer-events: none;
   animation: glowFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -444,15 +408,9 @@
   to { opacity: 1; }
 }
 
-
 .featureInner {
-  max-width: 640px;
+  max-width: 1180px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 16px;
   position: relative;
   z-index: 1;
 }
@@ -462,7 +420,49 @@
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Dimmed feature */
+.featureContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.featureContentWithVisual {
+  display: grid;
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  align-items: center;
+  gap: 56px;
+}
+
+.featureContentVisualLeft {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+}
+
+.featureContentVisualLeft .featureCopy {
+  order: 2;
+}
+
+.featureContentVisualLeft .featureVisual {
+  order: 1;
+}
+
+.featureCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.featureCopyVisual {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.featureVisual {
+  display: flex;
+  justify-content: center;
+}
+
 .visible.featureDimmed {
   opacity: 0.55;
 }
@@ -490,7 +490,7 @@
   color: var(--text-secondary);
   line-height: 1.7;
   font-weight: var(--fw-400);
-  max-width: 520px;
+  max-width: 560px;
 }
 
 .featureList {
@@ -522,14 +522,13 @@
   margin-top: 9px;
 }
 
-/* ─── How It Works ─── */
 .howSection {
   width: 100%;
   padding: 120px 24px;
 }
 
 .howInner {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -559,7 +558,7 @@
 
 .stepsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -611,20 +610,15 @@
   font-weight: var(--fw-400);
 }
 
-/* ─── Final CTA ─── */
 .ctaSection {
   width: 100%;
   padding: 80px 24px 120px;
 }
 
 .ctaInner {
-  max-width: 720px;
+  max-width: 760px;
   margin: 0 auto;
-  background: linear-gradient(
-    135deg,
-    var(--surface) 0%,
-    rgba(138, 59, 70, 0.06) 100%
-  );
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(138, 59, 70, 0.06) 100%);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-2xl);
   padding: 64px 48px;
@@ -638,7 +632,6 @@
   overflow: hidden;
 }
 
-/* Breathing glow behind CTA card */
 .ctaInner::before {
   content: "";
   position: absolute;
@@ -647,11 +640,7 @@
   transform: translate(-50%, -50%);
   width: 120%;
   height: 120%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(138, 59, 70, 0.06) 0%,
-    transparent 60%
-  );
+  background: radial-gradient(ellipse at center, rgba(138, 59, 70, 0.06) 0%, transparent 60%);
   pointer-events: none;
   animation: ctaGlow 5s ease-in-out infinite;
 }
@@ -689,38 +678,10 @@
 .ctaSubline {
   font-size: var(--fs-lg);
   color: var(--text-secondary);
-  max-width: 460px;
+  max-width: 520px;
   line-height: 1.6;
   font-weight: var(--fw-400);
   position: relative;
-}
-
-.ctaButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-500);
-  color: #fff;
-  background: var(--accent);
-  padding: 14px 32px;
-  border-radius: var(--radius-md);
-  transition:
-    background var(--transition-fast),
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-  letter-spacing: 0.01em;
-  margin-top: 4px;
-  position: relative;
-}
-
-.ctaButton:hover {
-  background: var(--accent-dark);
-  box-shadow: 0 4px 24px rgba(138, 59, 70, 0.2);
-}
-
-.ctaButton:active {
-  transform: scale(0.97);
 }
 
 .ctaLogin {
@@ -740,21 +701,41 @@
   color: var(--text-primary);
 }
 
-/* ═══════════════════════════════════════════════
-   Responsive
-   ═══════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .stepsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 
 @media (max-width: 900px) {
   .featureSection {
     padding: 80px 24px;
   }
 
+  .featureContent {
+    align-items: stretch;
+  }
+
+  .featureContentWithVisual {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .featureCopyVisual {
+    align-items: center;
+    text-align: center;
+  }
+
   .howSection {
     padding: 96px 24px;
   }
 
-  .stepsGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .showcaseSection {
+    padding: 0 24px 56px;
+  }
+
+  .showcaseInner {
+    padding: 36px 28px;
   }
 }
 
@@ -766,6 +747,10 @@
   .heroGlow {
     width: 400px;
     height: 300px;
+  }
+
+  .heroMeta {
+    margin-bottom: 32px;
   }
 
   .featureSection {
@@ -780,8 +765,23 @@
     padding: 48px 28px;
   }
 
-  .featureNav {
-    padding: 12px 20px;
+  .showcaseSection {
+    padding: 0 20px 48px;
+  }
+
+  .showcaseInner {
+    padding: 28px 22px;
+    border-radius: 26px;
+  }
+}
+
+@media (max-width: 640px) {
+  .featureInner {
+    max-width: 100%;
+  }
+
+  .featureCopy {
+    gap: 14px;
   }
 }
 
@@ -799,6 +799,11 @@
     font-size: var(--fs-base);
   }
 
+  .heroMeta span {
+    width: 100%;
+    text-align: center;
+  }
+
   .heroActions {
     flex-direction: column;
     align-items: stretch;
@@ -808,22 +813,7 @@
 
   .primaryCta,
   .secondaryCta {
-    justify-content: center;
-  }
-
-  .featureNav {
-    top: 56px;
-    padding: 10px 16px;
-    margin-top: 16px;
-  }
-
-  .highlightsBar {
-    gap: 6px;
-  }
-
-  .highlightPill {
-    padding: 7px 12px;
-    font-size: var(--fs-2xs);
+    width: 100%;
   }
 
   .featureSection {

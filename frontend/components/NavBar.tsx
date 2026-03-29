@@ -120,7 +120,7 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
     });
   };
 
-  if (!isLoggedIn || pathname === "/onboarding") return null;
+  if (!isLoggedIn || pathname === "/" || pathname === "/onboarding") return null;
 
   const contexts = agent?.contexts ?? [];
   const isDeployed = agent?.deployed ?? false;

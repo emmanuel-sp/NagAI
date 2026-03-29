@@ -1,6 +1,6 @@
 # NagAI
 
-A productivity app that helps you achieve your goals through AI-powered accountability. Set SMART goals, build action checklists, configure a personalized AI agent that nags/motivates you on schedule, and receive curated digests — all tailored to your profile.
+A personalized accountability OS that turns goals into daily execution. NagAI learns from onboarding and profile context, helps define SMART goals, generates goal checklists and daily plans, sends proactive nags and curated digests, and keeps the loop alive through inbox history and follow-up chat.
 
 ## Architecture
 
@@ -8,20 +8,21 @@ A productivity app that helps you achieve your goals through AI-powered accounta
 Frontend (Next.js)          port 3000
      ↕  REST/JSON
 Spring Boot Backend          port 8080
-     ↕  gRPC (sync)         port 9090
-     ↕  Redis Streams        port 6379
+     ↕  gRPC (sync)          port 9090
+     ↕  Redis Streams         port 6379
 Python AI Service
      ↕  Anthropic Claude API
 ```
 
-- **gRPC**: Main synchronous communication between ai service and backend with strict typing.
-- **Redis Streams**: Used to support scheduled, high-latency AI workflows (digest emails and agent messaging), where each task may take several seconds and must be processed reliably without blocking the backend.
+- **gRPC**: The backend calls the Python AI service synchronously for interactive AI operations such as SMART goal suggestions, checklist generation, daily checklist generation, and real-time chat.
+- **Redis Streams**: Scheduled and higher-latency workflows are queued through Redis so digest delivery and proactive agent messaging run asynchronously without blocking user requests.
+- **Internal callbacks**: After the AI service sends a digest or agent email, it persists the sent message back to the backend through internal callback endpoints so inbox history and chat follow-up links stay connected.
 
 ## Tech Stack
 
 | Layer | Stack |
 |---|---|
-| Frontend | Next.js 15, React 19, TypeScript, CSS Modules |
+| Frontend | Next.js 16, React 19, TypeScript, CSS Modules |
 | Backend | Spring Boot 4, Java, Maven, Spring Security (JWT + Google OAuth) |
 | Database | PostgreSQL, Flyway migrations |
 | AI Service | Python, gRPC, Redis Streams consumer |
@@ -86,7 +87,7 @@ python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# Edit .env — set ANTHROPIC_API_KEY, SMTP credentials, Redis host, NewsAPI key
+# Edit .env — set ANTHROPIC_API_KEY, SMTP credentials, Redis host, internal API key, NewsAPI key
 
 # Compile proto stubs (required after any .proto change)
 python -m grpc_tools.protoc \
@@ -102,7 +103,10 @@ python server.py
 python redis_consumer.py
 ```
 
-The gRPC server and Redis consumer are **separate processes** — both must be running for full functionality.
+The gRPC server and Redis consumer are **separate processes**. Both must be running for the full product loop:
+
+- gRPC server: SMART goal suggestions, checklist generation, daily checklist generation, real-time chat
+- Redis consumer: scheduled digests, proactive agent messages, email delivery, sent-message persistence
 
 ## Environment Variables
 
@@ -116,6 +120,8 @@ The defaults work for local development. Notable overrides via env vars:
 | `GRPC_AI_PORT` | `9090` | Python AI service gRPC port |
 | `REDIS_HOST` | `localhost` | Redis server host |
 | `REDIS_PORT` | `6379` | Redis server port |
+| `APP_BASE_URL` | `http://localhost:3000` | Frontend base URL for verification and app links |
+| `INTERNAL_API_KEY` | unset | Shared secret for AI-service callback endpoints |
 
 Google OAuth and email verification require real credentials — see comments in `application.properties`.
 
@@ -127,20 +133,23 @@ GRPC_PORT=9090
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
-# Email delivery (Gmail SMTP)
+# Digest email delivery (Gmail SMTP)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your_email@gmail.com
 SMTP_PASSWORD=your_app_password
 
-# Backend REST callback (for saving sent digests/messages — replaces direct DB access)
+# Backend callback URL (for saving sent messages/digests)
 BACKEND_INTERNAL_URL=http://localhost:8080
 INTERNAL_API_KEY=your_internal_api_key
 
 # Public backend URL (for email unsubscribe links)
 BACKEND_BASE_URL=http://localhost:8080
 
-# Web search (NewsAPI.org — for news content in digests)
+# Public frontend URL for email-to-chat links (defaults to http://localhost:3000 if unset)
+APP_BASE_URL=http://localhost:3000
+
+# Web search (NewsAPI.org — for news content type in digests)
 NEWSAPI_KEY=your_newsapi_key
 ```
 
@@ -160,23 +169,27 @@ NagAI/
 │   └── src/main/java/com/nagai/backend/
 │       ├── auth/           JWT auth + Google OAuth + email verification
 │       ├── users/          User entity + profile endpoints
+│       ├── inbox/          Unified inbox for sent nags and digests
 │       ├── goals/          Goal CRUD
 │       ├── checklists/     Checklist items CRUD
+│       ├── dailychecklist/ Daily plan generation + config + item toggles
 │       ├── digests/        Digest CRUD + scheduled delivery (Redis Streams)
 │       ├── agents/         AI agent + context CRUD
+│       ├── chat/           Real-time goal/accountability chat + session history
 │       ├── ai/             gRPC client + AI REST endpoints
 │       ├── config/         Security, Redis, gRPC, scheduling config
-│       ├── internal/       REST callback endpoints (AI service → backend)
+│       ├── internal/       Internal callback endpoints (AI service → backend)
 │       └── exceptions/     Domain exception classes
 │   └── src/main/proto/
 │       └── ai_service.proto   Shared gRPC contract (Java + Python)
 │
 ├── ai/                     Python AI service
-│   ├── server.py           gRPC server (real-time AI requests)
-│   ├── ai_handlers.py      Claude API call implementations
-│   ├── redis_consumer.py   Async message consumer (digests + agents)
-│   ├── digest_handler.py   Digest generation, HTML email rendering, SMTP delivery
-│   ├── agent_message_handler.py  Agent message generation + tool-use loop
+│   ├── server.py           gRPC server for interactive AI features
+│   ├── ai_handlers.py      SMART goal, checklist, daily plan, and digest generation
+│   ├── chat_handler.py     Real-time accountability chat + tool loop
+│   ├── redis_consumer.py   Async stream consumer for scheduled AI work
+│   ├── digest_handler.py   Digest generation, email rendering, SMTP delivery
+│   ├── agent_message_handler.py  Agent message generation, threading, and callbacks
 │   ├── web_search.py       NewsAPI.org integration for news content
 │   ├── logging_config.py   Structured logging setup (JSON in prod)
 │   └── requirements.txt
@@ -184,6 +197,16 @@ NagAI/
 ├── docker-compose.yml      PostgreSQL + Redis
 └── TODO.md                 Development plan (remaining steps)
 ```
+
+## Product Surface
+
+NagAI currently spans five connected product layers:
+
+1. **Personalized onboarding** — collects life context, interests, hobbies, habits, and timezone.
+2. **Goal design** — creates SMART goals with AI-assisted field suggestions.
+3. **Execution planning** — generates goal checklists and AI daily plans.
+4. **Proactive support** — sends scheduled digests and accountability messages.
+5. **Follow-up loop** — stores sent messages in a unified inbox and supports continuation in chat.
 
 ## Observability
 
@@ -244,6 +267,7 @@ Every request gets an `X-Correlation-ID` header (8-char UUID) that flows across 
 ```
 Frontend (generates ID) → Backend (MDC) → gRPC metadata → Python AI Service (contextvars)
                                         → Redis Streams  → Python AI Service (contextvars)
+                                        → Internal callback → Backend persistence
 ```
 
 All log lines include the correlation ID. Error responses from the backend include it in the JSON body (`correlationId` field) for debugging.
@@ -356,9 +380,6 @@ docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d naga
 docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT * FROM sent_agent_messages ORDER BY sent_at DESC LIMIT 5;"
 docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT digest_id, name, active, frequency, next_delivery_at FROM digests;"
 docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT context_id, name, message_type, last_message_sent_at, next_message_at FROM agent_contexts;"
-
-# Check Flyway migration status
-docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d nagai -c "SELECT * FROM flyway_schema_history;"
 ```
 
 ### Environment Variables

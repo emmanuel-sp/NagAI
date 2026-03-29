@@ -2,15 +2,15 @@
  * Root Page
  *
  * Always shows the landing page, regardless of auth state.
- * Logged-in users are auto-redirected to /home on first load (handled by LayoutClient).
+ * Logged-in users see direct links back into the product from here.
  */
 
 import LandingPage from "@/components/home/LandingPage";
 
 export const metadata = {
-  title: "NagAI - AI-Powered Accountability",
+  title: "NagAI - Personalized Accountability OS",
   description:
-    "Turn your goals into action with intelligent nudges, daily digests, and an AI agent that holds you accountable.",
+    "Turn goals into daily execution with onboarding-driven AI planning, daily plans, proactive accountability, inbox history, and follow-up chat.",
 };
 
 export default function RootPage() {

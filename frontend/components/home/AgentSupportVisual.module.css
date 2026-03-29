@@ -1,0 +1,135 @@
+.wrapper {
+  position: relative;
+  width: min(100%, 540px);
+  margin: 24px auto 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(138, 59, 70, 0.10);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 244, 244, 0.98));
+  box-shadow:
+    0 28px 54px rgba(36, 20, 23, 0.08),
+    0 8px 18px rgba(36, 20, 23, 0.05);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.eyebrow {
+  margin-bottom: 7px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.title {
+  max-width: 12ch;
+  font-size: clamp(25px, 3vw, 32px);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
+
+.status {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(138, 59, 70, 0.08);
+  color: var(--accent);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.messageBlock {
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.agentLabel {
+  margin-bottom: 8px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.agentText {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.quizCard {
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(138, 59, 70, 0.07), rgba(255, 255, 255, 0.94));
+  border: 1px solid rgba(138, 59, 70, 0.12);
+}
+
+.quizQuestion {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-primary);
+}
+
+.quizOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.quizChip {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(138, 59, 70, 0.12);
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.followUp {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.followUpCard {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.followUpLabel {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+@media (max-width: 720px) {
+  .card {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .followUp {
+    grid-template-columns: 1fr;
+  }
+}

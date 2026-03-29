@@ -1,0 +1,133 @@
+.wrapper {
+  position: relative;
+  width: min(100%, 540px);
+  margin: 24px auto 0;
+  padding: 18px 14px 28px;
+}
+
+.glow {
+  position: absolute;
+  inset: 8% 6% 10%;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(138, 59, 70, 0.11), transparent 40%),
+    linear-gradient(180deg, rgba(138, 59, 70, 0.05), rgba(255, 255, 255, 0));
+  filter: blur(30px);
+  pointer-events: none;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(138, 59, 70, 0.10);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 244, 244, 0.98));
+  box-shadow:
+    0 28px 54px rgba(36, 20, 23, 0.08),
+    0 8px 18px rgba(36, 20, 23, 0.05);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.eyebrow {
+  margin-bottom: 7px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.title {
+  max-width: 13ch;
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
+
+.status {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(138, 59, 70, 0.08);
+  color: var(--accent);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.previewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(138, 59, 70, 0.04));
+  border: 1px solid rgba(138, 59, 70, 0.12);
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.previewEyebrow {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.previewNote {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.sectionLabel {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.sectionContent {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 720px) {
+  .wrapper {
+    width: 100%;
+    padding: 12px 0 0;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 24px;
+  }
+}
