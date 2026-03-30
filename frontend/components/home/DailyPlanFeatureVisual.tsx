@@ -3,26 +3,26 @@ import styles from "./DailyPlanFeatureVisual.module.css";
 const planItems = [
   {
     time: "8:30",
-    title: "Morning planning reset",
-    note: "Recurring anchor",
+    title: "Morning review + plan the day",
+    note: "Recurring routine",
     tone: "neutral",
   },
   {
     time: "10:00",
-    title: "Finalize onboarding copy pass",
-    note: "Pulled from your launch goal",
+    title: "Write first draft of onboarding email",
+    note: "From your launch goal checklist",
     tone: "accent",
   },
   {
-    time: "13:30",
-    title: "Review top blockers in chat",
-    note: "AI suggested follow-up",
+    time: "13:00",
+    title: "Code review — Sarah's auth PR",
+    note: "Scheduled block",
     tone: "neutral",
   },
   {
-    time: "17:00",
-    title: "Prep tomorrow's launch checklist",
-    note: "Connective tissue",
+    time: "16:30",
+    title: "Update project status doc",
+    note: "End-of-day wrap",
     tone: "soft",
   },
 ];

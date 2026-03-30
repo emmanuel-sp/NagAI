@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect, KeyboardEvent } from "react";
-import { AgentContext } from "@/types/agent";
 import { Goal } from "@/types/goal";
 import styles from "./chat.module.css";
 
@@ -9,11 +8,8 @@ interface ChatInputProps {
   onSend: (text: string) => void;
   disabled: boolean;
   centered?: boolean;
-  contexts: AgentContext[];
   goals: Goal[];
-  selectedContextId: number | null;
   selectedGoalId: number | null;
-  onSelectContext: (id: number | null) => void;
   onSelectGoal: (id: number | null) => void;
 }
 
@@ -21,11 +17,8 @@ export default function ChatInput({
   onSend,
   disabled,
   centered,
-  contexts,
   goals,
-  selectedContextId,
   selectedGoalId,
-  onSelectContext,
   onSelectGoal,
 }: ChatInputProps) {
   const [text, setText] = useState("");
@@ -75,51 +68,31 @@ export default function ChatInput({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [plusOpen]);
 
-  const handleSelectContext = useCallback(
-    (id: number) => {
-      if (selectedContextId === id) {
-        onSelectContext(null);
-      } else {
-        onSelectContext(id);
-        onSelectGoal(null);
-      }
-      setPlusOpen(false);
-    },
-    [selectedContextId, onSelectContext, onSelectGoal]
-  );
-
   const handleSelectGoal = useCallback(
     (id: number) => {
       if (selectedGoalId === id) {
         onSelectGoal(null);
       } else {
         onSelectGoal(id);
-        onSelectContext(null);
       }
       setPlusOpen(false);
     },
-    [selectedGoalId, onSelectGoal, onSelectContext]
+    [selectedGoalId, onSelectGoal]
   );
 
-  const selectedContext = contexts.find((c) => c.contextId === selectedContextId);
   const selectedGoal = goals.find((g) => g.goalId === selectedGoalId);
-  const hasAttachment = !!selectedContext || !!selectedGoal;
-  const hasMenuItems = contexts.length > 0 || goals.length > 0;
+  const hasAttachment = !!selectedGoal;
+  const hasMenuItems = goals.length > 0;
 
   return (
     <div className={`${styles.inputArea} ${centered ? styles.inputAreaCentered : ""}`}>
       {hasAttachment && (
         <div style={{ paddingLeft: 8, pointerEvents: "all" }}>
           <span className={styles.attachmentChip}>
-            {selectedContext
-              ? selectedContext.name
-              : `Goal: ${selectedGoal?.title}`}
+            {`Goal: ${selectedGoal?.title}`}
             <button
               className={styles.attachmentChipRemove}
-              onClick={() => {
-                if (selectedContext) onSelectContext(null);
-                else onSelectGoal(null);
-              }}
+              onClick={() => onSelectGoal(null)}
               aria-label="Remove attachment"
             >
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
@@ -136,7 +109,7 @@ export default function ChatInput({
               <button
                 className={`${styles.plusButton} ${plusOpen ? styles.plusButtonOpen : ""}`}
                 onClick={() => setPlusOpen((v) => !v)}
-                aria-label="Attach context or goal"
+                aria-label="Attach goal"
               >
                 <svg
                   className={styles.plusIcon}
@@ -188,54 +161,30 @@ export default function ChatInput({
           </div>
         </div>
 
-        {plusOpen && (
+        {plusOpen && goals.length > 0 && (
           <div className={styles.plusMenu}>
-            {contexts.length > 0 && (
-              <div className={styles.plusMenuSection}>
-                <div className={styles.plusMenuLabel}>Contexts</div>
-                {contexts.map((ctx) => (
-                  <button
-                    key={ctx.contextId}
-                    className={`${styles.plusMenuItem} ${ctx.contextId === selectedContextId ? styles.plusMenuItemActive : ""}`}
-                    onClick={() => handleSelectContext(ctx.contextId)}
-                  >
-                    <svg className={styles.plusMenuItemIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+            <div className={styles.plusMenuSection}>
+              <div className={styles.plusMenuLabel}>Goals</div>
+              {goals.map((goal) => (
+                <button
+                  key={goal.goalId}
+                  className={`${styles.plusMenuItem} ${goal.goalId === selectedGoalId ? styles.plusMenuItemActive : ""}`}
+                  onClick={() => handleSelectGoal(goal.goalId)}
+                >
+                  <svg className={styles.plusMenuItemIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="12" cy="12" r="6" />
+                    <circle cx="12" cy="12" r="2" />
+                  </svg>
+                  <span className={styles.plusMenuItemName}>{goal.title}</span>
+                  {goal.goalId === selectedGoalId && (
+                    <svg className={styles.plusMenuItemCheck} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5" />
                     </svg>
-                    <span className={styles.plusMenuItemName}>{ctx.name}</span>
-                    {ctx.contextId === selectedContextId && (
-                      <svg className={styles.plusMenuItemCheck} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-            {goals.length > 0 && (
-              <div className={styles.plusMenuSection}>
-                <div className={styles.plusMenuLabel}>Goals</div>
-                {goals.map((goal) => (
-                  <button
-                    key={goal.goalId}
-                    className={`${styles.plusMenuItem} ${goal.goalId === selectedGoalId ? styles.plusMenuItemActive : ""}`}
-                    onClick={() => handleSelectGoal(goal.goalId)}
-                  >
-                    <svg className={styles.plusMenuItemIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <circle cx="12" cy="12" r="6" />
-                      <circle cx="12" cy="12" r="2" />
-                    </svg>
-                    <span className={styles.plusMenuItemName}>{goal.title}</span>
-                    {goal.goalId === selectedGoalId && (
-                      <svg className={styles.plusMenuItemCheck} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -13,7 +13,7 @@ export default function AccountabilityFlowVisual() {
             <span className={styles.promptLabel}>You type</span>
             <div className={styles.promptField}>
               <span className={styles.typedText}>
-                I want to launch NagAI with a landing page that actually converts.
+                Get promoted to senior engineer this year.
               </span>
             </div>
           </div>
@@ -40,29 +40,29 @@ export default function AccountabilityFlowVisual() {
             <div className={styles.item}>
               <span className={styles.itemDot} />
               <div>
-                <p className={styles.itemTitle}>Lock the landing page headline</p>
-                <p className={styles.itemNote}>Focus on sharper positioning and promise</p>
+                <p className={styles.itemTitle}>Schedule promotion criteria chat with manager</p>
+                <p className={styles.itemNote}>This week</p>
               </div>
             </div>
             <div className={styles.item}>
               <span className={styles.itemDot} />
               <div>
-                <p className={styles.itemTitle}>Generate the supporting feature visuals</p>
-                <p className={styles.itemNote}>Show real use, not screenshots</p>
+                <p className={styles.itemTitle}>Volunteer to lead the Q2 platform migration</p>
+                <p className={styles.itemNote}>By end of sprint</p>
               </div>
             </div>
             <div className={styles.item}>
               <span className={styles.itemDot} />
               <div>
-                <p className={styles.itemTitle}>Refine copy to highlight goals and AI checklists</p>
-                <p className={styles.itemNote}>Demote supporting features that clutter the story</p>
+                <p className={styles.itemTitle}>Start a weekly wins log</p>
+                <p className={styles.itemNote}>Every Friday</p>
               </div>
             </div>
             <div className={styles.item}>
               <span className={styles.itemDot} />
               <div>
-                <p className={styles.itemTitle}>Use agent support when follow-through gets fuzzy</p>
-                <p className={styles.itemNote}>Chat and nags stay there when needed</p>
+                <p className={styles.itemTitle}>Get peer feedback from 3 teammates</p>
+                <p className={styles.itemNote}>Before Q3 review</p>
               </div>
             </div>
           </div>

@@ -173,27 +173,20 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
                         <Link
                           href={`/goals/${goal.goalId}`}
                           className={styles.goalRowLink}
+                          title={goal.title}
                         >
-                          <span className={styles.contextName} title={goal.title}>
+                          <span className={styles.contextName}>
                             {goal.title}
                           </span>
                         </Link>
-                        {context ? (
+                        {context && (
                           <button
                             type="button"
-                            className={`${styles.goalRowStatusButton} ${context.deployed ? styles.goalRowStatusButtonActive : styles.goalRowStatusButtonIdle}`}
+                            className={`${styles.goalStatusDot} ${context.deployed ? styles.goalStatusDotActive : styles.goalStatusDotIdle}`}
                             onClick={() => void handleToggleGoalDeployment(context.contextId, context.deployed)}
                             disabled={isDeploying}
-                          >
-                            {isDeploying ? "..." : context.deployed ? "Live" : "Deploy"}
-                          </button>
-                        ) : (
-                          <Link
-                            href={`/goals/${goal.goalId}`}
-                            className={styles.goalRowStatusLink}
-                          >
-                            Set up
-                          </Link>
+                            title={isDeploying ? "Updating..." : context.deployed ? "Live — click to stop" : "Draft — click to deploy"}
+                          />
                         )}
                       </div>
                     );

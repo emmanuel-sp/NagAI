@@ -13,8 +13,8 @@ export default function AgentSupportVisual() {
       <div className={styles.card}>
         <div className={styles.header}>
           <div>
-            <p className={styles.eyebrow}>Chat support</p>
-            <h3 className={styles.title}>Talk through a goal, a blocker, or the next move</h3>
+            <p className={styles.eyebrow}>AI Agent + Chat</p>
+            <h3 className={styles.title}>Deploy an agent, get nagged by email, follow up in chat</h3>
           </div>
           <span className={styles.status}>Agent chat</span>
         </div>
@@ -22,8 +22,8 @@ export default function AgentSupportVisual() {
         <div className={styles.messageBlock}>
           <p className={styles.agentLabel}>Agent</p>
           <p className={styles.agentText}>
-            Want help figuring out your next goal? I can narrow it down with a
-            quick quiz, then help you stay on track when the plan gets messy.
+            Got a nag email about your goal? Continue here. Or start fresh—I
+            can help you define a goal, clear a blocker, or pick the next move.
           </p>
         </div>
 
@@ -40,12 +40,12 @@ export default function AgentSupportVisual() {
 
         <div className={styles.followUp}>
           <div className={styles.followUpCard}>
-            <span className={styles.followUpLabel}>After a nag</span>
-            <p>Continue the thread when a proactive nudge uncovers a real blocker.</p>
+            <span className={styles.followUpLabel}>After a nag email</span>
+            <p>Continue the thread when an email check-in raises a real question.</p>
           </div>
           <div className={styles.followUpCard}>
             <span className={styles.followUpLabel}>While working</span>
-            <p>Use chat to clarify a checklist item, rethink the plan, or choose the next step.</p>
+            <p>Clarify a checklist item or figure out what to do next.</p>
           </div>
         </div>
       </div>

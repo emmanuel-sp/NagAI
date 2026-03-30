@@ -36,10 +36,8 @@ export default function ChatContainer() {
   const [sending, setSending] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(true);
 
-  // Selected context / goal for chat
-  const [selectedContextId, setSelectedContextId] = useState<number | null>(null);
+  // Selected goal for chat context
   const [selectedGoalId, setSelectedGoalId] = useState<number | null>(null);
-  const contextSummaryCache = useRef<Map<number, string>>(new Map());
 
   // fromContext: stored from email link, attached to first message only
   const fromContextRef = useRef<string>("");
@@ -59,16 +57,12 @@ export default function ChatContainer() {
   useEffect(() => {
     if (!user) return;
     const fromContext = searchParams.get("fromContext");
-    if (!fromContext) return;
-    const contextId = parseInt(fromContext, 10);
-    if (isNaN(contextId)) return;
-
-    setSelectedContextId(contextId);
+    const contextId = fromContext ? parseInt(fromContext, 10) : NaN;
 
     const msgParam = searchParams.get("msg");
     const msgId = msgParam ? parseInt(msgParam, 10) : NaN;
 
-    if (!isNaN(msgId)) {
+    if (!isNaN(contextId) && !isNaN(msgId)) {
       // Specific message: fetch it, show as first message, use as focused context
       fetchAgentMessage(msgId)
         .then((detail) => {
@@ -80,17 +74,15 @@ export default function ChatContainer() {
               `Subject: ${detail.subject}\n` +
               `---\n${detail.content}`;
             fromContextRef.current = summary;
-            contextSummaryCache.current.set(contextId, summary);
           }
         })
         .catch(() => {});
-    } else {
+    } else if (!isNaN(contextId)) {
       // Fallback: no specific message, load general context summary
       fetchContextSummary(contextId)
         .then((summary) => {
           if (summary) {
             fromContextRef.current = summary;
-            contextSummaryCache.current.set(contextId, summary);
           }
         })
         .catch(() => {});
@@ -136,19 +128,6 @@ export default function ChatContainer() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, sending]);
 
-  // Fetch and cache context summary when selected
-  const handleSelectContext = useCallback(async (contextId: number | null) => {
-    setSelectedContextId(contextId);
-    if (contextId && !contextSummaryCache.current.has(contextId)) {
-      try {
-        const summary = await fetchContextSummary(contextId);
-        contextSummaryCache.current.set(contextId, summary);
-      } catch {
-        // silently fail
-      }
-    }
-  }, []);
-
   const handleSelectGoal = useCallback((goalId: number | null) => {
     setSelectedGoalId(goalId);
   }, []);
@@ -171,11 +150,6 @@ export default function ChatContainer() {
         // Attach fromContext on the first message of a new session, then clear it
         let contextSummary = fromContextRef.current || undefined;
         if (contextSummary) fromContextRef.current = "";
-
-        // If a context is selected and no fromContext, attach the cached summary
-        if (!contextSummary && selectedContextId) {
-          contextSummary = contextSummaryCache.current.get(selectedContextId);
-        }
 
         // If a goal is selected, build a context string from the goal
         if (!contextSummary && selectedGoalId) {
@@ -224,7 +198,7 @@ export default function ChatContainer() {
         setSending(false);
       }
     },
-    [activeSessionId, sending, selectedContextId, selectedGoalId, goals]
+    [activeSessionId, sending, selectedGoalId, goals]
   );
 
   const handleNewChat = useCallback(() => {
@@ -317,16 +291,11 @@ export default function ChatContainer() {
     ? user.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "?";
 
-  const contexts = agent?.contexts ?? [];
-
   const chatInputProps = {
     onSend: handleSend,
     disabled: sending,
-    contexts,
     goals,
-    selectedContextId,
     selectedGoalId,
-    onSelectContext: handleSelectContext,
     onSelectGoal: handleSelectGoal,
   };
 

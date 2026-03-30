@@ -69,50 +69,50 @@ const features: {
 }[] = [
   {
     id: "goals",
-    label: "SMART GOAL DESIGN",
-    title: "Define sharper goals with AI-assisted SMART guidance",
+    label: "SMART GOALS",
+    title: "Turn vague intentions into goals worth acting on",
     description:
-      "NagAI helps turn vague intentions into specific, measurable goals so you start with a target worth acting on instead of a nice idea.",
+      "AI helps you build specific, measurable goals one field at a time—using your profile to make suggestions actually relevant to your life.",
     bullets: [
-      "AI suggests SMART fields one piece at a time",
-      "Profile context makes the guidance more relevant to your actual life",
-      "A clearer goal becomes the foundation for better execution",
+      "AI suggests each SMART field as you go",
+      "Your profile context makes guidance more personal",
+      "Finish with a concrete target, not a vague idea",
     ],
   },
   {
     id: "daily-plan",
     label: "DAILY PLAN",
-    title: "Turn the bigger plan into a day you can actually execute",
+    title: "A focused day shaped from your goals and checklist",
     description:
-      "NagAI can turn your goals, checklist progress, and routines into a focused daily plan so the system helps you act today instead of just organizing tomorrow.",
+      "Pull your active goals and checklist progress into a lightweight daily plan—so the system helps you act today, not just organize tomorrow.",
     bullets: [
-      "Build a day around priorities, routines, and realistic focus blocks",
-      "Pull execution forward from the goal and checklist work already in motion",
-      "Keep the plan useful and lightweight instead of auto-filling every hour",
+      "Builds from your active goals and open checklist items",
+      "Add recurring routines alongside focused work blocks",
+      "Light enough to actually use every day",
     ],
   },
   {
     id: "chat-support",
-    label: "CHAT SUPPORT",
-    title: "Talk to the agent when you need clarity, coaching, or a next move",
+    label: "AI AGENT + CHAT",
+    title: "Deploy an agent that follows up—and chat when you need real support",
     description:
-      "Use chat to figure out new goals through quiz-style conversation, stay on track with checklist work, or continue the thread after an agent nag needs a real response.",
+      "Assign an AI agent to any goal and it will proactively reach out by email—check-ins, nudges, and progress prompts. When a nag sparks a real question, continue the conversation in chat.",
     bullets: [
-      "Use guided prompts to narrow vague intentions into real goals",
-      "Ask for help when a checklist item gets fuzzy or blocked",
-      "Continue from agent nags when a reminder turns into an actual conversation",
+      "Deploy a per-goal agent that sends proactive email check-ins",
+      "Agents adapt their style—motivator, guide, or accountability nag",
+      "Use chat to define goals, unblock checklist items, or follow up after an email nag",
     ],
   },
   {
     id: "digests",
-    label: "DIGESTS",
-    title: "Get curated support content you can actually read and use",
+    label: "EMAIL DIGESTS",
+    title: "Curated digest emails, delivered on your schedule",
     description:
-      "Digests deliver personalized reading and reinforcement around the themes you care about, so support arrives as something useful to absorb rather than another nag.",
+      "Choose your topics and cadence—NagAI sends a personalized email digest with motivation, practical tips, and reading tied to your interests.",
     bullets: [
-      "Choose the kinds of content you want included in your digest",
-      "Receive lightweight motivation, insights, and practical reading tied to your interests",
-      "Keep digests distinct from agent nags, which are proactive check-ins instead of curated content",
+      "Delivered to your inbox weekly or daily",
+      "Motivation, tips, and curated articles matched to your interests",
+      "Separate from agent nags—this is content, not a check-in",
     ],
   },
 ];
@@ -120,23 +120,23 @@ const features: {
 const steps = [
   {
     number: "1",
-    title: "Add just enough context",
-    text: "Profile details give the AI richer context, without becoming the whole story.",
+    title: "Set up your profile",
+    text: "A few details make AI suggestions personal, not generic.",
   },
   {
     number: "2",
-    title: "Define a real goal",
-    text: "Use AI guidance to make the goal concrete enough to act on.",
+    title: "Build a real goal",
+    text: "AI guides you to a specific, measurable target you can act on.",
   },
   {
     number: "3",
-    title: "Work the plan for today",
-    text: "Let the system shape a daily plan from the goals and checklist work already in motion.",
+    title: "Work today's plan",
+    text: "Your goals and checklist shape a focused daily action list.",
   },
   {
     number: "4",
-    title: "Stay reinforced over time",
-    text: "Use chat for real support, let nags prompt follow-up, and read digests for curated reinforcement.",
+    title: "Get nagged until you ship",
+    text: "Email check-ins, chat support, and digest emails keep you moving.",
   },
 ];
 
@@ -167,23 +167,23 @@ export default function LandingPage() {
       >
         <div className={styles.heroGlow} aria-hidden="true" />
         <div className={styles.heroContent}>
-          <p className={styles.heroEyebrow}>AI accountability for real goals</p>
+          <p className={styles.heroEyebrow}>AI goal accountability</p>
           <h1 className={styles.headline}>
-            Define better goals.
+            Build goals that stick.
             <br />
             <span className={styles.headlineAccent}>
-              <em>Get the next actions.</em>
+              <em>With AI that follows up.</em>
             </span>
           </h1>
           <p className={styles.subline}>
-            NagAI helps you turn a goal into focused next steps, shape the day
-            around what matters, and stay supported with chat, nags, and
-            curated digests when you need reinforcement.
+            NagAI turns vague intentions into SMART goals, generates your
+            action plan, and deploys an AI agent that keeps you
+            accountable—right in your inbox.
           </p>
           <div className={styles.heroMeta}>
-            <span>Profile context makes planning richer</span>
-            <span>Goals can become a usable daily plan</span>
-            <span>Chat and digests support follow-through differently</span>
+            <span>SMART goal builder</span>
+            <span>AI-generated checklists</span>
+            <span>Email nags + digests</span>
           </div>
           <div className={styles.heroActions}>
             {isLoggedIn ? (
@@ -193,9 +193,6 @@ export default function LandingPage() {
                 </Link>
                 <Link href="/goals" className={styles.secondaryCta}>
                   View Goals
-                </Link>
-                <Link href="/goals" className={styles.secondaryCta}>
-                  Open Goal Hub
                 </Link>
               </>
             ) : (
@@ -220,8 +217,7 @@ export default function LandingPage() {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionHeadline}>From goal to next steps</h2>
             <p className={styles.sectionSubline}>
-              Start with a real goal and watch it turn into something you can act
-              on immediately.
+              Type a goal. Get a concrete checklist. Start today.
             </p>
           </div>
           <div className={styles.showcaseVisual}>
@@ -316,7 +312,7 @@ export default function LandingPage() {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionHeadline}>How It Works</h2>
             <p className={styles.sectionSubline}>
-              A focused path from ambition to execution
+              Up and running in minutes
             </p>
           </div>
           <div className={styles.stepsGrid}>
@@ -337,11 +333,10 @@ export default function LandingPage() {
       >
         <div className={styles.ctaInner}>
           <h2 className={styles.ctaHeadline}>
-            Start with one goal and let the system do the hard part
+            One goal. One plan. An AI that won&apos;t let you forget it.
           </h2>
           <p className={styles.ctaSubline}>
-            Build a sharper target, generate the next actions, and lean on the
-            agent when you need help staying in motion.
+            Set up in minutes. Start moving today.
           </p>
           {isLoggedIn ? (
             <>

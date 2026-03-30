@@ -394,12 +394,12 @@
 .goalRowLink {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
   padding-left: 4px;
 }
 
 .contextName {
-  flex: 1;
-  min-width: 0;
+  display: block;
   font-family: var(--font-body);
   font-size: var(--fs-xs);
   font-weight: var(--fw-400);
@@ -416,39 +416,37 @@
   color: var(--accent);
 }
 
-.goalRowStatusButton,
-.goalRowStatusLink {
+/* Dot status indicator */
+.goalStatusDot {
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 54px;
-  padding: 5px 9px;
-  border-radius: var(--radius-full);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-.goalRowStatusButton {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 
-.goalRowStatusButtonActive {
-  background: rgba(52, 211, 153, 0.15);
-  color: #34d399;
+.goalStatusDot:hover {
+  opacity: 0.75;
+  transform: scale(1.25);
 }
 
-.goalRowStatusButtonIdle {
-  background: var(--accent-lighter);
-  color: var(--accent);
+.goalStatusDot:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
-.goalRowStatusLink {
-  background: var(--surface);
-  color: var(--text-secondary);
+.goalStatusDotActive {
+  background: #34d399;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.25);
 }
+
+.goalStatusDotIdle {
+  background: var(--text-light);
+}
+
 
 .contextRowActions {
   display: flex;

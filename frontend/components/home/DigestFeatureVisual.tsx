@@ -3,18 +3,15 @@ import styles from "./DigestFeatureVisual.module.css";
 const digestSections = [
   {
     label: "Motivation",
-    content:
-      "A short perspective shift on how to keep momentum when progress feels slower than expected, plus affirmations and motivational quotes tailored to your journey.",
+    content: "A quick perspective on staying consistent when progress feels invisible.",
   },
   {
     label: "Practical tip",
-    content:
-      "A concise idea for protecting your highest-focus block before reactive work starts crowding the day, alongside practical tips and reflection prompts you can actually use.",
+    content: "One actionable idea tied to your current focus.",
   },
   {
     label: "Relevant reading",
-    content:
-      "Curated news, knowledge snippets, resource recommendations, and progress insights tied to your selected interests so support feels useful, not generic.",
+    content: "News and articles matched to your chosen interests.",
   },
 ];
 
@@ -25,8 +22,8 @@ export default function DigestFeatureVisual() {
       <div className={styles.card}>
         <div className={styles.header}>
           <div>
-            <p className={styles.eyebrow}>Digest support</p>
-            <h3 className={styles.title}>Curated reading that supports the work without nagging you</h3>
+            <p className={styles.eyebrow}>Email digest</p>
+            <h3 className={styles.title}>Curated reading, delivered to your inbox</h3>
           </div>
           <span className={styles.status}>Weekly</span>
         </div>

@@ -73,7 +73,7 @@
   line-height: 1.45;
   color: var(--text-primary);
   animation:
-    typing 4.2s steps(54) infinite,
+    typing 10s steps(42) infinite,
     caretBlink 1s step-end infinite;
   border-right: 2px solid rgba(138, 59, 70, 0.55);
 }
@@ -162,13 +162,15 @@
   background: rgba(255, 255, 255, 0.88);
   opacity: 0;
   transform: translateY(16px);
-  animation: itemIn 4.2s ease-in-out infinite;
+  animation-duration: 10s;
+  animation-timing-function: ease;
+  animation-iteration-count: infinite;
 }
 
-.item:nth-child(1) { animation-delay: 0.9s; }
-.item:nth-child(2) { animation-delay: 1.5s; }
-.item:nth-child(3) { animation-delay: 2.1s; }
-.item:nth-child(4) { animation-delay: 2.7s; }
+.item:nth-child(1) { animation-name: item1In; }
+.item:nth-child(2) { animation-name: item2In; }
+.item:nth-child(3) { animation-name: item3In; }
+.item:nth-child(4) { animation-name: item4In; }
 
 .itemDot {
   width: 18px;
@@ -208,15 +210,10 @@
 }
 
 @keyframes typing {
-  0%, 18% {
-    width: 0;
-  }
-  35%, 78% {
-    width: 100%;
-  }
-  100% {
-    width: 0;
-  }
+  0%, 5%  { width: 0; }
+  35%     { width: 100%; }
+  72%     { width: 100%; }
+  88%, 100% { width: 0; }
 }
 
 @keyframes caretBlink {
@@ -239,19 +236,26 @@
   }
 }
 
-@keyframes itemIn {
-  0%, 18% {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  24%, 80% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
+/* Each item encodes its own wait offset — same 10s duration, no delays, loops stay in sync */
+@keyframes item1In {
+  0%, 33%  { opacity: 0; transform: translateY(14px); }
+  40%, 72% { opacity: 1; transform: translateY(0); }
+  80%, 100% { opacity: 0; transform: translateY(0); }
+}
+@keyframes item2In {
+  0%, 40%  { opacity: 0; transform: translateY(14px); }
+  47%, 72% { opacity: 1; transform: translateY(0); }
+  80%, 100% { opacity: 0; transform: translateY(0); }
+}
+@keyframes item3In {
+  0%, 47%  { opacity: 0; transform: translateY(14px); }
+  54%, 72% { opacity: 1; transform: translateY(0); }
+  80%, 100% { opacity: 0; transform: translateY(0); }
+}
+@keyframes item4In {
+  0%, 54%  { opacity: 0; transform: translateY(14px); }
+  61%, 72% { opacity: 1; transform: translateY(0); }
+  80%, 100% { opacity: 0; transform: translateY(0); }
 }
 
 @media (max-width: 960px) {
@@ -272,8 +276,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .typedText,
-  .sparkHalo,
-  .item {
+  .sparkHalo {
     animation: none;
   }
 
@@ -283,6 +286,7 @@
   }
 
   .item {
+    animation: none;
     opacity: 1;
     transform: translateY(0);
   }

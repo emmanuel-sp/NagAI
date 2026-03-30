@@ -40,7 +40,6 @@ interface GoalWorkspaceContainerProps {
 }
 
 interface ContextDraft {
-  name: string;
   messageType: MessageType;
   customInstructions: string;
 }
@@ -54,9 +53,8 @@ function formatGoalDate(dateString?: string) {
   });
 }
 
-function getDefaultContext(goalTitle: string): ContextDraft {
+function getDefaultContext(): ContextDraft {
   return {
-    name: `${goalTitle} support`,
     messageType: "motivation",
     customInstructions: "",
   };
@@ -82,7 +80,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isEditGoalOpen, setIsEditGoalOpen] = useState(false);
   const [generatingChecklist, setGeneratingChecklist] = useState(false);
-  const [contextDraft, setContextDraft] = useState<ContextDraft>(getDefaultContext("Goal"));
+  const [contextDraft, setContextDraft] = useState<ContextDraft>(getDefaultContext());
   const [isSavingContext, setIsSavingContext] = useState(false);
   const [isTogglingContext, setIsTogglingContext] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
@@ -133,13 +131,12 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
     if (!goal) return;
     if (currentContext) {
       setContextDraft({
-        name: currentContext.name,
         messageType: currentContext.messageType,
         customInstructions: currentContext.customInstructions ?? "",
       });
       return;
     }
-    setContextDraft(getDefaultContext(goal.title));
+    setContextDraft(getDefaultContext());
   }, [currentContext, goal]);
 
   const syncChecklistItem = (updater: (current: ChecklistType) => ChecklistType) => {
@@ -271,7 +268,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
   const handleContextSave = async () => {
     const payload: CreateContextRequest = {
       goalId,
-      name: contextDraft.name.trim() || `${goal?.title ?? "Goal"} support`,
+      name: goal?.title ?? "Goal Agent",
       messageType: contextDraft.messageType,
       customInstructions: contextDraft.customInstructions.trim() || undefined,
     };
@@ -327,10 +324,9 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
   }
 
   const contextDirty = currentContext
-    ? contextDraft.name !== currentContext.name ||
-      contextDraft.messageType !== currentContext.messageType ||
+    ? contextDraft.messageType !== currentContext.messageType ||
       contextDraft.customInstructions !== (currentContext.customInstructions ?? "")
-    : contextDraft.name.trim().length > 0 || contextDraft.customInstructions.trim().length > 0;
+    : true;
 
   return (
     <div className={styles.workspaceShell}>
@@ -390,7 +386,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
           <div className={styles.statCard}>
             <span className={styles.statLabel}>Goal Agent</span>
             <strong className={styles.statValue}>
-              {currentContext ? (currentContext.deployed ? "Live" : "Draft") : "Not set"}
+              {currentContext ? (currentContext.deployed ? "Live" : "Draft") : "—"}
             </strong>
           </div>
           <div className={styles.statCard}>
@@ -434,7 +430,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
               <div>
                 <h2 className={styles.sectionTitle}>Goal Agent</h2>
                 <p className={styles.sectionSubtitle}>
-                  One configurable agent context per goal, with deploy control built right into the page.
+                  Sends proactive email nudges for this goal. Choose a message style, add any custom instructions, and deploy when ready.
                 </p>
               </div>
               <span
@@ -442,7 +438,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
                   currentContext?.deployed ? styles.deploymentPillActive : styles.deploymentPillIdle
                 }`}
               >
-                {currentContext ? (currentContext.deployed ? "Live" : "Draft") : "Not set"}
+                {currentContext ? (currentContext.deployed ? "Live" : "Draft") : "—"}
               </span>
             </div>
 
@@ -454,19 +450,6 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
 
             <div className={styles.contextEditor}>
               <div className={styles.fieldGroup}>
-                <label className={styles.fieldLabel}>Context name</label>
-                <input
-                  type="text"
-                  value={contextDraft.name}
-                  onChange={(event) =>
-                    setContextDraft((current) => ({ ...current, name: event.target.value }))
-                  }
-                  placeholder="How should this goal agent be named?"
-                  maxLength={100}
-                />
-              </div>
-
-              <div className={styles.fieldGroup}>
                 <label className={styles.fieldLabel}>Message style</label>
                 <select
                   value={contextDraft.messageType}
@@ -477,9 +460,9 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
                     }))
                   }
                 >
-                  <option value="nag">Nag</option>
-                  <option value="motivation">Motivation</option>
-                  <option value="guidance">Guidance</option>
+                  <option value="nag">Nag — frequent, direct reminders</option>
+                  <option value="motivation">Motivation — encouraging check-ins</option>
+                  <option value="guidance">Guidance — actionable next-step advice</option>
                 </select>
               </div>
 
@@ -493,38 +476,40 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
                       customInstructions: event.target.value,
                     }))
                   }
-                  rows={5}
-                  placeholder="Tell the agent how to support this goal."
+                  rows={4}
+                  placeholder="Anything specific the agent should know or focus on for this goal."
                   maxLength={2000}
                 />
               </div>
 
-              <div className={styles.contextActionsRow}>
-                <button
-                  type="button"
-                  className={styles.secondaryButton}
-                  disabled={!canCreateContext || !contextDirty || isSavingContext}
-                  onClick={() => void handleContextSave()}
-                >
-                  {isSavingContext
-                    ? "Saving..."
-                    : currentContext
-                      ? "Save Goal Agent"
-                      : "Create Goal Agent"}
-                </button>
+              <div className={styles.contextActionsStack}>
+                <div className={styles.contextActionsMain}>
+                  <button
+                    type="button"
+                    className={styles.saveButton}
+                    disabled={!canCreateContext || !contextDirty || isSavingContext}
+                    onClick={() => void handleContextSave()}
+                  >
+                    {isSavingContext
+                      ? "Saving..."
+                      : currentContext
+                        ? "Save Changes"
+                        : "Set Up Agent"}
+                  </button>
 
-                <button
-                  type="button"
-                  className={styles.deployActionButton}
-                  disabled={!currentContext || isTogglingContext}
-                  onClick={() => void handleContextDeployment()}
-                >
-                  {isTogglingContext
-                    ? "Updating..."
-                    : currentContext?.deployed
-                      ? "Stop"
-                      : "Deploy"}
-                </button>
+                  <button
+                    type="button"
+                    className={`${styles.deployActionButton} ${currentContext?.deployed ? styles.deployActionButtonStop : ""}`}
+                    disabled={!currentContext || isTogglingContext}
+                    onClick={() => void handleContextDeployment()}
+                  >
+                    {isTogglingContext
+                      ? "Updating..."
+                      : currentContext?.deployed
+                        ? "Stop"
+                        : "Deploy"}
+                  </button>
+                </div>
 
                 {currentContext && (
                   <button
@@ -533,8 +518,8 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
                     onClick={() =>
                       setConfirmAction({
                         title: "Remove Goal Agent",
-                        message: `Delete "${currentContext.name}" from this goal?`,
-                        confirmLabel: "Delete",
+                        message: "Remove the agent from this goal? You can set it up again at any time.",
+                        confirmLabel: "Remove",
                         destructive: true,
                         onConfirm: async () => {
                           await handleDeleteContext(currentContext.contextId);
@@ -543,15 +528,17 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
                       })
                     }
                   >
-                    Delete
+                    Remove agent
                   </button>
                 )}
               </div>
 
               <p className={styles.contextHelper}>
                 {currentContext
-                  ? "Save configuration changes here, then deploy when you want this goal agent to start nudging."
-                  : "Create the goal agent here first. Deployment becomes available once the context exists."}
+                  ? currentContext.deployed
+                    ? "Agent is live and sending emails. Stop it any time, or adjust settings and save."
+                    : "Agent is saved but not active. Deploy it to start receiving email nudges."
+                  : "Set up this agent to start receiving email nudges for this goal."}
               </p>
             </div>
           </section>
