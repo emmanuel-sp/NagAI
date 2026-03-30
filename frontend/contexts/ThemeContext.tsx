@@ -11,7 +11,7 @@ export const ACCENT_CONFIGS: Record<
 > = {
   blue: { light: "#69aaff", lightFg: "#ffffff", dark: "#69aaff", darkFg: "#0a1628", swatch: "#69aaff", label: "Blue" },
   gold: { light: "#8556f5", lightFg: "#1a1a1a", dark: "#aa86fd", darkFg: "#1a0f00", swatch: "#8556f5", label: "Gold" },
-  wine: { light: "#8a3b46", lightFg: "#ffffff", dark: "#d4717d", darkFg: "#ffffff", swatch: "#8a3b46", label: "Wine" },
+  wine: { light: "#8a3b46", lightFg: "#ffffff", dark: "#ac5f5f", darkFg: "#ffffff", swatch: "#8a3b46", label: "Wine" },
   mono: { light: "#1a1a1a", lightFg: "#ffffff", dark: "#e0e0e0", darkFg: "#111111", swatch: "#888888", label: "B/W" },
 };
 
