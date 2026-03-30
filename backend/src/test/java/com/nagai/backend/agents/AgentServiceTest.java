@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.nagai.backend.exceptions.AgentContextNotFoundException;
+import com.nagai.backend.exceptions.DuplicateGoalContextException;
 import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.users.User;
@@ -156,6 +157,8 @@ class AgentServiceTest {
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
+        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of());
+        when(agentContextRepository.existsByAgentIdAndGoalId(10L, 50L)).thenReturn(false);
         when(goalRepository.findById(50L)).thenReturn(Optional.of(goal));
         when(agentContextRepository.save(any(AgentContext.class))).thenAnswer(inv -> {
             AgentContext c = inv.getArgument(0);
@@ -169,6 +172,22 @@ class AgentServiceTest {
         assertThat(result.getAgentId()).isEqualTo(10L);
         assertThat(result.getMessageType()).isEqualTo("guidance");
         verify(agentContextRepository).save(any(AgentContext.class));
+    }
+
+    @Test
+    void addContext_throwsWhenGoalAlreadyHasContext() {
+        AddContextRequest request = new AddContextRequest();
+        request.setName("Duplicate");
+        request.setGoalId(50L);
+        request.setMessageType("guidance");
+
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
+        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(context));
+        when(agentContextRepository.existsByAgentIdAndGoalId(10L, 50L)).thenReturn(true);
+
+        assertThatThrownBy(() -> agentService.addContext(request))
+                .isInstanceOf(DuplicateGoalContextException.class);
     }
 
     @Test

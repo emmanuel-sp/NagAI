@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.nagai.backend.exceptions.AgentContextLimitException;
 import com.nagai.backend.exceptions.AgentContextNotFoundException;
+import com.nagai.backend.exceptions.DuplicateGoalContextException;
 import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.users.User;
@@ -50,7 +51,13 @@ public class AgentService {
         User user = userService.getCurrentUser();
         Agent agent = agentRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> createDefaultAgent(user.getUserId()));
-        agent.setDeployed(true);
+        List<AgentContext> contexts = agentContextRepository.findByAgentId(agent.getAgentId());
+        contexts.forEach(context -> {
+            context.setDeployed(true);
+            context.setNextMessageAt(null);
+        });
+        agent.setDeployed(!contexts.isEmpty());
+        agentContextRepository.saveAll(contexts);
         return buildResponse(agentRepository.save(agent));
     }
 
@@ -58,11 +65,14 @@ public class AgentService {
         User user = userService.getCurrentUser();
         Agent agent = agentRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> createDefaultAgent(user.getUserId()));
+        List<AgentContext> contexts = agentContextRepository.findByAgentId(agent.getAgentId());
+        contexts.forEach(context -> context.setDeployed(false));
+        agentContextRepository.saveAll(contexts);
         agent.setDeployed(false);
         return buildResponse(agentRepository.save(agent));
     }
 
-    private static final int MAX_CONTEXTS = 4;
+    private static final int MAX_CONTEXTS = 3;
 
     public AgentContextResponse addContext(AddContextRequest request) {
         User user = userService.getCurrentUser();
@@ -71,6 +81,9 @@ public class AgentService {
         List<AgentContext> existing = agentContextRepository.findByAgentId(agent.getAgentId());
         if (existing.size() >= MAX_CONTEXTS) {
             throw new AgentContextLimitException();
+        }
+        if (agentContextRepository.existsByAgentIdAndGoalId(agent.getAgentId(), request.getGoalId())) {
+            throw new DuplicateGoalContextException();
         }
         AgentContext context = new AgentContext();
         context.setAgentId(agent.getAgentId());
@@ -87,6 +100,10 @@ public class AgentService {
         AgentContext context = agentContextRepository.findById(contextId)
                 .filter(c -> c.getAgentId().equals(agent.getAgentId()))
                 .orElseThrow(AgentContextNotFoundException::new);
+        if (!context.getGoalId().equals(request.getGoalId())
+                && agentContextRepository.existsByAgentIdAndGoalId(agent.getAgentId(), request.getGoalId())) {
+            throw new DuplicateGoalContextException();
+        }
         Goal goal = validateGoalOwnership(request.getGoalId(), user);
         if (request.getName() != null) context.setName(request.getName());
         context.setGoalId(goal.getGoalId());
@@ -95,19 +112,36 @@ public class AgentService {
         return buildContextResponse(agentContextRepository.save(context));
     }
 
+    public AgentContextResponse deployContext(Long contextId) {
+        AgentContext context = getOwnedContext(contextId);
+        context.setDeployed(true);
+        context.setNextMessageAt(null);
+        AgentContext saved = agentContextRepository.save(context);
+        syncAgentDeploymentFlag(saved.getAgentId());
+        return buildContextResponse(saved);
+    }
+
+    public AgentContextResponse stopContext(Long contextId) {
+        AgentContext context = getOwnedContext(contextId);
+        context.setDeployed(false);
+        AgentContext saved = agentContextRepository.save(context);
+        syncAgentDeploymentFlag(saved.getAgentId());
+        return buildContextResponse(saved);
+    }
+
     public void deleteContext(Long contextId) {
-        User user = userService.getCurrentUser();
-        Agent agent = agentRepository.findByUserId(user.getUserId())
-                .orElseGet(() -> createDefaultAgent(user.getUserId()));
-        AgentContext context = agentContextRepository.findById(contextId)
-                .filter(c -> c.getAgentId().equals(agent.getAgentId()))
-                .orElseThrow(AgentContextNotFoundException::new);
+        AgentContext context = getOwnedContext(contextId);
+        Long agentId = context.getAgentId();
         agentContextRepository.delete(context);
+        syncAgentDeploymentFlag(agentId);
     }
 
     public void stopByToken(String token) {
         Agent agent = agentRepository.findByUnsubscribeToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid token"));
+        List<AgentContext> contexts = agentContextRepository.findByAgentId(agent.getAgentId());
+        contexts.forEach(context -> context.setDeployed(false));
+        agentContextRepository.saveAll(contexts);
         agent.setDeployed(false);
         agentRepository.save(agent);
     }
@@ -146,6 +180,15 @@ public class AgentService {
         context.setCustomInstructions(customInstructions);
     }
 
+    private AgentContext getOwnedContext(Long contextId) {
+        User user = userService.getCurrentUser();
+        Agent agent = agentRepository.findByUserId(user.getUserId())
+                .orElseGet(() -> createDefaultAgent(user.getUserId()));
+        return agentContextRepository.findById(contextId)
+                .filter(c -> c.getAgentId().equals(agent.getAgentId()))
+                .orElseThrow(AgentContextNotFoundException::new);
+    }
+
     private Goal validateGoalOwnership(Long goalId, User user) {
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new AccessDeniedException("You do not have permission to use this goal"));
@@ -153,5 +196,15 @@ public class AgentService {
             throw new AccessDeniedException("You do not have permission to use this goal");
         }
         return goal;
+    }
+
+    private void syncAgentDeploymentFlag(Long agentId) {
+        Agent agent = agentRepository.findById(agentId).orElse(null);
+        if (agent == null) return;
+
+        boolean anyDeployed = agentContextRepository.findByAgentId(agentId).stream()
+                .anyMatch(AgentContext::isDeployed);
+        agent.setDeployed(anyDeployed);
+        agentRepository.save(agent);
     }
 }

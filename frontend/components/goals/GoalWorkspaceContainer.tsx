@@ -7,15 +7,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAgentData } from "@/contexts/AgentDataContext";
 import { GoalWithDetails } from "@/types/goal";
 import { Checklist as ChecklistType } from "@/types/checklist";
-import { AgentContext, CreateContextRequest } from "@/types/agent";
+import { CreateContextRequest, MessageType } from "@/types/agent";
 import GoalFormModal from "@/components/goals/GoalFormModal";
 import GoalJournalCard from "@/components/goals/GoalJournalCard";
-import ContextFormModal from "@/components/agent-builder/ContextFormModal";
 import Checklist from "@/components/checklists/Checklist";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import { IoAdd, IoCalendarOutline, IoPencil, IoSettings, IoSparkles } from "@/components/icons";
+import { IoCalendarOutline, IoPencil, IoSparkles } from "@/components/icons";
 import { parseUtcDate } from "@/lib/dates";
 import {
   fetchGoalById,
@@ -40,6 +39,12 @@ interface GoalWorkspaceContainerProps {
   goalId: number;
 }
 
+interface ContextDraft {
+  name: string;
+  messageType: MessageType;
+  customInstructions: string;
+}
+
 function formatGoalDate(dateString?: string) {
   if (!dateString) return null;
   return new Date(`${dateString}T00:00:00`).toLocaleDateString("en-US", {
@@ -49,16 +54,25 @@ function formatGoalDate(dateString?: string) {
   });
 }
 
+function getDefaultContext(goalTitle: string): ContextDraft {
+  return {
+    name: `${goalTitle} support`,
+    messageType: "motivation",
+    customInstructions: "",
+  };
+}
+
 export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContainerProps) {
   const router = useRouter();
   const { loading: authLoading } = useAuth({ requireAuth: true });
   const {
     agent,
-    goals,
     loading: agentLoading,
     handleCreateContext,
     handleUpdateContext,
     handleDeleteContext,
+    handleDeployContext,
+    handleStopContext,
     refreshAgent,
   } = useAgentData();
 
@@ -67,9 +81,10 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isEditGoalOpen, setIsEditGoalOpen] = useState(false);
-  const [isCreateContextOpen, setIsCreateContextOpen] = useState(false);
-  const [selectedContext, setSelectedContext] = useState<AgentContext | null>(null);
   const [generatingChecklist, setGeneratingChecklist] = useState(false);
+  const [contextDraft, setContextDraft] = useState<ContextDraft>(getDefaultContext("Goal"));
+  const [isSavingContext, setIsSavingContext] = useState(false);
+  const [isTogglingContext, setIsTogglingContext] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
     title: string;
     message: string;
@@ -107,11 +122,25 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
     [agent?.contexts, goalId]
   );
 
+  const currentContext = goalContexts[0] ?? null;
   const totalContextCount = agent?.contexts.length ?? 0;
-  const canCreateContext = totalContextCount < 4;
+  const canCreateContext = !!currentContext || totalContextCount < 3;
   const totalItems = checklist?.items.length ?? 0;
   const completedItems = checklist?.items.filter((item) => item.completed).length ?? 0;
   const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+
+  useEffect(() => {
+    if (!goal) return;
+    if (currentContext) {
+      setContextDraft({
+        name: currentContext.name,
+        messageType: currentContext.messageType,
+        customInstructions: currentContext.customInstructions ?? "",
+      });
+      return;
+    }
+    setContextDraft(getDefaultContext(goal.title));
+  }, [currentContext, goal]);
 
   const syncChecklistItem = (updater: (current: ChecklistType) => ChecklistType) => {
     setChecklist((current) => (current ? updater(current) : current));
@@ -239,17 +268,37 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
     setGoal(updatedGoal);
   };
 
-  const handleCreateContextSubmit = async (data: CreateContextRequest) => {
-    const created = await handleCreateContext(data);
-    if (created) {
-      setIsCreateContextOpen(false);
+  const handleContextSave = async () => {
+    const payload: CreateContextRequest = {
+      goalId,
+      name: contextDraft.name.trim() || `${goal?.title ?? "Goal"} support`,
+      messageType: contextDraft.messageType,
+      customInstructions: contextDraft.customInstructions.trim() || undefined,
+    };
+
+    setIsSavingContext(true);
+    try {
+      if (currentContext) {
+        await handleUpdateContext(currentContext.contextId, payload);
+      } else {
+        await handleCreateContext(payload);
+      }
+    } finally {
+      setIsSavingContext(false);
     }
   };
 
-  const handleUpdateContextSubmit = async (contextId: number, data: CreateContextRequest) => {
-    const updated = await handleUpdateContext(contextId, data);
-    if (updated) {
-      setSelectedContext(null);
+  const handleContextDeployment = async () => {
+    if (!currentContext) return;
+    setIsTogglingContext(true);
+    try {
+      if (currentContext.deployed) {
+        await handleStopContext(currentContext.contextId);
+      } else {
+        await handleDeployContext(currentContext.contextId);
+      }
+    } finally {
+      setIsTogglingContext(false);
     }
   };
 
@@ -277,7 +326,11 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
     );
   }
 
-  const goalOptions = [goal, ...goals.filter((entry) => entry.goalId !== goal.goalId)];
+  const contextDirty = currentContext
+    ? contextDraft.name !== currentContext.name ||
+      contextDraft.messageType !== currentContext.messageType ||
+      contextDraft.customInstructions !== (currentContext.customInstructions ?? "")
+    : contextDraft.name.trim().length > 0 || contextDraft.customInstructions.trim().length > 0;
 
   return (
     <div className={styles.workspaceShell}>
@@ -335,8 +388,10 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
             <strong className={styles.statValue}>{totalItems}</strong>
           </div>
           <div className={styles.statCard}>
-            <span className={styles.statLabel}>Contexts</span>
-            <strong className={styles.statValue}>{goalContexts.length}</strong>
+            <span className={styles.statLabel}>Goal Agent</span>
+            <strong className={styles.statValue}>
+              {currentContext ? (currentContext.deployed ? "Live" : "Draft") : "Not set"}
+            </strong>
           </div>
           <div className={styles.statCard}>
             <span className={styles.statLabel}>Journal</span>
@@ -377,82 +432,128 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
           <section className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
               <div>
-                <h2 className={styles.sectionTitle}>Goal Contexts</h2>
+                <h2 className={styles.sectionTitle}>Goal Agent</h2>
                 <p className={styles.sectionSubtitle}>
-                  These are the agent behaviors attached to this goal only.
+                  One configurable agent context per goal, with deploy control built right into the page.
                 </p>
               </div>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                disabled={!canCreateContext}
-                onClick={() => setIsCreateContextOpen(true)}
+              <span
+                className={`${styles.deploymentPill} ${
+                  currentContext?.deployed ? styles.deploymentPillActive : styles.deploymentPillIdle
+                }`}
               >
-                <IoAdd size={14} />
-                {canCreateContext ? "Add Context" : "Limit Reached"}
-              </button>
+                {currentContext ? (currentContext.deployed ? "Live" : "Draft") : "Not set"}
+              </span>
             </div>
 
-            {goalContexts.length === 0 ? (
-              <EmptyState
-                icon={<IoSettings size={44} />}
-                title="No contexts for this goal yet"
-                description="Create a goal-specific context when you want the agent to help with motivation, guidance, or more direct nudges."
-              />
-            ) : (
-              <div className={styles.contextList}>
-                {goalContexts.map((context) => (
-                  <article key={context.contextId} className={styles.contextCard}>
-                    <div className={styles.contextCardHeader}>
-                      <div>
-                        <h3 className={styles.contextName}>{context.name}</h3>
-                        <span className={styles.contextType}>{context.messageType}</span>
-                      </div>
-                      <div className={styles.contextActions}>
-                        <button
-                          type="button"
-                          className={styles.iconButton}
-                          onClick={() => setSelectedContext(context)}
-                        >
-                          <IoPencil size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          className={`${styles.iconButton} ${styles.iconButtonDanger}`}
-                          onClick={() =>
-                            setConfirmAction({
-                              title: "Delete Context",
-                              message: `Remove "${context.name}" from this goal?`,
-                              confirmLabel: "Delete",
-                              destructive: true,
-                              onConfirm: async () => {
-                                await handleDeleteContext(context.contextId);
-                                setConfirmAction(null);
-                              },
-                            })
-                          }
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                    {context.customInstructions ? (
-                      <p className={styles.contextInstructions}>{context.customInstructions}</p>
-                    ) : (
-                      <p className={styles.contextInstructionsMuted}>
-                        No custom instructions yet.
-                      </p>
-                    )}
-                  </article>
-                ))}
+            {!currentContext && !canCreateContext && (
+              <div className={styles.contextLimitBanner}>
+                You already have 3 goal agents. Remove one from another goal before creating a new one here.
               </div>
             )}
 
-            {!canCreateContext && (
-              <p className={styles.limitNote}>
-                You can have up to 4 contexts across all goals.
+            <div className={styles.contextEditor}>
+              <div className={styles.fieldGroup}>
+                <label className={styles.fieldLabel}>Context name</label>
+                <input
+                  type="text"
+                  value={contextDraft.name}
+                  onChange={(event) =>
+                    setContextDraft((current) => ({ ...current, name: event.target.value }))
+                  }
+                  placeholder="How should this goal agent be named?"
+                  maxLength={100}
+                />
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label className={styles.fieldLabel}>Message style</label>
+                <select
+                  value={contextDraft.messageType}
+                  onChange={(event) =>
+                    setContextDraft((current) => ({
+                      ...current,
+                      messageType: event.target.value as MessageType,
+                    }))
+                  }
+                >
+                  <option value="nag">Nag</option>
+                  <option value="motivation">Motivation</option>
+                  <option value="guidance">Guidance</option>
+                </select>
+              </div>
+
+              <div className={styles.fieldGroup}>
+                <label className={styles.fieldLabel}>Custom instructions</label>
+                <textarea
+                  value={contextDraft.customInstructions}
+                  onChange={(event) =>
+                    setContextDraft((current) => ({
+                      ...current,
+                      customInstructions: event.target.value,
+                    }))
+                  }
+                  rows={5}
+                  placeholder="Tell the agent how to support this goal."
+                  maxLength={2000}
+                />
+              </div>
+
+              <div className={styles.contextActionsRow}>
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  disabled={!canCreateContext || !contextDirty || isSavingContext}
+                  onClick={() => void handleContextSave()}
+                >
+                  {isSavingContext
+                    ? "Saving..."
+                    : currentContext
+                      ? "Save Goal Agent"
+                      : "Create Goal Agent"}
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.deployActionButton}
+                  disabled={!currentContext || isTogglingContext}
+                  onClick={() => void handleContextDeployment()}
+                >
+                  {isTogglingContext
+                    ? "Updating..."
+                    : currentContext?.deployed
+                      ? "Stop"
+                      : "Deploy"}
+                </button>
+
+                {currentContext && (
+                  <button
+                    type="button"
+                    className={styles.dangerTextButton}
+                    onClick={() =>
+                      setConfirmAction({
+                        title: "Remove Goal Agent",
+                        message: `Delete "${currentContext.name}" from this goal?`,
+                        confirmLabel: "Delete",
+                        destructive: true,
+                        onConfirm: async () => {
+                          await handleDeleteContext(currentContext.contextId);
+                          setConfirmAction(null);
+                        },
+                      })
+                    }
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+
+              <p className={styles.contextHelper}>
+                {currentContext
+                  ? "Save configuration changes here, then deploy when you want this goal agent to start nudging."
+                  : "Create the goal agent here first. Deployment becomes available once the context exists."}
               </p>
-            )}
+            </div>
           </section>
 
           <GoalJournalCard
@@ -502,27 +603,6 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
         onSubmit={handleGoalUpdate}
         onRemove={handleGoalDelete}
       />
-
-      <ContextFormModal
-        mode="create"
-        isOpen={isCreateContextOpen}
-        goals={goalOptions}
-        lockedGoalId={goal.goalId}
-        onClose={() => setIsCreateContextOpen(false)}
-        onSubmit={handleCreateContextSubmit}
-      />
-
-      {selectedContext && (
-        <ContextFormModal
-          mode="edit"
-          isOpen={!!selectedContext}
-          goals={goalOptions}
-          lockedGoalId={goal.goalId}
-          context={selectedContext}
-          onClose={() => setSelectedContext(null)}
-          onSubmit={handleUpdateContextSubmit}
-        />
-      )}
 
       <ConfirmDialog
         isOpen={!!confirmAction}

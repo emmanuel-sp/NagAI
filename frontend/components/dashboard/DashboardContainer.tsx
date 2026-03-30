@@ -5,17 +5,14 @@ import { UserProfile } from "@/types/user";
 import { Goal } from "@/types/goal";
 import { Checklist } from "@/types/checklist";
 import { Digest } from "@/types/digest";
-import { Agent } from "@/types/agent";
 import { fetchGoals } from "@/services/goalService";
 import { fetchChecklists } from "@/services/checklistService";
 import { fetchDigest } from "@/services/digestService";
-import { fetchAgent } from "@/services/agentService";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import DashboardHeader from "./DashboardHeader";
 import DailyChecklistContainer from "@/components/checklists/DailyChecklistContainer";
 import GoalProgressCards from "./GoalProgressCards";
 import SystemStatusRow from "./SystemStatusRow";
-import AgentChatCard from "./AgentChatCard";
 import styles from "./dashboard.module.css";
 
 interface DashboardContainerProps {
@@ -26,7 +23,6 @@ export default function DashboardContainer({ userProfile }: DashboardContainerPr
   const [goals, setGoals] = useState<Goal[]>([]);
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [digest, setDigest] = useState<Digest | null>(null);
-  const [agent, setAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,17 +32,15 @@ export default function DashboardContainer({ userProfile }: DashboardContainerPr
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [goalsData, checklistsData, digestData, agentData] = await Promise.all([
+      const [goalsData, checklistsData, digestData] = await Promise.all([
         fetchGoals(),
         fetchChecklists(),
         fetchDigest().catch(() => null),
-        fetchAgent().catch(() => null),
       ]);
 
       setGoals(goalsData);
       setChecklists(checklistsData);
       setDigest(digestData);
-      setAgent(agentData);
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     } finally {
@@ -68,8 +62,7 @@ export default function DashboardContainer({ userProfile }: DashboardContainerPr
         <DashboardHeader userName={userProfile.fullName.split(" ")[0]} />
         <DailyChecklistContainer goals={goals} />
         <GoalProgressCards goals={goals} checklists={checklists} />
-        <AgentChatCard />
-        <SystemStatusRow digest={digest} agent={agent} />
+        <SystemStatusRow digest={digest} />
       </div>
     </div>
   );

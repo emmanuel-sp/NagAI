@@ -176,12 +176,19 @@
   border-top: 1px solid var(--border);
 }
 
-/* Section header — clickable row */
-.contextsSectionHeader {
+.sectionHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.contextsSectionToggle {
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
+  min-width: 0;
+  flex: 1;
   padding: 6px 8px;
   background: none;
   border: none;
@@ -191,7 +198,7 @@
   white-space: nowrap;
 }
 
-.contextsSectionHeader:hover {
+.contextsSectionToggle:hover {
   background: var(--surface);
 }
 
@@ -363,26 +370,31 @@
 }
 
 /* Individual context row */
-.contextRow {
+.goalRow {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px 6px 12px;
+  gap: 8px;
+  padding: 6px 8px;
   border-radius: var(--radius-md);
-  text-decoration: none;
   transition: background var(--transition-fast);
 }
 
-.contextRow:hover {
+.goalRow:hover {
   background: var(--surface);
 }
 
-.contextRowActive {
+.goalRowActive {
   background: var(--accent-lighter);
 }
 
-.contextRowActive:hover {
+.goalRowActive:hover {
   background: var(--accent-light);
+}
+
+.goalRowLink {
+  flex: 1;
+  min-width: 0;
+  padding-left: 4px;
 }
 
 .contextName {
@@ -402,6 +414,40 @@
   font-size: var(--fs-2xs);
   font-weight: var(--fw-600);
   color: var(--accent);
+}
+
+.goalRowStatusButton,
+.goalRowStatusLink {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  padding: 5px 9px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.goalRowStatusButton {
+  border: none;
+}
+
+.goalRowStatusButtonActive {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+.goalRowStatusButtonIdle {
+  background: var(--accent-lighter);
+  color: var(--accent);
+}
+
+.goalRowStatusLink {
+  background: var(--surface);
+  color: var(--text-secondary);
 }
 
 .contextRowActions {
@@ -439,36 +485,6 @@
 
 .contextDeleteBtn:hover {
   color: var(--error);
-}
-
-.agentSection {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.agentSectionLabel {
-  display: block;
-  padding: 0 8px 8px;
-  font-family: var(--font-body);
-  font-size: var(--fs-2xs);
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.agentStatusRow {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 0 8px;
-}
-
-.agentStatusText {
-  font-size: var(--fs-xs);
-  line-height: 1.5;
-  color: var(--text-secondary);
 }
 
 /* ─── Theme Switcher ─── */

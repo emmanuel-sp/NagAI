@@ -13,6 +13,7 @@ export interface AgentContext {
   goalName?: string | null;
   messageType: MessageType;
   customInstructions?: string | null;
+  deployed: boolean;
   lastMessageSentAt?: string | null;
   createdAt: string;
   updatedAt: string;

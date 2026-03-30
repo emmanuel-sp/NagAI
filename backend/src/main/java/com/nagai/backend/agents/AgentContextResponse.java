@@ -13,6 +13,7 @@ public class AgentContextResponse {
     private String name;
     private String messageType;
     private String customInstructions;
+    private boolean deployed;
     private LocalDateTime lastMessageSentAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -26,6 +27,7 @@ public class AgentContextResponse {
         response.setName(context.getName());
         response.setMessageType(context.getMessageType());
         response.setCustomInstructions(context.getCustomInstructions());
+        response.setDeployed(context.isDeployed());
         response.setLastMessageSentAt(context.getLastMessageSentAt());
         response.setCreatedAt(context.getCreatedAt());
         response.setUpdatedAt(context.getUpdatedAt());

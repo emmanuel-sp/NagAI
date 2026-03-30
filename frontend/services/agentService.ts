@@ -32,6 +32,18 @@ export async function deleteContext(contextId: number): Promise<void> {
   await apiRequest(`/agent/contexts/${contextId}`, { method: "DELETE" });
 }
 
+export async function deployContext(contextId: number): Promise<AgentContext> {
+  return await apiRequest<AgentContext>(`/agent/contexts/${contextId}/deploy`, {
+    method: "POST",
+  });
+}
+
+export async function stopContext(contextId: number): Promise<AgentContext> {
+  return await apiRequest<AgentContext>(`/agent/contexts/${contextId}/stop`, {
+    method: "POST",
+  });
+}
+
 export async function deployAgent(): Promise<Agent> {
   return await apiRequest<Agent>("/agent/deploy", { method: "POST" });
 }

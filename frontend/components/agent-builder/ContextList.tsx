@@ -25,7 +25,7 @@ export default function ContextList({
   return (
     <div className={styles.contextsSection}>
       <div className={styles.contextsSectionHeader}>
-        <h2 className={styles.cardTitle}>Agent Contexts ({contexts.length}/4)</h2>
+        <h2 className={styles.cardTitle}>Agent Contexts ({contexts.length}/3)</h2>
         {canEdit && canCreate && (
           <button onClick={onCreate} className={styles.addContextButton}>
             <IoAdd size={20} />

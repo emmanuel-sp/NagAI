@@ -175,6 +175,25 @@
   font-size: var(--fs-sm);
 }
 
+.deploymentPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+}
+
+.deploymentPillActive {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.deploymentPillIdle {
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
 .secondaryButton {
   display: inline-flex;
   align-items: center;
@@ -197,6 +216,76 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.contextLimitBanner {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-lg);
+  background: var(--warning-light);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.contextEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.contextActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.deployActionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--text-inverse);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-500);
+}
+
+.deployActionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dangerTextButton {
+  border: none;
+  background: transparent;
+  color: var(--error);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-500);
+}
+
+.contextHelper {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
 }
 
 .contextCard {

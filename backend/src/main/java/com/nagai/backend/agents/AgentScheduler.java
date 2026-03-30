@@ -136,9 +136,8 @@ public class AgentScheduler {
                 return;
             }
 
-            // Verify agent is still deployed
             Agent agent = agentRepository.findById(context.getAgentId()).orElse(null);
-            if (agent == null || !agent.isDeployed()) return;
+            if (agent == null || !context.isDeployed()) return;
 
             log.info("Timer: processing agent context {}", contextId);
             processAgentContext(context, LocalDateTime.now(ZoneOffset.UTC), correlationId);

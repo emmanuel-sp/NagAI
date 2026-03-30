@@ -6,16 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useModal } from "@/contexts/ModalContext";
 import { useAgentData } from "@/contexts/AgentDataContext";
 import GoalFormModal from "@/components/goals/GoalFormModal";
-import ConfirmDialog from "@/components/common/ConfirmDialog";
-import {
-  IoSidebarPanel,
-  IoAdd,
-  IoChevronDown,
-  IoBell,
-  IoPerson,
-  IoSun,
-  IoMoon,
-} from "@/components/icons";
+import { IoSidebarPanel, IoAdd, IoChevronDown, IoBell, IoPerson, IoSun, IoMoon } from "@/components/icons";
 import { useTheme, ACCENT_CONFIGS, type AccentKey } from "@/contexts/ThemeContext";
 import MessageInboxPanel from "@/components/inbox/MessageInboxPanel";
 import { createGoal } from "@/services/goalService";
@@ -44,20 +35,15 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
     agent,
     goals,
     loading: agentLoading,
-    handleDeploy,
-    handleStop,
+    handleDeployContext,
+    handleStopContext,
     refreshAgent,
   } = useAgentData();
 
   const [goalsExpanded, setGoalsExpanded] = useState(true);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
-  const [isDeploying, setIsDeploying] = useState(false);
+  const [deployingContextId, setDeployingContextId] = useState<number | null>(null);
   const [inboxOpen, setInboxOpen] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<{
-    title: string;
-    message: string;
-    onConfirm: () => void;
-  } | null>(null);
 
   useEffect(() => {
     const hasToken = !!localStorage.getItem("authToken");
@@ -96,28 +82,21 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
     router.push(`/goals/${goal.goalId}`);
   };
 
-  const onDeployClick = async () => {
-    setIsDeploying(true);
-    await handleDeploy();
-    setIsDeploying(false);
-  };
-
-  const onStopClick = () => {
-    setConfirmAction({
-      title: "Stop Agent",
-      message: "Stop sending messages? You can redeploy at any time.",
-      onConfirm: async () => {
-        setConfirmAction(null);
-        setIsDeploying(true);
-        await handleStop();
-        setIsDeploying(false);
-      },
-    });
+  const handleToggleGoalDeployment = async (contextId: number, isDeployed: boolean) => {
+    setDeployingContextId(contextId);
+    try {
+      if (isDeployed) {
+        await handleStopContext(contextId);
+      } else {
+        await handleDeployContext(contextId);
+      }
+    } finally {
+      setDeployingContextId(null);
+    }
   };
 
   if (!isLoggedIn || pathname === "/" || pathname === "/onboarding") return null;
 
-  const isDeployed = agent?.deployed ?? false;
   const canCreateGoal = goals.length < 10;
 
   return (
@@ -147,30 +126,28 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
 
         {!agentLoading && (
           <div className={styles.contextsSection}>
-            <button
-              className={styles.contextsSectionHeader}
-              onClick={() => setGoalsExpanded((value) => !value)}
-            >
-              <span className={`${styles.contextsSectionChevron} ${goalsExpanded ? styles.contextsSectionChevronOpen : ""}`}>
-                <IoChevronDown size={12} />
-              </span>
-              <span className={styles.contextsSectionTitle}>Goal Workspaces</span>
-              <span className={styles.contextsSectionActions}>
-                {canCreateGoal && (
-                  <button
-                    type="button"
-                    className={styles.contextsSectionBtn}
-                    title="Add goal"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setIsGoalModalOpen(true);
-                    }}
-                  >
-                    <IoAdd size={14} />
-                  </button>
-                )}
-              </span>
-            </button>
+            <div className={styles.sectionHeaderRow}>
+              <button
+                type="button"
+                className={styles.contextsSectionToggle}
+                onClick={() => setGoalsExpanded((value) => !value)}
+              >
+                <span className={`${styles.contextsSectionChevron} ${goalsExpanded ? styles.contextsSectionChevronOpen : ""}`}>
+                  <IoChevronDown size={12} />
+                </span>
+                <span className={styles.contextsSectionTitle}>Goal Workspaces</span>
+              </button>
+              {canCreateGoal && (
+                <button
+                  type="button"
+                  className={styles.contextsSectionBtn}
+                  title="Add goal"
+                  onClick={() => setIsGoalModalOpen(true)}
+                >
+                  <IoAdd size={14} />
+                </button>
+              )}
+            </div>
 
             {goalsExpanded && (
               <div className={styles.contextsList}>
@@ -183,50 +160,49 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
                     <span>Add your first goal</span>
                   </button>
                 ) : (
-                  goals.map((goal) => (
-                    <Link
-                      key={goal.goalId}
-                      href={`/goals/${goal.goalId}`}
-                      className={`${styles.contextRow} ${pathname === `/goals/${goal.goalId}` ? styles.contextRowActive : ""}`}
-                    >
-                      <span className={styles.contextName} title={goal.title}>
-                        {goal.title}
-                      </span>
-                      <span className={styles.goalWorkspaceHint}>Open</span>
-                    </Link>
-                  ))
+                  goals.map((goal) => {
+                    const context = (agent?.contexts ?? []).find((entry) => entry.goalId === goal.goalId) ?? null;
+                    const isActiveGoal = pathname === `/goals/${goal.goalId}`;
+                    const isDeploying = deployingContextId === context?.contextId;
+
+                    return (
+                      <div
+                        key={goal.goalId}
+                        className={`${styles.goalRow} ${isActiveGoal ? styles.goalRowActive : ""}`}
+                      >
+                        <Link
+                          href={`/goals/${goal.goalId}`}
+                          className={styles.goalRowLink}
+                        >
+                          <span className={styles.contextName} title={goal.title}>
+                            {goal.title}
+                          </span>
+                        </Link>
+                        {context ? (
+                          <button
+                            type="button"
+                            className={`${styles.goalRowStatusButton} ${context.deployed ? styles.goalRowStatusButtonActive : styles.goalRowStatusButtonIdle}`}
+                            onClick={() => void handleToggleGoalDeployment(context.contextId, context.deployed)}
+                            disabled={isDeploying}
+                          >
+                            {isDeploying ? "..." : context.deployed ? "Live" : "Deploy"}
+                          </button>
+                        ) : (
+                          <Link
+                            href={`/goals/${goal.goalId}`}
+                            className={styles.goalRowStatusLink}
+                          >
+                            Set up
+                          </Link>
+                        )}
+                      </div>
+                    );
+                  })
                 )}
               </div>
             )}
           </div>
         )}
-
-        <div className={styles.agentSection}>
-          <span className={styles.agentSectionLabel}>Agent</span>
-          <div className={styles.agentStatusRow}>
-            <span className={styles.agentStatusText}>
-              {isDeployed ? "Active across your goal contexts" : "Paused until you deploy"}
-            </span>
-            <button
-              type="button"
-              className={`${styles.deployPill} ${isDeployed ? styles.deployPillActive : styles.deployPillInactive}`}
-              title={isDeployed ? "Stop agent" : "Deploy agent"}
-              onClick={() => {
-                if (isDeploying) return;
-                isDeployed ? onStopClick() : onDeployClick();
-              }}
-            >
-              {isDeploying ? (
-                <span className={styles.miniSpinner} />
-              ) : (
-                <>
-                  <span className={`${styles.deployDot} ${isDeployed ? styles.deployDotActive : styles.deployDotInactive}`} />
-                  {isDeployed ? "Live" : "Deploy"}
-                </>
-              )}
-            </button>
-          </div>
-        </div>
 
         <div className={styles.spacer} />
 
@@ -302,16 +278,6 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
         isOpen={isGoalModalOpen}
         onClose={() => setIsGoalModalOpen(false)}
         onSubmit={handleCreateGoal}
-      />
-
-      <ConfirmDialog
-        isOpen={!!confirmAction}
-        title={confirmAction?.title ?? ""}
-        message={confirmAction?.message ?? ""}
-        confirmLabel="Stop"
-        destructive
-        onConfirm={() => confirmAction?.onConfirm()}
-        onCancel={() => setConfirmAction(null)}
       />
     </>
   );

@@ -26,6 +26,7 @@ import com.nagai.backend.exceptions.ChecklistNotFoundException;
 import com.nagai.backend.exceptions.DigestAlreadyExistsException;
 import com.nagai.backend.exceptions.DigestException;
 import com.nagai.backend.exceptions.DigestNotFoundException;
+import com.nagai.backend.exceptions.DuplicateGoalContextException;
 import com.nagai.backend.exceptions.EmailAlreadyExistsException;
 import com.nagai.backend.exceptions.GoalException;
 import com.nagai.backend.exceptions.GoalLimitException;
@@ -139,6 +140,11 @@ public class GlobalExceptionHandler {
         if (exception instanceof AgentContextLimitException) {
             ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
             detail.setProperty("description", "Maximum number of agent contexts reached");
+            return detail;
+        }
+        if (exception instanceof DuplicateGoalContextException) {
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+            detail.setProperty("description", "This goal already has an agent context");
             return detail;
         }
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());

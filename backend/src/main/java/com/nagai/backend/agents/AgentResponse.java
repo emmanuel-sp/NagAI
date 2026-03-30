@@ -21,7 +21,7 @@ public class AgentResponse {
         response.setAgentId(agent.getAgentId());
         response.setUserId(agent.getUserId());
         response.setName(agent.getName());
-        response.setDeployed(agent.isDeployed());
+        response.setDeployed(contexts.stream().anyMatch(AgentContextResponse::isDeployed));
         response.setCommunicationChannel(agent.getCommunicationChannel());
         response.setContexts(contexts);
         response.setCreatedAt(agent.getCreatedAt());

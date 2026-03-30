@@ -59,6 +59,16 @@ public class AgentController {
         return ResponseEntity.ok(agentService.updateContext(contextId, request));
     }
 
+    @PostMapping("/contexts/{contextId}/deploy")
+    public ResponseEntity<AgentContextResponse> deployContext(@PathVariable Long contextId) {
+        return ResponseEntity.ok(agentService.deployContext(contextId));
+    }
+
+    @PostMapping("/contexts/{contextId}/stop")
+    public ResponseEntity<AgentContextResponse> stopContext(@PathVariable Long contextId) {
+        return ResponseEntity.ok(agentService.stopContext(contextId));
+    }
+
     @DeleteMapping("/contexts/{contextId}")
     public ResponseEntity<Void> deleteContext(@PathVariable Long contextId) {
         agentService.deleteContext(contextId);

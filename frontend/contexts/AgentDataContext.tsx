@@ -15,6 +15,8 @@ import {
   createContext as apiCreateContext,
   updateContext as apiUpdateContext,
   deleteContext as apiDeleteContext,
+  deployContext as apiDeployContext,
+  stopContext as apiStopContext,
   deployAgent,
   stopAgent,
 } from "@/services/agentService";
@@ -27,6 +29,8 @@ interface AgentDataState {
   handleCreateContext: (data: CreateContextRequest) => Promise<AgentCtx | null>;
   handleUpdateContext: (contextId: number, data: CreateContextRequest) => Promise<AgentCtx | null>;
   handleDeleteContext: (contextId: number) => Promise<boolean>;
+  handleDeployContext: (contextId: number) => Promise<AgentCtx | null>;
+  handleStopContext: (contextId: number) => Promise<AgentCtx | null>;
   handleDeploy: () => Promise<boolean>;
   handleStop: () => Promise<boolean>;
   refreshAgent: () => Promise<void>;
@@ -106,14 +110,58 @@ export function AgentDataProvider({
   const handleDeleteContext = useCallback(async (contextId: number): Promise<boolean> => {
     try {
       await apiDeleteContext(contextId);
-      setAgent((prev) =>
-        prev
-          ? { ...prev, contexts: prev.contexts.filter((c) => c.contextId !== contextId) }
-          : prev
-      );
+      setAgent((prev) => {
+        if (!prev) return prev;
+        const nextContexts = prev.contexts.filter((context) => context.contextId !== contextId);
+        return {
+          ...prev,
+          deployed: nextContexts.some((context) => context.deployed),
+          contexts: nextContexts,
+        };
+      });
       return true;
     } catch {
       return false;
+    }
+  }, []);
+
+  const handleDeployContext = useCallback(async (contextId: number): Promise<AgentCtx | null> => {
+    try {
+      const ctx = await apiDeployContext(contextId);
+      setAgent((prev) =>
+        prev
+          ? {
+              ...prev,
+              deployed: true,
+              contexts: prev.contexts.map((context) =>
+                context.contextId === contextId ? ctx : context
+              ),
+            }
+          : prev
+      );
+      return ctx;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const handleStopContext = useCallback(async (contextId: number): Promise<AgentCtx | null> => {
+    try {
+      const ctx = await apiStopContext(contextId);
+      setAgent((prev) => {
+        if (!prev) return prev;
+        const nextContexts = prev.contexts.map((context) =>
+          context.contextId === contextId ? ctx : context
+        );
+        return {
+          ...prev,
+          deployed: nextContexts.some((context) => context.deployed),
+          contexts: nextContexts,
+        };
+      });
+      return ctx;
+    } catch {
+      return null;
     }
   }, []);
 
@@ -146,6 +194,8 @@ export function AgentDataProvider({
         handleCreateContext,
         handleUpdateContext,
         handleDeleteContext,
+        handleDeployContext,
+        handleStopContext,
         handleDeploy,
         handleStop,
         refreshAgent: loadData,

@@ -220,7 +220,7 @@ export default function AgentBuilderContainer() {
   }
 
   const canDeploy = agent.contexts.length > 0 && !agent.deployed;
-  const canCreateContext = agent.contexts.length < 4;
+  const canCreateContext = agent.contexts.length < 3;
 
   return (
     <div className={styles.agentBuilderContainer}>
