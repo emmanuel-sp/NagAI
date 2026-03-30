@@ -355,9 +355,9 @@ main {
   --text-light: #4a4a5a;
   --text-inverse: #111111;
 
-  --bg-page: #080808;
-  --bg-card: #0e0e0e;
-  --bg-elevated: #121212;
+  --bg-page: #0f0f0ffb;
+  --bg-card: #0e0e0eea;
+  --bg-elevated: #000000;
   --bg-dark: #030303;
   --surface: rgba(255, 255, 255, 0.04);
   --surface-hover: rgba(255, 255, 255, 0.08);

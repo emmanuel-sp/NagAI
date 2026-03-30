@@ -57,14 +57,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--border-light);
+  padding: var(--space-sm) var(--space-sm);
+  /* border-bottom: 1px solid var(--border-light); */
   flex-shrink: 0;
   gap: 8px;
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--bg-page);
+  background: transparent;
 }
 
 .topBarLeft {
