@@ -239,6 +239,7 @@ export function IoFlag({ size = 16, width, height, ...p }: IconProps) {
 }
 
 export const IoChevronDown = S(<polyline points="6 9 12 15 18 9" />);
+export const IoChevronUp = S(<polyline points="18 15 12 9 6 15" />);
 
 export const IoClock = S(
   <>

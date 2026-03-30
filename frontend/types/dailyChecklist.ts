@@ -23,10 +23,25 @@ export interface DailyChecklistConfig {
   maxItems: number;
   recurringItems: string[] | null;
   includedGoalIds: number[] | null;
+  calendarEnabled: boolean;
+  calendarConnected: boolean;
 }
 
 export interface UpdateDailyChecklistConfigDto {
   maxItems?: number;
   recurringItems?: string[];
   includedGoalIds?: number[] | null;
+  calendarEnabled?: boolean;
+}
+
+export interface CreateDailyItemDto {
+  title: string;
+  notes?: string;
+  scheduledTime?: string; // HH:MM
+}
+
+export interface UpdateDailyItemDto {
+  title?: string;
+  notes?: string;
+  scheduledTime?: string | null;
 }

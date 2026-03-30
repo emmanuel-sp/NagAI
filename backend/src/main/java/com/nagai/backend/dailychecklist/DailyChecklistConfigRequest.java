@@ -8,5 +8,6 @@ import jakarta.validation.constraints.Min;
 public record DailyChecklistConfigRequest(
         @Min(1) @Max(12) Integer maxItems,
         List<String> recurringItems,
-        List<Long> includedGoalIds) {
+        List<Long> includedGoalIds,
+        Boolean calendarEnabled) {
 }

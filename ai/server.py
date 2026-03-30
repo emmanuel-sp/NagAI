@@ -103,6 +103,14 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
                 }
                 for c in request.candidates
             ]
+            busy_blocks = [
+                {
+                    "start_time": b.start_time,
+                    "end_time": b.end_time,
+                    "summary": b.summary,
+                }
+                for b in request.busy_blocks
+            ]
             items = ai_handlers.generate_daily_checklist(
                 candidates,
                 list(request.recurring_items),
@@ -111,6 +119,7 @@ class AiServiceServicer(ai_service_pb2_grpc.AiServiceServicer):
                 request.user_profile,
                 request.day_of_week,
                 request.plan_date,
+                busy_blocks,
             )
             pb_items = [
                 ai_service_pb2.DailyChecklistItemSuggestion(

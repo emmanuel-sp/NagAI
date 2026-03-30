@@ -75,6 +75,19 @@ public class User implements UserDetails{
     @Column(name = "onboarding_completed")
     private boolean onboardingCompleted = false;
 
+    @Column(name = "google_calendar_refresh_token", columnDefinition = "TEXT")
+    private String googleCalendarRefreshToken;
+
+    @Column(name = "google_calendar_access_token", columnDefinition = "TEXT")
+    private String googleCalendarAccessToken;
+
+    @Column(name = "google_calendar_token_expiry")
+    private LocalDateTime googleCalendarTokenExpiry;
+
+    public boolean isCalendarConnected() {
+        return googleCalendarRefreshToken != null;
+    }
+
     @Override
     public String getUsername() {
         return email;

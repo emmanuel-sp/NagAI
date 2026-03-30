@@ -10,7 +10,7 @@ import { fetchChecklists } from "@/services/checklistService";
 import { fetchDigest } from "@/services/digestService";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import DashboardHeader from "./DashboardHeader";
-import DailyChecklistContainer from "@/components/checklists/DailyChecklistContainer";
+import DailyChecklistPreview from "./DailyChecklistPreview";
 import GoalProgressCards from "./GoalProgressCards";
 import SystemStatusRow from "./SystemStatusRow";
 import styles from "./dashboard.module.css";
@@ -60,7 +60,7 @@ export default function DashboardContainer({ userProfile }: DashboardContainerPr
     <div className={styles.dashboardContainer}>
       <div className={styles.dashboardContent}>
         <DashboardHeader userName={userProfile.fullName.split(" ")[0]} />
-        <DailyChecklistContainer goals={goals} />
+        <DailyChecklistPreview />
         <GoalProgressCards goals={goals} checklists={checklists} />
         <SystemStatusRow digest={digest} />
       </div>

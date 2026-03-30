@@ -13,7 +13,7 @@ export default function AccountabilityFlowVisual() {
             <span className={styles.promptLabel}>You type</span>
             <div className={styles.promptField}>
               <span className={styles.typedText}>
-                Get promoted to senior engineer this year.
+                Get promoted to senior engineer.
               </span>
             </div>
           </div>
@@ -32,6 +32,7 @@ export default function AccountabilityFlowVisual() {
         </div>
 
         <div className={styles.checklistPanel}>
+          <p className={styles.mobileGoal}>Goal: Get promoted to senior engineer.</p>
           <div className={styles.checklistHeader}>
             <span className={styles.eyebrow}>Generated checklist</span>
             <span className={styles.checklistMeta}>4 actionable items</span>

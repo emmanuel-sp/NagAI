@@ -1,5 +1,6 @@
 .wrapper {
   width: 100%;
+  overflow: hidden;
 }
 
 .shell {
@@ -146,6 +147,10 @@
   color: var(--text-secondary);
 }
 
+.mobileGoal {
+  display: none;
+}
+
 .checklistItems {
   display: flex;
   flex-direction: column;
@@ -271,6 +276,38 @@
 
   .transformLabel {
     max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  /* On small screens, drop the goal input + AI orb — show only the checklist */
+  .goalPanel,
+  .transformCore {
+    display: none;
+  }
+
+  /* Show the goal text above the checklist instead */
+  .mobileGoal {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  /* Show all checklist items statically — no animation needed */
+  .item {
+    animation: none;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .checklistPanel {
+    border-radius: 20px;
+  }
+
+  .itemTitle {
+    font-size: 14px;
   }
 }
 

@@ -22,10 +22,12 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nagai.ai.CalendarBusyBlock;
 import com.nagai.ai.DailyChecklistCandidate;
 import com.nagai.ai.DailyChecklistItemSuggestion;
 import com.nagai.ai.DailyChecklistResponse;
 import com.nagai.backend.ai.AiGrpcClientService;
+import com.nagai.backend.calendar.GoogleCalendarService;
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
 import com.nagai.backend.common.ProfileUtils;
@@ -56,6 +58,7 @@ public class DailyChecklistService {
     private final UserService userService;
     private final AiGrpcClientService aiGrpcClientService;
     private final StringRedisTemplate redisTemplate;
+    private final GoogleCalendarService googleCalendarService;
 
     public DailyChecklistService(
             DailyChecklistConfigRepository configRepository,
@@ -66,7 +69,8 @@ public class DailyChecklistService {
             GoalService goalService,
             UserService userService,
             AiGrpcClientService aiGrpcClientService,
-            StringRedisTemplate redisTemplate) {
+            StringRedisTemplate redisTemplate,
+            GoogleCalendarService googleCalendarService) {
         this.configRepository = configRepository;
         this.dailyChecklistRepository = dailyChecklistRepository;
         this.dailyItemRepository = dailyItemRepository;
@@ -76,6 +80,7 @@ public class DailyChecklistService {
         this.userService = userService;
         this.aiGrpcClientService = aiGrpcClientService;
         this.redisTemplate = redisTemplate;
+        this.googleCalendarService = googleCalendarService;
     }
 
     // ---- Config ----
@@ -84,7 +89,7 @@ public class DailyChecklistService {
         User user = userService.getCurrentUser();
         DailyChecklistConfig config = configRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> createDefaultConfig(user.getUserId()));
-        return DailyChecklistConfigResponse.fromEntity(config);
+        return DailyChecklistConfigResponse.fromEntity(config, user);
     }
 
     public DailyChecklistConfigResponse updateConfig(DailyChecklistConfigRequest request) {
@@ -101,9 +106,12 @@ public class DailyChecklistService {
         // null means "all goals" — explicitly pass empty list to clear selection
         config.setIncludedGoalIds(request.includedGoalIds() != null
                 ? toJson(request.includedGoalIds()) : null);
+        if (request.calendarEnabled() != null) {
+            config.setCalendarEnabled(request.calendarEnabled());
+        }
         config.setUpdatedAt(LocalDateTime.now());
 
-        return DailyChecklistConfigResponse.fromEntity(configRepository.save(config));
+        return DailyChecklistConfigResponse.fromEntity(configRepository.save(config), user);
     }
 
     private DailyChecklistConfig createDefaultConfig(Long userId) {
@@ -169,6 +177,28 @@ public class DailyChecklistService {
             }
         }
 
+        // Fetch calendar events if connected and enabled
+        List<CalendarBusyBlock> busyBlocks = List.of();
+        if (config.isCalendarEnabled() && user.isCalendarConnected()) {
+            try {
+                List<GoogleCalendarService.BusyBlock> events =
+                        googleCalendarService.fetchTodayEvents(user, zone);
+                busyBlocks = events.stream()
+                        .map(e -> CalendarBusyBlock.newBuilder()
+                                .setStartTime(e.startTime())
+                                .setEndTime(e.endTime())
+                                .setSummary(e.summary() != null ? e.summary() : "")
+                                .build())
+                        .toList();
+                if (!busyBlocks.isEmpty()) {
+                    log.info("Loaded {} calendar events for user={}", busyBlocks.size(), user.getUserId());
+                }
+            } catch (Exception e) {
+                log.warn("Calendar fetch failed for user={}, continuing without it: {}",
+                        user.getUserId(), e.getMessage());
+            }
+        }
+
         // Call AI
         String currentTime = nowTime.format(DateTimeFormatter.ofPattern("HH:mm"));
         String dayOfWeek = today.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
@@ -177,7 +207,7 @@ public class DailyChecklistService {
 
         DailyChecklistResponse aiResponse = aiGrpcClientService.generateDailyChecklist(
                 candidates, recurringItems, config.getMaxItems(),
-                currentTime, userProfile, dayOfWeek, planDate);
+                currentTime, userProfile, dayOfWeek, planDate, busyBlocks);
 
         // Persist daily checklist
         DailyChecklist checklist = new DailyChecklist();

@@ -7,12 +7,14 @@ import {
 } from "@/types/dailyChecklist";
 import { Goal } from "@/types/goal";
 import { IoClose } from "@/components/icons";
+import { fetchCalendarAuthUrl, disconnectCalendar } from "@/services/calendarService";
 import styles from "./dailyChecklist.module.css";
 
 interface DailyChecklistConfigProps {
   config: ConfigType;
   goals: Goal[];
   onSave: (data: UpdateDailyChecklistConfigDto) => Promise<void>;
+  onConfigChange?: () => void;
 }
 
 function arraysEqual(a: number[] | null, b: number[] | null): boolean {
@@ -28,6 +30,7 @@ export default function DailyChecklistConfig({
   config,
   goals,
   onSave,
+  onConfigChange,
 }: DailyChecklistConfigProps) {
   const [maxItems, setMaxItems] = useState(config.maxItems);
   const [recurringItems, setRecurringItems] = useState<string[]>(
@@ -38,6 +41,7 @@ export default function DailyChecklistConfig({
   );
   const [newRecurring, setNewRecurring] = useState("");
   const [saving, setSaving] = useState(false);
+  const [calendarWorking, setCalendarWorking] = useState(false);
 
   const initialRecurring = config.recurringItems ?? [];
   const isDirty =
@@ -74,6 +78,30 @@ export default function DailyChecklistConfig({
   const isGoalSelected = (goalId: number) =>
     selectedGoalIds === null || selectedGoalIds.includes(goalId);
 
+  const handleConnectCalendar = async () => {
+    setCalendarWorking(true);
+    try {
+      const { url } = await fetchCalendarAuthUrl();
+      window.location.href = url;
+    } catch {
+      setCalendarWorking(false);
+    }
+  };
+
+  const handleDisconnectCalendar = async () => {
+    setCalendarWorking(true);
+    try {
+      await disconnectCalendar();
+      onConfigChange?.();
+    } finally {
+      setCalendarWorking(false);
+    }
+  };
+
+  const handleCalendarToggle = async () => {
+    await onSave({ calendarEnabled: !config.calendarEnabled });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -89,6 +117,49 @@ export default function DailyChecklistConfig({
 
   return (
     <div className={styles.configPanel}>
+      <div className={styles.configSection}>
+        <label className={styles.configLabel}>Google Calendar</label>
+        {!config.calendarConnected ? (
+          <div className={styles.calendarRow}>
+            <span className={styles.configHint}>
+              Connect to avoid scheduling conflicts with your meetings.
+            </span>
+            <button
+              className={styles.calendarConnectBtn}
+              onClick={handleConnectCalendar}
+              disabled={calendarWorking}
+            >
+              Connect
+            </button>
+          </div>
+        ) : (
+          <div className={styles.calendarRow}>
+            <div className={styles.calendarConnectedLabel}>
+              <span className={styles.calendarDot} />
+              Connected
+            </div>
+            <label className={styles.calendarToggle}>
+              <input
+                type="checkbox"
+                checked={config.calendarEnabled}
+                onChange={handleCalendarToggle}
+                disabled={calendarWorking}
+              />
+              <span className={styles.calendarToggleLabel}>
+                {config.calendarEnabled ? "Enabled" : "Disabled"}
+              </span>
+            </label>
+            <button
+              className={styles.calendarDisconnectBtn}
+              onClick={handleDisconnectCalendar}
+              disabled={calendarWorking}
+            >
+              Disconnect
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className={styles.configSection}>
         <label className={styles.configLabel}>Max items per day</label>
         <input

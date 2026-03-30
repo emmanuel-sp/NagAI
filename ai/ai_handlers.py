@@ -293,6 +293,22 @@ def _parse_digest_response(text: str) -> dict:
     return {"subject": subject, "body": body}
 
 
+def _calendar_section(busy_blocks: list[dict]) -> str:
+    """Format calendar events as a labeled XML section for the Claude prompt."""
+    if not busy_blocks:
+        return ""
+    lines = [
+        f"  {b['start_time']}–{b['end_time']}: {b['summary'] or '(busy)'}"
+        for b in busy_blocks
+    ]
+    return (
+        "\n<calendar_events>\n"
+        "Today's calendar — do NOT schedule tasks during these times:\n"
+        + "\n".join(lines)
+        + "\n</calendar_events>\n"
+    )
+
+
 def generate_daily_checklist(
     candidates: list[dict],
     recurring_items: list[str],
@@ -301,6 +317,7 @@ def generate_daily_checklist(
     user_profile: str = "",
     day_of_week: str = "",
     plan_date: str = "",
+    busy_blocks: list[dict] | None = None,
 ) -> list[dict]:
     """Generate a thoughtful daily plan using AI.
 
@@ -353,6 +370,7 @@ def generate_daily_checklist(
         "- Afternoon generation (12:00-17:00): skip morning routines, plan afternoon + evening + tomorrow prep.\n"
         "- Evening generation (after 17:00): wind-down + tomorrow planning only.\n"
         f"- Maximum {max_items} items. Quality over quantity — a focused day, not an overwhelming list.\n"
+        f"{'- Respect calendar events in <calendar_events>. Do NOT schedule tasks during those intervals. If a meeting fills a preferred time slot, schedule around it. If an all-day event is present (00:00-23:59), assume the user is unavailable — minimize or skip non-essential routines.' + chr(10) if busy_blocks else ''}"
         "- Label rules: [G{goalId}-{checklistId}] = one-shot task that permanently completes that checklist item. "
         "[G{goalId}] = goal-inspired session/breakdown that does NOT complete the checklist item. "
         "[R] = user's recurring anchor. [NEW] = connective tissue with no goal link. "
@@ -377,6 +395,9 @@ def generate_daily_checklist(
         prompt += f"\nRecurring anchors (include at appropriate times):\n{recurring_text}\n"
     else:
         prompt += "\nNo recurring anchors configured.\n"
+
+    if busy_blocks:
+        prompt += _calendar_section(busy_blocks)
 
     if candidates_text:
         prompt += f"\nGoals and their checklist items:\n{candidates_text}\n"

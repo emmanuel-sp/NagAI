@@ -503,6 +503,93 @@
   background: var(--accent-light);
 }
 
+/* ─── Google Calendar Row ─── */
+.calendarRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.calendarConnectedLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.calendarDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  flex-shrink: 0;
+}
+
+.calendarToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.calendarToggleLabel {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.calendarConnectBtn {
+  padding: 5px 14px;
+  background: var(--accent);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+  margin-left: auto;
+}
+
+.calendarConnectBtn:hover:not(:disabled) {
+  background: var(--accent-dark);
+}
+
+.calendarConnectBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.calendarDisconnectBtn {
+  padding: 5px 12px;
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.calendarDisconnectBtn:hover:not(:disabled) {
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+}
+
+.calendarDisconnectBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ─── Save Button ─── */
 .saveButton {
   display: inline-flex;

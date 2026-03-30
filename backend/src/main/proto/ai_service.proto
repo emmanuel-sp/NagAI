@@ -78,6 +78,12 @@ message DailyChecklistCandidate {
   string goal_smart_context = 6;  // SMART field breakdown for richer context
 }
 
+message CalendarBusyBlock {
+  string start_time = 1;  // "09:00" in user's timezone
+  string end_time   = 2;  // "10:30"
+  string summary    = 3;  // event title, empty for private events
+}
+
 message DailyChecklistRequest {
   repeated DailyChecklistCandidate candidates = 1;  // goal checklist items as labeled candidates
   repeated string recurring_items             = 2;  // user-defined recurring anchors
@@ -86,6 +92,7 @@ message DailyChecklistRequest {
   string user_profile                         = 5;
   string day_of_week                          = 6;  // "Monday"
   string plan_date                            = 7;  // "2026-03-23"
+  repeated CalendarBusyBlock busy_blocks      = 8;  // today's calendar events (avoids conflicts)
 }
 
 message DailyChecklistItemSuggestion {

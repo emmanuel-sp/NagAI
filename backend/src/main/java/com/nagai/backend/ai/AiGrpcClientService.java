@@ -7,6 +7,7 @@ import com.nagai.ai.ChatGoalSummary;
 import com.nagai.ai.ChatHistoryEntry;
 import com.nagai.ai.ChecklistItemRequest;
 import com.nagai.ai.ChecklistItemResponse;
+import com.nagai.ai.CalendarBusyBlock;
 import com.nagai.ai.DailyChecklistCandidate;
 import com.nagai.ai.DailyChecklistRequest;
 import com.nagai.ai.DailyChecklistResponse;
@@ -130,17 +131,20 @@ public class AiGrpcClientService {
     public DailyChecklistResponse generateDailyChecklist(
             List<DailyChecklistCandidate> candidates, List<String> recurringItems,
             int maxItems, String currentTime, String userProfile,
-            String dayOfWeek, String planDate) {
+            String dayOfWeek, String planDate, List<CalendarBusyBlock> busyBlocks) {
         try {
-            return stubWithCorrelation().generateDailyChecklist(DailyChecklistRequest.newBuilder()
+            DailyChecklistRequest.Builder req = DailyChecklistRequest.newBuilder()
                     .addAllCandidates(candidates)
                     .addAllRecurringItems(recurringItems)
                     .setMaxItems(maxItems)
                     .setCurrentTime(currentTime)
                     .setUserProfile(userProfile)
                     .setDayOfWeek(dayOfWeek)
-                    .setPlanDate(planDate)
-                    .build());
+                    .setPlanDate(planDate);
+            if (busyBlocks != null && !busyBlocks.isEmpty()) {
+                req.addAllBusyBlocks(busyBlocks);
+            }
+            return stubWithCorrelation().generateDailyChecklist(req.build());
         } catch (StatusRuntimeException e) {
             if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
             log.error("gRPC call failed: {}", e.getStatus().getDescription());

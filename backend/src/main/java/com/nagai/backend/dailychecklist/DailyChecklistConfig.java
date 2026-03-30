@@ -40,4 +40,7 @@ public class DailyChecklistConfig {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "calendar_enabled")
+    private boolean calendarEnabled = true;
 }

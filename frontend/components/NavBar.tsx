@@ -14,6 +14,7 @@ import styles from "./NavBar.module.css";
 
 const navLinks = [
   { href: "/home", label: "Dashboard" },
+  { href: "/today", label: "Today" },
   { href: "/goals", label: "Goals" },
   { href: "/digests", label: "Digests" },
   { href: "/chat", label: "Chat" },
