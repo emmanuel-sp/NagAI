@@ -62,6 +62,17 @@ public class GoalService {
         return goalRepository.save(goal);
     }
 
+    public Goal updateGoalJournal(Long goalId, GoalJournalUpdateRequest request) {
+        User currentUser = userService.getCurrentUser();
+        Goal goal = goalRepository.findById(goalId).orElseThrow(GoalNotFoundException::new);
+        if (!currentUser.getUserId().equals(goal.getUserId())) {
+            throw new AccessDeniedException("You do not have permission to update this goal");
+        }
+
+        goal.setJournalMarkdown(request.getJournalMarkdown());
+        return goalRepository.save(goal);
+    }
+
     public Goal getGoal(Long goalId) {
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new GoalNotFoundException());
         return goal;

@@ -3,10 +3,12 @@ package com.nagai.backend.agents;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.nagai.backend.exceptions.AgentContextLimitException;
 import com.nagai.backend.exceptions.AgentContextNotFoundException;
+import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.users.User;
 import com.nagai.backend.users.UserService;
@@ -72,7 +74,8 @@ public class AgentService {
         }
         AgentContext context = new AgentContext();
         context.setAgentId(agent.getAgentId());
-        applyContextFields(context, request.getName(), request.getGoalId(),
+        Goal goal = validateGoalOwnership(request.getGoalId(), user);
+        applyContextFields(context, request.getName(), goal.getGoalId(),
                 request.getMessageType(), request.getCustomInstructions());
         return buildContextResponse(agentContextRepository.save(context));
     }
@@ -84,8 +87,9 @@ public class AgentService {
         AgentContext context = agentContextRepository.findById(contextId)
                 .filter(c -> c.getAgentId().equals(agent.getAgentId()))
                 .orElseThrow(AgentContextNotFoundException::new);
+        Goal goal = validateGoalOwnership(request.getGoalId(), user);
         if (request.getName() != null) context.setName(request.getName());
-        if (request.getGoalId() != null) context.setGoalId(request.getGoalId());
+        context.setGoalId(goal.getGoalId());
         if (request.getMessageType() != null) context.setMessageType(request.getMessageType());
         if (request.getCustomInstructions() != null) context.setCustomInstructions(request.getCustomInstructions());
         return buildContextResponse(agentContextRepository.save(context));
@@ -140,5 +144,14 @@ public class AgentService {
         context.setGoalId(goalId);
         context.setMessageType(messageType);
         context.setCustomInstructions(customInstructions);
+    }
+
+    private Goal validateGoalOwnership(Long goalId, User user) {
+        Goal goal = goalRepository.findById(goalId)
+                .orElseThrow(() -> new AccessDeniedException("You do not have permission to use this goal"));
+        if (!user.getUserId().equals(goal.getUserId())) {
+            throw new AccessDeniedException("You do not have permission to use this goal");
+        }
+        return goal;
     }
 }

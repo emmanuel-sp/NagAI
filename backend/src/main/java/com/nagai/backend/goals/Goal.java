@@ -35,6 +35,8 @@ public class Goal {
     private String timely;
     @Column(name="steps_taken")
     private String stepsTaken;
+    @Column(name = "journal_markdown")
+    private String journalMarkdown;
 
     @Column(name="created_at")
     @CreationTimestamp

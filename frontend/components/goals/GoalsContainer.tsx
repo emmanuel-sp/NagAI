@@ -1,38 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { Goal, GoalWithDetails } from "@/types/goal";
+import { useAgentData } from "@/contexts/AgentDataContext";
+import { Goal } from "@/types/goal";
 import GoalsList from "@/components/goals/GoalsList";
 import GoalFormModal from "@/components/goals/GoalFormModal";
-import GoalViewModal from "@/components/goals/GoalViewModal";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import Toast from "@/components/common/Toast";
 import { IoAdd } from "@/components/icons";
 import styles from "./goalsList.module.css";
 import {
   fetchGoals,
-  fetchGoalById,
-  updateGoal,
   createGoal,
-  deleteGoal,
 } from "@/services/goalService";
 import { Checklist } from "@/types/checklist";
 import { fetchChecklists } from "@/services/checklistService";
 
 export default function GoalsContainer() {
   const { loading: authLoading } = useAuth({ requireAuth: true });
+  const router = useRouter();
+  const { refreshAgent } = useAgentData();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [checklists, setChecklists] = useState<Checklist[]>([]);
-  const [selectedGoal, setSelectedGoal] = useState<GoalWithDetails | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
@@ -58,34 +52,8 @@ export default function GoalsContainer() {
     }
   };
 
-  const handleViewGoal = async (goalId: number) => {
-    try {
-      const goal = await fetchGoalById(goalId);
-      setSelectedGoal(goal);
-      setIsViewModalOpen(true);
-    } catch (error) {
-      console.error("Failed to fetch goal details:", error);
-      setLoadError("Failed to open goal. Please try again.");
-    }
-  };
-
-  const handleCloseViewModal = () => {
-    setIsViewModalOpen(false);
-    setSelectedGoal(null);
-  };
-
-  const handleViewToEdit = () => {
-    setIsViewModalOpen(false);
-    setIsEditModalOpen(true);
-  };
-
   const handleCloseAddModal = () => {
     setIsAddModalOpen(false);
-  };
-
-  const handleCloseEditModal = () => {
-    setIsEditModalOpen(false);
-    setSelectedGoal(null);
   };
 
   const handleAddGoal = () => {
@@ -101,23 +69,13 @@ export default function GoalsContainer() {
     attainable: string;
     relevant: string;
     timely: string;
+    stepsTaken: string;
   }) => {
-    await createGoal(goalData);
+    const createdGoal = await createGoal(goalData);
+    await refreshAgent();
     await loadGoals();
     handleCloseAddModal();
-    setShowToast(true);
-  };
-
-  const handleUpdateGoal = async (goal: GoalWithDetails) => {
-    await updateGoal(goal.goalId, goal);
-    await loadGoals();
-    handleCloseEditModal();
-  };
-
-  const handleRemoveGoal = async (goalId: number) => {
-    await deleteGoal(goalId);
-    await loadGoals();
-    handleCloseEditModal();
+    router.push(`/goals/${createdGoal.goalId}`);
   };
 
   if (isLoading) {
@@ -144,7 +102,7 @@ export default function GoalsContainer() {
       {goals.length === 0 ? (
         <EmptyState
           title="No goals yet"
-          description="Create your first goal to get started on your journey"
+          description="Create your first goal from the sidebar or here to open your first goal workspace."
           action={
             <button onClick={handleAddGoal} className={styles.addGoalButton}>
               <IoAdd size={20} />
@@ -153,7 +111,11 @@ export default function GoalsContainer() {
           }
         />
       ) : (
-        <GoalsList goals={goals} checklists={checklists} onViewGoal={handleViewGoal} />
+        <GoalsList
+          goals={goals}
+          checklists={checklists}
+          onViewGoal={(goalId) => router.push(`/goals/${goalId}`)}
+        />
       )}
 
       <GoalFormModal
@@ -162,42 +124,6 @@ export default function GoalsContainer() {
         onClose={handleCloseAddModal}
         onSubmit={handleCreateGoal}
       />
-
-      {selectedGoal && (
-        <GoalViewModal
-          isOpen={isViewModalOpen}
-          goal={selectedGoal}
-          checklist={checklists.find((c) => c.goalId === selectedGoal.goalId)}
-          onClose={handleCloseViewModal}
-          onEdit={handleViewToEdit}
-        />
-      )}
-
-      {selectedGoal && (
-        <GoalFormModal
-          mode="edit"
-          isOpen={isEditModalOpen}
-          goal={selectedGoal}
-          onClose={handleCloseEditModal}
-          onSubmit={handleUpdateGoal}
-          onRemove={handleRemoveGoal}
-        />
-      )}
-
-      {showToast && (
-        <Toast
-          message={
-            <>
-              Goal added! Head to{" "}
-              <Link href="/checklists" className={styles.toastLink}>
-                Checklists
-              </Link>{" "}
-              to track your goal
-            </>
-          }
-          onClose={() => setShowToast(false)}
-        />
-      )}
     </div>
   );
 }

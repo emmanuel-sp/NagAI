@@ -16,6 +16,7 @@ public class GoalResponse {
     private String relevant;
     private String timely;
     private String stepsTaken;
+    private String journalMarkdown;
     private LocalDateTime createdAt;
 
     public static GoalResponse fromEntity(Goal goal) {
@@ -31,6 +32,7 @@ public class GoalResponse {
         goalResponse.setRelevant(goal.getRelevant());
         goalResponse.setTimely(goal.getTimely());
         goalResponse.setStepsTaken(goal.getStepsTaken());
+        goalResponse.setJournalMarkdown(goal.getJournalMarkdown());
         return goalResponse;
     }
 }

@@ -31,14 +31,14 @@ export interface Agent {
 
 export interface CreateContextRequest {
   name: string;
-  goalId?: number | null;
+  goalId: number;
   messageType: MessageType;
   customInstructions?: string;
 }
 
 export interface UpdateContextRequest {
   name?: string;
-  goalId?: number | null;
+  goalId: number;
   messageType?: MessageType;
   customInstructions?: string;
 }

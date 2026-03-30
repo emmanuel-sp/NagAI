@@ -7,6 +7,17 @@ import {
 } from "@/types/checklist";
 import { fetchGoals } from "@/services/goalService";
 
+export async function fetchChecklistByGoal(goalId: number): Promise<Checklist> {
+  const items = await apiRequest<ChecklistItem[]>(`/checklists/goal/${goalId}`);
+  const goals = await fetchGoals();
+  const goal = goals.find((entry) => entry.goalId === goalId);
+  return {
+    goalId,
+    goalTitle: goal?.title ?? "Untitled Goal",
+    items,
+  };
+}
+
 export async function fetchChecklists(): Promise<Checklist[]> {
   const goals = await fetchGoals();
   const checklists = await Promise.all(

@@ -11,6 +11,7 @@ import styles from "./agent-builder-modal.module.css";
 interface ContextFormModalBaseProps {
   isOpen: boolean;
   goals: Goal[];
+  lockedGoalId?: number;
   onClose: () => void;
 }
 
@@ -28,7 +29,7 @@ interface EditModeProps extends ContextFormModalBaseProps {
 type ContextFormModalProps = CreateModeProps | EditModeProps;
 
 export default function ContextFormModal(props: ContextFormModalProps) {
-  const { isOpen, goals, onClose, mode } = props;
+  const { isOpen, goals, lockedGoalId, onClose, mode } = props;
   const [name, setName] = useState("");
   const [goalId, setGoalId] = useState("");
   const [messageType, setMessageType] = useState<MessageType>("motivation");
@@ -50,14 +51,21 @@ export default function ContextFormModal(props: ContextFormModalProps) {
   }, [isOpen, registerModal]);
 
   useEffect(() => {
-    if (mode === "edit" && isOpen) {
+    if (!isOpen) return;
+
+    if (mode === "edit") {
       const { context } = props as EditModeProps;
       setName(context.name);
-      setGoalId(context.goalId != null ? String(context.goalId) : "");
+      setGoalId(String(lockedGoalId ?? context.goalId ?? ""));
       setMessageType(context.messageType);
       setCustomInstructions(context.customInstructions || "");
+    } else {
+      resetForm();
+      if (lockedGoalId != null) {
+        setGoalId(String(lockedGoalId));
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, lockedGoalId, mode, props]);
 
   const resetForm = () => {
     setName("");
@@ -73,13 +81,17 @@ export default function ContextFormModal(props: ContextFormModalProps) {
       setFormError("Please provide a name");
       return;
     }
+    if (!goalId) {
+      setFormError("Please attach this context to a goal");
+      return;
+    }
     setFormError(null);
 
     setIsSaving(true);
     try {
       const data: CreateContextRequest = {
         name: name.trim(),
-        goalId: goalId ? Number(goalId) : null,
+        goalId: Number(goalId),
         messageType,
         customInstructions: customInstructions.trim() || undefined,
       };
@@ -100,6 +112,9 @@ export default function ContextFormModal(props: ContextFormModalProps) {
   if (mode === "edit" && !(props as EditModeProps).context) return null;
 
   const isCreate = mode === "create";
+  const lockedGoal = lockedGoalId != null
+    ? goals.find((goal) => goal.goalId === lockedGoalId) ?? null
+    : null;
 
   const modal = (
     <div className={styles.modalOverlay} onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -141,25 +156,37 @@ export default function ContextFormModal(props: ContextFormModalProps) {
 
             <div className={styles.formSection}>
               <label className={styles.formLabel}>Goal</label>
-              <div className={styles.goalPills}>
-                {goals.length > 0 ? (
-                  goals.map((goal) => {
-                    const selected = goalId === String(goal.goalId);
-                    return (
-                      <button
-                        key={goal.goalId}
-                        type="button"
-                        className={`${styles.goalPill} ${selected ? styles.goalPillActive : ""}`}
-                        onClick={() => setGoalId(selected ? "" : String(goal.goalId))}
-                      >
-                        {goal.title}
-                      </button>
-                    );
-                  })
-                ) : (
-                  <span className={styles.radioDescription}>No goals created yet</span>
-                )}
-              </div>
+              {lockedGoal ? (
+                <div className={styles.goalPills}>
+                  <button
+                    type="button"
+                    className={`${styles.goalPill} ${styles.goalPillActive}`}
+                    disabled
+                  >
+                    {lockedGoal.title}
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.goalPills}>
+                  {goals.length > 0 ? (
+                    goals.map((goal) => {
+                      const selected = goalId === String(goal.goalId);
+                      return (
+                        <button
+                          key={goal.goalId}
+                          type="button"
+                          className={`${styles.goalPill} ${selected ? styles.goalPillActive : ""}`}
+                          onClick={() => setGoalId(selected ? "" : String(goal.goalId))}
+                        >
+                          {goal.title}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <span className={styles.radioDescription}>No goals created yet</span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className={styles.formSection}>

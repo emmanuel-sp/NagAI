@@ -6,6 +6,7 @@ export interface Goal {
   description: string;
   createdAt: string;
   targetDate: string;
+  journalMarkdown?: string;
 }
 
 export interface GoalWithDetails extends Goal {
@@ -15,6 +16,7 @@ export interface GoalWithDetails extends Goal {
   relevant?: string;
   timely?: string;
   stepsTaken?: string;
+  journalMarkdown?: string;
 }
 
 export interface CreateGoalRequest {
@@ -27,6 +29,7 @@ export interface CreateGoalRequest {
   relevant?: string;
   timely?: string;
   stepsTaken?: string;
+  journalMarkdown?: string;
 }
 
 export interface UpdateGoalRequest extends Partial<CreateGoalRequest> {}

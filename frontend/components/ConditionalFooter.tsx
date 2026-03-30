@@ -6,8 +6,9 @@ import Footer from "@/components/Footer";
 export default function ConditionalFooter() {
   const pathname = usePathname();
 
-  // Hide footer on goals and checklists pages
-  const hideFooter = pathname === "/goals" || pathname === "/checklists" || pathname === "/chat";
+  const hideFooter =
+    pathname.startsWith("/goals") ||
+    pathname === "/chat";
 
   if (hideFooter) {
     return null;

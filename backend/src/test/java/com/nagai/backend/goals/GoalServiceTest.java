@@ -125,6 +125,20 @@ class GoalServiceTest {
     }
 
     @Test
+    void updateGoalJournal_updatesJournalContent() {
+        GoalJournalUpdateRequest request = new GoalJournalUpdateRequest();
+        request.setJournalMarkdown("# Weekly notes");
+
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(goalRepository.findById(10L)).thenReturn(Optional.of(goal));
+        when(goalRepository.save(any(Goal.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Goal result = goalService.updateGoalJournal(10L, request);
+
+        assertThat(result.getJournalMarkdown()).isEqualTo("# Weekly notes");
+    }
+
+    @Test
     void deleteGoal_deletesGoalForOwner() {
         when(userService.getCurrentUser()).thenReturn(user);
         when(goalRepository.findById(10L)).thenReturn(Optional.of(goal));

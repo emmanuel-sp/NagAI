@@ -39,7 +39,7 @@ export default function GoalProgressCards({ goals, checklists }: GoalProgressCar
           return (
             <Link
               key={goal.goalId}
-              href="/checklists"
+              href={`/goals/${goal.goalId}`}
               className={styles.goalCard}
             >
               <span className={styles.goalCardTitle}>{goal.title}</span>

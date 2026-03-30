@@ -232,6 +232,9 @@
   justify-content: center;
   width: 24px;
   height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
   border-radius: var(--radius-sm);
   color: var(--text-light);
   cursor: pointer;
@@ -366,11 +369,20 @@
   gap: 4px;
   padding: 6px 8px 6px 12px;
   border-radius: var(--radius-md);
+  text-decoration: none;
   transition: background var(--transition-fast);
 }
 
 .contextRow:hover {
   background: var(--surface);
+}
+
+.contextRowActive {
+  background: var(--accent-lighter);
+}
+
+.contextRowActive:hover {
+  background: var(--accent-light);
 }
 
 .contextName {
@@ -383,6 +395,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.goalWorkspaceHint {
+  flex-shrink: 0;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-600);
+  color: var(--accent);
 }
 
 .contextRowActions {
@@ -420,6 +439,36 @@
 
 .contextDeleteBtn:hover {
   color: var(--error);
+}
+
+.agentSection {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.agentSectionLabel {
+  display: block;
+  padding: 0 8px 8px;
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.agentStatusRow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 8px;
+}
+
+.agentStatusText {
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  color: var(--text-secondary);
 }
 
 /* ─── Theme Switcher ─── */

@@ -194,8 +194,8 @@ export default function LandingPage() {
                 <Link href="/goals" className={styles.secondaryCta}>
                   View Goals
                 </Link>
-                <Link href="/checklists" className={styles.secondaryCta}>
-                  Open Checklists
+                <Link href="/goals" className={styles.secondaryCta}>
+                  Open Goal Hub
                 </Link>
               </>
             ) : (

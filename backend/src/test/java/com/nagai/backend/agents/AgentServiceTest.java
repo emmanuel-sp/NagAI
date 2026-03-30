@@ -14,8 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import com.nagai.backend.exceptions.AgentContextNotFoundException;
+import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalRepository;
 import com.nagai.backend.users.User;
 import com.nagai.backend.users.UserService;
@@ -41,6 +43,7 @@ class AgentServiceTest {
     private User user;
     private Agent agent;
     private AgentContext context;
+    private Goal goal;
 
     @BeforeEach
     void setUp() {
@@ -58,8 +61,14 @@ class AgentServiceTest {
         context = new AgentContext();
         context.setContextId(100L);
         context.setAgentId(10L);
+        context.setGoalId(50L);
         context.setName("Morning Check");
         context.setMessageType("motivation");
+
+        goal = new Goal();
+        goal.setGoalId(50L);
+        goal.setUserId(1L);
+        goal.setTitle("Stay consistent");
     }
 
     @Test
@@ -141,11 +150,13 @@ class AgentServiceTest {
     void addContext_savesAndReturnsContext() {
         AddContextRequest request = new AddContextRequest();
         request.setName("Evening Review");
+        request.setGoalId(50L);
         request.setMessageType("guidance");
         request.setCustomInstructions("Be concise.");
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
+        when(goalRepository.findById(50L)).thenReturn(Optional.of(goal));
         when(agentContextRepository.save(any(AgentContext.class))).thenAnswer(inv -> {
             AgentContext c = inv.getArgument(0);
             c.setContextId(200L);
@@ -164,9 +175,11 @@ class AgentServiceTest {
     void updateContext_updatesFields() {
         UpdateContextRequest request = new UpdateContextRequest();
         request.setName("Updated Name");
+        request.setGoalId(50L);
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
+        when(goalRepository.findById(50L)).thenReturn(Optional.of(goal));
         when(agentContextRepository.findById(100L)).thenReturn(Optional.of(context));
         when(agentContextRepository.save(any(AgentContext.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -179,6 +192,7 @@ class AgentServiceTest {
     void updateContext_throwsNotFoundWhenContextDoesNotExist() {
         UpdateContextRequest request = new UpdateContextRequest();
         request.setName("X");
+        request.setGoalId(50L);
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
@@ -196,6 +210,7 @@ class AgentServiceTest {
 
         UpdateContextRequest request = new UpdateContextRequest();
         request.setName("X");
+        request.setGoalId(50L);
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
@@ -203,6 +218,27 @@ class AgentServiceTest {
 
         assertThatThrownBy(() -> agentService.updateContext(100L, request))
                 .isInstanceOf(AgentContextNotFoundException.class);
+    }
+
+    @Test
+    void addContext_throwsAccessDeniedWhenGoalBelongsToAnotherUser() {
+        User otherUser = new User();
+        otherUser.setUserId(99L);
+        goal.setUserId(99L);
+
+        AddContextRequest request = new AddContextRequest();
+        request.setName("Evening Review");
+        request.setGoalId(50L);
+        request.setMessageType("guidance");
+
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
+        when(goalRepository.findById(50L)).thenReturn(Optional.of(goal));
+
+        assertThatThrownBy(() -> agentService.addContext(request))
+                .isInstanceOf(AccessDeniedException.class);
+
+        verify(agentContextRepository, never()).save(any());
     }
 
     @Test

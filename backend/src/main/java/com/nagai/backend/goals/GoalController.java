@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +47,13 @@ public class GoalController {
     @PutMapping
     public ResponseEntity<GoalResponse> updateGoal(@Valid @RequestBody GoalUpdateRequest goalUpdateRequest) {
         return ResponseEntity.ok(GoalResponse.fromEntity(goalService.updateGoal(goalUpdateRequest)));
+    }
+
+    @PatchMapping("/{goalId}/journal")
+    public ResponseEntity<GoalResponse> updateGoalJournal(
+            @PathVariable Long goalId,
+            @Valid @RequestBody GoalJournalUpdateRequest request) {
+        return ResponseEntity.ok(GoalResponse.fromEntity(goalService.updateGoalJournal(goalId, request)));
     }
 
     @DeleteMapping("/{goalId}")

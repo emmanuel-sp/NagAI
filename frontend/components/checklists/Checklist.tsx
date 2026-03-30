@@ -10,6 +10,7 @@ import styles from "./checklist.module.css";
 interface ChecklistProps {
   checklist: ChecklistType;
   filter: "all" | "active" | "completed";
+  title?: string;
   onAddItem: (title: string, notes?: string, deadline?: string) => void;
   onToggleItem: (checklistId: number) => void;
   onUpdateItem: (checklistId: number, updates: { title?: string; notes?: string; deadline?: string }) => void;
@@ -22,6 +23,7 @@ interface ChecklistProps {
 export default function Checklist({
   checklist,
   filter,
+  title,
   onAddItem,
   onToggleItem,
   onUpdateItem,
@@ -60,7 +62,7 @@ export default function Checklist({
       <div className={styles.checklistHeader} onClick={() => setIsCollapsed(!isCollapsed)} style={{ cursor: "pointer" }}>
         <div className={styles.checklistHeaderInfo}>
           <div className={styles.checklistTitleRow}>
-            <h2 className={styles.checklistGoalTitle}>{checklist.goalTitle || "Untitled Goal"}</h2>
+            <h2 className={styles.checklistGoalTitle}>{title || checklist.goalTitle || "Untitled Goal"}</h2>
             <span className={`${styles.collapseIcon} ${isCollapsed ? styles.collapseIconCollapsed : ""}`}>
               <IoChevronDown size={18} />
             </span>

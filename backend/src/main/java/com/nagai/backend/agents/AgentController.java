@@ -55,7 +55,7 @@ public class AgentController {
     @PatchMapping("/contexts/{contextId}")
     public ResponseEntity<AgentContextResponse> updateContext(
             @PathVariable Long contextId,
-            @RequestBody UpdateContextRequest request) {
+            @Valid @RequestBody UpdateContextRequest request) {
         return ResponseEntity.ok(agentService.updateContext(contextId, request));
     }
 

@@ -63,7 +63,7 @@ export function Goal({ title, description, createdAt, targetDate, goalId, checkl
                     className={styles.viewButton}
                     onClick={() => onView?.(goalId)}
                 >
-                    View Details
+                    Open Goal
                 </button>
             </div>
         </div>

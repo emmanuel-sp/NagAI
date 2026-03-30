@@ -23,6 +23,16 @@ export async function updateGoal(_id: number, data: Partial<GoalWithDetails>): P
   });
 }
 
+export async function updateGoalJournal(
+  goalId: number,
+  journalMarkdown: string
+): Promise<GoalWithDetails> {
+  return apiRequest<GoalWithDetails>(`/goals/${goalId}/journal`, {
+    method: "PATCH",
+    body: JSON.stringify({ journalMarkdown }),
+  });
+}
+
 export async function deleteGoal(id: number): Promise<void> {
   return apiRequest<void>(`/goals/${id}`, { method: "DELETE" });
 }
