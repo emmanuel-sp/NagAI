@@ -1,7 +1,7 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
