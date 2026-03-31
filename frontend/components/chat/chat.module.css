@@ -71,6 +71,7 @@
 .sessionDropdown {
   position: relative;
   min-width: 0;
+  flex: 1;
 }
 
 .sessionButton {
@@ -78,21 +79,25 @@
   align-items: center;
   gap: 8px;
   padding: 7px 12px;
-  background: none;
-  border: none;
+  width: 100%;
+  max-width: min(300px, 100%);
+  background: color-mix(in srgb, var(--bg-page), transparent 20%);
+  border: 1px solid color-mix(in srgb, var(--border), transparent 15%);
   border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: var(--fs-sm);
   font-weight: var(--fw-500);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: color var(--transition-fast), background var(--transition-fast);
-  max-width: 300px;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .sessionButton:hover {
   color: var(--text-primary);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--bg-page), transparent 10%);
+  border-color: var(--border-strong);
 }
 
 .sessionIcon {
@@ -205,8 +210,8 @@
   align-items: center;
   gap: 5px;
   padding: 6px 14px;
-  background: none;
-  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-page), transparent 20%);
+  border: 1px solid color-mix(in srgb, var(--border), transparent 15%);
   border-radius: var(--radius-full);
   font-family: var(--font-body);
   font-size: var(--fs-xs);
@@ -216,11 +221,13 @@
   transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
   white-space: nowrap;
   flex-shrink: 0;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .newChatButton:hover {
   color: var(--text-primary);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--bg-page), transparent 10%);
   border-color: var(--border-strong);
 }
 
@@ -957,6 +964,10 @@
 @media (max-width: 768px) {
   .chatPage {
     padding: 0 var(--space-sm);
+  }
+
+  .topBarRight {
+    display: none;
   }
 
   .presetGrid {
