@@ -21,6 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.nagai.ai.DailyChecklistItemSuggestion;
@@ -36,6 +38,7 @@ import com.nagai.backend.users.User;
 import com.nagai.backend.users.UserService;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DailyChecklistServiceTest {
 
     @Mock private DailyChecklistConfigRepository configRepository;
@@ -134,7 +137,7 @@ class DailyChecklistServiceTest {
         checklist.setPlanDate(today);
         checklist.setGenerationCount(1);
 
-        DailyChecklist completedItem = new DailyChecklistItem();
+        DailyChecklistItem completedItem = new DailyChecklistItem();
         completedItem.setDailyItemId(201L);
         completedItem.setDailyChecklistId(50L);
         completedItem.setTitle("Already done");

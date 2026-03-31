@@ -87,7 +87,9 @@ public class ChecklistService {
 
         applyReorder(items, request.getOrderedItemIds());
         List<ChecklistItem> updatedItems = checklistRepository.saveAll(items);
-        return updatedItems.stream().map(ChecklistResponse::fromEntity).toList();
+        return updatedItems.stream()
+                .sorted(java.util.Comparator.comparingLong(ChecklistItem::getSortOrder))
+                .map(ChecklistResponse::fromEntity).toList();
     }
 
     public ChecklistResponse updateChecklistItem(ChecklistUpdateRequest request) {

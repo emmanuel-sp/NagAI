@@ -126,7 +126,8 @@ class AgentServiceTest {
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
         when(agentRepository.save(any(Agent.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of());
+        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(context));
+        when(agentContextRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         AgentResponse result = agentService.deployAgent();
 
