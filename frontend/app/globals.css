@@ -65,6 +65,7 @@
 
   /* Backgrounds */
   --bg-page: #ffffff;
+  --bg-page-0: rgba(255, 255, 255, 0);
   --bg-card: #ffffff;
   --bg-elevated: #fafafa;
   --bg-dark: #f0f0f0;
