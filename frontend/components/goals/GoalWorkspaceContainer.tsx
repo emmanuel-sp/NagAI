@@ -341,7 +341,8 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
     <div className={styles.workspaceShell}>
       <div className={styles.workspaceHeaderRow}>
         <Link href="/goals" className={styles.backLink}>
-          ← All goals
+          <span className={styles.backLinkArrow} aria-hidden="true">←</span>
+          <span>All goals</span>
         </Link>
         <button
           type="button"
@@ -413,9 +414,9 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
               </div>
             </div>
             <Checklist
-              title="Checklist"
               checklist={checklist}
               filter="all"
+              showHeader={false}
               onAddItem={handleChecklistAdd}
               onToggleItem={handleChecklistToggle}
               onUpdateItem={handleChecklistUpdate}
@@ -433,9 +434,6 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
             <div className={styles.sectionHeader}>
               <div>
                 <h2 className={styles.sectionTitle}>Goal Agent</h2>
-                <p className={styles.sectionSubtitle}>
-                  Sends proactive email nudges for this goal. Choose a message style, add any custom instructions, and deploy when ready.
-                </p>
               </div>
               <span
                 className={`${styles.deploymentPill} ${

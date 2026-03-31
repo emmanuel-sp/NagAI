@@ -55,9 +55,15 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
     setMobileOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (modalOpen) {
+      setMobileOpen(false);
+    }
+  }, [modalOpen]);
+
   const active = (path: string) =>
     path === "/home" ? pathname === "/home" : pathname.startsWith(path);
-  const hideMobileToggle = pathname.startsWith("/goals") || modalOpen;
+  const hideMobileToggle = modalOpen;
 
   const handleToggle = useCallback(() => {
     if (window.innerWidth <= 768) {
@@ -265,7 +271,7 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
         onClick={handleToggle}
         aria-label="Toggle sidebar"
       >
-        <IoSidebarPanel size={18} />
+        <IoSidebarPanel size={16} strokeWidth={1.35} />
       </button>
 
       <GoalFormModal

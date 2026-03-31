@@ -1,33 +1,22 @@
 /* ─── Chat Layout ─── */
 
 .chatScroll {
-  height: calc(100vh - 32px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .chatScrollEmpty {
   overflow: hidden;
 }
 
-.chatScroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.chatScroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.chatScroll::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-full);
-}
-
 .chatPage {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  flex: 1;
+  min-height: 0;
   width: 100%;
   max-width: 1060px;
   margin: 0 auto;
@@ -35,7 +24,7 @@
 }
 
 .chatPageEmpty {
-  height: calc(100vh - 32px);
+  height: 100%;
   overflow: hidden;
 }
 
@@ -58,13 +47,11 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-sm) var(--space-sm);
-  /* border-bottom: 1px solid var(--border-light); */
   flex-shrink: 0;
   gap: 8px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: transparent;
+  position: relative;
+  z-index: 2;
+  background: var(--bg-page);
 }
 
 .topBarLeft {
@@ -242,10 +229,28 @@
 .messagesArea {
   flex: 1;
   min-height: 0;
-  padding: var(--space-lg) 0 calc(var(--space-md) + 20px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+  padding: var(--space-lg) 0 var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+}
+
+.messagesArea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messagesArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messagesArea::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
 }
 
 /* ─── Message Rows ─── */
@@ -551,12 +556,10 @@
 
 .inputArea {
   flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-  padding: 36px 0 14px;
-  background: linear-gradient(to bottom, transparent 0%, var(--bg-page) 36px);
-  pointer-events: none;
+  position: relative;
+  z-index: 2;
+  padding: 16px 0 14px;
+  background: linear-gradient(to bottom, transparent 0%, var(--bg-page) 20px);
 }
 
 .inputAreaCentered {
@@ -569,7 +572,6 @@
 
 .inputWrapper {
   position: relative;
-  pointer-events: all;
 }
 
 .inputPill {
@@ -937,7 +939,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 32px);
+  height: calc(100vh - 64px);
+}
+
+@supports (height: 100dvh) {
+  .chatScroll {
+    height: calc(100dvh - 64px);
+  }
+
+  .loadingPage {
+    height: calc(100dvh - 64px);
+  }
 }
 
 /* ─── Responsive ─── */
@@ -976,8 +988,7 @@
 
 @media (max-width: 768px) {
   .chatScroll {
-    height: calc(100dvh - 104px);
-    overflow: hidden;
+    height: calc(100vh - 104px);
   }
 
   .chatPage,
@@ -988,26 +999,31 @@
   }
 
   .topBar {
-    position: relative;
-    top: auto;
     background: var(--bg-page);
   }
 
   .messagesArea {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
     padding-bottom: var(--space-md);
   }
 
   .inputArea {
-    position: relative;
-    bottom: auto;
     padding: 20px 0 calc(14px + env(safe-area-inset-bottom));
     background: linear-gradient(to bottom, transparent 0%, var(--bg-page) 20px);
   }
 
   .loadingPage {
-    height: calc(100dvh - 104px);
+    height: calc(100vh - 104px);
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (max-width: 768px) {
+    .chatScroll {
+      height: calc(100dvh - 104px);
+    }
+
+    .loadingPage {
+      height: calc(100dvh - 104px);
+    }
   }
 }

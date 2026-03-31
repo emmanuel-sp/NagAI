@@ -7,6 +7,8 @@
   -webkit-backdrop-filter: blur(6px);
   z-index: 200;
   animation: fadeIn 0.2s ease;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 /* ─── Panel ─── */
@@ -24,6 +26,7 @@
   flex-direction: column;
   z-index: 201;
   animation: slideInFromRight 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+  overflow: hidden;
 }
 
 /* Form wraps header/body/footer — must participate in flex layout */
@@ -98,6 +101,7 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .formSection {
@@ -179,6 +183,12 @@
 }
 
 .fieldTextarea { min-height: 72px; resize: none; }
+
+.modalContent input,
+.modalContent textarea,
+.modalContent select {
+  font-size: 16px;
+}
 
 .charCount {
   font-size: var(--fs-2xs);
@@ -330,6 +340,31 @@
 
 .deleteButton:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.deleteIconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--error);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  margin-right: auto;
+}
+
+.deleteIconButton:hover {
+  background: var(--error-light);
+  border-color: var(--error-border);
+}
+
+.deleteIconButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .cancelButton {
   display: inline-flex;
   align-items: center;
@@ -376,6 +411,9 @@
 @media (max-width: 600px) {
   .modalContent {
     width: 100%;
+    background: var(--bg-page);
+    border-left: none;
+    box-shadow: var(--shadow-2xl);
   }
 
   .modalHeader {

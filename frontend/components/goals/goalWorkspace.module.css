@@ -17,9 +17,34 @@
 
 .backLink,
 .primaryLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
   color: var(--accent);
   font-size: var(--fs-sm);
   font-weight: var(--fw-500);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.backLink:hover,
+.primaryLink:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+
+.backLink:active,
+.primaryLink:active {
+  transform: translateY(1px);
+}
+
+.backLinkArrow {
+  font-size: var(--fs-md);
+  line-height: 1;
 }
 
 .heroCard {

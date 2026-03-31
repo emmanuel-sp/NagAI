@@ -11,6 +11,7 @@ interface ChecklistProps {
   checklist: ChecklistType;
   filter: "all" | "active" | "completed";
   title?: string;
+  showHeader?: boolean;
   onAddItem: (title: string, notes?: string, deadline?: string) => void;
   onToggleItem: (checklistId: number) => void;
   onUpdateItem: (checklistId: number, updates: { title?: string; notes?: string; deadline?: string }) => void;
@@ -25,6 +26,7 @@ export default function Checklist({
   checklist,
   filter,
   title,
+  showHeader = true,
   onAddItem,
   onToggleItem,
   onUpdateItem,
@@ -74,27 +76,28 @@ export default function Checklist({
 
   return (
     <div className={styles.checklist}>
-      {/* Header with progress */}
-      <div className={styles.checklistHeader} onClick={() => setIsCollapsed(!isCollapsed)} style={{ cursor: "pointer" }}>
-        <div className={styles.checklistHeaderInfo}>
-          <div className={styles.checklistTitleRow}>
-            <h2 className={styles.checklistGoalTitle}>{title || checklist.goalTitle || "Untitled Goal"}</h2>
-            <span className={`${styles.collapseIcon} ${isCollapsed ? styles.collapseIconCollapsed : ""}`}>
-              <IoChevronDown size={18} />
-            </span>
-          </div>
-          {filter == "all" &&
-          <div className={styles.checklistProgress}>
-            <div className={styles.progressBar}>
-              <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
+      {showHeader && (
+        <div className={styles.checklistHeader} onClick={() => setIsCollapsed(!isCollapsed)} style={{ cursor: "pointer" }}>
+          <div className={styles.checklistHeaderInfo}>
+            <div className={styles.checklistTitleRow}>
+              <h2 className={styles.checklistGoalTitle}>{title || checklist.goalTitle || "Untitled Goal"}</h2>
+              <span className={`${styles.collapseIcon} ${isCollapsed ? styles.collapseIconCollapsed : ""}`}>
+                <IoChevronDown size={18} />
+              </span>
             </div>
-            <span className={styles.progressText}>
-              {completedCount} of {totalCount} completed
-            </span>
+            {filter == "all" &&
+            <div className={styles.checklistProgress}>
+              <div className={styles.progressBar}>
+                <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
+              </div>
+              <span className={styles.progressText}>
+                {completedCount} of {totalCount} completed
+              </span>
+            </div>
+            }
           </div>
-          }
         </div>
-      </div>
+      )}
 
       {/* Items */}
       {!isCollapsed && (

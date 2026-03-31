@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./goalModals.module.css";
 import { GoalWithDetails } from "@/types/goal";
 import { IoClose, IoTrash, IoChevronDown } from "@/components/icons";
@@ -52,19 +52,47 @@ export default function GoalFormModal(props: GoalFormModalProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const scrollPositionRef = useRef(0);
 
   const { registerModal } = useModal();
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      registerModal(true);
-    }
+    if (!isOpen) return;
+
+    scrollPositionRef.current = window.scrollY;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollPositionRef.current}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    registerModal(true);
+
     return () => {
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollPositionRef.current);
       registerModal(false);
     };
   }, [isOpen, registerModal]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (window.innerWidth <= 768) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      titleInputRef.current?.focus();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -178,13 +206,13 @@ export default function GoalFormModal(props: GoalFormModalProps) {
                   Title <span className={styles.required}>*</span>
                 </label>
                 <input
+                  ref={titleInputRef}
                   type="text"
                   className={styles.fieldInput}
                   value={fields.title}
                   onChange={(e) => setField("title", e.target.value)}
                   placeholder="Enter your goal title"
                   required
-                  autoFocus={isCreate}
                   maxLength={200}
                 />
               </div>
@@ -269,12 +297,13 @@ export default function GoalFormModal(props: GoalFormModalProps) {
             {!isCreate && (props as EditModeProps).onRemove && (
               <button
                 type="button"
-                className={styles.deleteButton}
+                className={styles.deleteIconButton}
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={isSaving || isDeleting}
+                aria-label="Remove goal"
+                title="Remove goal"
               >
                 <IoTrash size={16} />
-                Remove Goal
               </button>
             )}
             <button type="button" className={styles.cancelButton} onClick={handleClose} disabled={isSaving}>

@@ -49,18 +49,22 @@
   align-items: center;
   justify-content: center;
   position: fixed;
-  top: 28px;
-  left: calc(var(--sidebar-width) - 46px);
+  top: 24px;
+  left: calc(var(--sidebar-width) - 40px);
   z-index: 110;
-  width: 30px;
-  height: 30px;
-  background: none;
-  border: 1px solid transparent;
+  width: 28px;
+  height: 28px;
+  background: color-mix(in srgb, var(--bg-page), transparent 8%);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   cursor: pointer;
   transition: color var(--transition-fast), background var(--transition-fast),
-              border-color var(--transition-fast), left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+              border-color var(--transition-fast), box-shadow var(--transition-fast),
+              left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* When sidebar is collapsed on desktop, move toggle to far left */
@@ -70,8 +74,9 @@
 
 .toggleButton:hover {
   color: var(--text-primary);
-  background: var(--surface-hover);
+  background: var(--surface-elevated);
   border-color: var(--border);
+  box-shadow: var(--shadow-md);
 }
 
 .toggleButtonHiddenMobile {
@@ -601,12 +606,12 @@
      slides to sidebar edge when open */
   .toggleButton {
     left: 14px;
-    top: 18px;
-    width: 36px;
-    height: 36px;
-    background: var(--bg-page);
-    border: 1px solid transparent;
-    color: var(--text-primary);
+    top: 16px;
+    width: 34px;
+    height: 34px;
+    background: color-mix(in srgb, var(--bg-page), transparent 6%);
+    border-color: var(--border-light);
+    color: var(--text-secondary);
   }
 
   .toggleButtonHiddenMobile {
@@ -616,8 +621,8 @@
   /* When mobile sidebar is open, reposition toggle to sidebar's top-right */
   .sidebarOpen ~ .toggleButton {
     left: calc(var(--sidebar-width) - 50px);
-    background: transparent;
-    border-color: transparent;
+    background: color-mix(in srgb, var(--bg-page), transparent 12%);
+    border-color: var(--border-light);
     color: var(--text-muted);
   }
 

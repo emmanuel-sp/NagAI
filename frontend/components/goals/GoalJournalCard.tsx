@@ -179,6 +179,14 @@ export default function GoalJournalCard({ value = "", onSave }: GoalJournalCardP
 
   const hasContent = draft.trim().length > 0;
   const isDirty = draft !== normalizedValue;
+  const statusMessage =
+    saveState === "saved"
+      ? "Saved"
+      : saveState === "error"
+        ? "Could not save. Try again."
+        : isDirty
+          ? "Unsaved changes"
+          : "";
 
   return (
     <div className={styles.card}>
@@ -251,21 +259,19 @@ export default function GoalJournalCard({ value = "", onSave }: GoalJournalCardP
 
       <div className={styles.footer}>
         <span className={styles.helperText}>Formatting supported: headings, bold, italics, bullet lists, and markdown checklists.</span>
-        <span
-          className={`${styles.saveState} ${
-            saveState === "saved"
-              ? styles.saveStateSaved
-              : saveState === "error"
-                ? styles.saveStateError
-                : isDirty
-                  ? styles.saveStateDirty
-                  : ""
-          }`}
-        >
-          {saveState === "saved" && "Saved"}
-          {saveState === "error" && "Could not save. Try again."}
-          {saveState === "idle" && isDirty && "Unsaved changes"}
-        </span>
+        {statusMessage && (
+          <span
+            className={`${styles.saveState} ${
+              saveState === "saved"
+                ? styles.saveStateSaved
+                : saveState === "error"
+                  ? styles.saveStateError
+                  : styles.saveStateDirty
+            }`}
+          >
+            {statusMessage}
+          </span>
+        )}
       </div>
     </div>
   );
