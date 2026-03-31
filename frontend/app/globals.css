@@ -386,6 +386,7 @@ main {
   --text-inverse: #111111;
 
   --bg-page: #0f0f0fee;
+  --bg-page-0: rgba(15, 15, 15, 0);
   --bg-card: #0e0e0ebe;
   --bg-elevated: #121213;
   --bg-dark: #030303;

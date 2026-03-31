@@ -151,10 +151,10 @@
   width: 300px;
   max-height: 340px;
   overflow-y: auto;
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  /* box-shadow: var(--shadow-lg); */
+  box-shadow: var(--shadow-lg);
   z-index: 50;
   animation: fadeInDown 0.15s ease;
 }
@@ -560,7 +560,6 @@
   bottom: 0;
   z-index: 2;
   padding: 16px 0 14px;
-  background: linear-gradient(to top, var(--bg-page) 80%, transparent 100%);
 }
 
 .inputAreaCentered {
@@ -711,7 +710,7 @@
   width: 240px;
   max-height: 320px;
   overflow-y: auto;
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -885,7 +884,7 @@
   width: 220px;
   max-height: 260px;
   overflow-y: auto;
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
