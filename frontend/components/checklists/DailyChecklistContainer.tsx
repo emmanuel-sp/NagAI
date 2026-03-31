@@ -8,7 +8,7 @@ import {
 import { Goal } from "@/types/goal";
 import DailyChecklistItem from "./DailyChecklistItem";
 import DailyChecklistConfig from "./DailyChecklistConfig";
-import { IoSparkles, IoChevronDown, IoSettings } from "@/components/icons";
+import { IoChevronDown, IoRefresh, IoSettings } from "@/components/icons";
 import {
   fetchTodayChecklist,
   generateDailyChecklist,
@@ -16,6 +16,7 @@ import {
   deleteDailyItem,
   fetchDailyChecklistConfig,
   updateDailyChecklistConfig,
+  reorderTodayChecklistItems,
 } from "@/services/dailyChecklistService";
 import styles from "./dailyChecklist.module.css";
 
@@ -64,14 +65,22 @@ export default function DailyChecklistContainer({
   useEffect(() => {
     if (!linkedToggle || !checklist) return;
     const { checklistId, completed } = linkedToggle;
-    setChecklist({
-      ...checklist,
-      items: checklist.items.map((item) =>
-        item.parentChecklistId === checklistId
-          ? { ...item, completed, completedAt: completed ? new Date().toISOString() : undefined }
-          : item
-      ),
-    });
+    setChecklist((current) =>
+      current
+        ? {
+            ...current,
+            items: current.items.map((item) =>
+              item.parentChecklistId === checklistId
+                ? {
+                    ...item,
+                    completed,
+                    completedAt: completed ? new Date().toISOString() : undefined,
+                  }
+                : item
+            ),
+          }
+        : current
+    );
   }, [linkedToggle]);
 
   const handleGenerate = async () => {
@@ -122,6 +131,30 @@ export default function DailyChecklistContainer({
       });
     } catch (err) {
       console.error("Failed to delete item:", err);
+    }
+  };
+
+  const handleReorder = async (dailyItemId: number, direction: -1 | 1) => {
+    if (!checklist) return;
+    const movableIds = checklist.items
+      .filter((item) => !item.scheduledTime)
+      .map((item) => item.dailyItemId);
+    const currentIndex = movableIds.indexOf(dailyItemId);
+    const targetIndex = currentIndex + direction;
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= movableIds.length) return;
+
+    const orderedItemIds = [...movableIds];
+    [orderedItemIds[currentIndex], orderedItemIds[targetIndex]] = [
+      orderedItemIds[targetIndex],
+      orderedItemIds[currentIndex],
+    ];
+
+    try {
+      const updated = await reorderTodayChecklistItems({ orderedItemIds });
+      setChecklist(updated);
+    } catch (err) {
+      console.error("Failed to reorder daily items:", err);
+      setError("Could not reorder daily plan items. Please try again.");
     }
   };
 
@@ -186,6 +219,20 @@ export default function DailyChecklistContainer({
                   aria-label="Daily plan settings"
                 >
                   <IoSettings size={16} />
+                </button>
+              )}
+              {checklist && checklist.generationCount < 2 && (
+                <button
+                  className={styles.settingsButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void handleGenerate();
+                  }}
+                  aria-label="Regenerate daily plan"
+                  title="Regenerate daily plan"
+                  disabled={isGenerating}
+                >
+                  <IoRefresh size={16} />
                 </button>
               )}
               <span
@@ -253,14 +300,24 @@ export default function DailyChecklistContainer({
           ) : (
             /* Items list */
             <div className={styles.itemsList}>
-              {checklist.items.map((item) => (
-                <DailyChecklistItem
-                  key={item.dailyItemId}
-                  item={item}
-                  onToggle={handleToggle}
-                  onDelete={handleDelete}
-                />
-              ))}
+              {checklist.items.map((item) => {
+                const movableIds = checklist.items
+                  .filter((entry) => !entry.scheduledTime)
+                  .map((entry) => entry.dailyItemId);
+                const movableIndex = movableIds.indexOf(item.dailyItemId);
+                return (
+                  <DailyChecklistItem
+                    key={item.dailyItemId}
+                    item={item}
+                    onToggle={handleToggle}
+                    onDelete={handleDelete}
+                    onMoveUp={!item.scheduledTime ? () => void handleReorder(item.dailyItemId, -1) : undefined}
+                    onMoveDown={!item.scheduledTime ? () => void handleReorder(item.dailyItemId, 1) : undefined}
+                    canMoveUp={!item.scheduledTime && movableIndex > 0}
+                    canMoveDown={!item.scheduledTime && movableIndex < movableIds.length - 1}
+                  />
+                );
+              })}
             </div>
           )}
         </>

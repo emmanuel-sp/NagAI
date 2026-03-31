@@ -23,10 +23,10 @@
   justify-content: space-between;
   padding: 0 6px 0 20px;
   width: clamp(300px, 48vw, 480px);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--glass-panel-bg);
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--glass-panel-border);
   border-radius: var(--radius-full);
   transition:
     background var(--transition-base),
@@ -34,8 +34,8 @@
 }
 
 .landingNavScrolled {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: var(--border);
+  background: var(--glass-panel-bg-strong);
+  border-color: var(--glass-panel-border);
 }
 
 .logoLink {
@@ -66,14 +66,14 @@
 
 .navLogin:hover {
   color: var(--text-primary);
-  background: rgba(80, 81, 79, 0.05);
+  background: var(--surface);
 }
 
 .navSignup {
   font-family: var(--font-body);
   font-size: var(--fs-xs);
   font-weight: var(--fw-500);
-  color: #fff;
+  color: var(--accent-foreground);
   background: var(--accent);
   padding: 7px 18px;
   border-radius: var(--radius-full);
@@ -85,7 +85,7 @@
 
 .navSignup:hover {
   background: var(--accent-dark);
-  box-shadow: 0 2px 8px rgba(138, 59, 70, 0.25);
+  box-shadow: var(--visual-accent-shadow);
 }
 
 .navSignup:active {
@@ -151,13 +151,13 @@
 
 @keyframes ringPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(138, 59, 70, 0.35);
+    box-shadow: 0 0 0 0 var(--visual-accent-ring);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(138, 59, 70, 0);
+    box-shadow: 0 0 0 10px transparent;
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(138, 59, 70, 0);
+    box-shadow: 0 0 0 0 transparent;
   }
 }
 
@@ -177,12 +177,7 @@
   transform: translateX(-50%);
   width: 700px;
   height: 500px;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(138, 59, 70, 0.10) 0%,
-    rgba(138, 59, 70, 0.04) 40%,
-    transparent 70%
-  );
+  background: var(--hero-glow-gradient);
   border-radius: 50%;
   filter: blur(80px);
   pointer-events: none;
@@ -260,8 +255,8 @@
 .heroMeta span {
   padding: 8px 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid var(--border-light);
+  background: var(--glass-panel-bg);
+  border: 1px solid var(--glass-panel-border);
   color: var(--text-secondary);
   font-size: 12px;
 }
@@ -295,7 +290,7 @@
 .primaryCta,
 .ctaButton {
   font-weight: var(--fw-500);
-  color: #fff;
+  color: var(--accent-foreground);
   background: var(--accent);
   padding: 14px 32px;
   position: relative;
@@ -327,7 +322,7 @@
 .primaryCta:hover,
 .ctaButton:hover {
   background: var(--accent-dark);
-  box-shadow: 0 4px 24px rgba(138, 59, 70, 0.2);
+  box-shadow: var(--visual-accent-shadow);
 }
 
 .primaryCta:active,
@@ -353,19 +348,13 @@
 .showcaseSection {
   width: 100%;
   padding: 0 24px 72px;
+  overflow-x: clip;
 }
 
 .showcaseInner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 44px;
-  border-radius: 34px;
-  background:
-    linear-gradient(180deg, rgba(249, 245, 245, 0.98), rgba(255, 255, 255, 0.92));
-  border: 1px solid rgba(138, 59, 70, 0.10);
-  box-shadow:
-    0 24px 58px rgba(36, 20, 23, 0.08),
-    0 8px 18px rgba(36, 20, 23, 0.04);
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -373,6 +362,7 @@
 
 .showcaseVisual {
   margin-top: 8px;
+  min-width: 0;
 }
 
 .featureSection {
@@ -389,7 +379,7 @@
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(138, 59, 70, 0.02) 50%,
+    var(--accent-light) 50%,
     transparent 100%
   );
 }
@@ -618,7 +608,7 @@
 .ctaInner {
   max-width: 760px;
   margin: 0 auto;
-  background: linear-gradient(135deg, var(--surface) 0%, rgba(138, 59, 70, 0.06) 100%);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--visual-accent-fill) 100%);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-2xl);
   padding: 64px 48px;
@@ -640,7 +630,7 @@
   transform: translate(-50%, -50%);
   width: 120%;
   height: 120%;
-  background: radial-gradient(ellipse at center, rgba(138, 59, 70, 0.06) 0%, transparent 60%);
+  background: var(--hero-glow-gradient);
   pointer-events: none;
   animation: ctaGlow 5s ease-in-out infinite;
 }
@@ -721,6 +711,14 @@
     gap: 28px;
   }
 
+  .featureContentVisualLeft .featureCopy {
+    order: 1;
+  }
+
+  .featureContentVisualLeft .featureVisual {
+    order: 2;
+  }
+
   .featureCopyVisual {
     align-items: center;
     text-align: center;
@@ -735,7 +733,7 @@
   }
 
   .showcaseInner {
-    padding: 36px 28px;
+    padding: 0;
   }
 }
 
@@ -770,8 +768,7 @@
   }
 
   .showcaseInner {
-    padding: 28px 22px;
-    border-radius: 26px;
+    padding: 0;
   }
 }
 

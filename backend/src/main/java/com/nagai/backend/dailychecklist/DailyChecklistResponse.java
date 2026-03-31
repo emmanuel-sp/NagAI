@@ -6,5 +6,6 @@ public record DailyChecklistResponse(
         Long dailyChecklistId,
         String planDate,
         String generatedAt,
+        Integer generationCount,
         List<DailyChecklistItemResponse> items) {
 }

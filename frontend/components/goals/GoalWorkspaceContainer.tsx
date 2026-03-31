@@ -28,6 +28,7 @@ import {
   updateChecklistItem,
   toggleChecklistItem,
   deleteChecklistItem,
+  reorderChecklistItems,
 } from "@/services/checklistService";
 import {
   generateChecklistItem,
@@ -198,6 +199,14 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
     syncChecklistItem((current) => ({
       ...current,
       items: current.items.filter((item) => item.checklistId !== checklistId),
+    }));
+  };
+
+  const handleChecklistReorder = async (orderedItemIds: number[]) => {
+    const updatedItems = await reorderChecklistItems(goalId, { orderedItemIds });
+    syncChecklistItem((current) => ({
+      ...current,
+      items: updatedItems,
     }));
   };
 
@@ -389,12 +398,6 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
               {currentContext ? (currentContext.deployed ? "Live" : "Draft") : "—"}
             </strong>
           </div>
-          <div className={styles.statCard}>
-            <span className={styles.statLabel}>Journal</span>
-            <strong className={styles.statValue}>
-              {goal.journalMarkdown?.trim() ? "Active" : "Empty"}
-            </strong>
-          </div>
         </div>
       </section>
 
@@ -417,6 +420,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
               onToggleItem={handleChecklistToggle}
               onUpdateItem={handleChecklistUpdate}
               onDeleteItem={handleChecklistDelete}
+              onReorderItems={handleChecklistReorder}
               onGenerateItem={handleGenerateChecklistItem}
               onGenerateFullChecklist={handleGenerateFullChecklist}
               isGenerating={generatingChecklist}
@@ -544,7 +548,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
           </section>
 
           <GoalJournalCard
-            value={goal.journalMarkdown}
+            value={goal.journalMarkdown ?? ""}
             onSave={handleJournalSave}
           />
         </div>

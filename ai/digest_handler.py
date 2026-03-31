@@ -186,7 +186,7 @@ def _send_email(to_addr: str, subject: str, html_body: str, unsubscribe_url: str
 
 
 def render_email_html(subject: str, body: str, user_name: str, unsubscribe_url: str = "") -> str:
-    """Render the digest body into a beautiful, light-themed HTML email."""
+    """Render the digest body into a polished on-brand HTML email."""
     sections_html = _markdown_to_sections(body)
     safe_subject = html_mod.escape(subject)
     safe_user_name = html_mod.escape(user_name) if user_name else "there"
@@ -198,48 +198,55 @@ def render_email_html(subject: str, body: str, user_name: str, unsubscribe_url: 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{safe_subject}</title>
 </head>
-<body style="margin:0;padding:0;background-color:#faf5f4;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#2a1f1e;line-height:1.6;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#faf5f4;">
-<tr><td align="center" style="padding:24px 16px;">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(158,96,90,0.10);">
-
-<!-- Header -->
+<body style="margin:0;padding:0;background-color:#f6f1ee;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#2c201f;line-height:1.6;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(180deg,#f6f1ee 0%,#f1e7e4 100%);">
+<tr><td align="center" style="padding:28px 16px;">
+<table role="presentation" width="620" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%;background-color:#fffdfb;border:1px solid #eadbd6;border-radius:24px;overflow:hidden;box-shadow:0 18px 38px rgba(61,43,41,0.10);">
 <tr>
-<td style="background:linear-gradient(135deg,#2a1f1e 0%,#3d2b29 100%);padding:32px 40px;text-align:center;">
-  <h1 style="margin:0;font-size:28px;font-weight:700;color:#d4918b;letter-spacing:-0.5px;">NagAI</h1>
-  <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.65);font-weight:400;">Your Personal Digest</p>
+<td style="padding:18px 24px;background-color:#f9f1ef;border-bottom:1px solid #eadbd6;text-align:center;">
+  <p style="margin:0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8a3b46;font-weight:700;">NagAI Digest</p>
 </td>
 </tr>
-
-<!-- Greeting -->
 <tr>
-<td style="padding:32px 40px 16px;">
-  <p style="margin:0;font-size:18px;color:#2a1f1e;font-weight:600;">Hey {safe_user_name} &#128075;</p>
-  <p style="margin:8px 0 0;font-size:15px;color:#6b5550;">Here's what's happening with your goals.</p>
+<td style="background:linear-gradient(135deg,#251b1a 0%,#4b3432 100%);padding:34px 32px 30px;text-align:left;">
+  <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.62);font-weight:700;">Curated for your goals</p>
+  <h1 style="margin:0;font-size:30px;line-height:1.1;font-weight:700;letter-spacing:-0.03em;color:#f7ece9;">{safe_subject}</h1>
+  <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:rgba(255,255,255,0.78);">A sharper read on what matters next, delivered in a format that actually feels useful.</p>
 </td>
 </tr>
-
-<!-- Content sections -->
 <tr>
-<td style="padding:0 40px 24px;">
-  {sections_html}
+<td style="padding:28px 28px 10px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(180deg,#fffaf8 0%,#f9f1ef 100%);border:1px solid #eadbd6;border-radius:20px;">
+    <tr>
+      <td style="padding:22px 22px 8px;">
+        <p style="margin:0;font-size:18px;color:#2c201f;font-weight:700;">Hey {safe_user_name},</p>
+        <p style="margin:10px 0 0;font-size:15px;color:#6a504d;line-height:1.75;">Here’s a thoughtful pass on your goals, progress, and a few useful ideas worth carrying into the week.</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:0 22px 22px;">
+        {sections_html}
+      </td>
+    </tr>
+  </table>
 </td>
 </tr>
-
-<!-- Footer -->
 <tr>
-<td style="background-color:#faf5f4;padding:24px 40px;border-top:1px solid #e8d8d5;">
-  <p style="margin:0;font-size:12px;color:#8a706b;text-align:center;">
-    You received this because you have an active digest on NagAI.<br>
-    Manage your digest preferences in the app.
-  </p>
-  {"" if not unsubscribe_url else f'<p style="margin:12px 0 0;font-size:12px;text-align:center;"><a href="{unsubscribe_url}" style="color:#9e605a;text-decoration:underline;">Unsubscribe from digest emails</a></p>'}
-  <p style="margin:12px 0 0;font-size:11px;color:#b09a96;text-align:center;">
-    Built with care by NagAI
-  </p>
+<td style="padding:8px 28px 28px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7eeeb;border:1px solid #eadbd6;border-radius:18px;">
+    <tr>
+      <td style="padding:18px 20px;text-align:center;">
+        <p style="margin:0;font-size:12px;color:#7b625e;line-height:1.7;">
+          You received this because you have an active NagAI digest.<br>
+          Manage your digest preferences in the app anytime.
+        </p>
+        {"" if not unsubscribe_url else f'<p style="margin:12px 0 0;font-size:12px;line-height:1.6;"><a href="{unsubscribe_url}" style="color:#8a3b46;text-decoration:underline;font-weight:600;">Unsubscribe from digest emails</a></p>'}
+        <p style="margin:12px 0 0;font-size:11px;color:#a08580;">Built with care by NagAI</p>
+      </td>
+    </tr>
+  </table>
 </td>
 </tr>
-
 </table>
 </td></tr>
 </table>
@@ -262,15 +269,19 @@ def _markdown_to_sections(body: str) -> str:
             content = _render_lines(current_lines)
             if current_section_title:
                 html_parts.append(
-                    f'<div style="margin-bottom:24px;">'
-                    f'<h2 style="margin:0 0 12px;font-size:16px;font-weight:700;color:#1a1a2e;'
-                    f'padding-left:12px;border-left:3px solid #9e605a;">{current_section_title}</h2>'
-                    f'<div style="font-size:14px;color:#4a3935;line-height:1.7;">{content}</div>'
+                    f'<div style="margin-bottom:16px;padding:18px 18px 16px;background-color:#ffffff;'
+                    f'border:1px solid #ebddd8;border-radius:18px;">'
+                    f'<p style="margin:0 0 8px;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;'
+                    f'font-weight:700;color:#8a3b46;">Section</p>'
+                    f'<h2 style="margin:0 0 12px;font-size:18px;line-height:1.3;font-weight:700;color:#2c201f;'
+                    f'letter-spacing:-0.01em;">{current_section_title}</h2>'
+                    f'<div style="font-size:14px;color:#5c4643;line-height:1.75;">{content}</div>'
                     f'</div>'
                 )
             else:
                 html_parts.append(
-                    f'<div style="margin-bottom:16px;font-size:14px;color:#4a3935;line-height:1.7;">'
+                    f'<div style="margin-bottom:16px;padding:18px;background-color:#ffffff;'
+                    f'border:1px solid #ebddd8;border-radius:18px;font-size:14px;color:#5c4643;line-height:1.75;">'
                     f'{content}</div>'
                 )
         current_section_title = None
@@ -306,15 +317,15 @@ def _render_lines(lines: list[str]) -> str:
 
         if stripped.startswith("- ") or stripped.startswith("* "):
             if not in_list:
-                html.append('<ul style="margin:8px 0;padding-left:20px;">')
+                html.append('<ul style="margin:10px 0 0;padding-left:20px;">')
                 in_list = True
             item_text = _linkify(stripped[2:])
-            html.append(f'<li style="margin-bottom:6px;">{item_text}</li>')
+            html.append(f'<li style="margin-bottom:8px;color:#5c4643;">{item_text}</li>')
         else:
             if in_list:
                 html.append("</ul>")
                 in_list = False
-            html.append(f"<p style=\"margin:6px 0;\">{_linkify(stripped)}</p>")
+            html.append(f"<p style=\"margin:0 0 10px;\">{_linkify(stripped)}</p>")
 
     if in_list:
         html.append("</ul>")
@@ -354,7 +365,7 @@ def _linkify(text: str) -> str:
         safe_url = html_mod.escape(url)
         text = text.replace(
             f"\x00LINK{idx}\x00",
-            f'<a href="{safe_url}" style="color:#9e605a;text-decoration:underline;">{safe_label}</a>',
+            f'<a href="{safe_url}" style="color:#8a3b46;text-decoration:underline;font-weight:600;">{safe_label}</a>',
         )
 
     # Restore bold
@@ -364,7 +375,7 @@ def _linkify(text: str) -> str:
     # Convert bare URLs (already escaped, so &amp; etc. are safe)
     text = re.sub(
         r'(?<!\"|>)(https?://[^\s<\)]+)',
-        r'<a href="\1" style="color:#9e605a;text-decoration:underline;">\1</a>',
+        r'<a href="\1" style="color:#8a3b46;text-decoration:underline;font-weight:600;">\1</a>',
         text,
     )
     return text

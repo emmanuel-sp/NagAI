@@ -7,9 +7,11 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +34,7 @@ import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
 import com.nagai.backend.common.ProfileUtils;
 import com.nagai.backend.config.RedisStreamConfig;
-import com.nagai.backend.exceptions.DailyChecklistAlreadyExistsException;
+import com.nagai.backend.exceptions.DailyChecklistRegenerationLimitException;
 import com.nagai.backend.exceptions.DailyChecklistException;
 import com.nagai.backend.exceptions.DailyChecklistItemNotFoundException;
 import com.nagai.backend.goals.Goal;
@@ -136,10 +138,13 @@ public class DailyChecklistService {
         ZoneId zone = ZoneId.of(user.getTimezone() != null ? user.getTimezone() : "UTC");
         LocalDate today = LocalDate.now(zone);
         LocalTime nowTime = LocalTime.now(zone);
-
-        // 409 if already exists
-        if (dailyChecklistRepository.findByUserIdAndPlanDate(user.getUserId(), today).isPresent()) {
-            throw new DailyChecklistAlreadyExistsException();
+        DailyChecklist existingChecklist = dailyChecklistRepository
+                .findByUserIdAndPlanDate(user.getUserId(), today)
+                .orElse(null);
+        boolean isRegeneration = existingChecklist != null;
+        if (isRegeneration && existingChecklist.getGenerationCount() != null
+                && existingChecklist.getGenerationCount() >= 2) {
+            throw new DailyChecklistRegenerationLimitException();
         }
 
         // Load config
@@ -209,12 +214,6 @@ public class DailyChecklistService {
                 candidates, recurringItems, config.getMaxItems(),
                 currentTime, userProfile, dayOfWeek, planDate, busyBlocks);
 
-        // Persist daily checklist
-        DailyChecklist checklist = new DailyChecklist();
-        checklist.setUserId(user.getUserId());
-        checklist.setPlanDate(today);
-        checklist = dailyChecklistRepository.save(checklist);
-
         // Validate AI returned usable items
         if (aiResponse.getItemsList().isEmpty()) {
             throw new DailyChecklistException(
@@ -223,9 +222,46 @@ public class DailyChecklistService {
                     + "or configuring recurring anchors in the daily plan settings.");
         }
 
+        DailyChecklist checklist;
+        int startingSortOrder = 0;
+        if (isRegeneration) {
+            checklist = existingChecklist;
+            List<DailyChecklistItem> currentItems = dailyItemRepository
+                    .findByDailyChecklistIdOrderBySortOrder(checklist.getDailyChecklistId());
+            List<DailyChecklistItem> preservedCompleted = currentItems.stream()
+                    .filter(DailyChecklistItem::isCompleted)
+                    .toList();
+            List<DailyChecklistItem> incompleteItems = currentItems.stream()
+                    .filter(item -> !item.isCompleted())
+                    .toList();
+
+            if (!incompleteItems.isEmpty()) {
+                dailyItemRepository.deleteAll(incompleteItems);
+            }
+
+            int nextSortOrder = 0;
+            for (DailyChecklistItem preservedItem : preservedCompleted) {
+                preservedItem.setSortOrder(nextSortOrder++);
+            }
+            if (!preservedCompleted.isEmpty()) {
+                dailyItemRepository.saveAll(preservedCompleted);
+            }
+
+            startingSortOrder = nextSortOrder;
+            checklist.setGenerationCount((checklist.getGenerationCount() == null
+                    ? 1 : checklist.getGenerationCount()) + 1);
+            checklist = dailyChecklistRepository.save(checklist);
+        } else {
+            checklist = new DailyChecklist();
+            checklist.setUserId(user.getUserId());
+            checklist.setPlanDate(today);
+            checklist.setGenerationCount(1);
+            checklist = dailyChecklistRepository.save(checklist);
+        }
+
         // Parse AI response and create items
         List<DailyChecklistItem> items = new ArrayList<>();
-        int sortOrder = 0;
+        int sortOrder = startingSortOrder;
         for (DailyChecklistItemSuggestion suggestion : aiResponse.getItemsList()) {
             DailyChecklistItem item = new DailyChecklistItem();
             item.setDailyChecklistId(checklist.getDailyChecklistId());
@@ -269,15 +305,7 @@ public class DailyChecklistService {
 
     public DailyChecklistItemResponse toggleDailyItem(Long dailyItemId) {
         User user = userService.getCurrentUser();
-        DailyChecklistItem dailyItem = dailyItemRepository.findById(dailyItemId)
-                .orElseThrow(() -> new DailyChecklistItemNotFoundException());
-
-        // Ownership check
-        DailyChecklist checklist = dailyChecklistRepository.findById(dailyItem.getDailyChecklistId())
-                .orElseThrow(() -> new DailyChecklistItemNotFoundException());
-        if (!checklist.getUserId().equals(user.getUserId())) {
-            throw new AccessDeniedException("You do not have permission to modify this item");
-        }
+        DailyChecklistItem dailyItem = getOwnedDailyItem(dailyItemId, user);
 
         // Toggle daily item
         boolean newState = !dailyItem.isCompleted();
@@ -309,18 +337,73 @@ public class DailyChecklistService {
         return resolveItemResponse(dailyItem);
     }
 
+    public DailyChecklistItemResponse addDailyItem(DailyChecklistItemCreateRequest request) {
+        User user = userService.getCurrentUser();
+        DailyChecklist checklist = getTodayChecklistEntityForUser(user);
+        List<DailyChecklistItem> currentItems = dailyItemRepository
+                .findByDailyChecklistIdOrderBySortOrder(checklist.getDailyChecklistId());
+
+        DailyChecklistItem item = new DailyChecklistItem();
+        item.setDailyChecklistId(checklist.getDailyChecklistId());
+        item.setParentChecklistId(null);
+        item.setParentGoalId(null);
+        item.setSortOrder(currentItems.size());
+        item.setTitle(request.getTitle().trim());
+        item.setNotes(normalizeNullableText(request.getNotes()));
+        item.setScheduledTime(normalizeNullableText(request.getScheduledTime()));
+        item.setCompleted(false);
+        item.setCompletedAt(null);
+
+        return resolveItemResponse(dailyItemRepository.save(item));
+    }
+
+    public DailyChecklistItemResponse updateDailyItem(
+            Long dailyItemId,
+            DailyChecklistItemUpdateRequest request) {
+        User user = userService.getCurrentUser();
+        DailyChecklistItem item = getOwnedDailyItem(dailyItemId, user);
+
+        if (request.getTitle() != null) {
+            String title = request.getTitle().trim();
+            if (title.isEmpty()) {
+                throw new DailyChecklistException("title is required");
+            }
+            item.setTitle(title);
+        }
+        if (request.getNotes() != null || request.isNotesProvided()) {
+            item.setNotes(normalizeNullableText(request.getNotes()));
+        }
+        if (request.getScheduledTime() != null || request.isScheduledTimeProvided()) {
+            item.setScheduledTime(normalizeNullableText(request.getScheduledTime()));
+        }
+
+        return resolveItemResponse(dailyItemRepository.save(item));
+    }
+
+    public com.nagai.backend.dailychecklist.DailyChecklistResponse reorderTodayItems(
+            DailyChecklistReorderRequest request) {
+        User user = userService.getCurrentUser();
+        DailyChecklist checklist = getTodayChecklistEntityForUser(user);
+        List<DailyChecklistItem> items = dailyItemRepository
+                .findByDailyChecklistIdOrderBySortOrder(checklist.getDailyChecklistId());
+        List<DailyChecklistItem> movableItems = items.stream()
+                .filter(item -> item.getScheduledTime() == null || item.getScheduledTime().isBlank())
+                .toList();
+        validateReorderPayload(
+                request.getOrderedItemIds(),
+                movableItems.stream().map(DailyChecklistItem::getDailyItemId).toList(),
+                "Only unscheduled daily items can be reordered");
+
+        applyDailyReorder(items, request.getOrderedItemIds());
+        dailyItemRepository.saveAll(items);
+        return buildResponse(checklist, user);
+    }
+
     // ---- Delete ----
 
     public void deleteDailyItem(Long dailyItemId) {
         User user = userService.getCurrentUser();
-        DailyChecklistItem dailyItem = dailyItemRepository.findById(dailyItemId)
-                .orElseThrow(() -> new DailyChecklistItemNotFoundException());
-
-        DailyChecklist checklist = dailyChecklistRepository.findById(dailyItem.getDailyChecklistId())
-                .orElseThrow(() -> new DailyChecklistItemNotFoundException());
-        if (!checklist.getUserId().equals(user.getUserId())) {
-            throw new AccessDeniedException("You do not have permission to delete this item");
-        }
+        DailyChecklistItem dailyItem = getOwnedDailyItem(dailyItemId, user);
 
         dailyItemRepository.delete(dailyItem);
     }
@@ -338,6 +421,7 @@ public class DailyChecklistService {
                 checklist.getDailyChecklistId(),
                 checklist.getPlanDate().toString(),
                 checklist.getGeneratedAt() != null ? checklist.getGeneratedAt().toString() : null,
+                checklist.getGenerationCount(),
                 itemResponses);
     }
 
@@ -357,6 +441,62 @@ public class DailyChecklistService {
     private LocalDate todayInUserTimezone(User user) {
         String tz = user.getTimezone() != null ? user.getTimezone() : "UTC";
         return LocalDate.now(ZoneId.of(tz));
+    }
+
+    private DailyChecklist getTodayChecklistEntityForUser(User user) {
+        LocalDate today = todayInUserTimezone(user);
+        return dailyChecklistRepository.findByUserIdAndPlanDate(user.getUserId(), today)
+                .orElseThrow(() -> new DailyChecklistException(
+                        "Generate a daily plan before editing today’s items"));
+    }
+
+    private DailyChecklistItem getOwnedDailyItem(Long dailyItemId, User user) {
+        DailyChecklistItem dailyItem = dailyItemRepository.findById(dailyItemId)
+                .orElseThrow(DailyChecklistItemNotFoundException::new);
+        DailyChecklist checklist = dailyChecklistRepository.findById(dailyItem.getDailyChecklistId())
+                .orElseThrow(DailyChecklistItemNotFoundException::new);
+        if (!checklist.getUserId().equals(user.getUserId())) {
+            throw new AccessDeniedException("You do not have permission to modify this item");
+        }
+        return dailyItem;
+    }
+
+    private String normalizeNullableText(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private void validateReorderPayload(List<Long> submittedIds, List<Long> expectedIds, String errorMessage) {
+        List<Long> safeSubmitted = submittedIds == null ? List.of() : submittedIds;
+        if (safeSubmitted.size() != expectedIds.size()) {
+            throw new DailyChecklistException(errorMessage);
+        }
+
+        Set<Long> submittedSet = new HashSet<>(safeSubmitted);
+        Set<Long> expectedSet = new HashSet<>(expectedIds);
+        if (submittedSet.size() != safeSubmitted.size() || !submittedSet.equals(expectedSet)) {
+            throw new DailyChecklistException(errorMessage);
+        }
+    }
+
+    private void applyDailyReorder(List<DailyChecklistItem> items, List<Long> orderedItemIds) {
+        List<DailyChecklistItem> movableItems = items.stream()
+                .filter(item -> item.getScheduledTime() == null || item.getScheduledTime().isBlank())
+                .toList();
+        Map<Long, DailyChecklistItem> movableById = movableItems.stream()
+                .collect(java.util.stream.Collectors.toMap(DailyChecklistItem::getDailyItemId, item -> item));
+
+        int movableIndex = 0;
+        int nextSortOrder = 0;
+        for (DailyChecklistItem item : items) {
+            if (item.getScheduledTime() == null || item.getScheduledTime().isBlank()) {
+                DailyChecklistItem reordered = movableById.get(orderedItemIds.get(movableIndex++));
+                reordered.setSortOrder(nextSortOrder++);
+            } else {
+                item.setSortOrder(nextSortOrder++);
+            }
+        }
     }
 
     private void publishGeneratedEvent(Long userId, String planDate, int itemCount) {

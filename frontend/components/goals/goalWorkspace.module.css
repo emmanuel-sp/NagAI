@@ -29,10 +29,8 @@
   padding: 28px;
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 245, 0.98)),
-    radial-gradient(circle at top right, var(--accent-lighter), transparent 35%);
-  box-shadow: var(--shadow-md);
+  background: var(--visual-panel-bg-strong);
+  box-shadow: var(--visual-panel-shadow);
 }
 
 .heroCopy {
@@ -58,12 +56,12 @@
 }
 
 .metaPill {
-  background: var(--accent-lighter);
+  background: var(--visual-accent-fill);
   color: var(--accent);
 }
 
 .metaPillMuted {
-  background: var(--surface);
+  background: var(--visual-neutral-fill);
   color: var(--text-secondary);
 }
 
@@ -90,14 +88,14 @@
   min-width: 0;
   height: 10px;
   border-radius: var(--radius-full);
-  background: var(--surface-hover);
+  background: var(--visual-neutral-fill-strong);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+  background: var(--visual-accent-gradient);
 }
 
 .progressLabel {
@@ -119,7 +117,7 @@
   padding: 16px 18px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--bg-card), var(--accent-lighter) 22%);
+  background: var(--visual-accent-fill-strong);
 }
 
 .statLabel {
@@ -330,7 +328,7 @@
   padding: 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(250, 250, 250, 1));
+  background: var(--visual-panel-bg);
 }
 
 .contextCardHeader {
@@ -350,7 +348,7 @@
   margin-top: 6px;
   padding: 4px 10px;
   border-radius: var(--radius-full);
-  background: var(--accent-lighter);
+  background: var(--visual-accent-fill);
   color: var(--accent);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-500);
@@ -401,7 +399,7 @@
   gap: 8px;
   padding: 8px 12px;
   border-radius: var(--radius-full);
-  background: var(--accent-lighter);
+  background: var(--visual-accent-fill);
   color: var(--accent);
   font-size: var(--fs-xs);
   font-weight: var(--fw-500);
@@ -417,7 +415,7 @@
   padding: 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: var(--surface);
+  background: var(--visual-neutral-fill);
 }
 
 .smartLabel {

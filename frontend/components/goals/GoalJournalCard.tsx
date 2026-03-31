@@ -5,7 +5,7 @@ import { IoSave } from "@/components/icons";
 import styles from "./goalJournal.module.css";
 
 interface GoalJournalCardProps {
-  value?: string;
+  value?: string | null;
   onSave: (markdown: string) => Promise<void>;
 }
 
@@ -105,15 +105,22 @@ function renderMarkdown(markdown: string) {
 }
 
 export default function GoalJournalCard({ value = "", onSave }: GoalJournalCardProps) {
-  const [draft, setDraft] = useState(value);
+  const normalizedValue = value ?? "";
+  const [draft, setDraft] = useState(normalizedValue);
   const [view, setView] = useState<"write" | "preview">("write");
   const [isSaving, setIsSaving] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saved" | "error">("idle");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
-    setDraft(value);
-  }, [value]);
+    setDraft(normalizedValue);
+  }, [normalizedValue]);
+
+  useEffect(() => {
+    if (!draft.trim() && view === "preview") {
+      setView("write");
+    }
+  }, [draft, view]);
 
   const updateSelection = (
     nextValue: string,
@@ -170,7 +177,8 @@ export default function GoalJournalCard({ value = "", onSave }: GoalJournalCardP
     }
   };
 
-  const isDirty = draft !== value;
+  const hasContent = draft.trim().length > 0;
+  const isDirty = draft !== normalizedValue;
 
   return (
     <div className={styles.card}>
@@ -194,6 +202,7 @@ export default function GoalJournalCard({ value = "", onSave }: GoalJournalCardP
               type="button"
               className={`${styles.viewButton} ${view === "preview" ? styles.viewButtonActive : ""}`}
               onClick={() => setView("preview")}
+              disabled={!hasContent}
             >
               Preview
             </button>
@@ -242,7 +251,17 @@ export default function GoalJournalCard({ value = "", onSave }: GoalJournalCardP
 
       <div className={styles.footer}>
         <span className={styles.helperText}>Formatting supported: headings, bold, italics, bullet lists, and markdown checklists.</span>
-        <span className={styles.saveState}>
+        <span
+          className={`${styles.saveState} ${
+            saveState === "saved"
+              ? styles.saveStateSaved
+              : saveState === "error"
+                ? styles.saveStateError
+                : isDirty
+                  ? styles.saveStateDirty
+                  : ""
+          }`}
+        >
           {saveState === "saved" && "Saved"}
           {saveState === "error" && "Could not save. Try again."}
           {saveState === "idle" && isDirty && "Unsaved changes"}

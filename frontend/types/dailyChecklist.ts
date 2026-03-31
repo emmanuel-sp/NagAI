@@ -15,6 +15,7 @@ export interface DailyChecklist {
   dailyChecklistId: number;
   planDate: string;
   generatedAt: string;
+  generationCount: number;
   items: DailyChecklistItem[];
 }
 
@@ -44,4 +45,8 @@ export interface UpdateDailyItemDto {
   title?: string;
   notes?: string;
   scheduledTime?: string | null;
+}
+
+export interface ReorderDailyItemsDto {
+  orderedItemIds: number[];
 }

@@ -11,6 +11,28 @@
   --accent-shadow: color-mix(in srgb, var(--accent), transparent 70%);
   --accent-selection: color-mix(in srgb, var(--accent), transparent 85%);
   --accent-tint: color-mix(in srgb, var(--accent), transparent 82%);
+  --glass-panel-bg: rgba(255, 255, 255, 0.72);
+  --glass-panel-bg-strong: rgba(255, 255, 255, 0.88);
+  --glass-panel-border: rgba(0, 0, 0, 0.08);
+  --visual-panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 244, 244, 0.98));
+  --visual-panel-bg-soft: linear-gradient(180deg, rgba(249, 245, 245, 0.98), rgba(255, 255, 255, 0.92));
+  --visual-panel-bg-strong: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 245, 245, 0.98));
+  --visual-panel-border: color-mix(in srgb, var(--accent), transparent 90%);
+  --visual-panel-shadow: 0 28px 54px rgba(36, 20, 23, 0.08), 0 8px 18px rgba(36, 20, 23, 0.05);
+  --visual-panel-shadow-strong: 0 34px 60px rgba(36, 20, 23, 0.10), 0 10px 24px rgba(36, 20, 23, 0.06);
+  --visual-panel-glow: radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--accent), transparent 88%), transparent 42%), linear-gradient(180deg, color-mix(in srgb, var(--accent), transparent 94%), transparent);
+  --hero-glow-gradient: radial-gradient(ellipse at center, color-mix(in srgb, var(--accent), transparent 90%) 0%, color-mix(in srgb, var(--accent), transparent 96%) 42%, transparent 72%);
+  --visual-chip-bg: rgba(255, 255, 255, 0.88);
+  --visual-chip-border: rgba(0, 0, 0, 0.06);
+  --visual-neutral-fill: rgba(0, 0, 0, 0.04);
+  --visual-neutral-fill-strong: rgba(0, 0, 0, 0.08);
+  --visual-neutral-border: rgba(0, 0, 0, 0.06);
+  --visual-accent-fill: color-mix(in srgb, var(--accent), transparent 92%);
+  --visual-accent-fill-strong: linear-gradient(180deg, color-mix(in srgb, var(--accent), transparent 92%), rgba(255, 255, 255, 0.92));
+  --visual-accent-border: color-mix(in srgb, var(--accent), transparent 82%);
+  --visual-accent-gradient: linear-gradient(135deg, color-mix(in srgb, var(--accent), white 6%), var(--accent));
+  --visual-accent-shadow: 0 14px 34px color-mix(in srgb, var(--accent), transparent 72%);
+  --visual-accent-ring: color-mix(in srgb, var(--accent), transparent 66%);
 
   /* Semantic aliases */
   --primary: var(--accent-dark);
@@ -141,6 +163,13 @@ body {
   flex-direction: column;
   position: relative;
   overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
 }
 
 /* ─── Animations ─── */
@@ -374,6 +403,28 @@ main {
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
   --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-2xl: 0 24px 56px rgba(0, 0, 0, 0.8), 0 8px 20px rgba(0, 0, 0, 0.5);
+  --glass-panel-bg: rgba(15, 16, 18, 0.78);
+  --glass-panel-bg-strong: rgba(17, 18, 20, 0.90);
+  --glass-panel-border: rgba(255, 255, 255, 0.10);
+  --visual-panel-bg: linear-gradient(180deg, rgba(24, 25, 28, 0.98), rgba(17, 17, 19, 0.98));
+  --visual-panel-bg-soft: linear-gradient(180deg, rgba(28, 24, 26, 0.94), rgba(18, 18, 20, 0.98));
+  --visual-panel-bg-strong: linear-gradient(135deg, rgba(24, 25, 28, 0.98), rgba(36, 26, 29, 0.96));
+  --visual-panel-border: color-mix(in srgb, var(--accent), transparent 78%);
+  --visual-panel-shadow: 0 28px 56px rgba(0, 0, 0, 0.42), 0 10px 24px rgba(0, 0, 0, 0.28);
+  --visual-panel-shadow-strong: 0 34px 62px rgba(0, 0, 0, 0.50), 0 12px 28px rgba(0, 0, 0, 0.32);
+  --visual-panel-glow: radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--accent), transparent 80%), transparent 44%), linear-gradient(180deg, color-mix(in srgb, var(--accent), transparent 92%), transparent);
+  --hero-glow-gradient: radial-gradient(ellipse at center, color-mix(in srgb, var(--accent), transparent 78%) 0%, color-mix(in srgb, var(--accent), transparent 92%) 42%, transparent 74%);
+  --visual-chip-bg: rgba(255, 255, 255, 0.08);
+  --visual-chip-border: rgba(255, 255, 255, 0.12);
+  --visual-neutral-fill: rgba(255, 255, 255, 0.06);
+  --visual-neutral-fill-strong: rgba(255, 255, 255, 0.10);
+  --visual-neutral-border: rgba(255, 255, 255, 0.10);
+  --visual-accent-fill: color-mix(in srgb, var(--accent), transparent 88%);
+  --visual-accent-fill-strong: linear-gradient(180deg, color-mix(in srgb, var(--accent), transparent 86%), rgba(255, 255, 255, 0.04));
+  --visual-accent-border: color-mix(in srgb, var(--accent), transparent 70%);
+  --visual-accent-gradient: linear-gradient(135deg, color-mix(in srgb, var(--accent), white 8%), var(--accent-dark));
+  --visual-accent-shadow: 0 14px 34px color-mix(in srgb, var(--accent), transparent 78%);
+  --visual-accent-ring: color-mix(in srgb, var(--accent), transparent 48%);
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb {

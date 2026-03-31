@@ -21,6 +21,7 @@ import com.nagai.backend.exceptions.ChecklistException;
 import com.nagai.backend.exceptions.DailyChecklistAlreadyExistsException;
 import com.nagai.backend.exceptions.DailyChecklistException;
 import com.nagai.backend.exceptions.DailyChecklistItemNotFoundException;
+import com.nagai.backend.exceptions.DailyChecklistRegenerationLimitException;
 import com.nagai.backend.exceptions.ChecklistLimitException;
 import com.nagai.backend.exceptions.ChecklistNotFoundException;
 import com.nagai.backend.exceptions.DigestAlreadyExistsException;
@@ -162,6 +163,11 @@ public class GlobalExceptionHandler {
         if (exception instanceof DailyChecklistAlreadyExistsException) {
             ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
             detail.setProperty("description", "A daily checklist already exists for today");
+            return detail;
+        }
+        if (exception instanceof DailyChecklistRegenerationLimitException) {
+            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+            detail.setProperty("description", "Today's daily checklist has already been regenerated once");
             return detail;
         }
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());

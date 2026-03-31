@@ -57,6 +57,7 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
 
   const active = (path: string) =>
     path === "/home" ? pathname === "/home" : pathname.startsWith(path);
+  const hideMobileToggle = pathname.startsWith("/goals") || modalOpen;
 
   const handleToggle = useCallback(() => {
     if (window.innerWidth <= 768) {
@@ -260,7 +261,7 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
       <MessageInboxPanel isOpen={inboxOpen} onClose={() => setInboxOpen(false)} />
 
       <button
-        className={`${styles.toggleButton} ${collapsed && !mobileOpen ? styles.toggleCollapsed : ""}`}
+        className={`${styles.toggleButton} ${collapsed && !mobileOpen ? styles.toggleCollapsed : ""} ${hideMobileToggle ? styles.toggleButtonHiddenMobile : ""}`}
         onClick={handleToggle}
         aria-label="Toggle sidebar"
       >

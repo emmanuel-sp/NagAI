@@ -34,8 +34,9 @@ public class DailyChecklistController {
 
     @PostMapping("/generate")
     public ResponseEntity<DailyChecklistResponse> generateDailyChecklist() {
+        boolean created = dailyChecklistService.getTodayChecklist() == null;
         DailyChecklistResponse response = dailyChecklistService.generateDailyChecklist();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(created ? HttpStatus.CREATED : HttpStatus.OK).body(response);
     }
 
     @GetMapping("/config")
@@ -53,6 +54,25 @@ public class DailyChecklistController {
     public ResponseEntity<DailyChecklistItemResponse> toggleItem(
             @PathVariable Long dailyItemId) {
         return ResponseEntity.ok(dailyChecklistService.toggleDailyItem(dailyItemId));
+    }
+
+    @PostMapping("/items")
+    public ResponseEntity<DailyChecklistItemResponse> addItem(
+            @Valid @RequestBody DailyChecklistItemCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(dailyChecklistService.addDailyItem(request));
+    }
+
+    @PatchMapping("/items/{dailyItemId}")
+    public ResponseEntity<DailyChecklistItemResponse> updateItem(
+            @PathVariable Long dailyItemId,
+            @Valid @RequestBody DailyChecklistItemUpdateRequest request) {
+        return ResponseEntity.ok(dailyChecklistService.updateDailyItem(dailyItemId, request));
+    }
+
+    @PatchMapping("/today/reorder")
+    public ResponseEntity<DailyChecklistResponse> reorderTodayItems(
+            @Valid @RequestBody DailyChecklistReorderRequest request) {
+        return ResponseEntity.ok(dailyChecklistService.reorderTodayItems(request));
     }
 
     @DeleteMapping("/items/{dailyItemId}")

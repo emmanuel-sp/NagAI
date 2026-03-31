@@ -74,6 +74,10 @@
   border-color: var(--border);
 }
 
+.toggleButtonHiddenMobile {
+  display: flex;
+}
+
 /* ─── Nav Links ─── */
 .navLinks {
   display: flex;
@@ -603,6 +607,10 @@
     background: var(--bg-page);
     border: 1px solid transparent;
     color: var(--text-primary);
+  }
+
+  .toggleButtonHiddenMobile {
+    display: none;
   }
 
   /* When mobile sidebar is open, reposition toggle to sidebar's top-right */

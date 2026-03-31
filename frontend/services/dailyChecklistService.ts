@@ -6,6 +6,7 @@ import {
   UpdateDailyChecklistConfigDto,
   CreateDailyItemDto,
   UpdateDailyItemDto,
+  ReorderDailyItemsDto,
 } from "@/types/dailyChecklist";
 
 export async function fetchTodayChecklist(): Promise<DailyChecklist | null> {
@@ -67,6 +68,15 @@ export async function updateDailyItem(
   data: UpdateDailyItemDto
 ): Promise<DailyChecklistItem> {
   return apiRequest<DailyChecklistItem>(`/daily-checklists/items/${dailyItemId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function reorderTodayChecklistItems(
+  data: ReorderDailyItemsDto
+): Promise<DailyChecklist> {
+  return apiRequest<DailyChecklist>("/daily-checklists/today/reorder", {
     method: "PATCH",
     body: JSON.stringify(data),
   });

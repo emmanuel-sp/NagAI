@@ -344,6 +344,35 @@
   border-color: var(--error-border);
 }
 
+.reorderButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.reorderButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 15px;
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  padding: 0;
+}
+
+.reorderButton:hover:not(:disabled) {
+  color: var(--accent);
+}
+
+.reorderButton:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
 /* ─── Config Panel (inside card body) ─── */
 .configPanel {
   padding: 16px 24px;

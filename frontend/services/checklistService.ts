@@ -4,6 +4,7 @@ import {
   Checklist,
   CreateChecklistItemDto,
   UpdateChecklistItemDto,
+  ReorderChecklistItemsDto,
 } from "@/types/checklist";
 import { fetchGoals } from "@/services/goalService";
 
@@ -62,5 +63,15 @@ export async function deleteChecklistItem(
 ): Promise<void> {
   return apiRequest<void>(`/checklists/${checklistId}`, {
     method: "DELETE",
+  });
+}
+
+export async function reorderChecklistItems(
+  goalId: number,
+  data: ReorderChecklistItemsDto
+): Promise<ChecklistItem[]> {
+  return apiRequest<ChecklistItem[]>(`/checklists/goal/${goalId}/reorder`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
   });
 }

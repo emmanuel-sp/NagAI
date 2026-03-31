@@ -32,6 +32,13 @@ public class ChecklistController {
         return ResponseEntity.ok(checklistService.fetchGoalChecklist(goalId));
     }
 
+    @PatchMapping("/goal/{goalId}/reorder")
+    public ResponseEntity<List<ChecklistResponse>> reorderGoalChecklist(
+            @PathVariable Long goalId,
+            @Valid @RequestBody ChecklistReorderRequest request) {
+        return ResponseEntity.ok(checklistService.reorderUndatedItems(goalId, request));
+    }
+
     @PostMapping
     public ResponseEntity<ChecklistResponse> addChecklistItem(@Valid @RequestBody ChecklistAddRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(checklistService.addChecklistItem(request));

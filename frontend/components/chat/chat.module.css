@@ -241,6 +241,7 @@
 
 .messagesArea {
   flex: 1;
+  min-height: 0;
   padding: var(--space-lg) 0 calc(var(--space-md) + 20px);
   display: flex;
   flex-direction: column;
@@ -970,5 +971,43 @@
 
   .plusMenu {
     width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chatScroll {
+    height: calc(100dvh - 104px);
+    overflow: hidden;
+  }
+
+  .chatPage,
+  .chatPageEmpty {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .topBar {
+    position: relative;
+    top: auto;
+    background: var(--bg-page);
+  }
+
+  .messagesArea {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: var(--space-md);
+  }
+
+  .inputArea {
+    position: relative;
+    bottom: auto;
+    padding: 20px 0 calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(to bottom, transparent 0%, var(--bg-page) 20px);
+  }
+
+  .loadingPage {
+    height: calc(100dvh - 104px);
   }
 }

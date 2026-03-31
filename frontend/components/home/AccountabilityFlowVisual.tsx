@@ -12,8 +12,11 @@ export default function AccountabilityFlowVisual() {
           <div className={styles.promptRow}>
             <span className={styles.promptLabel}>You type</span>
             <div className={styles.promptField}>
-              <span className={styles.typedText}>
-                Get promoted to senior engineer.
+              <span className={styles.typingViewport}>
+                <span className={styles.typedText}>
+                  Run a sub-24 minute 5K this fall.
+                </span>
+                <span className={styles.typingCover} />
               </span>
             </div>
           </div>
@@ -32,7 +35,6 @@ export default function AccountabilityFlowVisual() {
         </div>
 
         <div className={styles.checklistPanel}>
-          <p className={styles.mobileGoal}>Goal: Get promoted to senior engineer.</p>
           <div className={styles.checklistHeader}>
             <span className={styles.eyebrow}>Generated checklist</span>
             <span className={styles.checklistMeta}>4 actionable items</span>
@@ -41,36 +43,31 @@ export default function AccountabilityFlowVisual() {
             <div className={styles.item}>
               <span className={styles.itemDot} />
               <div>
-                <p className={styles.itemTitle}>Schedule promotion criteria chat with manager</p>
-                <p className={styles.itemNote}>This week</p>
+                <p className={styles.itemTitle}>Run three times a week consistently</p>
+                <p className={styles.itemNote}>Base first</p>
               </div>
             </div>
             <div className={styles.item}>
               <span className={styles.itemDot} />
               <div>
-                <p className={styles.itemTitle}>Volunteer to lead the Q2 platform migration</p>
-                <p className={styles.itemNote}>By end of sprint</p>
+                <p className={styles.itemTitle}>Add one weekly speed workout</p>
+                <p className={styles.itemNote}>Build pace</p>
               </div>
             </div>
             <div className={styles.item}>
               <span className={styles.itemDot} />
               <div>
-                <p className={styles.itemTitle}>Start a weekly wins log</p>
-                <p className={styles.itemNote}>Every Friday</p>
+                <p className={styles.itemTitle}>Build your long run to 6 miles</p>
+                <p className={styles.itemNote}>Endurance</p>
               </div>
             </div>
             <div className={styles.item}>
               <span className={styles.itemDot} />
               <div>
-                <p className={styles.itemTitle}>Get peer feedback from 3 teammates</p>
-                <p className={styles.itemNote}>Before Q3 review</p>
+                <p className={styles.itemTitle}>Retest your 5K pace each month</p>
+                <p className={styles.itemNote}>Track progress</p>
               </div>
             </div>
-          </div>
-          <div className={styles.checklistFooter}>
-            <span className={styles.footerChip}>Goal-specific</span>
-            <span className={styles.footerChip}>Editable</span>
-            <span className={styles.footerChip}>Ready to start</span>
           </div>
         </div>
       </div>

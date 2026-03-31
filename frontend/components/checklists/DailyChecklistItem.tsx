@@ -1,7 +1,14 @@
 "use client";
 
 import { DailyChecklistItem as DailyChecklistItemType } from "@/types/dailyChecklist";
-import { IoTrash, IoClock, IoCheckmarkCircle, IoEllipseOutline } from "@/components/icons";
+import {
+  IoTrash,
+  IoClock,
+  IoCheckmarkCircle,
+  IoEllipseOutline,
+  IoChevronUp,
+  IoChevronDown,
+} from "@/components/icons";
 import styles from "./dailyChecklist.module.css";
 
 function formatTime12h(time24: string): string {
@@ -17,12 +24,20 @@ interface DailyChecklistItemProps {
   item: DailyChecklistItemType;
   onToggle: (dailyItemId: number) => void;
   onDelete: (dailyItemId: number) => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
 }
 
 export default function DailyChecklistItem({
   item,
   onToggle,
   onDelete,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp = false,
+  canMoveDown = false,
 }: DailyChecklistItemProps) {
   return (
     <div
@@ -59,6 +74,26 @@ export default function DailyChecklistItem({
       </div>
 
       <div className={styles.itemActions}>
+        {onMoveUp && onMoveDown && (
+          <div className={styles.reorderButtons}>
+            <button
+              className={styles.reorderButton}
+              onClick={onMoveUp}
+              aria-label="Move item up"
+              disabled={!canMoveUp}
+            >
+              <IoChevronUp size={13} />
+            </button>
+            <button
+              className={styles.reorderButton}
+              onClick={onMoveDown}
+              aria-label="Move item down"
+              disabled={!canMoveDown}
+            >
+              <IoChevronDown size={13} />
+            </button>
+          </div>
+        )}
         <button
           className={styles.itemActionDelete}
           onClick={() => onDelete(item.dailyItemId)}

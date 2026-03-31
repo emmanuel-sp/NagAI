@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -102,12 +103,17 @@ export default function GoalsContainer() {
       {goals.length === 0 ? (
         <EmptyState
           title="No goals yet"
-          description="Create your first goal from the sidebar or here to open your first goal workspace."
+          description="Create your first goal here, or head to chat if you want help turning a vague idea into a concrete SMART goal."
           action={
-            <button onClick={handleAddGoal} className={styles.addGoalButton}>
-              <IoAdd size={20} />
-              Add Your First Goal
-            </button>
+            <div className={styles.emptyActions}>
+              <button onClick={handleAddGoal} className={styles.addGoalButton}>
+                <IoAdd size={20} />
+                Add Your First Goal
+              </button>
+              <Link href="/chat" className={styles.secondaryGoalAction}>
+                Get Help in Chat
+              </Link>
+            </div>
           }
         />
       ) : (

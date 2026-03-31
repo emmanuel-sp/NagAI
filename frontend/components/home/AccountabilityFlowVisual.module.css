@@ -1,6 +1,7 @@
 .wrapper {
   width: 100%;
-  overflow: hidden;
+  min-width: 0;
+  overflow: clip;
 }
 
 .shell {
@@ -8,18 +9,17 @@
   grid-template-columns: minmax(0, 1.1fr) auto minmax(0, 1.05fr);
   align-items: center;
   gap: 22px;
+  min-width: 0;
 }
 
 .goalPanel,
 .checklistPanel {
+  min-width: 0;
   padding: 26px;
   border-radius: 28px;
-  border: 1px solid rgba(138, 59, 70, 0.10);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 244, 244, 0.96));
-  box-shadow:
-    0 24px 54px rgba(36, 20, 23, 0.08),
-    0 8px 16px rgba(36, 20, 23, 0.04);
+  border: 1px solid var(--visual-panel-border);
+  background: var(--visual-panel-bg);
+  box-shadow: var(--visual-panel-shadow);
 }
 
 .goalHeader,
@@ -27,6 +27,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 14px;
   margin-bottom: 18px;
 }
@@ -58,25 +59,45 @@
 .promptField {
   display: flex;
   align-items: center;
+  min-width: 0;
   min-height: 84px;
   padding: 18px 20px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: var(--visual-chip-bg);
+  border: 1px solid var(--visual-chip-border);
+  overflow: hidden;
+}
+
+.typingViewport {
+  position: relative;
+  display: inline-grid;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .typedText {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
+  display: block;
   white-space: nowrap;
   font-size: 18px;
   line-height: 1.45;
   color: var(--text-primary);
+}
+
+.typedText,
+.typingCover {
+  grid-area: 1 / 1;
+}
+
+.typingCover {
+  position: absolute;
+  inset: 0;
+  background: var(--visual-chip-bg);
+  border-left: 2px solid var(--visual-accent-ring);
+  will-change: transform, border-color;
   animation:
-    typing 10s steps(42) infinite,
+    typingSweep 8.8s cubic-bezier(0.22, 1, 0.36, 1) infinite,
     caretBlink 1s step-end infinite;
-  border-right: 2px solid rgba(138, 59, 70, 0.55);
 }
 
 .goalSummary {
@@ -90,7 +111,7 @@
 .summaryLineShort {
   height: 12px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.07);
+  background: var(--visual-neutral-fill-strong);
 }
 
 .summaryLine {
@@ -107,6 +128,7 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  width: 100%;
   min-width: 120px;
 }
 
@@ -116,9 +138,9 @@
   width: 112px;
   height: 112px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(138, 59, 70, 0.16), rgba(138, 59, 70, 0.02));
+  background: radial-gradient(circle, var(--visual-accent-fill), transparent 72%);
   filter: blur(8px);
-  animation: haloPulse 2.8s ease-in-out infinite;
+  animation: haloPulse 2.4s ease-in-out infinite;
 }
 
 .sparkCore {
@@ -129,12 +151,12 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, rgba(138, 59, 70, 0.92), rgba(138, 59, 70, 0.72));
-  color: #fff;
+  background: var(--visual-accent-gradient);
+  color: var(--accent-foreground);
   font-size: 15px;
   font-weight: var(--fw-500);
   letter-spacing: 0.08em;
-  box-shadow: 0 14px 34px rgba(138, 59, 70, 0.28);
+  box-shadow: var(--visual-accent-shadow);
 }
 
 .transformLabel {
@@ -145,10 +167,6 @@
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-secondary);
-}
-
-.mobileGoal {
-  display: none;
 }
 
 .checklistItems {
@@ -163,11 +181,11 @@
   gap: 12px;
   padding: 14px 16px;
   border-radius: 18px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--visual-chip-border);
+  background: var(--visual-chip-bg);
   opacity: 0;
   transform: translateY(16px);
-  animation-duration: 10s;
+  animation-duration: 8.8s;
   animation-timing-function: ease;
   animation-iteration-count: infinite;
 }
@@ -181,8 +199,8 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: rgba(138, 59, 70, 0.12);
-  border: 1.5px solid rgba(138, 59, 70, 0.28);
+  background: var(--visual-accent-fill);
+  border: 1.5px solid var(--visual-accent-border);
   margin-top: 2px;
 }
 
@@ -199,31 +217,21 @@
   line-height: 1.45;
 }
 
-.checklistFooter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.footerChip {
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.04);
-  color: var(--text-secondary);
-  font-size: 12px;
-}
-
-@keyframes typing {
-  0%, 5%  { width: 0; }
-  35%     { width: 100%; }
-  72%     { width: 100%; }
-  88%, 100% { width: 0; }
+@keyframes typingSweep {
+  0%, 5% {
+    transform: translateX(0%);
+  }
+  30%, 63% {
+    transform: translateX(100%);
+  }
+  82%, 100% {
+    transform: translateX(0%);
+  }
 }
 
 @keyframes caretBlink {
   0%, 50% {
-    border-color: rgba(138, 59, 70, 0.55);
+    border-color: var(--visual-accent-ring);
   }
   51%, 100% {
     border-color: transparent;
@@ -241,7 +249,7 @@
   }
 }
 
-/* Each item encodes its own wait offset — same 10s duration, no delays, loops stay in sync */
+/* Each item encodes its own wait offset — same 8.8s duration, no delays, loops stay in sync */
 @keyframes item1In {
   0%, 33%  { opacity: 0; transform: translateY(14px); }
   40%, 72% { opacity: 1; transform: translateY(0); }
@@ -266,12 +274,12 @@
 @media (max-width: 960px) {
   .shell {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 14px;
   }
 
   .transformCore {
     min-width: 0;
-    padding: 8px 0;
+    padding: 4px 0;
   }
 
   .transformLabel {
@@ -280,30 +288,46 @@
 }
 
 @media (max-width: 640px) {
-  /* On small screens, drop the goal input + AI orb — show only the checklist */
   .goalPanel,
-  .transformCore {
-    display: none;
-  }
-
-  /* Show the goal text above the checklist instead */
-  .mobileGoal {
-    display: block;
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 14px;
-    line-height: 1.4;
-  }
-
-  /* Show all checklist items statically — no animation needed */
-  .item {
-    animation: none;
-    opacity: 1;
-    transform: translateY(0);
-  }
-
   .checklistPanel {
+    padding: 18px;
     border-radius: 20px;
+  }
+
+  .promptField {
+    min-height: 68px;
+    padding: 14px 16px;
+  }
+
+  .typedText {
+    font-size: 15px;
+  }
+
+  .transformCore {
+    gap: 8px;
+    padding: 0 0 6px;
+  }
+
+  .sparkHalo {
+    top: 6px;
+    width: 88px;
+    height: 88px;
+  }
+
+  .sparkCore {
+    width: 62px;
+    height: 62px;
+    font-size: 14px;
+  }
+
+  .checklistHeader {
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+
+  .item {
+    gap: 10px;
+    padding: 12px 14px;
   }
 
   .itemTitle {
@@ -311,20 +335,70 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .typedText,
+@media (max-width: 420px) {
+  .goalPanel,
+  .checklistPanel {
+    padding: 16px;
+  }
+
+  .promptField {
+    min-height: 64px;
+    padding: 12px 14px;
+  }
+
+  .typedText {
+    font-size: 14px;
+  }
+
   .sparkHalo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .sparkCore {
+    width: 56px;
+    height: 56px;
+    font-size: 13px;
+  }
+
+  .transformLabel {
+    font-size: 11px;
+  }
+
+  .item {
+    padding: 11px 12px;
+  }
+
+  .itemTitle {
+    font-size: 13px;
+  }
+
+  .itemNote {
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .sparkHalo,
+  .typingCover {
     animation: none;
+  }
+
+  .item {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .typingViewport {
+    overflow: visible;
   }
 
   .typedText {
     white-space: normal;
-    border-right: none;
   }
 
-  .item {
-    animation: none;
-    opacity: 1;
-    transform: translateY(0);
+  .typingCover {
+    display: none;
   }
 }

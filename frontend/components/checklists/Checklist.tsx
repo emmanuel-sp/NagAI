@@ -15,6 +15,7 @@ interface ChecklistProps {
   onToggleItem: (checklistId: number) => void;
   onUpdateItem: (checklistId: number, updates: { title?: string; notes?: string; deadline?: string }) => void;
   onDeleteItem: (checklistId: number) => void;
+  onReorderItems?: (orderedItemIds: number[]) => Promise<void> | void;
   onGenerateItem?: () => void;
   onGenerateFullChecklist?: () => void;
   isGenerating?: boolean;
@@ -28,6 +29,7 @@ export default function Checklist({
   onToggleItem,
   onUpdateItem,
   onDeleteItem,
+  onReorderItems,
   onGenerateItem,
   onGenerateFullChecklist,
   isGenerating = false,
@@ -35,10 +37,10 @@ export default function Checklist({
   const [isAdding, setIsAdding] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const sortedItems = [...checklist.items].sort((a, b) => {
-    if (a.completed != b.completed) return a.completed ? 1 : -1;
-    return a.sortOrder - b.sortOrder;
-  });
+  const sortedItems = [...checklist.items].sort((a, b) => a.sortOrder - b.sortOrder);
+  const movableIds = sortedItems
+    .filter((item) => !item.deadline)
+    .map((item) => item.checklistId);
   const completedCount = checklist.items.filter((item) => item.completed).length;
   const totalCount = checklist.items.length;
   const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
@@ -54,6 +56,20 @@ export default function Checklist({
   const handleAdd = (title: string, notes?: string, deadline?: string) => {
     onAddItem(title, notes, deadline);
     setIsAdding(false);
+  };
+
+  const handleReorder = (checklistId: number, direction: -1 | 1) => {
+    if (!onReorderItems) return;
+    const currentIndex = movableIds.indexOf(checklistId);
+    const targetIndex = currentIndex + direction;
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= movableIds.length) return;
+
+    const orderedItemIds = [...movableIds];
+    [orderedItemIds[currentIndex], orderedItemIds[targetIndex]] = [
+      orderedItemIds[targetIndex],
+      orderedItemIds[currentIndex],
+    ];
+    void onReorderItems(orderedItemIds);
   };
 
   return (
@@ -84,9 +100,22 @@ export default function Checklist({
       {!isCollapsed && (
         <>
         <div className={styles.checklistItems}>
-          {sortedItems.map((item) => (
-            <ChecklistItem key={item.checklistId} item={item} onToggle={onToggleItem} onUpdate={onUpdateItem} onDelete={onDeleteItem} />
-          ))}
+          {sortedItems.map((item) => {
+            const movableIndex = movableIds.indexOf(item.checklistId);
+            return (
+              <ChecklistItem
+                key={item.checklistId}
+                item={item}
+                onToggle={onToggleItem}
+                onUpdate={onUpdateItem}
+                onDelete={onDeleteItem}
+                onMoveUp={!item.deadline ? () => handleReorder(item.checklistId, -1) : undefined}
+                onMoveDown={!item.deadline ? () => handleReorder(item.checklistId, 1) : undefined}
+                canMoveUp={!item.deadline && movableIndex > 0}
+                canMoveDown={!item.deadline && movableIndex < movableIds.length - 1}
+              />
+            );
+          })}
 
           {sortedItems.length === 0 && !isAdding && !isGenerating && (
             <div className={styles.emptyState}>

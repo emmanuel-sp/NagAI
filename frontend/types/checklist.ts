@@ -34,3 +34,7 @@ export interface UpdateChecklistItemDto {
   sortOrder?: number;
   completed?: boolean;
 }
+
+export interface ReorderChecklistItemsDto {
+  orderedItemIds: number[];
+}

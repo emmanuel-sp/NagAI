@@ -24,6 +24,7 @@ import {
   IoChevronDown,
   IoListOutline,
   IoCalendarOutline,
+  IoRefresh,
 } from "@/components/icons";
 import {
   fetchTodayChecklist,
@@ -34,6 +35,7 @@ import {
   updateDailyChecklistConfig,
   addDailyItem,
   updateDailyItem,
+  reorderTodayChecklistItems,
 } from "@/services/dailyChecklistService";
 import { fetchGoals } from "@/services/goalService";
 import styles from "./today.module.css";
@@ -208,8 +210,8 @@ function AddForm({ onAdd, onCancel }: AddFormProps) {
 
 interface ListItemProps {
   item: DailyItem;
-  idx: number;
-  total: number;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
   onToggle: (id: number) => void;
   onEdit: () => void;
   onDelete: (id: number) => void;
@@ -219,8 +221,8 @@ interface ListItemProps {
 
 function ListItemRow({
   item,
-  idx,
-  total,
+  canMoveUp,
+  canMoveDown,
   onToggle,
   onEdit,
   onDelete,
@@ -271,7 +273,7 @@ function ListItemRow({
             className={styles.reorderBtn}
             onClick={() => onMoveUp(item.dailyItemId)}
             aria-label="Move up"
-            disabled={idx === 0}
+            disabled={!canMoveUp}
           >
             <IoChevronUp size={13} />
           </button>
@@ -279,7 +281,7 @@ function ListItemRow({
             className={styles.reorderBtn}
             onClick={() => onMoveDown(item.dailyItemId)}
             aria-label="Move down"
-            disabled={idx === total - 1}
+            disabled={!canMoveDown}
           >
             <IoChevronDown size={13} />
           </button>
@@ -358,6 +360,7 @@ export default function TodayContainer() {
     try {
       const result = await generateDailyChecklist();
       setChecklist(result);
+      setItems(result.items);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to generate plan.";
       setError(message);
@@ -370,6 +373,14 @@ export default function TodayContainer() {
     try {
       const updated = await toggleDailyItem(dailyItemId);
       setItems((prev) => prev.map((i) => (i.dailyItemId === dailyItemId ? updated : i)));
+      setChecklist((prev) =>
+        prev
+          ? {
+              ...prev,
+              items: prev.items.map((i) => (i.dailyItemId === dailyItemId ? updated : i)),
+            }
+          : prev
+      );
     } catch (err) {
       console.error("Failed to toggle:", err);
     }
@@ -379,6 +390,11 @@ export default function TodayContainer() {
     try {
       await deleteDailyItem(dailyItemId);
       setItems((prev) => prev.filter((i) => i.dailyItemId !== dailyItemId));
+      setChecklist((prev) =>
+        prev
+          ? { ...prev, items: prev.items.filter((i) => i.dailyItemId !== dailyItemId) }
+          : prev
+      );
       if (editingId === dailyItemId) setEditingId(null);
     } catch (err) {
       console.error("Failed to delete:", err);
@@ -395,33 +411,48 @@ export default function TodayContainer() {
       scheduledTime: updates.scheduledTime,
     });
     setItems((prev) => prev.map((i) => (i.dailyItemId === id ? updated : i)));
+    setChecklist((prev) =>
+      prev
+        ? {
+            ...prev,
+            items: prev.items.map((i) => (i.dailyItemId === id ? updated : i)),
+          }
+        : prev
+    );
     setEditingId(null);
   };
 
   const handleAdd = async (data: { title: string; notes?: string; scheduledTime?: string }) => {
     const newItem = await addDailyItem(data);
     setItems((prev) => [...prev, newItem]);
+    setChecklist((prev) =>
+      prev ? { ...prev, items: [...prev.items, newItem] } : prev
+    );
     setShowAdd(false);
   };
 
-  const handleMoveUp = (id: number) => {
-    setItems((prev) => {
-      const idx = prev.findIndex((i) => i.dailyItemId === id);
-      if (idx <= 0) return prev;
-      const next = [...prev];
-      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-      return next;
-    });
-  };
+  const handleReorder = async (id: number, direction: -1 | 1) => {
+    const movableIds = items
+      .filter((item) => !item.scheduledTime)
+      .map((item) => item.dailyItemId);
+    const currentIndex = movableIds.indexOf(id);
+    const targetIndex = currentIndex + direction;
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= movableIds.length) return;
 
-  const handleMoveDown = (id: number) => {
-    setItems((prev) => {
-      const idx = prev.findIndex((i) => i.dailyItemId === id);
-      if (idx < 0 || idx >= prev.length - 1) return prev;
-      const next = [...prev];
-      [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
-      return next;
-    });
+    const orderedItemIds = [...movableIds];
+    [orderedItemIds[currentIndex], orderedItemIds[targetIndex]] = [
+      orderedItemIds[targetIndex],
+      orderedItemIds[currentIndex],
+    ];
+
+    try {
+      const updated = await reorderTodayChecklistItems({ orderedItemIds });
+      setChecklist(updated);
+      setItems(updated.items);
+    } catch (err) {
+      console.error("Failed to reorder daily items:", err);
+      setError("Could not reorder daily plan items. Please try again.");
+    }
   };
 
   const handleSaveConfig = async (
@@ -435,7 +466,7 @@ export default function TodayContainer() {
 
   const renderListView = () => (
     <div className={styles.listView}>
-      {items.map((item, idx) =>
+      {items.map((item) =>
         editingId === item.dailyItemId ? (
           <EditForm
             key={item.dailyItemId}
@@ -444,20 +475,28 @@ export default function TodayContainer() {
             onCancel={() => setEditingId(null)}
           />
         ) : (
-          <ListItemRow
-            key={item.dailyItemId}
-            item={item}
-            idx={idx}
-            total={items.length}
-            onToggle={handleToggle}
-            onEdit={() => {
-              setShowAdd(false);
-              setEditingId(item.dailyItemId);
-            }}
-            onDelete={handleDelete}
-            onMoveUp={handleMoveUp}
-            onMoveDown={handleMoveDown}
-          />
+          (() => {
+            const movableIds = items
+              .filter((entry) => !entry.scheduledTime)
+              .map((entry) => entry.dailyItemId);
+            const movableIndex = movableIds.indexOf(item.dailyItemId);
+            return (
+              <ListItemRow
+                key={item.dailyItemId}
+                item={item}
+                canMoveUp={!item.scheduledTime && movableIndex > 0}
+                canMoveDown={!item.scheduledTime && movableIndex < movableIds.length - 1}
+                onToggle={handleToggle}
+                onEdit={() => {
+                  setShowAdd(false);
+                  setEditingId(item.dailyItemId);
+                }}
+                onDelete={handleDelete}
+                onMoveUp={(dailyItemId) => void handleReorder(dailyItemId, -1)}
+                onMoveDown={(dailyItemId) => void handleReorder(dailyItemId, 1)}
+              />
+            );
+          })()
         )
       )}
 
@@ -618,6 +657,17 @@ export default function TodayContainer() {
           <h1 className={styles.pageTitle}>Today</h1>
         </div>
         <div className={styles.headerRight}>
+          {checklist && checklist.generationCount < 2 && (
+            <button
+              className={styles.headerIconBtn}
+              onClick={() => void handleGenerate()}
+              aria-label="Regenerate daily plan"
+              title="Regenerate"
+              disabled={isGenerating}
+            >
+              <IoRefresh size={16} />
+            </button>
+          )}
           <div className={styles.viewTabs}>
             <button
               className={`${styles.viewTab} ${view === "list" ? styles.viewTabActive : ""}`}

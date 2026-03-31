@@ -32,4 +32,7 @@ public class DailyChecklist {
     @Column(name = "generated_at")
     @CreationTimestamp
     private LocalDateTime generatedAt;
+
+    @Column(name = "generation_count")
+    private Integer generationCount;
 }

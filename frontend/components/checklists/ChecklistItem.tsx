@@ -13,6 +13,8 @@ import {
   IoClose,
   IoCalendarOutline,
   IoDocumentTextOutline,
+  IoChevronUp,
+  IoChevronDown,
 } from "@/components/icons";
 
 interface ChecklistItemProps {
@@ -23,6 +25,10 @@ interface ChecklistItemProps {
     updates: { title?: string; notes?: string; deadline?: string }
   ) => void;
   onDelete: (checklistId: number) => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
 }
 
 export default function ChecklistItem({
@@ -30,6 +36,10 @@ export default function ChecklistItem({
   onToggle,
   onUpdate,
   onDelete,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp = false,
+  canMoveDown = false,
 }: ChecklistItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(item.title);
@@ -153,6 +163,26 @@ export default function ChecklistItem({
       </div>
 
       <div className={styles.itemActions}>
+        {onMoveUp && onMoveDown && (
+          <div className={styles.reorderButtons}>
+            <button
+              onClick={onMoveUp}
+              className={styles.reorderButton}
+              aria-label="Move item up"
+              disabled={!canMoveUp}
+            >
+              <IoChevronUp size={14} />
+            </button>
+            <button
+              onClick={onMoveDown}
+              className={styles.reorderButton}
+              aria-label="Move item down"
+              disabled={!canMoveDown}
+            >
+              <IoChevronDown size={14} />
+            </button>
+          </div>
+        )}
         <button
           onClick={() => setIsEditing(true)}
           className={styles.itemActionButton}

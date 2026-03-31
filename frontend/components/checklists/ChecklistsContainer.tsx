@@ -17,6 +17,7 @@ import {
   updateChecklistItem,
   toggleChecklistItem,
   deleteChecklistItem,
+  reorderChecklistItems,
 } from "@/services/checklistService";
 import {
   generateChecklistItem,
@@ -163,6 +164,19 @@ export default function ChecklistsContainer() {
     }
   };
 
+  const handleReorderItems = async (goalId: number, orderedItemIds: number[]) => {
+    try {
+      const updatedItems = await reorderChecklistItems(goalId, { orderedItemIds });
+      setChecklists((prev) =>
+        prev.map((c) =>
+          c.goalId === goalId ? { ...c, items: updatedItems } : c
+        )
+      );
+    } catch (error) {
+      console.error("Failed to reorder items:", error);
+    }
+  };
+
   const handleGenerateItem = async (goalId: number) => {
     setGeneratingGoalId(goalId);
     try {
@@ -226,18 +240,18 @@ export default function ChecklistsContainer() {
   const getFilteredChecklists = () => {
     const mapped = checklists.map((checklist) => {
       if (filter === "all") {
-        const sortedItems = [...checklist.items].sort((a, b) => {
-          if (a.completed === b.completed) return 0;
-          return a.completed ? 1 : -1;
-        });
-        return { ...checklist, items: sortedItems };
+        return {
+          ...checklist,
+          items: [...checklist.items].sort((a, b) => a.sortOrder - b.sortOrder),
+        };
       }
       return {
         ...checklist,
-        items:
+        items: (
           filter === "active"
             ? checklist.items.filter((item) => !item.completed)
-            : checklist.items.filter((item) => item.completed),
+            : checklist.items.filter((item) => item.completed)
+        ).sort((a, b) => a.sortOrder - b.sortOrder),
       };
     });
 
@@ -316,6 +330,9 @@ export default function ChecklistsContainer() {
                 }
                 onDeleteItem={(checklistId) =>
                   handleDeleteItem(checklist.goalId, checklistId)
+                }
+                onReorderItems={(orderedItemIds) =>
+                  handleReorderItems(checklist.goalId, orderedItemIds)
                 }
                 onGenerateItem={() =>
                   handleGenerateItem(checklist.goalId)
