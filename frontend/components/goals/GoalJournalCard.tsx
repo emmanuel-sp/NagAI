@@ -185,7 +185,7 @@ export default function GoalJournalCard({ value = "", onSave }: GoalJournalCardP
       : saveState === "error"
         ? "Could not save. Try again."
         : isDirty
-          ? "Unsaved changes"
+          ? "Unsaved"
           : "";
 
   return (

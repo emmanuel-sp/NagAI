@@ -15,12 +15,12 @@
   align-items: center;
 }
 
-.backLink,
+/* .backLink,
 .primaryLink {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
+  padding: 6px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   background: var(--bg-card);
@@ -45,7 +45,7 @@
 .backLinkArrow {
   font-size: var(--fs-md);
   line-height: 1;
-}
+} */
 
 .heroCard {
   display: grid;
@@ -219,7 +219,7 @@
 
 .secondaryButton {
   display: inline-flex;
-  align-items: center;
+  
   gap: 8px;
   padding: 10px 14px;
   border: 1px solid var(--border);
@@ -228,6 +228,7 @@
   color: var(--text-primary);
   font-size: var(--fs-sm);
   font-weight: var(--fw-500);
+
 }
 
 .secondaryButton:disabled {
@@ -473,6 +474,11 @@
 @media (max-width: 768px) {
   .workspaceShell {
     padding-inline: 0;
+  }
+
+  .secondaryButton {
+      width: 100%;
+      justify-content: center;
   }
 
   .workspaceHeaderRow,

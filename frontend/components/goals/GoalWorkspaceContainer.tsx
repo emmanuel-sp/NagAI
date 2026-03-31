@@ -340,10 +340,10 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
   return (
     <div className={styles.workspaceShell}>
       <div className={styles.workspaceHeaderRow}>
-        <Link href="/goals" className={styles.backLink}>
+        {/* <Link href="/goals" className={styles.backLink}>
           <span className={styles.backLinkArrow} aria-hidden="true">←</span>
           <span>All goals</span>
-        </Link>
+        </Link> */}
         <button
           type="button"
           className={styles.secondaryButton}
