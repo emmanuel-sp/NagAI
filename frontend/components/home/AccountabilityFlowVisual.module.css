@@ -19,7 +19,7 @@
   border-radius: 28px;
   border: 1px solid var(--visual-panel-border);
   background: var(--visual-panel-bg);
-  box-shadow: var(--visual-panel-shadow);
+  /* box-shadow: var(--visual-panel-shadow); */
 }
 
 .goalHeader,

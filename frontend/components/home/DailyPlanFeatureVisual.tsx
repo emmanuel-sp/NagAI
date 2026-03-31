@@ -35,7 +35,6 @@ export default function DailyPlanFeatureVisual() {
         <div className={styles.header}>
           <div>
             <p className={styles.eyebrow}>Daily plan</p>
-            <h3 className={styles.title}>A focused day, shaped from your goals and routines</h3>
           </div>
           <div className={styles.badge}>Tue</div>
         </div>

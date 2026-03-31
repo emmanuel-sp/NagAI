@@ -23,7 +23,6 @@ export default function DigestFeatureVisual() {
         <div className={styles.header}>
           <div>
             <p className={styles.eyebrow}>Email digest</p>
-            <h3 className={styles.title}>Curated reading, delivered to your inbox</h3>
           </div>
           <span className={styles.status}>Weekly</span>
         </div>

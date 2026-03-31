@@ -14,7 +14,6 @@ export default function AgentSupportVisual() {
         <div className={styles.header}>
           <div>
             <p className={styles.eyebrow}>AI Agent + Chat</p>
-            <h3 className={styles.title}>Deploy an agent, get nagged by email, follow up in chat</h3>
           </div>
           <span className={styles.status}>Agent chat</span>
         </div>
