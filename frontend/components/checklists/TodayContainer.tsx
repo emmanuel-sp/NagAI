@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { DndContext, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   DailyChecklist,
@@ -347,8 +346,11 @@ function SortableTodayListRow(props: SortableTodayListRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: props.item.dailyItemId });
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: transform
+      ? `translate3d(${Math.round(transform.x)}px, ${Math.round(transform.y)}px, 0)`
+      : undefined,
     transition,
+    width: "100%",
   };
 
   return (

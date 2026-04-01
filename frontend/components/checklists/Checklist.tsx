@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { DndContext, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { Checklist as ChecklistType } from "@/types/checklist";
 import { buildDirectionalOrder, buildDraggedOrder } from "@/lib/anchoredReorder";
 import ChecklistItem from "./ChecklistItem";
@@ -52,8 +51,11 @@ function SortableChecklistRow({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: item.checklistId });
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: transform
+      ? `translate3d(${Math.round(transform.x)}px, ${Math.round(transform.y)}px, 0)`
+      : undefined,
     transition,
+    width: "100%",
   };
 
   return (
