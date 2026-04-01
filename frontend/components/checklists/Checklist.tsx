@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { DndContext, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Checklist as ChecklistType } from "@/types/checklist";
+import { buildDirectionalOrder, buildDraggedOrder } from "@/lib/anchoredReorder";
 import ChecklistItem from "./ChecklistItem";
 import AddItemForm from "./AddItemForm";
 import { IoAdd, IoSparkles, IoChevronDown } from "@/components/icons";
@@ -22,6 +26,56 @@ interface ChecklistProps {
   isGenerating?: boolean;
 }
 
+interface SortableChecklistRowProps {
+  item: ChecklistType["items"][number];
+  onToggleItem: (checklistId: number) => void;
+  onUpdateItem: (checklistId: number, updates: { title?: string; notes?: string; deadline?: string }) => void;
+  onDeleteItem: (checklistId: number) => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  isDraggable: boolean;
+}
+
+function SortableChecklistRow({
+  item,
+  onToggleItem,
+  onUpdateItem,
+  onDeleteItem,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp,
+  canMoveDown,
+  isDraggable,
+}: SortableChecklistRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: item.checklistId });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <ChecklistItem
+        item={item}
+        onToggle={onToggleItem}
+        onUpdate={onUpdateItem}
+        onDelete={onDeleteItem}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        canMoveUp={canMoveUp}
+        canMoveDown={canMoveDown}
+        isDraggable={isDraggable}
+        isDragging={isDragging}
+        dragHandleAttributes={isDraggable ? attributes : undefined}
+        dragHandleListeners={isDraggable ? listeners : undefined}
+      />
+    </div>
+  );
+}
+
 export default function Checklist({
   checklist,
   filter,
@@ -40,14 +94,21 @@ export default function Checklist({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sortedItems = [...checklist.items].sort((a, b) => a.sortOrder - b.sortOrder);
-  const movableIds = sortedItems
-    .filter((item) => !item.deadline)
-    .map((item) => item.checklistId);
   const completedCount = checklist.items.filter((item) => item.completed).length;
   const totalCount = checklist.items.length;
   const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
   const shouldShowActions = filter !== "completed";
   const atItemLimit = totalCount >= 20;
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const getEmptyStateMessage = () => {
     if (filter === "completed") return "No completed items yet.";
@@ -62,15 +123,30 @@ export default function Checklist({
 
   const handleReorder = (checklistId: number, direction: -1 | 1) => {
     if (!onReorderItems) return;
-    const currentIndex = movableIds.indexOf(checklistId);
-    const targetIndex = currentIndex + direction;
-    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= movableIds.length) return;
+    const orderedItemIds = buildDirectionalOrder(
+      sortedItems,
+      checklistId,
+      direction,
+      (item) => item.checklistId
+    );
+    if (!orderedItemIds) return;
+    void onReorderItems(orderedItemIds);
+  };
 
-    const orderedItemIds = [...movableIds];
-    [orderedItemIds[currentIndex], orderedItemIds[targetIndex]] = [
-      orderedItemIds[targetIndex],
-      orderedItemIds[currentIndex],
-    ];
+  const handleDragEnd = (event: DragEndEvent) => {
+    if (!onReorderItems || !event.over) return;
+    const activeId = Number(event.active.id);
+    const overId = Number(event.over.id);
+    const activeItem = sortedItems.find((item) => item.checklistId === activeId);
+    if (!activeItem || activeItem.deadline) return;
+
+    const orderedItemIds = buildDraggedOrder(
+      sortedItems,
+      activeId,
+      overId,
+      (item) => item.checklistId
+    );
+    if (!orderedItemIds) return;
     void onReorderItems(orderedItemIds);
   };
 
@@ -103,22 +179,27 @@ export default function Checklist({
       {!isCollapsed && (
         <>
         <div className={styles.checklistItems}>
-          {sortedItems.map((item) => {
-            const movableIndex = movableIds.indexOf(item.checklistId);
-            return (
-              <ChecklistItem
-                key={item.checklistId}
-                item={item}
-                onToggle={onToggleItem}
-                onUpdate={onUpdateItem}
-                onDelete={onDeleteItem}
-                onMoveUp={!item.deadline ? () => handleReorder(item.checklistId, -1) : undefined}
-                onMoveDown={!item.deadline ? () => handleReorder(item.checklistId, 1) : undefined}
-                canMoveUp={!item.deadline && movableIndex > 0}
-                canMoveDown={!item.deadline && movableIndex < movableIds.length - 1}
-              />
-            );
-          })}
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={sortedItems.map((item) => item.checklistId)}
+              strategy={verticalListSortingStrategy}
+            >
+              {sortedItems.map((item, index) => (
+                <SortableChecklistRow
+                  key={item.checklistId}
+                  item={item}
+                  onToggleItem={onToggleItem}
+                  onUpdateItem={onUpdateItem}
+                  onDeleteItem={onDeleteItem}
+                  onMoveUp={!item.deadline ? () => handleReorder(item.checklistId, -1) : undefined}
+                  onMoveDown={!item.deadline ? () => handleReorder(item.checklistId, 1) : undefined}
+                  canMoveUp={!item.deadline && index > 0}
+                  canMoveDown={!item.deadline && index < sortedItems.length - 1}
+                  isDraggable={!item.deadline && Boolean(onReorderItems)}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
 
           {sortedItems.length === 0 && !isAdding && !isGenerating && (
             <div className={styles.emptyState}>

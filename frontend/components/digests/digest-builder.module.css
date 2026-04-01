@@ -1,50 +1,35 @@
-/* ═══════════════════════════════════════════════
-   Digest Builder — Refined Editorial Layout
-   Warm, spacious, with deliberate visual rhythm
-   ═══════════════════════════════════════════════ */
-
 /* ─── Page Container ─── */
 .digestBuilderContainer {
   width: 100%;
+  padding: 8px 0 32px;
+}
+
+.digestPageShell {
+  display: flex;
+  flex-direction: column;
 }
 
 .digestBuilderContent {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: 24px;
+}
+
+.configurationGrid {
+  display: grid;
+  grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
 }
 
 .errorMessage {
   background: var(--error-light);
   border: 1px solid var(--error-border);
-  border-radius: var(--radius-xl);
+  border-radius: 18px;
   padding: 18px 24px;
   font-size: var(--fs-sm);
   color: var(--error);
   line-height: 1.5;
-}
-
-/* ─── Digest Header ─── */
-.digestHeader {
-  padding-bottom: var(--space-sm);
-  position: relative;
-}
-
-.digestTitle {
-  font-family: var(--font-display);
-  font-size: var(--fs-4xl);
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  color: var(--text-primary);
-  margin-bottom: 6px;
-  line-height: 1.1;
-}
-
-.digestSubtitle {
-  font-size: var(--fs-base);
-  color: var(--text-secondary);
-  font-weight: var(--fw-300);
-  letter-spacing: 0.005em;
 }
 
 /* ─── Shared Card Pattern ─── */
@@ -52,110 +37,96 @@
 .settingsCard,
 .contentTypes,
 .deploymentPanel {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-2xl);
+  background: color-mix(in srgb, var(--bg-card) 96%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 24px;
+  box-shadow: 0 18px 40px rgba(17, 17, 17, 0.05), 0 2px 8px rgba(17, 17, 17, 0.03);
   overflow: hidden;
-  transition: border-color var(--transition-base);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base);
 }
 
 .overviewCard:hover,
-.settingsCard:hover {
-  border-color: var(--border-strong);
+.settingsCard:hover,
+.deploymentPanel:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 10%, var(--border-strong));
+  box-shadow: 0 22px 46px rgba(17, 17, 17, 0.07), 0 6px 14px rgba(17, 17, 17, 0.04);
 }
 
 /* ─── Card Headers ─── */
-.overviewHeader {
+.overviewHeader,
+.deploymentInfo {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 24px 32px;
-  border-bottom: 1px solid var(--border-light);
-  background: transparent;
+  gap: 16px;
+  padding: 28px 28px 20px;
+}
+
+.messageBell {
+  flex-shrink: 0;
 }
 
 .deploymentInfo {
-  display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
-  padding: 28px 32px;
-  border-bottom: 1px solid var(--border-light);
-  background: transparent;
+  justify-content: flex-start;
 }
 
 .cardTitle {
   font-family: var(--font-display);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xl);
   font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
 }
 
 .cardSubtitle {
+  margin-top: 6px;
   font-size: var(--fs-sm);
   color: var(--text-secondary);
   font-weight: var(--fw-300);
-  line-height: 1.5;
-  margin-top: 2px;
+  line-height: 1.65;
 }
 
-/* ─── Status Badge ─── */
-.statusBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-500);
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  transition: all var(--transition-fast);
-}
-
-.statusActive {
-  color: var(--text-secondary);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-}
-
-.statusInactive {
-  color: var(--text-muted);
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-
-/* ─── Overview Content — 4-column stat grid ─── */
+/* ─── Overview Content ─── */
 .overviewContent {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0 28px 28px;
 }
 
 .overviewStat {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 28px 32px;
+  gap: 8px;
   min-width: 0;
+  min-height: 120px;
+  padding: 20px 22px;
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 76%, var(--bg-card));
 }
 
 .statLabel {
   font-family: var(--font-body);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-500);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
 
 .statValue {
   font-family: var(--font-display);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xl);
   font-weight: 500;
   color: var(--text-primary);
-  letter-spacing: -0.015em;
+  letter-spacing: -0.03em;
   line-height: 1.2;
 }
 
@@ -167,32 +138,31 @@
 }
 
 /* ─── Settings Card ─── */
-.settingsCard .cardTitle {
-  padding: 28px 32px 0;
+.settingsCard {
+  padding: 28px;
 }
 
+.settingsCard .cardTitle,
 .settingsCard .cardSubtitle {
-  padding: 0 32px 8px;
+  padding: 0;
 }
 
 .settingSection {
-  padding: 24px 32px;
-  border-bottom: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
   gap: 14px;
-}
-
-.settingSection:last-child {
-  border-bottom: none;
-  padding-bottom: 28px;
+  margin-top: 20px;
+  padding: 20px 22px;
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 76%, var(--bg-card));
 }
 
 .settingLabel {
   font-family: var(--font-body);
   font-size: var(--fs-2xs);
   font-weight: var(--fw-500);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -207,14 +177,20 @@
 
 .frequencyButton,
 .timeButton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  min-height: 48px;
   font-family: var(--font-body);
   font-size: var(--fs-sm);
   font-weight: var(--fw-500);
   color: var(--text-secondary);
-  background: var(--surface);
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  padding: 11px 22px;
-  border-radius: var(--radius-2xl);
+  padding: 11px 18px;
+  border-radius: 14px;
   cursor: pointer;
   transition:
     color var(--transition-fast),
@@ -227,133 +203,120 @@
 
 .frequencyButton:hover,
 .timeButton:hover {
-  border-color: var(--border-strong);
-  background: var(--surface-hover);
+  border-color: color-mix(in srgb, var(--accent) 12%, var(--border-strong));
+  background: color-mix(in srgb, var(--surface) 80%, var(--bg-card));
   box-shadow: var(--shadow-xs);
 }
 
 .frequencyButton:active,
 .timeButton:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 .frequencyButtonActive,
 .frequencyButtonActive:hover,
 .timeButtonActive,
 .timeButtonActive:hover {
-  color: var(--text-inverse);
-  background: var(--accent);
-  border-color: var(--accent);
-  /* box-shadow: 0 2px 10px var(--accent-shadow); */
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--bg-card));
+  border-color: color-mix(in srgb, var(--accent) 26%, var(--border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .timeLabel {
   font-size: var(--fs-sm);
   font-weight: var(--fw-500);
-  color: var(--text-secondary);
-}
-
-.timeButtonActive .timeLabel {
-  color: var(--text-inverse);
+  color: inherit;
 }
 
 .timeValue {
+  margin-top: 2px;
   font-size: var(--fs-xs);
-  font-weight: var(--fw-500);
+  font-weight: var(--fw-400);
   color: var(--text-muted);
   font-family: var(--font-body);
-  margin-top: 2px;
 }
 
 .timeButtonActive .timeValue {
-  color: var(--text-inverse);
+  color: color-mix(in srgb, var(--accent) 78%, var(--text-secondary));
 }
 
 /* ─── Content Types Grid ─── */
 .contentTypeGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  padding: 28px 32px 32px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 20px 0 0;
 }
 
 .contentTypeCard {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 20px 22px;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-xl);
+  gap: 10px;
+  padding: 20px;
+  background: color-mix(in srgb, var(--surface) 72%, var(--bg-card));
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
   cursor: pointer;
   transition:
     border-color var(--transition-base),
     background var(--transition-base),
     box-shadow var(--transition-base),
     transform 100ms ease;
-  position: relative;
 }
 
 .contentTypeCard:hover {
-  border-color: var(--border-strong);
-  background: var(--surface-hover);
+  border-color: color-mix(in srgb, var(--accent) 12%, var(--border-strong));
+  background: color-mix(in srgb, var(--surface-hover) 72%, var(--bg-card));
   box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
 .contentTypeCardActive {
-  border-color: var(--accent);
-  background: var(--accent-lighter);
-  /* box-shadow:
-    0 0 0 1px var(--accent),
-    0 2px 8px var(--accent-shadow); */
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--border));
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .contentTypeCardActive:hover {
-  border-color: var(--accent-dark);
-  background: var(--accent-light);
-  box-shadow:
-    0 0 0 1px var(--accent-dark),
-    0 4px 12px var(--accent-shadow);
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
 }
 
 .contentTypeCardDisabled {
-  opacity: 0.4;
+  opacity: 0.42;
   cursor: not-allowed;
   pointer-events: none;
 }
 
 .contentTypeLimitHint {
+  margin-top: 16px;
   font-size: var(--fs-xs);
   color: var(--text-muted);
-  text-align: center;
-  margin-top: 8px;
+  text-align: left;
 }
 
 .contentTypeHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   width: 100%;
 }
 
 .contentTypeLabel {
   font-family: var(--font-display);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
   font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: -0.005em;
-}
-
-.contentTypeCardActive .contentTypeLabel {
   color: var(--text-primary);
+  letter-spacing: -0.015em;
 }
 
 .contentTypeDescription {
+  margin-top: 0;
   font-size: var(--fs-xs);
   color: var(--text-muted);
-  line-height: 1.55;
-  margin-top: 0;
+  line-height: 1.65;
   font-weight: var(--fw-300);
 }
 
@@ -361,141 +324,132 @@
   color: var(--text-secondary);
 }
 
-/* Checkmark — refined circle toggle */
 .checkmark {
-  width: 22px;
-  height: 22px;
-  border: 2px solid var(--border-strong);
-  border-radius: var(--radius-full);
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   color: transparent;
+  background: var(--bg-card);
   transition:
     border-color var(--transition-fast),
     background var(--transition-fast),
     color var(--transition-fast),
-    transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-size: 11px;
-  font-weight: 500;
+    transform var(--transition-fast);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .contentTypeCardActive .checkmark {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--text-inverse);
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 /* ─── Deployment / Status Panel ─── */
 .deploymentPanel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow-md);
+  padding: 0;
 }
 
 .deploymentDate {
+  margin-top: 6px;
   font-size: var(--fs-sm);
   color: var(--text-secondary);
   font-family: var(--font-body);
   font-weight: var(--fw-300);
-  margin-top: 4px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .deploymentActions {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 20px 32px 28px;
+  padding: 0 28px 28px;
 }
 
-.deployButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-body);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-500);
-  color: var(--text-inverse);
-  background: var(--accent);
-  border: none;
-  padding: 13px 28px;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition:
-    background var(--transition-fast),
-    box-shadow var(--transition-fast),
-    transform 80ms ease;
-  letter-spacing: 0.01em;
-}
-
-.deployButton:hover {
-  background: var(--accent-dark);
-  box-shadow: 0 4px 14px var(--accent-shadow);
-}
-
-.deployButton:active {
-  transform: scale(0.97);
-}
-
-.deployButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
+.deployButton,
 .stopButton {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  min-height: 48px;
+  width: 100%;
   font-family: var(--font-body);
   font-size: var(--fs-sm);
   font-weight: var(--fw-500);
-  color: var(--error);
-  background: var(--error-light);
-  border: 1.5px solid var(--error-border);
-  padding: 12px 28px;
-  border-radius: var(--radius-full);
+  padding: 13px 24px;
+  border-radius: 14px;
   cursor: pointer;
   transition:
     background var(--transition-fast),
     border-color var(--transition-fast),
     box-shadow var(--transition-fast),
     transform 80ms ease;
+  letter-spacing: 0.01em;
+}
+
+.deployButton {
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.deployButton:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.deployButton:active,
+.stopButton:active {
+  transform: scale(0.98);
+}
+
+.deployButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.stopButton {
+  color: var(--error);
+  background: var(--error-light);
+  border: 1px solid var(--error-border);
 }
 
 .stopButton:hover {
-  background: rgba(139, 99, 103, 0.12);
-  border-color: var(--error);
-  box-shadow: 0 2px 8px rgba(139, 99, 103, 0.15);
-}
-
-.stopButton:active {
-  transform: scale(0.97);
+  background: rgba(220, 53, 69, 0.11);
+  border-color: rgba(220, 53, 69, 0.28);
+  box-shadow: 0 8px 18px rgba(220, 53, 69, 0.10);
 }
 
 .pauseBanner {
-  background: rgba(190, 196, 255, 0.06);
-  border: 1px solid rgba(190, 196, 255, 0.15);
-  border-radius: var(--radius-lg);
-  padding: 16px 20px;
+  width: 100%;
   margin-top: 4px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border));
 }
 
 .pauseBannerTitle {
+  margin-bottom: 6px;
   font-size: var(--fs-sm);
   font-weight: 500;
   color: var(--accent);
-  margin-bottom: 4px;
 }
 
 .pauseBannerText {
   font-size: var(--fs-sm);
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 /* ─── Digest Preview Modal ─── */
@@ -605,7 +559,7 @@
 /* ─── Preview Trigger (inside ContentTypesSelector) ─── */
 
 .previewTriggerRow {
-  padding: 0 32px 28px;
+  padding: 20px 0 0;
   display: flex;
   justify-content: flex-start;
 }
@@ -765,7 +719,7 @@
   font-size: var(--fs-sm);
   color: var(--text-secondary);
   line-height: 1.6;
-  padding: 0 32px 20px;
+  padding: 0;
   font-weight: var(--fw-300);
 }
 
@@ -798,51 +752,50 @@
    Responsive
    ═══════════════════════════════════════════════ */
 
+@media (max-width: 1080px) {
+
+  .configurationGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
 
-  .digestBuilderContent {
-    gap: var(--space-md);
+  .digestBuilderContainer {
+    padding-bottom: 24px;
   }
 
-  .digestTitle {
-    font-size: var(--fs-3xl);
+  .digestPageShell,
+  .digestBuilderContent {
+    gap: 20px;
+  }
+
+  .overviewHeader,
+  .deploymentInfo,
+  .settingsCard {
+    padding: 24px;
   }
 
   .overviewContent {
-    grid-template-columns: repeat(2, 1fr);
+    padding: 0 24px 24px;
   }
 
   .overviewStat {
-    padding: 20px 22px;
-  }
-
-  .overviewHeader {
-    padding: 20px 24px;
+    min-height: 100px;
+    padding: 18px 20px;
   }
 
   .settingSection {
-    padding: 20px 24px;
-  }
-
-  .settingsCard .cardTitle {
-    padding: 24px 24px 0;
-  }
-
-  .settingsCard .cardSubtitle {
-    padding: 0 24px 6px;
+    margin-top: 16px;
+    padding: 18px 20px;
   }
 
   .contentTypeGrid {
-    gap: 12px;
-    padding: 24px;
-  }
-
-  .deploymentInfo {
-    padding: 24px;
+    gap: 10px;
   }
 
   .deploymentActions {
-    padding: 16px 24px 24px;
+    padding: 0 24px 24px;
   }
 
   .previewModalOverlay {
@@ -856,34 +809,17 @@
   .previewModalBody {
     padding: 16px 22px 22px;
   }
-
-  .previewTriggerRow {
-    padding: 0 24px 24px;
-  }
 }
 
 @media (max-width: 500px) {
 
-  .digestTitle {
-    font-size: var(--fs-2xl);
+  .overviewHeader {
+    align-items: center;
   }
 
-  .digestSubtitle {
-    font-size: var(--fs-sm);
-  }
-
-  .overviewContent {
-    grid-template-columns: 1fr;
-  }
-
-  .overviewStat {
-    padding: 18px 20px;
-  }
-
+  .overviewContent,
   .contentTypeGrid {
     grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 20px;
   }
 
   .frequencyOptions,
@@ -893,35 +829,23 @@
 
   .frequencyButton,
   .timeButton {
-    padding: 10px 18px;
+    width: 100%;
+    padding: 10px 16px;
     font-size: var(--fs-xs);
   }
 
-  .settingSection {
-    padding: 18px 20px;
-  }
-
-  .settingsCard .cardTitle {
-    padding: 22px 20px 0;
-  }
-
-  .settingsCard .cardSubtitle {
-    padding: 0 20px 4px;
-  }
-
-  .deploymentInfo {
+  .overviewHeader,
+  .deploymentInfo,
+  .settingsCard {
     padding: 20px;
   }
 
-  .deploymentActions {
-    padding: 14px 20px 22px;
-    flex-direction: column;
+  .overviewContent {
+    padding: 0 20px 20px;
   }
 
-  .deployButton,
-  .stopButton {
-    width: 100%;
-    justify-content: center;
+  .deploymentActions {
+    padding: 0 20px 20px;
   }
 
   .previewModalOverlay {
@@ -938,9 +862,5 @@
 
   .previewModalBody {
     padding: 14px 18px 20px;
-  }
-
-  .previewTriggerRow {
-    padding: 0 20px 22px;
   }
 }

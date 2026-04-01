@@ -69,7 +69,7 @@ public class ChecklistService {
         return ChecklistResponse.fromEntity(checklistRepository.save(item));
     }
 
-    public List<ChecklistResponse> reorderUndatedItems(Long goalId, ChecklistReorderRequest request) {
+    public List<ChecklistResponse> reorderItems(Long goalId, ChecklistReorderRequest request) {
         Goal goal = goalService.getGoal(goalId);
         User currentUser = userService.getCurrentUser();
         if (!currentUser.getUserId().equals(goal.getUserId())) {
@@ -77,15 +77,22 @@ public class ChecklistService {
         }
 
         List<ChecklistItem> items = checklistRepository.findChecklistItemByGoalIdOrderBySortOrder(goalId);
-        List<ChecklistItem> movableItems = items.stream()
-                .filter(item -> item.getDeadline() == null || item.getDeadline().isBlank())
-                .toList();
-        List<Long> expectedIds = movableItems.stream()
+        List<Long> expectedIds = items.stream()
                 .map(ChecklistItem::getChecklistId)
                 .toList();
-        validateReorderPayload(request.getOrderedItemIds(), expectedIds);
+        List<Long> datedIds = items.stream()
+                .filter(item -> item.getDeadline() != null && !item.getDeadline().isBlank())
+                .map(ChecklistItem::getChecklistId)
+                .toList();
+        List<Long> safeSubmitted = validateReorderPayload(request.getOrderedItemIds(), expectedIds);
+        List<Long> submittedDatedIds = safeSubmitted.stream()
+                .filter(datedIds::contains)
+                .toList();
+        if (!submittedDatedIds.equals(datedIds)) {
+            throw new ChecklistException("Dated checklist items must keep their relative order");
+        }
 
-        applyReorder(items, request.getOrderedItemIds());
+        applyReorder(items, safeSubmitted);
         List<ChecklistItem> updatedItems = checklistRepository.saveAll(items);
         return updatedItems.stream()
                 .sorted(java.util.Comparator.comparingLong(ChecklistItem::getSortOrder))
@@ -159,35 +166,27 @@ public class ChecklistService {
         dailyItemRepository.saveAll(linkedItems);
     }
 
-    private void validateReorderPayload(List<Long> submittedIds, List<Long> expectedIds) {
+    private List<Long> validateReorderPayload(List<Long> submittedIds, List<Long> expectedIds) {
         List<Long> safeSubmitted = submittedIds == null ? List.of() : submittedIds;
         if (safeSubmitted.size() != expectedIds.size()) {
-            throw new ChecklistException("Only undated checklist items can be reordered");
+            throw new ChecklistException("Checklist reorder payload is invalid");
         }
 
         Set<Long> submittedSet = new HashSet<>(safeSubmitted);
         Set<Long> expectedSet = new HashSet<>(expectedIds);
         if (submittedSet.size() != safeSubmitted.size() || !submittedSet.equals(expectedSet)) {
-            throw new ChecklistException("Only undated checklist items can be reordered");
+            throw new ChecklistException("Checklist reorder payload is invalid");
         }
+        return safeSubmitted;
     }
 
     private void applyReorder(List<ChecklistItem> items, List<Long> orderedItemIds) {
-        List<ChecklistItem> movableItems = items.stream()
-                .filter(item -> item.getDeadline() == null || item.getDeadline().isBlank())
-                .toList();
-        java.util.Map<Long, ChecklistItem> movableById = movableItems.stream()
+        java.util.Map<Long, ChecklistItem> itemsById = items.stream()
                 .collect(java.util.stream.Collectors.toMap(ChecklistItem::getChecklistId, item -> item));
-
-        int movableIndex = 0;
         long nextSortOrder = 0;
-        for (ChecklistItem item : items) {
-            if (item.getDeadline() == null || item.getDeadline().isBlank()) {
-                ChecklistItem reordered = movableById.get(orderedItemIds.get(movableIndex++));
-                reordered.setSortOrder(nextSortOrder++);
-            } else {
-                item.setSortOrder(nextSortOrder++);
-            }
+        for (Long orderedItemId : orderedItemIds) {
+            ChecklistItem reordered = itemsById.get(orderedItemId);
+            reordered.setSortOrder(nextSortOrder++);
         }
     }
 }

@@ -6,9 +6,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useModal } from "@/contexts/ModalContext";
 import { useAgentData } from "@/contexts/AgentDataContext";
 import GoalFormModal from "@/components/goals/GoalFormModal";
-import { IoSidebarPanel, IoAdd, IoChevronDown, IoBell, IoPerson, IoSun, IoMoon } from "@/components/icons";
+import { IoSidebarPanel, IoAdd, IoChevronDown, IoPerson, IoSun, IoMoon } from "@/components/icons";
 import { useTheme, ACCENT_CONFIGS, type AccentKey } from "@/contexts/ThemeContext";
-import MessageInboxPanel from "@/components/inbox/MessageInboxPanel";
+import MessageInboxTrigger from "@/components/inbox/MessageInboxTrigger";
 import { createGoal } from "@/services/goalService";
 import styles from "./NavBar.module.css";
 
@@ -44,7 +44,6 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
   const [goalsExpanded, setGoalsExpanded] = useState(true);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [deployingContextId, setDeployingContextId] = useState<number | null>(null);
-  const [inboxOpen, setInboxOpen] = useState(false);
 
   useEffect(() => {
     const hasToken = !!localStorage.getItem("authToken");
@@ -207,15 +206,7 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
 
         <div className={styles.spacer} />
 
-        <button
-          className={styles.bellBtn}
-          onClick={() => setInboxOpen(true)}
-          aria-label="Open message inbox"
-          title="Messages"
-        >
-          <IoBell size={15} />
-          <span className={styles.bellLabel}>Messages</span>
-        </button>
+        <MessageInboxTrigger variant="nav" />
 
         <Link
           href="/profile"
@@ -263,8 +254,6 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
           </div>
         </div>
       </nav>
-
-      <MessageInboxPanel isOpen={inboxOpen} onClose={() => setInboxOpen(false)} />
 
       <button
         className={`${styles.toggleButton} ${collapsed && !mobileOpen ? styles.toggleCollapsed : ""} ${hideMobileToggle ? styles.toggleButtonHiddenMobile : ""}`}

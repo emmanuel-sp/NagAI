@@ -15,6 +15,7 @@ import {
   IoDocumentTextOutline,
   IoChevronUp,
   IoChevronDown,
+  IoMenuOutline,
 } from "@/components/icons";
 
 interface ChecklistItemProps {
@@ -29,6 +30,10 @@ interface ChecklistItemProps {
   onMoveDown?: () => void;
   canMoveUp?: boolean;
   canMoveDown?: boolean;
+  isDraggable?: boolean;
+  isDragging?: boolean;
+  dragHandleAttributes?: any;
+  dragHandleListeners?: any;
 }
 
 export default function ChecklistItem({
@@ -40,6 +45,10 @@ export default function ChecklistItem({
   onMoveDown,
   canMoveUp = false,
   canMoveDown = false,
+  isDraggable = false,
+  isDragging = false,
+  dragHandleAttributes,
+  dragHandleListeners,
 }: ChecklistItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(item.title);
@@ -119,10 +128,12 @@ export default function ChecklistItem({
   }
 
   return (
-    <div
+      <div
       className={`${styles.checklistItem} ${
         item.completed ? styles.checklistItemCompleted : ""
-      } ${isOverdue ? styles.checklistItemOverdue : ""}`}
+      } ${isOverdue ? styles.checklistItemOverdue : ""} ${
+        isDragging ? styles.checklistItemDragging : ""
+      }`}
     >
       <button
         onClick={() => onToggle(item.checklistId)}
@@ -163,6 +174,17 @@ export default function ChecklistItem({
       </div>
 
       <div className={styles.itemActions}>
+        {isDraggable && dragHandleAttributes && dragHandleListeners && (
+          <button
+            type="button"
+            className={styles.dragHandle}
+            aria-label="Drag item"
+            {...dragHandleAttributes}
+            {...dragHandleListeners}
+          >
+            <IoMenuOutline size={14} />
+          </button>
+        )}
         {onMoveUp && onMoveDown && (
           <div className={styles.reorderButtons}>
             <button

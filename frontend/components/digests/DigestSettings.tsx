@@ -43,7 +43,9 @@ export default function DigestSettings({
           {frequencies.map((freq) => (
             <button
               key={freq.value}
+              type="button"
               onClick={() => onFrequencyChange(freq.value)}
+              aria-pressed={frequency === freq.value}
               className={`${styles.frequencyButton} ${
                 frequency === freq.value ? styles.frequencyButtonActive : ""
               }`}
@@ -60,7 +62,9 @@ export default function DigestSettings({
           {deliveryTimes.map((time) => (
             <button
               key={time.value}
+              type="button"
               onClick={() => onDeliveryTimeChange(time.value)}
+              aria-pressed={deliveryTime === time.value}
               className={`${styles.timeButton} ${
                 deliveryTime === time.value ? styles.timeButtonActive : ""
               }`}

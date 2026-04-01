@@ -354,7 +354,7 @@ class DailyChecklistServiceTest {
     }
 
     @Test
-    void reorderTodayItems_reordersOnlyUnscheduledItems() {
+    void reorderTodayItems_allowsUnscheduledItemsBetweenScheduledAnchors() {
         DailyChecklist checklist = new DailyChecklist();
         checklist.setDailyChecklistId(50L);
         checklist.setUserId(1L);
@@ -380,22 +380,102 @@ class DailyChecklistServiceTest {
         unscheduledLast.setTitle("Last");
         unscheduledLast.setSortOrder(2);
 
+        DailyChecklistItem scheduledLater = new DailyChecklistItem();
+        scheduledLater.setDailyItemId(204L);
+        scheduledLater.setDailyChecklistId(50L);
+        scheduledLater.setTitle("Later fixed");
+        scheduledLater.setScheduledTime("13:00");
+        scheduledLater.setSortOrder(3);
+
         DailyChecklistReorderRequest request = new DailyChecklistReorderRequest();
-        request.setOrderedItemIds(List.of(203L, 201L));
+        request.setOrderedItemIds(List.of(202L, 203L, 204L, 201L));
 
         when(dailyChecklistRepository.findByUserIdAndPlanDate(1L, today)).thenReturn(Optional.of(checklist));
         when(dailyItemRepository.findByDailyChecklistIdOrderBySortOrder(50L))
-                .thenReturn(List.of(unscheduledFirst, scheduled, unscheduledLast))
-                .thenReturn(List.of(unscheduledLast, scheduled, unscheduledFirst));
+                .thenReturn(List.of(unscheduledFirst, scheduled, unscheduledLast, scheduledLater))
+                .thenReturn(List.of(scheduled, unscheduledLast, scheduledLater, unscheduledFirst));
         when(dailyItemRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         DailyChecklistResponse result = dailyChecklistService.reorderTodayItems(request);
 
         assertThat(result.items()).extracting(DailyChecklistItemResponse::title)
-                .containsExactly("Last", "Fixed", "First");
-        assertThat(unscheduledLast.getSortOrder()).isEqualTo(0);
-        assertThat(scheduled.getSortOrder()).isEqualTo(1);
-        assertThat(unscheduledFirst.getSortOrder()).isEqualTo(2);
+                .containsExactly("Fixed", "Last", "Later fixed", "First");
+        assertThat(scheduled.getSortOrder()).isEqualTo(0);
+        assertThat(unscheduledLast.getSortOrder()).isEqualTo(1);
+        assertThat(scheduledLater.getSortOrder()).isEqualTo(2);
+        assertThat(unscheduledFirst.getSortOrder()).isEqualTo(3);
+    }
+
+    @Test
+    void reorderTodayItems_rejectsChangingScheduledAnchorOrder() {
+        DailyChecklist checklist = new DailyChecklist();
+        checklist.setDailyChecklistId(50L);
+        checklist.setUserId(1L);
+        checklist.setPlanDate(today);
+        checklist.setGenerationCount(1);
+
+        DailyChecklistItem unscheduled = new DailyChecklistItem();
+        unscheduled.setDailyItemId(201L);
+        unscheduled.setDailyChecklistId(50L);
+        unscheduled.setTitle("Flexible");
+
+        DailyChecklistItem scheduledMorning = new DailyChecklistItem();
+        scheduledMorning.setDailyItemId(202L);
+        scheduledMorning.setDailyChecklistId(50L);
+        scheduledMorning.setTitle("Morning");
+        scheduledMorning.setScheduledTime("09:00");
+
+        DailyChecklistItem scheduledEvening = new DailyChecklistItem();
+        scheduledEvening.setDailyItemId(203L);
+        scheduledEvening.setDailyChecklistId(50L);
+        scheduledEvening.setTitle("Evening");
+        scheduledEvening.setScheduledTime("13:00");
+
+        DailyChecklistReorderRequest request = new DailyChecklistReorderRequest();
+        request.setOrderedItemIds(List.of(203L, 201L, 202L));
+
+        when(dailyChecklistRepository.findByUserIdAndPlanDate(1L, today)).thenReturn(Optional.of(checklist));
+        when(dailyItemRepository.findByDailyChecklistIdOrderBySortOrder(50L))
+                .thenReturn(List.of(unscheduled, scheduledMorning, scheduledEvening));
+
+        assertThatThrownBy(() -> dailyChecklistService.reorderTodayItems(request))
+                .isInstanceOf(DailyChecklistException.class)
+                .hasMessage("Scheduled daily items must keep their relative order");
+
+        verify(dailyItemRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void reorderTodayItems_rejectsInvalidPayload() {
+        DailyChecklist checklist = new DailyChecklist();
+        checklist.setDailyChecklistId(50L);
+        checklist.setUserId(1L);
+        checklist.setPlanDate(today);
+        checklist.setGenerationCount(1);
+
+        DailyChecklistItem unscheduled = new DailyChecklistItem();
+        unscheduled.setDailyItemId(201L);
+        unscheduled.setDailyChecklistId(50L);
+        unscheduled.setTitle("Flexible");
+
+        DailyChecklistItem scheduled = new DailyChecklistItem();
+        scheduled.setDailyItemId(202L);
+        scheduled.setDailyChecklistId(50L);
+        scheduled.setTitle("Fixed");
+        scheduled.setScheduledTime("09:00");
+
+        DailyChecklistReorderRequest request = new DailyChecklistReorderRequest();
+        request.setOrderedItemIds(List.of(201L, 202L, 202L));
+
+        when(dailyChecklistRepository.findByUserIdAndPlanDate(1L, today)).thenReturn(Optional.of(checklist));
+        when(dailyItemRepository.findByDailyChecklistIdOrderBySortOrder(50L))
+                .thenReturn(List.of(unscheduled, scheduled));
+
+        assertThatThrownBy(() -> dailyChecklistService.reorderTodayItems(request))
+                .isInstanceOf(DailyChecklistException.class)
+                .hasMessage("Daily checklist reorder payload is invalid");
+
+        verify(dailyItemRepository, never()).saveAll(anyList());
     }
 
     @Test

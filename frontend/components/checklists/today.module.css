@@ -327,6 +327,11 @@
   opacity: 0.5;
 }
 
+.listItemDragging {
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
 /* ─── Checkbox ────────────────────────────────────────────────────────────── */
 .itemCheckbox {
   background: none;
@@ -425,6 +430,31 @@
 
 .listItem:hover .itemActions {
   opacity: 1;
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-light);
+  cursor: grab;
+  transition: color var(--transition-fast), background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.dragHandle:hover {
+  color: var(--text-secondary);
+  background: var(--surface-hover);
+  border-color: var(--border);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
 }
 
 .actionBtn {

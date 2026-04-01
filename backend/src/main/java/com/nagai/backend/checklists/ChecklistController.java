@@ -36,7 +36,7 @@ public class ChecklistController {
     public ResponseEntity<List<ChecklistResponse>> reorderGoalChecklist(
             @PathVariable Long goalId,
             @Valid @RequestBody ChecklistReorderRequest request) {
-        return ResponseEntity.ok(checklistService.reorderUndatedItems(goalId, request));
+        return ResponseEntity.ok(checklistService.reorderItems(goalId, request));
     }
 
     @PostMapping

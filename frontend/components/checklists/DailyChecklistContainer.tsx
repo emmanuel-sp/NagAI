@@ -18,6 +18,7 @@ import {
   updateDailyChecklistConfig,
   reorderTodayChecklistItems,
 } from "@/services/dailyChecklistService";
+import { buildDirectionalOrder } from "@/lib/anchoredReorder";
 import styles from "./dailyChecklist.module.css";
 
 interface DailyChecklistContainerProps {
@@ -136,18 +137,13 @@ export default function DailyChecklistContainer({
 
   const handleReorder = async (dailyItemId: number, direction: -1 | 1) => {
     if (!checklist) return;
-    const movableIds = checklist.items
-      .filter((item) => !item.scheduledTime)
-      .map((item) => item.dailyItemId);
-    const currentIndex = movableIds.indexOf(dailyItemId);
-    const targetIndex = currentIndex + direction;
-    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= movableIds.length) return;
-
-    const orderedItemIds = [...movableIds];
-    [orderedItemIds[currentIndex], orderedItemIds[targetIndex]] = [
-      orderedItemIds[targetIndex],
-      orderedItemIds[currentIndex],
-    ];
+    const orderedItemIds = buildDirectionalOrder(
+      checklist.items,
+      dailyItemId,
+      direction,
+      (item) => item.dailyItemId
+    );
+    if (!orderedItemIds) return;
 
     try {
       const updated = await reorderTodayChecklistItems({ orderedItemIds });
@@ -312,10 +308,9 @@ export default function DailyChecklistContainer({
             /* Items list */
             <div className={styles.itemsList}>
               {checklist.items.map((item) => {
-                const movableIds = checklist.items
-                  .filter((entry) => !entry.scheduledTime)
-                  .map((entry) => entry.dailyItemId);
-                const movableIndex = movableIds.indexOf(item.dailyItemId);
+                const itemIndex = checklist.items.findIndex(
+                  (entry) => entry.dailyItemId === item.dailyItemId
+                );
                 return (
                   <DailyChecklistItem
                     key={item.dailyItemId}
@@ -324,8 +319,8 @@ export default function DailyChecklistContainer({
                     onDelete={handleDelete}
                     onMoveUp={!item.scheduledTime ? () => void handleReorder(item.dailyItemId, -1) : undefined}
                     onMoveDown={!item.scheduledTime ? () => void handleReorder(item.dailyItemId, 1) : undefined}
-                    canMoveUp={!item.scheduledTime && movableIndex > 0}
-                    canMoveDown={!item.scheduledTime && movableIndex < movableIds.length - 1}
+                    canMoveUp={!item.scheduledTime && itemIndex > 0}
+                    canMoveDown={!item.scheduledTime && itemIndex < checklist.items.length - 1}
                   />
                 );
               })}

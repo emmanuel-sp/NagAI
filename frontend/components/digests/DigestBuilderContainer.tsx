@@ -12,6 +12,7 @@ import {
   toggleDigestStatus,
 } from "@/services/digestService";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import MessageInboxTrigger from "@/components/inbox/MessageInboxTrigger";
 import DigestOverview from "./DigestOverview";
 import DigestSettings from "./DigestSettings";
 import ContentTypesSelector from "./ContentTypesSelector";
@@ -168,22 +169,29 @@ export default function DigestBuilderContainer() {
 
   return (
     <div className={styles.digestBuilderContainer}>
-      <div className={styles.digestBuilderContent}>
-        <DigestOverview digest={digest!} />
+      <div className={styles.digestPageShell}>
+        <div className={styles.digestBuilderContent}>
+          <DigestOverview
+            digest={digest!}
+            headerAction={<MessageInboxTrigger variant="icon" className={styles.messageBell} />}
+          />
 
-        <DigestSettings
-          frequency={digest!.frequency}
-          deliveryTime={digest!.deliveryTime}
-          onFrequencyChange={handleFrequencyChange}
-          onDeliveryTimeChange={handleDeliveryTimeChange}
-        />
+          <div className={styles.configurationGrid}>
+            <DigestSettings
+              frequency={digest!.frequency}
+              deliveryTime={digest!.deliveryTime}
+              onFrequencyChange={handleFrequencyChange}
+              onDeliveryTimeChange={handleDeliveryTimeChange}
+            />
 
-        <ContentTypesSelector
-          selectedTypes={digest!.contentTypes}
-          onToggleType={handleToggleContentType}
-        />
+            <ContentTypesSelector
+              selectedTypes={digest!.contentTypes}
+              onToggleType={handleToggleContentType}
+            />
+          </div>
 
-        <DigestStatusPanel digest={digest!} onToggleStatus={handleToggleStatus} />
+          <DigestStatusPanel digest={digest!} onToggleStatus={handleToggleStatus} />
+        </div>
       </div>
     </div>
   );

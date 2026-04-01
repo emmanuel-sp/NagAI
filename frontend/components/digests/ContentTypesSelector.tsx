@@ -77,14 +77,19 @@ export default function ContentTypesSelector({
             return (
               <button
                 key={type.value}
+                type="button"
                 onClick={() => !atLimit && onToggleType(type.value)}
                 disabled={atLimit}
+                aria-pressed={isSelected}
                 className={`${styles.contentTypeCard} ${
                   isSelected ? styles.contentTypeCardActive : ""
                 } ${atLimit ? styles.contentTypeCardDisabled : ""}`}
               >
                 <div className={styles.contentTypeHeader}>
                   <span className={styles.contentTypeLabel}>{type.label}</span>
+                  <span className={styles.checkmark} aria-hidden="true">
+                    {isSelected ? "✓" : ""}
+                  </span>
                 </div>
                 <p className={styles.contentTypeDescription}>{type.description}</p>
               </button>

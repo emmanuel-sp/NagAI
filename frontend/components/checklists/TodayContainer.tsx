@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { DndContext, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   DailyChecklist,
@@ -26,7 +29,9 @@ import {
   IoListOutline,
   IoCalendarOutline,
   IoRefresh,
+  IoMenuOutline,
 } from "@/components/icons";
+import { buildDirectionalOrder, buildDraggedOrder } from "@/lib/anchoredReorder";
 import {
   fetchTodayChecklist,
   generateDailyChecklist,
@@ -217,6 +222,10 @@ interface ListItemProps {
   item: DailyItem;
   canMoveUp: boolean;
   canMoveDown: boolean;
+  isDraggable: boolean;
+  isDragging?: boolean;
+  dragHandleAttributes?: any;
+  dragHandleListeners?: any;
   onToggle: (id: number) => void;
   onEdit: () => void;
   onDelete: (id: number) => void;
@@ -228,6 +237,10 @@ function ListItemRow({
   item,
   canMoveUp,
   canMoveDown,
+  isDraggable,
+  isDragging = false,
+  dragHandleAttributes,
+  dragHandleListeners,
   onToggle,
   onEdit,
   onDelete,
@@ -235,7 +248,11 @@ function ListItemRow({
   onMoveDown,
 }: ListItemProps) {
   return (
-    <div className={`${styles.listItem} ${item.completed ? styles.listItemCompleted : ""}`}>
+    <div
+      className={`${styles.listItem} ${item.completed ? styles.listItemCompleted : ""} ${
+        isDragging ? styles.listItemDragging : ""
+      }`}
+    >
       <button
         className={`${styles.itemCheckbox} ${item.completed ? styles.checkboxChecked : styles.checkboxUnchecked}`}
         onClick={() => onToggle(item.dailyItemId)}
@@ -265,6 +282,17 @@ function ListItemRow({
       </div>
 
       <div className={styles.itemActions}>
+        {isDraggable && dragHandleAttributes && dragHandleListeners && (
+          <button
+            type="button"
+            className={styles.dragHandle}
+            aria-label="Drag item"
+            {...dragHandleAttributes}
+            {...dragHandleListeners}
+          >
+            <IoMenuOutline size={13} />
+          </button>
+        )}
         <button
           className={styles.actionBtn}
           onClick={onEdit}
@@ -304,6 +332,38 @@ function ListItemRow({
   );
 }
 
+interface SortableTodayListRowProps {
+  item: DailyItem;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onToggle: (id: number) => void;
+  onEdit: () => void;
+  onDelete: (id: number) => void;
+  onMoveUp: (id: number) => void;
+  onMoveDown: (id: number) => void;
+}
+
+function SortableTodayListRow(props: SortableTodayListRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: props.item.dailyItemId });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <ListItemRow
+        {...props}
+        isDraggable={!props.item.scheduledTime}
+        isDragging={isDragging}
+        dragHandleAttributes={!props.item.scheduledTime ? attributes : undefined}
+        dragHandleListeners={!props.item.scheduledTime ? listeners : undefined}
+      />
+    </div>
+  );
+}
+
 // ─── Main Container ────────────────────────────────────────────────────────────
 
 export default function TodayContainer() {
@@ -319,6 +379,16 @@ export default function TodayContainer() {
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [calendarNotice, setCalendarNotice] = useState<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -437,18 +507,39 @@ export default function TodayContainer() {
   };
 
   const handleReorder = async (id: number, direction: -1 | 1) => {
-    const movableIds = items
-      .filter((item) => !item.scheduledTime)
-      .map((item) => item.dailyItemId);
-    const currentIndex = movableIds.indexOf(id);
-    const targetIndex = currentIndex + direction;
-    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= movableIds.length) return;
+    const orderedItemIds = buildDirectionalOrder(
+      items,
+      id,
+      direction,
+      (item) => item.dailyItemId
+    );
+    if (!orderedItemIds) return;
 
-    const orderedItemIds = [...movableIds];
-    [orderedItemIds[currentIndex], orderedItemIds[targetIndex]] = [
-      orderedItemIds[targetIndex],
-      orderedItemIds[currentIndex],
-    ];
+    try {
+      const updated = await reorderTodayChecklistItems({ orderedItemIds });
+      setChecklist(updated);
+      setItems(updated.items);
+    } catch (err) {
+      console.error("Failed to reorder daily items:", err);
+      setError("Could not reorder daily plan items. Please try again.");
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    if (!event.over) return;
+
+    const activeId = Number(event.active.id);
+    const overId = Number(event.over.id);
+    const activeItem = items.find((item) => item.dailyItemId === activeId);
+    if (!activeItem || activeItem.scheduledTime) return;
+
+    const orderedItemIds = buildDraggedOrder(
+      items,
+      activeId,
+      overId,
+      (item) => item.dailyItemId
+    );
+    if (!orderedItemIds) return;
 
     try {
       const updated = await reorderTodayChecklistItems({ orderedItemIds });
@@ -469,58 +560,68 @@ export default function TodayContainer() {
 
   // ─── List view ───────────────────────────────────────────────────────────────
 
-  const renderListView = () => (
-    <div className={styles.listView}>
-      {items.map((item) =>
-        editingId === item.dailyItemId ? (
-          <EditForm
-            key={item.dailyItemId}
-            item={item}
-            onSave={handleEditSave}
-            onCancel={() => setEditingId(null)}
-          />
-        ) : (
-          (() => {
-            const movableIds = items
-              .filter((entry) => !entry.scheduledTime)
-              .map((entry) => entry.dailyItemId);
-            const movableIndex = movableIds.indexOf(item.dailyItemId);
-            return (
-              <ListItemRow
-                key={item.dailyItemId}
-                item={item}
-                canMoveUp={!item.scheduledTime && movableIndex > 0}
-                canMoveDown={!item.scheduledTime && movableIndex < movableIds.length - 1}
-                onToggle={handleToggle}
-                onEdit={() => {
-                  setShowAdd(false);
-                  setEditingId(item.dailyItemId);
-                }}
-                onDelete={handleDelete}
-                onMoveUp={(dailyItemId) => void handleReorder(dailyItemId, -1)}
-                onMoveDown={(dailyItemId) => void handleReorder(dailyItemId, 1)}
-              />
-            );
-          })()
-        )
-      )}
-
-      {showAdd ? (
-        <AddForm onAdd={handleAdd} onCancel={() => setShowAdd(false)} />
+  const renderListRows = () =>
+    items.map((item, index) =>
+      editingId === item.dailyItemId ? (
+        <EditForm
+          key={item.dailyItemId}
+          item={item}
+          onSave={handleEditSave}
+          onCancel={() => setEditingId(null)}
+        />
       ) : (
-        <button
-          className={styles.addItemBtn}
-          onClick={() => {
-            setEditingId(null);
-            setShowAdd(true);
+        <SortableTodayListRow
+          key={item.dailyItemId}
+          item={item}
+          canMoveUp={!item.scheduledTime && index > 0}
+          canMoveDown={!item.scheduledTime && index < items.length - 1}
+          onToggle={handleToggle}
+          onEdit={() => {
+            setShowAdd(false);
+            setEditingId(item.dailyItemId);
           }}
-        >
-          <IoAdd size={14} />
-          Add item
-        </button>
-      )}
-    </div>
-  );
+          onDelete={handleDelete}
+          onMoveUp={(dailyItemId) => void handleReorder(dailyItemId, -1)}
+          onMoveDown={(dailyItemId) => void handleReorder(dailyItemId, 1)}
+        />
+      )
+    );
+
+  const renderListView = () => {
+    const isDragEnabled = editingId === null && !showAdd;
+
+    return (
+      <div className={styles.listView}>
+        {isDragEnabled ? (
+          <DndContext sensors={sensors} onDragEnd={(event) => void handleDragEnd(event)}>
+            <SortableContext
+              items={items.map((item) => item.dailyItemId)}
+              strategy={verticalListSortingStrategy}
+            >
+              {renderListRows()}
+            </SortableContext>
+          </DndContext>
+        ) : (
+          renderListRows()
+        )}
+
+        {showAdd ? (
+          <AddForm onAdd={handleAdd} onCancel={() => setShowAdd(false)} />
+        ) : (
+          <button
+            className={styles.addItemBtn}
+            onClick={() => {
+              setEditingId(null);
+              setShowAdd(true);
+            }}
+          >
+            <IoAdd size={14} />
+            Add item
+          </button>
+        )}
+      </div>
+    );
+  };
 
   // ─── Hourly view ─────────────────────────────────────────────────────────────
 

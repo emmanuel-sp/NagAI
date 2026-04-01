@@ -131,13 +131,13 @@ class ChecklistServiceTest {
     }
 
     @Test
-    void reorderUndatedItems_preservesDatedSlots() {
-        ChecklistItem dated = new ChecklistItem();
-        dated.setChecklistId(21L);
-        dated.setGoalId(5L);
-        dated.setTitle("Fixed deadline");
-        dated.setDeadline("2026-04-01");
-        dated.setSortOrder(1L);
+    void reorderItems_allowsUndatedItemsBetweenDatedAnchors() {
+        ChecklistItem datedMorning = new ChecklistItem();
+        datedMorning.setChecklistId(21L);
+        datedMorning.setGoalId(5L);
+        datedMorning.setTitle("Morning");
+        datedMorning.setDeadline("2026-04-01");
+        datedMorning.setSortOrder(1L);
 
         ChecklistItem undatedLater = new ChecklistItem();
         undatedLater.setChecklistId(22L);
@@ -145,25 +145,61 @@ class ChecklistServiceTest {
         undatedLater.setTitle("Second undated");
         undatedLater.setSortOrder(2L);
 
+        ChecklistItem datedEvening = new ChecklistItem();
+        datedEvening.setChecklistId(23L);
+        datedEvening.setGoalId(5L);
+        datedEvening.setTitle("Evening");
+        datedEvening.setDeadline("2026-04-02");
+        datedEvening.setSortOrder(3L);
+
         ChecklistReorderRequest request = new ChecklistReorderRequest();
-        request.setOrderedItemIds(List.of(22L, 20L));
+        request.setOrderedItemIds(List.of(21L, 22L, 23L, 20L));
 
         when(goalService.getGoal(5L)).thenReturn(goal);
         when(userService.getCurrentUser()).thenReturn(user);
         when(checklistRepository.findChecklistItemByGoalIdOrderBySortOrder(5L))
-                .thenReturn(List.of(item, dated, undatedLater));
+                .thenReturn(List.of(item, datedMorning, undatedLater, datedEvening));
         when(checklistRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
-        List<ChecklistResponse> result = checklistService.reorderUndatedItems(5L, request);
+        List<ChecklistResponse> result = checklistService.reorderItems(5L, request);
 
         assertThat(result).extracting(ChecklistResponse::getChecklistId)
-                .containsExactly(22L, 21L, 20L);
+                .containsExactly(21L, 22L, 23L, 20L);
         assertThat(result).extracting(ChecklistResponse::getSortOrder)
-                .containsExactly(0L, 1L, 2L);
+                .containsExactly(0L, 1L, 2L, 3L);
     }
 
     @Test
-    void reorderUndatedItems_rejectsInvalidPayload() {
+    void reorderItems_rejectsChangingDatedAnchorOrder() {
+        ChecklistItem datedMorning = new ChecklistItem();
+        datedMorning.setChecklistId(21L);
+        datedMorning.setGoalId(5L);
+        datedMorning.setTitle("Morning");
+        datedMorning.setDeadline("2026-04-01");
+
+        ChecklistItem datedEvening = new ChecklistItem();
+        datedEvening.setChecklistId(22L);
+        datedEvening.setGoalId(5L);
+        datedEvening.setTitle("Evening");
+        datedEvening.setDeadline("2026-04-02");
+
+        ChecklistReorderRequest request = new ChecklistReorderRequest();
+        request.setOrderedItemIds(List.of(22L, 20L, 21L));
+
+        when(goalService.getGoal(5L)).thenReturn(goal);
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(checklistRepository.findChecklistItemByGoalIdOrderBySortOrder(5L))
+                .thenReturn(List.of(item, datedMorning, datedEvening));
+
+        assertThatThrownBy(() -> checklistService.reorderItems(5L, request))
+                .isInstanceOf(ChecklistException.class)
+                .hasMessage("Dated checklist items must keep their relative order");
+
+        verify(checklistRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void reorderItems_rejectsInvalidPayload() {
         ChecklistItem dated = new ChecklistItem();
         dated.setChecklistId(21L);
         dated.setGoalId(5L);
@@ -171,16 +207,16 @@ class ChecklistServiceTest {
         dated.setDeadline("2026-04-01");
 
         ChecklistReorderRequest request = new ChecklistReorderRequest();
-        request.setOrderedItemIds(List.of(21L, 20L));
+        request.setOrderedItemIds(List.of(20L, 21L, 21L));
 
         when(goalService.getGoal(5L)).thenReturn(goal);
         when(userService.getCurrentUser()).thenReturn(user);
         when(checklistRepository.findChecklistItemByGoalIdOrderBySortOrder(5L))
                 .thenReturn(List.of(item, dated));
 
-        assertThatThrownBy(() -> checklistService.reorderUndatedItems(5L, request))
+        assertThatThrownBy(() -> checklistService.reorderItems(5L, request))
                 .isInstanceOf(ChecklistException.class)
-                .hasMessage("Only undated checklist items can be reordered");
+                .hasMessage("Checklist reorder payload is invalid");
 
         verify(checklistRepository, never()).saveAll(anyList());
     }

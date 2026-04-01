@@ -385,15 +385,25 @@ public class DailyChecklistService {
         List<GoogleCalendarService.BusyBlock> busyBlocks = loadTodayBusyBlocks(user, zone, config);
         List<DailyChecklistItem> items = dailyItemRepository
                 .findByDailyChecklistIdOrderBySortOrder(checklist.getDailyChecklistId());
-        List<DailyChecklistItem> movableItems = items.stream()
-                .filter(item -> item.getScheduledTime() == null || item.getScheduledTime().isBlank())
+        List<Long> expectedIds = items.stream()
+                .map(DailyChecklistItem::getDailyItemId)
                 .toList();
-        validateReorderPayload(
+        List<Long> scheduledIds = items.stream()
+                .filter(item -> item.getScheduledTime() != null && !item.getScheduledTime().isBlank())
+                .map(DailyChecklistItem::getDailyItemId)
+                .toList();
+        List<Long> safeSubmitted = validateReorderPayload(
                 request.getOrderedItemIds(),
-                movableItems.stream().map(DailyChecklistItem::getDailyItemId).toList(),
-                "Only unscheduled daily items can be reordered");
+                expectedIds,
+                "Daily checklist reorder payload is invalid");
+        List<Long> submittedScheduledIds = safeSubmitted.stream()
+                .filter(scheduledIds::contains)
+                .toList();
+        if (!submittedScheduledIds.equals(scheduledIds)) {
+            throw new DailyChecklistException("Scheduled daily items must keep their relative order");
+        }
 
-        applyDailyReorder(items, request.getOrderedItemIds());
+        applyDailyReorder(items, safeSubmitted);
         dailyItemRepository.saveAll(items);
         return buildResponse(checklist, user, busyBlocks);
     }
@@ -502,7 +512,7 @@ public class DailyChecklistService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
-    private void validateReorderPayload(List<Long> submittedIds, List<Long> expectedIds, String errorMessage) {
+    private List<Long> validateReorderPayload(List<Long> submittedIds, List<Long> expectedIds, String errorMessage) {
         List<Long> safeSubmitted = submittedIds == null ? List.of() : submittedIds;
         if (safeSubmitted.size() != expectedIds.size()) {
             throw new DailyChecklistException(errorMessage);
@@ -513,24 +523,16 @@ public class DailyChecklistService {
         if (submittedSet.size() != safeSubmitted.size() || !submittedSet.equals(expectedSet)) {
             throw new DailyChecklistException(errorMessage);
         }
+        return safeSubmitted;
     }
 
     private void applyDailyReorder(List<DailyChecklistItem> items, List<Long> orderedItemIds) {
-        List<DailyChecklistItem> movableItems = items.stream()
-                .filter(item -> item.getScheduledTime() == null || item.getScheduledTime().isBlank())
-                .toList();
-        Map<Long, DailyChecklistItem> movableById = movableItems.stream()
+        Map<Long, DailyChecklistItem> itemsById = items.stream()
                 .collect(java.util.stream.Collectors.toMap(DailyChecklistItem::getDailyItemId, item -> item));
-
-        int movableIndex = 0;
         int nextSortOrder = 0;
-        for (DailyChecklistItem item : items) {
-            if (item.getScheduledTime() == null || item.getScheduledTime().isBlank()) {
-                DailyChecklistItem reordered = movableById.get(orderedItemIds.get(movableIndex++));
-                reordered.setSortOrder(nextSortOrder++);
-            } else {
-                item.setSortOrder(nextSortOrder++);
-            }
+        for (Long orderedItemId : orderedItemIds) {
+            DailyChecklistItem reordered = itemsById.get(orderedItemId);
+            reordered.setSortOrder(nextSortOrder++);
         }
     }
 
