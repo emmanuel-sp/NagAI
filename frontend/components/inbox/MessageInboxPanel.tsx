@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   fetchInbox,
   fetchAgentMessageDetail,
@@ -38,6 +39,7 @@ export default function MessageInboxPanel({ isOpen, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState<InboxMessageDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async (p: number) => {
@@ -50,6 +52,10 @@ export default function MessageInboxPanel({ isOpen, onClose }: Props) {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -86,6 +92,21 @@ export default function MessageInboxPanel({ isOpen, onClose }: Props) {
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen, detail, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [isOpen]);
+
   const openDetail = async (item: InboxItem) => {
     setDetailLoading(true);
     setDetail(null);
@@ -100,7 +121,11 @@ export default function MessageInboxPanel({ isOpen, onClose }: Props) {
     }
   };
 
-  return (
+  if (!mounted) {
+    return null;
+  }
+
+  return createPortal(
     <>
       {isOpen && <div className={styles.backdrop} onClick={onClose} />}
       <div
@@ -208,6 +233,7 @@ export default function MessageInboxPanel({ isOpen, onClose }: Props) {
           </div>
         )}
       </div>
-    </>
+    </>,
+    document.body
   );
 }
