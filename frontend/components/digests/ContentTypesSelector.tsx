@@ -65,10 +65,9 @@ export default function ContentTypesSelector({
   return (
     <>
       <div className={styles.settingsCard}>
-        <span className={styles.sectionEyebrow}>Content</span>
-        <h2 className={styles.cardTitle}>Content Types</h2>
+        <h2 className={styles.cardTitle}>Content</h2>
         <p className={styles.cardSubtitle}>
-          Choose the mix you want to read, without turning the digest into noise.
+          Choose the mix you want to receive.
         </p>
 
         <div className={styles.contentTypeGrid}>

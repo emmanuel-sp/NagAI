@@ -86,7 +86,6 @@
 }
 
 .pageEyebrow,
-.sectionEyebrow,
 .overviewMetaLabel,
 .statLabel,
 .settingLabel,
@@ -101,12 +100,6 @@
 
 .pageEyebrow {
   color: var(--accent);
-}
-
-.sectionEyebrow {
-  display: inline-flex;
-  margin-bottom: 10px;
-  color: color-mix(in srgb, var(--accent) 88%, var(--text-secondary));
 }
 
 .pageDescription {
@@ -187,17 +180,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-top: 16px;
-}
-
-.settingsCard::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 68px;
-  height: 2px;
-  background: color-mix(in srgb, var(--accent) 26%, var(--border));
+  padding-top: 0;
 }
 
 .cardTitle {
@@ -373,7 +356,7 @@
 
 .contentTypeLabel {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--text-primary);
@@ -761,73 +744,100 @@
   }
 
   .contentTypeGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 1120px) {
   .overviewMeta {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-  }
-
-  .overviewContent {
-    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
   .digestBuilderContainer {
-    padding-bottom: 24px;
+    padding-bottom: 20px;
   }
 
   .digestBuilderContent {
-    gap: 28px;
+    gap: 18px;
   }
 
   .overviewCard {
-    gap: 22px;
-    padding-bottom: 26px;
+    gap: 14px;
+    padding-bottom: 18px;
   }
 
-  .overviewHeader,
-  .deploymentPanel {
-    grid-template-columns: 1fr;
+  .overviewHeader {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
   }
 
   .pageDescription {
     max-width: 100%;
-    font-size: var(--fs-sm);
+    font-size: var(--fs-xs);
+    line-height: 1.55;
   }
 
   .overviewHeaderAction {
-    justify-content: flex-start;
+    justify-content: flex-end;
     padding-top: 0;
   }
 
-  .overviewMeta,
-  .overviewContent,
-  .contentTypeGrid {
-    grid-template-columns: 1fr;
+  .messageBell {
+    margin-top: 2px;
   }
 
-  .contentTypeGrid {
-    gap: 0;
+  .overviewMeta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+    padding-top: 12px;
+  }
+
+  .overviewMetaValue {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .overviewContent {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .overviewStat {
+    gap: 6px;
+    padding-top: 12px;
+  }
+
+  .statValue {
+    font-size: clamp(18px, 6vw, 24px);
+    line-height: 1.18;
+  }
+
+  .statTime {
+    margin-top: 4px;
+    font-size: 11px;
   }
 
   .settingsCard,
   .deploymentPanel {
-    padding: 18px 18px 20px;
+    padding: 14px;
     border: 1px solid color-mix(in srgb, var(--border-light) 94%, var(--border));
-    border-radius: 18px;
+    border-radius: 14px;
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--accent) 2%, white), color-mix(in srgb, var(--surface) 32%, white));
   }
 
-  .settingsCard::before {
-    top: 18px;
-    left: 18px;
-    width: 48px;
+  .cardTitle {
+    font-size: 18px;
+    line-height: 1.1;
+  }
+
+  .cardSubtitle {
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.5;
   }
 
   .settingSection,
@@ -836,22 +846,126 @@
     border-top-color: var(--border-light);
   }
 
-  .sectionEyebrow {
-    margin-bottom: 8px;
+  .settingSection {
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .settingLabel {
+    font-size: 10px;
+  }
+
+  .frequencyOptions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .timeOptions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .frequencyButton,
+  .timeButton {
+    min-height: 42px;
+    padding: 9px 10px;
+    font-size: 12px;
+    line-height: 1.2;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+  }
+
+  .timeLabel {
+    font-size: 12px;
+  }
+
+  .timeValue {
+    font-size: 10px;
+    margin-top: 1px;
+  }
+
+  .contentTypeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+    margin-top: 12px;
   }
 
   .contentTypeCard {
-    padding: 16px 0 16px 14px;
+    gap: 6px;
+    padding: 12px 0 12px 10px;
+  }
+
+  .contentTypeCard::before {
+    top: 12px;
+    bottom: 12px;
+  }
+
+  .contentTypeLabel {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .contentTypeDescription {
+    display: none;
+  }
+
+  .checkmark {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+
+  .contentTypeLimitHint {
+    margin-top: 10px;
+    font-size: 11px;
+  }
+
+  .previewTriggerRow {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .previewTrigger {
+    font-size: 12px;
+  }
+
+  .deploymentPanel {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .deploymentInfo {
+    gap: 4px;
+  }
+
+  .deploymentDate,
+  .pauseBannerText {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .pauseBanner {
+    margin-top: 8px;
+    padding-left: 10px;
   }
 
   .deploymentActions {
-    justify-content: flex-start;
+    justify-content: flex-end;
+    align-self: start;
   }
 
   .deployButton,
   .stopButton {
-    min-width: 0;
-    width: 100%;
+    min-width: 132px;
+    min-height: 40px;
+    width: auto;
+    padding: 0 14px;
+    font-size: 12px;
   }
 
   .previewModalOverlay {
@@ -872,27 +986,38 @@
     padding-top: 4px;
   }
 
+  .overviewMeta,
+  .overviewContent,
+  .contentTypeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .overviewHeader {
+    gap: 10px;
+  }
+
   .settingsCard,
   .deploymentPanel {
-    padding: 16px 16px 18px;
-  }
-
-  .settingsCard::before {
-    top: 16px;
-    left: 16px;
-    width: 42px;
-  }
-
-  .frequencyOptions,
-  .timeOptions {
-    gap: 8px;
+    padding: 12px;
   }
 
   .frequencyButton,
   .timeButton {
+    padding: 10px 8px;
+  }
+
+  .deploymentPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .deploymentActions {
+    justify-content: stretch;
+  }
+
+  .deployButton,
+  .stopButton {
     width: 100%;
-    padding: 10px 14px;
-    font-size: var(--fs-xs);
+    min-width: 0;
   }
 
   .previewModalOverlay {

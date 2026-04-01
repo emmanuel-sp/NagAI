@@ -108,7 +108,6 @@ export default function GoalsContainer() {
       <div className={styles.pageHeader}>
         <div className={styles.pageIntro}>
           <span className={styles.pageEyebrow}>Goals</span>
-          <h1 className={styles.pageTitle}>Your goals</h1>
           <p className={styles.pageDescription}>
             See everything you&apos;re building at a glance and open the workspace that needs your attention next.
           </p>

@@ -15,11 +15,15 @@ export default function DigestStatusPanel({
   onToggleStatus,
 }: DigestStatusPanelProps) {
   const isPausedStale = !digest.active && digest.pauseReason === "stale_progress";
+  const subtitle = digest.active
+    ? "Your digest is live and following the cadence you set."
+    : isPausedStale
+      ? "Your digest is paused right now."
+      : "Turn it on when you want personalized content arriving on schedule.";
 
   return (
     <div className={styles.deploymentPanel}>
       <div className={styles.deploymentInfo}>
-        <span className={styles.sectionEyebrow}>Status</span>
         <h2 className={styles.cardTitle}>
           {digest.active
             ? "Digest Active"
@@ -27,13 +31,7 @@ export default function DigestStatusPanel({
               ? "Digest Paused"
               : "Digest Inactive"}
         </h2>
-        <p className={styles.cardSubtitle}>
-          {digest.active
-            ? "Your digest is live and will keep following the cadence you set."
-            : isPausedStale
-              ? "Your digest was automatically paused after a stretch without checklist movement."
-              : "Turn the digest on when you want personalized content arriving on schedule."}
-        </p>
+        <p className={styles.cardSubtitle}>{subtitle}</p>
         {digest.active && digest.nextDeliveryAt && (
           <p className={styles.deploymentDate}>
             Next delivery:{" "}
