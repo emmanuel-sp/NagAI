@@ -1,54 +1,47 @@
 /* ─── Chat Layout ─── */
 
-.chatScroll {
-  height: calc(100vh - 64px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
-}
-
-.chatScroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.chatScroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.chatScroll::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-full);
-}
-
-.chatScrollEmpty {
-  overflow: hidden;
-}
-
 .chatPage {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: 100%;
   width: 100%;
-  max-width: 1060px;
+  min-width: 0;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 0 var(--space-xl);
+  padding: 0 clamp(16px, 4vw, 48px) max(16px, env(safe-area-inset-bottom));
 }
 
-.chatPageEmpty {
-  height: 100%;
+.chatShell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 100%;
+  min-width: 0;
+}
+
+.chatStage {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.chatStageEmpty {
+  justify-content: center;
 }
 
 /* ─── Empty Centered Layout ─── */
 
 .emptyCentered {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-lg);
-  padding: 0 0 var(--space-xl);
+  min-width: 0;
+  padding: var(--space-lg) 0;
 }
 
 /* ─── Top Bar ─── */
@@ -57,13 +50,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-sm) var(--space-sm);
+  padding: var(--space-sm) 0;
   flex-shrink: 0;
   gap: 8px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: transparent;
+  min-width: 0;
 }
 
 .topBarLeft {
@@ -78,6 +68,7 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .sessionDropdown {
@@ -93,6 +84,7 @@
   padding: 7px 12px;
   width: 100%;
   max-width: min(300px, 100%);
+  min-width: 0;
   background: color-mix(in srgb, var(--bg-page), transparent 20%);
   border: 1px solid color-mix(in srgb, var(--border), transparent 15%);
   border-radius: var(--radius-md);
@@ -118,6 +110,7 @@
 }
 
 .sessionButtonText {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -148,7 +141,7 @@
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  width: 300px;
+  width: min(300px, calc(100vw - 32px));
   max-height: 340px;
   overflow-y: auto;
   background: var(--bg-elevated);
@@ -163,6 +156,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: 10px 14px;
   font-size: var(--fs-sm);
   color: var(--text-primary);
@@ -171,6 +165,7 @@
   border: none;
   background: none;
   width: 100%;
+  min-width: 0;
   text-align: left;
   font-family: var(--font-body);
 }
@@ -246,11 +241,12 @@
 /* ─── Messages Area ─── */
 
 .messagesArea {
-  flex: 1;
+  flex: 1 1 auto;
   padding: var(--space-lg) 0 var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  min-width: 0;
 }
 
 /* ─── Message Rows ─── */
@@ -259,6 +255,7 @@
   display: flex;
   gap: 10px;
   align-items: flex-start;
+  min-width: 0;
   animation: fadeInUp 0.25s ease both;
 }
 
@@ -296,9 +293,12 @@
 /* ─── Message Bubbles ─── */
 
 .messageBubble {
-  max-width: 80%;
+  min-width: 0;
+  max-width: min(80%, 42rem);
   line-height: 1.7;
   font-size: var(--fs-base);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .messageUser {
@@ -310,6 +310,8 @@
 }
 
 .messageAssistant {
+  width: min(100%, 46rem);
+  max-width: 100%;
   color: var(--text-primary);
   padding: 4px 0;
 }
@@ -318,6 +320,11 @@
 
 .messageAssistant p {
   margin: 0 0 12px;
+}
+
+.messageAssistant > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .messageAssistant p:last-child {
@@ -379,6 +386,9 @@
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.87em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .messageAssistant pre {
@@ -386,7 +396,10 @@
   border-radius: var(--radius-md);
   padding: 12px 14px;
   margin: 8px 0 12px;
-  overflow-x: auto;
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-size: 0.87em;
   line-height: 1.55;
 }
@@ -455,6 +468,7 @@
   gap: var(--space-lg);
   position: relative;
   width: 100%;
+  min-width: 0;
 }
 
 .emptyGlow {
@@ -492,6 +506,7 @@
   font-size: var(--fs-sm);
   color: var(--text-muted);
   margin-top: -12px;
+  text-align: center;
   position: relative;
   z-index: 1;
 }
@@ -502,6 +517,7 @@
   gap: 10px;
   max-width: 680px;
   width: 100%;
+  min-width: 0;
   position: relative;
   z-index: 1;
 }
@@ -520,6 +536,7 @@
   font-size: var(--fs-sm);
   color: var(--text-secondary);
   text-align: left;
+  min-width: 0;
   animation: presetFadeIn 0.4s ease both;
 }
 
@@ -552,32 +569,47 @@
   opacity: 0.8;
 }
 
+.messageEnd {
+  height: 1px;
+  scroll-margin-block-end: 144px;
+}
+
 /* ─── Chat Input ─── */
 
 .inputArea {
+  width: 100%;
+  min-width: 0;
   flex-shrink: 0;
   position: sticky;
   bottom: 0;
   z-index: 2;
-  padding: 16px 0 14px;
+  padding: 16px 0 calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    color-mix(in srgb, var(--bg-page), transparent 12%) 22%,
+    var(--bg-page) 100%
+  );
 }
 
 .inputAreaCentered {
-  position: relative;
-  padding: var(--space-lg) 0 0;
-  background: none;
   width: 100%;
   max-width: 680px;
+  margin-inline: auto;
 }
 
 .inputWrapper {
   position: relative;
+  width: 100%;
+  min-width: 0;
 }
 
 .inputPill {
   display: flex;
   align-items: flex-end;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
   border-radius: 28px;
   background: var(--bg-elevated);
   padding: 8px 8px 8px 6px;
@@ -599,6 +631,7 @@
 
 .chatTextarea {
   width: 100%;
+  min-width: 0;
   border: none;
   outline: none;
   resize: none;
@@ -707,7 +740,7 @@
   position: absolute;
   bottom: calc(100% + 8px);
   left: 0;
-  width: 240px;
+  width: min(240px, calc(100vw - 32px));
   max-height: 320px;
   overflow-y: auto;
   background: var(--bg-elevated);
@@ -755,6 +788,7 @@
   border: none;
   background: none;
   width: 100%;
+  min-width: 0;
   text-align: left;
   font-family: var(--font-body);
 }
@@ -799,6 +833,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
   padding: 4px 10px 4px 8px;
   background: var(--accent-tint);
   border: 1px solid var(--accent-border);
@@ -936,32 +973,37 @@
 
 .loadingPage {
   display: flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 64px);
+  min-height: 100%;
 }
 
-@supports (height: 100dvh) {
-  .chatScroll {
-    height: calc(100dvh - 64px);
+@media (min-width: 769px) {
+  .topBar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(
+      180deg,
+      var(--bg-page) 0%,
+      color-mix(in srgb, var(--bg-page), transparent 12%) 100%
+    );
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
-
-  .loadingPage {
-    height: calc(100dvh - 64px);
-  }
-}
-
-/* scrollbar for dark theme (override global) */
-.chatScroll::-webkit-scrollbar-thumb:hover {
-  background: var(--border-strong);
-  opacity: 0.8;
 }
 
 /* ─── Responsive ─── */
 
 @media (max-width: 768px) {
   .chatPage {
-    padding: 0 var(--space-sm);
+    padding: 0 max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+
+  .topBar {
+    padding-top: 0;
   }
 
   .topBarRight {
@@ -973,7 +1015,7 @@
   }
 
   .messageBubble {
-    max-width: 88%;
+    max-width: 100%;
   }
 
   .messageAvatar {
@@ -983,7 +1025,7 @@
   }
 
   .dropdownMenu {
-    width: 260px;
+    width: min(260px, calc(100vw - 32px));
   }
 
   .emptyTitle {
@@ -991,37 +1033,14 @@
   }
 
   .plusMenu {
-    width: 200px;
-  }
-}
-
-@media (max-width: 768px) {
-  .chatScroll {
-    height: calc(100vh - 104px);
-  }
-
-  .messagesArea {
-    padding-bottom: var(--space-md);
+    width: min(220px, calc(100vw - 32px));
   }
 
   .inputArea {
     padding: 20px 0 calc(14px + env(safe-area-inset-bottom));
   }
 
-  .loadingPage {
-    height: calc(100vh - 104px);
+  .chatTextarea {
+    font-size: 16px;
   }
 }
-
-@supports (height: 100dvh) {
-  @media (max-width: 768px) {
-    .chatScroll {
-      height: calc(100dvh - 104px);
-    }
-
-    .loadingPage {
-      height: calc(100dvh - 104px);
-    }
-  }
-}
-

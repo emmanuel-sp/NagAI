@@ -1,9 +1,13 @@
 .card {
+  width: 100%;
+  min-width: 0;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: 16px;
   margin-top: 10px;
   background: var(--bg-card);
+  overflow-wrap: anywhere;
+  word-break: break-word;
   animation: quizFadeIn 0.3s ease both;
 }
 
@@ -38,6 +42,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
+  max-width: 100%;
   padding: 10px 16px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border-strong);
@@ -71,6 +76,8 @@
   font-weight: var(--fw-500);
   color: var(--text-primary);
   line-height: 1.3;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .optionDesc {
@@ -78,17 +85,22 @@
   font-size: var(--fs-xs);
   color: var(--text-muted);
   line-height: 1.3;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .freeResponse {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
+  min-width: 0;
 }
 
 .freeInput {
   flex: 1;
+  min-width: 0;
   font-family: var(--font-body);
   font-size: var(--fs-sm);
   padding: 8px 14px;
@@ -138,4 +150,10 @@
   font-size: var(--fs-xs);
   font-weight: var(--fw-500);
   color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .freeInput {
+    font-size: 16px;
+  }
 }

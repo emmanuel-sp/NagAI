@@ -26,14 +26,21 @@ export default function LayoutClient({
 
   const isLandingPage = pathname === "/";
   const isOnboardingPage = pathname === "/onboarding";
+  const isChatPage = pathname === "/chat";
   const hasSidebar = showNavbar === true && !isLandingPage && !isOnboardingPage;
   const isLoggedIn = showNavbar === true;
 
-  const mainClass = !hasSidebar
-    ? styles.main
-    : sidebarCollapsed
+  let mainClass = styles.main;
+
+  if (hasSidebar && isChatPage) {
+    mainClass = sidebarCollapsed
+      ? styles.mainChatCollapsed
+      : styles.mainChatWithSidebar;
+  } else if (hasSidebar) {
+    mainClass = sidebarCollapsed
       ? styles.mainCollapsed
       : styles.mainWithSidebar;
+  }
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>

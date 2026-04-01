@@ -95,7 +95,7 @@ export default function MessageList({
         </div>
       )}
 
-      <div ref={messagesEndRef} />
+      <div ref={messagesEndRef} className={styles.messageEnd} />
     </div>
   );
 }

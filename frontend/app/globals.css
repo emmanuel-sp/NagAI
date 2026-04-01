@@ -148,6 +148,9 @@
 html {
   scroll-behavior: smooth;
   font-family: var(--font-body);
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -160,6 +163,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -385,7 +389,7 @@ main {
   --text-light: #4a4a5a;
   --text-inverse: #111111;
 
-  --bg-page: #0f0f0fee;
+  --bg-page: #0f0f0f;
   --bg-page-0: rgba(15, 15, 15, 0);
   --bg-card: #0e0e0ebe;
   --bg-elevated: #121213;

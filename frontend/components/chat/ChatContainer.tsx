@@ -28,7 +28,7 @@ import styles from "./chat.module.css";
 export default function ChatContainer() {
   const { user, loading: authLoading } = useAuth({ requireAuth: true });
   const searchParams = useSearchParams();
-  const { agent, goals, refreshAgent } = useAgentData();
+  const { goals, refreshAgent } = useAgentData();
 
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
@@ -300,8 +300,8 @@ export default function ChatContainer() {
   };
 
   return (
-    <div className={`${styles.chatScroll} ${!hasMessages && !sending ? styles.chatScrollEmpty : ""}`}>
-      <div className={`${styles.chatPage} ${!hasMessages && !sending ? styles.chatPageEmpty : ""}`}>
+    <div className={styles.chatPage}>
+      <div className={styles.chatShell}>
         <div className={styles.topBar}>
           <div className={styles.topBarLeft}>
             <SessionDropdown
@@ -324,22 +324,28 @@ export default function ChatContainer() {
 
         {hasMessages || sending ? (
           <>
-            <MessageList
-              messages={displayMessages}
-              sending={sending}
-              messagesEndRef={messagesEndRef}
-              userInitials={initials}
-              onSuggestionStatusChange={handleSuggestionStatusChange}
-              onDataRefresh={refreshAgent}
-              onQuizSelect={handleQuizSelect}
-            />
+            <div className={styles.chatStage}>
+              <MessageList
+                messages={displayMessages}
+                sending={sending}
+                messagesEndRef={messagesEndRef}
+                userInitials={initials}
+                onSuggestionStatusChange={handleSuggestionStatusChange}
+                onDataRefresh={refreshAgent}
+                onQuizSelect={handleQuizSelect}
+              />
+            </div>
             <ChatInput {...chatInputProps} />
           </>
         ) : (
-          <div className={styles.emptyCentered}>
-            <PresetPrompts onSelect={handleSend} />
+          <>
+            <div className={`${styles.chatStage} ${styles.chatStageEmpty}`}>
+              <div className={styles.emptyCentered}>
+                <PresetPrompts onSelect={handleSend} />
+              </div>
+            </div>
             <ChatInput {...chatInputProps} centered />
-          </div>
+          </>
         )}
       </div>
     </div>

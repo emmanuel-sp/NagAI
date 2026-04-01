@@ -1,9 +1,13 @@
 .card {
+  width: 100%;
+  min-width: 0;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   padding: 14px 16px;
   margin-top: 10px;
   background: var(--bg-card);
+  overflow-wrap: anywhere;
+  word-break: break-word;
   animation: cardFadeIn 0.3s ease both;
 }
 
@@ -61,6 +65,8 @@
   color: var(--text-primary);
   margin: 0;
   line-height: 1.5;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .subItems {
@@ -83,6 +89,7 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
 }
