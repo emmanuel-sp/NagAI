@@ -53,7 +53,6 @@ export default function DigestOverview({ digest, headerAction }: DigestOverviewP
       <div className={styles.overviewHeader}>
         <div className={styles.overviewIntro}>
           <span className={styles.pageEyebrow}>Digest</span>
-          <h1 className={styles.pageTitle}>{digest.name}</h1>
           <p className={styles.pageDescription}>
             {digest.description || "Personalized guidance delivered on your cadence."}
           </p>

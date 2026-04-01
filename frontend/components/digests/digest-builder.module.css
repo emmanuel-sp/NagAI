@@ -5,7 +5,7 @@
 
 .digestPageShell {
   position: relative;
-  max-width: 1160px;
+  max-width: 1080px;
   margin: 0 auto;
 }
 
@@ -27,18 +27,18 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 44px;
+  gap: 40px;
 }
 
 .configurationGrid {
   display: grid;
   grid-template-columns: minmax(300px, 350px) minmax(0, 1fr);
   align-items: start;
-  gap: 40px;
+  gap: 36px;
 }
 
 .configurationGrid > :first-child {
-  padding-right: 40px;
+  padding-right: 32px;
   border-right: 1px solid var(--border-light);
 }
 
@@ -55,8 +55,8 @@
 .overviewCard {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  padding: 8px 0 34px;
+  gap: 24px;
+  padding: 8px 0 30px;
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -70,8 +70,8 @@
 .overviewIntro {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 780px;
+  gap: 8px;
+  max-width: 680px;
 }
 
 .overviewHeaderAction {
@@ -102,19 +102,10 @@
   color: var(--accent);
 }
 
-.pageTitle {
-  font-family: var(--font-display);
-  font-size: clamp(34px, 5vw, 58px);
-  font-weight: 500;
-  letter-spacing: -0.05em;
-  line-height: 0.98;
-  color: var(--text-primary);
-}
-
 .pageDescription {
-  max-width: 700px;
+  max-width: 620px;
   font-size: 15px;
-  line-height: 1.75;
+  line-height: 1.7;
   color: var(--text-secondary);
   font-weight: var(--fw-300);
 }
@@ -122,8 +113,8 @@
 .overviewMeta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  padding-top: 18px;
+  gap: 16px;
+  padding-top: 16px;
   border-top: 1px solid var(--border-light);
 }
 
@@ -148,7 +139,7 @@
 .overviewContent {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 28px;
+  gap: 24px;
 }
 
 .overviewStat {
@@ -188,7 +179,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding-top: 18px;
+  padding-top: 16px;
 }
 
 .settingsCard::before {
@@ -203,7 +194,7 @@
 
 .cardTitle {
   font-family: var(--font-display);
-  font-size: clamp(24px, 3vw, 30px);
+  font-size: clamp(22px, 2.6vw, 28px);
   font-weight: 500;
   letter-spacing: -0.035em;
   line-height: 1.06;
@@ -223,8 +214,8 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-top: 22px;
-  padding-top: 18px;
+  margin-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid var(--border-light);
 }
 
@@ -314,8 +305,8 @@
 .contentTypeGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 28px;
-  margin-top: 18px;
+  gap: 0 24px;
+  margin-top: 16px;
 }
 
 .contentTypeCard {
@@ -429,8 +420,8 @@
 .previewTriggerRow {
   display: flex;
   justify-content: flex-start;
-  margin-top: 22px;
-  padding-top: 18px;
+  margin-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid var(--border-light);
 }
 
@@ -467,7 +458,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 24px;
   align-items: end;
-  padding-top: 26px;
+  padding-top: 22px;
   border-top: 1px solid var(--border-light);
 }
 
@@ -749,16 +740,30 @@
   }
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1280px) {
   .configurationGrid {
     grid-template-columns: 1fr;
-    gap: 36px;
+    gap: 32px;
   }
 
   .configurationGrid > :first-child {
     padding-right: 0;
     padding-bottom: 4px;
     border-right: none;
+  }
+
+  .contentTypeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1120px) {
+  .overviewMeta {
+    grid-template-columns: 1fr;
+  }
+
+  .overviewContent {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -768,12 +773,12 @@
   }
 
   .digestBuilderContent {
-    gap: 32px;
+    gap: 28px;
   }
 
   .overviewCard {
     gap: 22px;
-    padding-bottom: 28px;
+    padding-bottom: 26px;
   }
 
   .overviewHeader,
@@ -822,10 +827,6 @@
 @media (max-width: 500px) {
   .digestBuilderContainer {
     padding-top: 4px;
-  }
-
-  .pageTitle {
-    font-size: clamp(30px, 11vw, 40px);
   }
 
   .frequencyOptions,
