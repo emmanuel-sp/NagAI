@@ -8,6 +8,7 @@ import { useModal } from "@/contexts/ModalContext";
 import { useAgentData } from "@/contexts/AgentDataContext";
 import { IoSidebarPanel, IoAdd, IoChevronDown, IoPerson, IoSun, IoMoon } from "@/components/icons";
 import { useTheme, ACCENT_CONFIGS, type AccentKey } from "@/contexts/ThemeContext";
+import { getAgentContextStatus } from "@/lib/agentStatus";
 import MessageInboxTrigger from "@/components/inbox/MessageInboxTrigger";
 import { createGoal } from "@/services/goalService";
 import styles from "./NavBar.module.css";
@@ -165,6 +166,12 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
                     const context = (agent?.contexts ?? []).find((entry) => entry.goalId === goal.goalId) ?? null;
                     const isActiveGoal = pathname === `/goals/${goal.goalId}`;
                     const isDeploying = deployingContextId === context?.contextId;
+                    const status = getAgentContextStatus(context);
+                    const dotClassName = status.tone === "paused"
+                      ? styles.goalStatusDotPaused
+                      : context?.deployed
+                        ? styles.goalStatusDotActive
+                        : styles.goalStatusDotIdle;
 
                     return (
                       <div
@@ -179,14 +186,23 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
                           <span className={styles.contextName}>
                             {goal.title}
                           </span>
+                          {context && (
+                            <span className={styles.contextStatusText}>
+                              {status.tone === "cooling"
+                                ? status.helperText
+                                : status.tone === "paused"
+                                  ? "Paused for inactivity"
+                                  : status.label}
+                            </span>
+                          )}
                         </Link>
                         {context && (
                           <button
                             type="button"
-                            className={`${styles.goalStatusDot} ${context.deployed ? styles.goalStatusDotActive : styles.goalStatusDotIdle}`}
+                            className={`${styles.goalStatusDot} ${dotClassName}`}
                             onClick={() => void handleToggleGoalDeployment(context.contextId, context.deployed)}
                             disabled={isDeploying}
-                            title={isDeploying ? "Updating..." : context.deployed ? "Live — click to stop" : "Draft — click to deploy"}
+                            title={isDeploying ? "Updating..." : status.title}
                           />
                         )}
                       </div>

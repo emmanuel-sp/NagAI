@@ -1,6 +1,7 @@
 package com.nagai.backend.checklists;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.nagai.backend.agents.Agent;
+import com.nagai.backend.agents.AgentCadence;
+import com.nagai.backend.agents.AgentContext;
+import com.nagai.backend.agents.AgentContextRepository;
+import com.nagai.backend.agents.AgentRepository;
 import com.nagai.backend.dailychecklist.DailyChecklistItem;
 import com.nagai.backend.dailychecklist.DailyChecklistItemRepository;
 
@@ -26,13 +32,19 @@ public class ChecklistService {
     private final GoalService goalService;
     private final UserService userService;
     private final DailyChecklistItemRepository dailyItemRepository;
+    private final AgentContextRepository agentContextRepository;
+    private final AgentRepository agentRepository;
 
     public ChecklistService(ChecklistRepository checklistRepository, GoalService goalService, UserService userService,
-                            DailyChecklistItemRepository dailyItemRepository) {
+                            DailyChecklistItemRepository dailyItemRepository,
+                            AgentContextRepository agentContextRepository,
+                            AgentRepository agentRepository) {
         this.checklistRepository = checklistRepository;
         this.goalService = goalService;
         this.userService = userService;
         this.dailyItemRepository = dailyItemRepository;
+        this.agentContextRepository = agentContextRepository;
+        this.agentRepository = agentRepository;
     }
 
     public List<ChecklistResponse> fetchGoalChecklist(Long goalId) {
@@ -68,7 +80,9 @@ public class ChecklistService {
         item.setSortOrder(request.getSortOrder() != null ? request.getSortOrder() : (long) existing.size());
         item.setCompleted(false);
 
-        return ChecklistResponse.fromEntity(checklistRepository.save(item));
+        ChecklistResponse response = ChecklistResponse.fromEntity(checklistRepository.save(item));
+        touchAgentContextsForGoal(request.getGoalId());
+        return response;
     }
 
     @Transactional
@@ -97,6 +111,7 @@ public class ChecklistService {
 
         applyReorder(items, safeSubmitted);
         List<ChecklistItem> updatedItems = checklistRepository.saveAll(items);
+        touchAgentContextsForGoal(goalId);
         return updatedItems.stream()
                 .sorted(java.util.Comparator.comparingLong(ChecklistItem::getSortOrder))
                 .map(ChecklistResponse::fromEntity).toList();
@@ -124,7 +139,9 @@ public class ChecklistService {
             item.setCompletedAt(request.getCompleted() ? LocalDateTime.now().toString() : null);
         }
 
-        return ChecklistResponse.fromEntity(checklistRepository.save(item));
+        ChecklistResponse response = ChecklistResponse.fromEntity(checklistRepository.save(item));
+        touchAgentContextsForGoal(item.getGoalId());
+        return response;
     }
 
     @Transactional
@@ -139,6 +156,7 @@ public class ChecklistService {
         }
 
         checklistRepository.delete(item);
+        touchAgentContextsForGoal(item.getGoalId());
     }
 
     @Transactional
@@ -159,6 +177,7 @@ public class ChecklistService {
 
         // Reverse sync: propagate to linked daily checklist items
         syncLinkedDailyItems(checklistId, newState);
+        touchAgentContextsForGoal(item.getGoalId());
 
         return ChecklistResponse.fromEntity(item);
     }
@@ -193,6 +212,54 @@ public class ChecklistService {
         for (Long orderedItemId : orderedItemIds) {
             ChecklistItem reordered = itemsById.get(orderedItemId);
             reordered.setSortOrder(nextSortOrder++);
+        }
+    }
+
+    private void touchAgentContextsForGoal(Long goalId) {
+        List<AgentContext> contexts = agentContextRepository.findByGoalId(goalId);
+        if (contexts == null || contexts.isEmpty()) {
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        Set<Long> resumedAgentIds = new HashSet<>();
+
+        for (AgentContext context : contexts) {
+            context.setLastChecklistActivityAt(now);
+
+            if (AgentCadence.PAUSE_REASON_STALE_PROGRESS.equals(context.getPauseReason())) {
+                context.setDeployed(true);
+                context.setPauseReason(null);
+                context.setStaleCount(0);
+                context.setNextMessageAt(now.plusHours(AgentCadence.baseIntervalHours(context.getMessageType())));
+                context.setProcessingStartedAt(null);
+                resumedAgentIds.add(context.getAgentId());
+                continue;
+            }
+
+            if (context.isDeployed()) {
+                context.setStaleCount(0);
+                LocalDateTime responsiveAt = now.plusHours(AgentCadence.baseIntervalHours(context.getMessageType()));
+                if (context.getNextMessageAt() == null || context.getNextMessageAt().isAfter(responsiveAt)) {
+                    context.setNextMessageAt(responsiveAt);
+                }
+            }
+        }
+
+        agentContextRepository.saveAll(contexts);
+        syncResumedAgentFlags(resumedAgentIds);
+    }
+
+    private void syncResumedAgentFlags(Set<Long> agentIds) {
+        for (Long agentId : agentIds) {
+            Agent agent = agentRepository.findById(agentId).orElse(null);
+            if (agent == null) {
+                continue;
+            }
+            boolean anyDeployed = agentContextRepository.findByAgentId(agentId).stream()
+                    .anyMatch(AgentContext::isDeployed);
+            agent.setDeployed(anyDeployed);
+            agentRepository.save(agent);
         }
     }
 }

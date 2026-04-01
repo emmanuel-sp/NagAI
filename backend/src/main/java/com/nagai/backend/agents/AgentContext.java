@@ -50,6 +50,15 @@ public class AgentContext {
     @Column(name = "processing_started_at")
     private LocalDateTime processingStartedAt;
 
+    @Column(name = "stale_count", nullable = false)
+    private int staleCount = 0;
+
+    @Column(name = "pause_reason")
+    private String pauseReason;
+
+    @Column(name = "last_checklist_activity_at")
+    private LocalDateTime lastChecklistActivityAt;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;

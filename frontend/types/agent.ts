@@ -15,6 +15,9 @@ export interface AgentContext {
   customInstructions?: string | null;
   deployed: boolean;
   lastMessageSentAt?: string | null;
+  nextMessageAt?: string | null;
+  staleCount: number;
+  pauseReason?: string | null;
   createdAt: string;
   updatedAt: string;
 }

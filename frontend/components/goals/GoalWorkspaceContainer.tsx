@@ -14,6 +14,7 @@ import EmptyState from "@/components/common/EmptyState";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { IoCalendarOutline, IoPencil, IoSparkles } from "@/components/icons";
+import { getAgentContextStatus } from "@/lib/agentStatus";
 import { parseUtcDate } from "@/lib/dates";
 import {
   fetchGoalById,
@@ -118,6 +119,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
   );
 
   const currentContext = goalContexts[0] ?? null;
+  const contextStatus = getAgentContextStatus(currentContext);
   const totalContextCount = agent?.contexts.length ?? 0;
   const canCreateContext = !!currentContext || totalContextCount < 3;
   const totalItems = checklist?.items.length ?? 0;
@@ -392,7 +394,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
           <div className={styles.statCard}>
             <span className={styles.statLabel}>Goal Agent</span>
             <strong className={styles.statValue}>
-              {currentContext ? (currentContext.deployed ? "Live" : "Draft") : "—"}
+              {currentContext ? contextStatus.label : "—"}
             </strong>
           </div>
         </div>
@@ -436,7 +438,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
                   currentContext?.deployed ? styles.deploymentPillActive : styles.deploymentPillIdle
                 }`}
               >
-                {currentContext ? (currentContext.deployed ? "Live" : "Draft") : "—"}
+                {currentContext ? contextStatus.label : "—"}
               </span>
             </div>
 
@@ -532,11 +534,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
               </div>
 
               <p className={styles.contextHelper}>
-                {currentContext
-                  ? currentContext.deployed
-                    ? "Agent is live and sending emails. Stop it any time, or adjust settings and save."
-                    : "Agent is saved but not active. Deploy it to start receiving email nudges."
-                  : "Set up this agent to start receiving email nudges for this goal."}
+                {contextStatus.helperText}
               </p>
             </div>
           </section>

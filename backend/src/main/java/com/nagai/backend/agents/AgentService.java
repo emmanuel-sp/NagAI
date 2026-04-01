@@ -1,5 +1,7 @@
 package com.nagai.backend.agents;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,11 +58,8 @@ public class AgentService {
         Agent agent = agentRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> createDefaultAgent(user.getUserId()));
         List<AgentContext> contexts = agentContextRepository.findByAgentId(agent.getAgentId());
-        contexts.forEach(context -> {
-            context.setDeployed(true);
-            context.setNextMessageAt(null);
-            context.setProcessingStartedAt(null);
-        });
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        contexts.forEach(context -> applyDeployState(context, now));
         agent.setDeployed(!contexts.isEmpty());
         agentContextRepository.saveAll(contexts);
         return buildResponse(agentRepository.save(agent));
@@ -71,10 +70,7 @@ public class AgentService {
         Agent agent = agentRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> createDefaultAgent(user.getUserId()));
         List<AgentContext> contexts = agentContextRepository.findByAgentId(agent.getAgentId());
-        contexts.forEach(context -> {
-            context.setDeployed(false);
-            context.setProcessingStartedAt(null);
-        });
+        contexts.forEach(this::applyManualStopState);
         agentContextRepository.saveAll(contexts);
         agent.setDeployed(false);
         return buildResponse(agentRepository.save(agent));
@@ -122,9 +118,7 @@ public class AgentService {
 
     public AgentContextResponse deployContext(Long contextId) {
         AgentContext context = getOwnedContext(contextId);
-        context.setDeployed(true);
-        context.setNextMessageAt(null);
-        context.setProcessingStartedAt(null);
+        applyDeployState(context, LocalDateTime.now(ZoneOffset.UTC));
         AgentContext saved = agentContextRepository.save(context);
         syncAgentDeploymentFlag(saved.getAgentId());
         return buildContextResponse(saved);
@@ -132,8 +126,7 @@ public class AgentService {
 
     public AgentContextResponse stopContext(Long contextId) {
         AgentContext context = getOwnedContext(contextId);
-        context.setDeployed(false);
-        context.setProcessingStartedAt(null);
+        applyManualStopState(context);
         AgentContext saved = agentContextRepository.save(context);
         syncAgentDeploymentFlag(saved.getAgentId());
         return buildContextResponse(saved);
@@ -155,10 +148,7 @@ public class AgentService {
             agent.setUnsubscribeTokenHash(tokenHash);
         }
         List<AgentContext> contexts = agentContextRepository.findByAgentId(agent.getAgentId());
-        contexts.forEach(context -> {
-            context.setDeployed(false);
-            context.setProcessingStartedAt(null);
-        });
+        contexts.forEach(this::applyManualStopState);
         agentContextRepository.saveAll(contexts);
         agent.setDeployed(false);
         agentRepository.save(agent);
@@ -198,6 +188,21 @@ public class AgentService {
         context.setGoalId(goalId);
         context.setMessageType(messageType);
         context.setCustomInstructions(customInstructions);
+    }
+
+    private void applyDeployState(AgentContext context, LocalDateTime now) {
+        context.setDeployed(true);
+        context.setPauseReason(null);
+        context.setStaleCount(0);
+        context.setNextMessageAt(AgentCadence.deployNextMessageAt(context.getLastMessageSentAt(), now));
+        context.setProcessingStartedAt(null);
+    }
+
+    private void applyManualStopState(AgentContext context) {
+        context.setDeployed(false);
+        context.setNextMessageAt(null);
+        context.setPauseReason(null);
+        context.setProcessingStartedAt(null);
     }
 
     private AgentContext getOwnedContext(Long contextId) {

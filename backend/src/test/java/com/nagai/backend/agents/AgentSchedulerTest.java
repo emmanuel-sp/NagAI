@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -88,8 +89,10 @@ class AgentSchedulerTest {
         context.setName("Morning Check");
         context.setMessageType("motivation");
         context.setDeployed(true);
+        context.setStaleCount(0);
         context.setLastMessageSentAt(null); // never sent
         lenient().when(agentContextRepository.findById(100L)).thenReturn(Optional.of(context));
+        lenient().when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(context));
 
         goal = new Goal();
         goal.setGoalId(200L);
@@ -209,7 +212,7 @@ class AgentSchedulerTest {
         context.setMessageType("nag");
         LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
 
-        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 0, now);
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), true, 1, now);
 
         assertThat(next).isEqualTo(now.plusHours(6));
     }
@@ -219,7 +222,7 @@ class AgentSchedulerTest {
         context.setMessageType("motivation");
         LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
 
-        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 0, now);
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), true, 1, now);
 
         assertThat(next).isEqualTo(now.plusHours(24));
     }
@@ -229,7 +232,7 @@ class AgentSchedulerTest {
         context.setMessageType("guidance");
         LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
 
-        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 0, now);
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), true, 1, now);
 
         assertThat(next).isEqualTo(now.plusHours(48));
     }
@@ -246,9 +249,8 @@ class AgentSchedulerTest {
         ChecklistItem c3 = new ChecklistItem(); c3.setCompleted(true); c3.setCompletedAt(today);
 
         LocalDateTime next = agentScheduler.computeNextMessageAt(
-                context, List.of(c1, c2, c3), 0, now);
+                context, List.of(c1, c2, c3), true, 1, now);
 
-        // 6h * 0.5 = 3h
         assertThat(next).isEqualTo(now.plusHours(3));
     }
 
@@ -257,43 +259,41 @@ class AgentSchedulerTest {
         context.setMessageType("nag"); // base 6h
         LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
 
-        // messagesSinceLastChange=2, +1 for current send = 3 → staleMultiplier = 1.5
-        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 2, now);
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), false, 2, now);
 
-        // 6h * 1.5 = 9h
-        assertThat(next).isEqualTo(now.plusHours(9));
+        assertThat(next).isEqualTo(now.plusHours(12));
     }
 
     @Test
-    void computeNextMessageAt_capsAtMaxInterval() {
-        context.setMessageType("nag"); // base 6h, max 24h
+    void computeNextMessageAt_capsAtWeekLongInterval() {
+        context.setMessageType("nag");
         LocalDateTime now = LocalDateTime.of(2026, 3, 22, 12, 0, 0);
 
-        // messagesSinceLastChange=9, +1=10 → staleMultiplier = 1.0 + (10-2)*0.5 = 5.0
-        // effective = 6h * 5.0 = 30h, capped at max 24h
-        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 9, now);
+        LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), false, 10, now);
 
-        assertThat(next).isEqualTo(now.plusHours(24));
+        assertThat(next).isEqualTo(now.plusHours(168));
     }
 
     @Test
-    void computeMessagesSinceLastChange_handlesDateOnlyCompletionTimestamps() {
-        context.setContextId(100L);
-        ChecklistItem completedItem = new ChecklistItem();
-        completedItem.setCompleted(true);
-        completedItem.setCompletedAt("2026-03-10");
+    void computeStaleCountForCurrentSend_resetsWhenChecklistActivityIsNewerThanLastMessage() {
+        context.setLastMessageSentAt(LocalDateTime.of(2026, 3, 10, 9, 0));
+        context.setLastChecklistActivityAt(LocalDateTime.of(2026, 3, 10, 10, 0));
+        context.setStaleCount(6);
 
-        SentAgentMessage olderMessage = new SentAgentMessage();
-        olderMessage.setSentAt(LocalDateTime.of(2026, 3, 9, 23, 59));
-        SentAgentMessage newerMessage = new SentAgentMessage();
-        newerMessage.setSentAt(LocalDateTime.of(2026, 3, 10, 12, 0));
-
-        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L))
-                .thenReturn(List.of(newerMessage, olderMessage));
-
-        int count = agentScheduler.computeMessagesSinceLastChange(context, List.of(completedItem));
+        int count = agentScheduler.computeStaleCountForCurrentSend(context);
 
         assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void computeStaleCountForCurrentSend_usesPersistedStaleCountWhenNoNewActivity() {
+        context.setLastMessageSentAt(LocalDateTime.of(2026, 3, 10, 9, 0));
+        context.setLastChecklistActivityAt(LocalDateTime.of(2026, 3, 10, 8, 0));
+        context.setStaleCount(6);
+
+        int count = agentScheduler.computeStaleCountForCurrentSend(context);
+
+        assertThat(count).isEqualTo(7);
     }
 
     @Test
@@ -301,7 +301,7 @@ class AgentSchedulerTest {
         when(goalRepository.findById(200L)).thenReturn(Optional.of(goal));
         when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
 
-        AgentMessagePayload payload = agentScheduler.buildPayload(context, agent, user, List.of(item), 0);
+        AgentMessagePayload payload = agentScheduler.buildPayload(context, agent, user, List.of(item), 7);
 
         assertThat(payload.getContextId()).isEqualTo(100L);
         assertThat(payload.getUserEmail()).isEqualTo("test@example.com");
@@ -310,7 +310,7 @@ class AgentSchedulerTest {
         assertThat(payload.getAgentName()).isEqualTo("My AI Agent");
         assertThat(payload.getContextName()).isEqualTo("Morning Check");
         assertThat(payload.getMessageType()).isEqualTo("motivation");
-        assertThat(payload.getMessagesSinceLastChange()).isEqualTo(0);
+        assertThat(payload.getMessagesSinceLastChange()).isEqualTo(7);
         assertThat(payload.getGoal()).isNotNull();
         assertThat(payload.getGoal().getTitle()).isEqualTo("Learn Spanish");
         assertThat(payload.getGoal().getSmartContext()).contains("Specific: Pass B2 exam");
@@ -342,5 +342,30 @@ class AgentSchedulerTest {
         assertThat(payload.getConversationHistory().get(0).getContent()).isEqualTo("How's progress?");
         assertThat(payload.getPreviousMessageIds()).containsExactly("<agent-100-123@nagai.app>");
         assertThat(payload.getPreviousSubjects()).containsExactly("Check in");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void processAgentMessages_autoPausesContextWhenStaleThresholdReached() {
+        context.setMessageType("nag");
+        context.setStaleCount(9);
+
+        when(agentContextRepository.findDueForDeployedAgents(any(LocalDateTime.class)))
+                .thenReturn(List.of(context));
+        when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(checklistRepository.findChecklistItemByGoalId(200L)).thenReturn(List.of());
+        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L)).thenReturn(List.of());
+        when(goalRepository.findById(200L)).thenReturn(Optional.of(goal));
+        when(agentRepository.save(any(Agent.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        agentScheduler.processAgentMessages();
+
+        verify(streamOps).add(anyString(), any(Map.class));
+        verify(taskScheduler, never()).schedule(any(Runnable.class), any(Instant.class));
+        assertThat(context.isDeployed()).isFalse();
+        assertThat(context.getPauseReason()).isEqualTo(AgentCadence.PAUSE_REASON_STALE_PROGRESS);
+        assertThat(context.getNextMessageAt()).isNull();
+        assertThat(context.getStaleCount()).isEqualTo(10);
     }
 }

@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,6 +76,9 @@ class AgentServiceTest {
         goal.setGoalId(50L);
         goal.setUserId(1L);
         goal.setTitle("Stay consistent");
+
+        lenient().when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
+        lenient().when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(context));
     }
 
     @Test
@@ -131,13 +136,15 @@ class AgentServiceTest {
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
         when(agentRepository.save(any(Agent.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(context));
         when(agentContextRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         AgentResponse result = agentService.deployAgent();
 
         assertThat(result.isDeployed()).isTrue();
+        assertThat(context.isDeployed()).isTrue();
         assertThat(context.getProcessingStartedAt()).isNull();
+        assertThat(context.getNextMessageAt()).isNotNull();
+        assertThat(context.getStaleCount()).isZero();
     }
 
     @Test
@@ -149,12 +156,13 @@ class AgentServiceTest {
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
         when(agentRepository.save(any(Agent.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(context));
         when(agentContextRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         AgentResponse result = agentService.stopAgent();
 
         assertThat(result.isDeployed()).isFalse();
+        assertThat(context.getNextMessageAt()).isNull();
+        assertThat(context.getPauseReason()).isNull();
         assertThat(context.getProcessingStartedAt()).isNull();
     }
 
@@ -166,13 +174,12 @@ class AgentServiceTest {
         when(tokenHashService.hash("legacy-token")).thenReturn("agent-hash");
         when(agentRepository.findByUnsubscribeTokenHash("agent-hash")).thenReturn(Optional.empty());
         when(agentRepository.findByUnsubscribeToken("legacy-token")).thenReturn(Optional.of(agent));
-        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(context));
-
         agentService.stopByToken("legacy-token");
 
         assertThat(agent.isDeployed()).isFalse();
         assertThat(agent.getUnsubscribeTokenHash()).isEqualTo("agent-hash");
         assertThat(context.isDeployed()).isFalse();
+        assertThat(context.getNextMessageAt()).isNull();
         assertThat(context.getProcessingStartedAt()).isNull();
         verify(agentContextRepository).saveAll(List.of(context));
         verify(agentRepository).save(agent);
@@ -312,5 +319,68 @@ class AgentServiceTest {
                 .isInstanceOf(AgentContextNotFoundException.class);
 
         verify(agentContextRepository, never()).delete(any());
+    }
+
+    @Test
+    void deployContext_schedulesImmediateSendWhenCooldownExpired() {
+        context.setLastMessageSentAt(LocalDateTime.now().minusHours(30));
+        context.setPauseReason(AgentCadence.PAUSE_REASON_STALE_PROGRESS);
+        context.setStaleCount(4);
+
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
+        when(agentContextRepository.findById(100L)).thenReturn(Optional.of(context));
+        when(agentContextRepository.save(any(AgentContext.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(agentRepository.save(any(Agent.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        LocalDateTime before = LocalDateTime.now(ZoneOffset.UTC).minusSeconds(1);
+        AgentContextResponse result = agentService.deployContext(100L);
+        LocalDateTime after = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(1);
+
+        assertThat(result.isDeployed()).isTrue();
+        assertThat(result.getPauseReason()).isNull();
+        assertThat(result.getStaleCount()).isZero();
+        assertThat(result.getNextMessageAt()).isAfterOrEqualTo(before);
+        assertThat(result.getNextMessageAt()).isBeforeOrEqualTo(after);
+    }
+
+    @Test
+    void deployContext_respectsRecentEmailCooldown() {
+        LocalDateTime lastMessageSentAt = LocalDateTime.now().minusHours(2);
+        context.setLastMessageSentAt(lastMessageSentAt);
+        context.setStaleCount(3);
+
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
+        when(agentContextRepository.findById(100L)).thenReturn(Optional.of(context));
+        when(agentContextRepository.save(any(AgentContext.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(agentRepository.save(any(Agent.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        AgentContextResponse result = agentService.deployContext(100L);
+
+        assertThat(result.isDeployed()).isTrue();
+        assertThat(result.getStaleCount()).isZero();
+        assertThat(result.getNextMessageAt()).isEqualTo(lastMessageSentAt.plusHours(24));
+    }
+
+    @Test
+    void stopContext_clearsScheduleWithoutMarkingStalePause() {
+        context.setDeployed(true);
+        context.setNextMessageAt(LocalDateTime.now().plusHours(6));
+        context.setPauseReason(AgentCadence.PAUSE_REASON_STALE_PROGRESS);
+        context.setProcessingStartedAt(LocalDateTime.now());
+
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
+        when(agentContextRepository.findById(100L)).thenReturn(Optional.of(context));
+        when(agentContextRepository.save(any(AgentContext.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(agentRepository.save(any(Agent.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        AgentContextResponse result = agentService.stopContext(100L);
+
+        assertThat(result.isDeployed()).isFalse();
+        assertThat(result.getNextMessageAt()).isNull();
+        assertThat(result.getPauseReason()).isNull();
+        assertThat(context.getProcessingStartedAt()).isNull();
     }
 }

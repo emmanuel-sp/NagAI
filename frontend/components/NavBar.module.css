@@ -296,6 +296,16 @@
   white-space: nowrap;
 }
 
+.contextStatusText {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-light);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Dot status indicator */
 .goalStatusDot {
   flex-shrink: 0;
@@ -325,6 +335,11 @@
 
 .goalStatusDotIdle {
   background: var(--text-light);
+}
+
+.goalStatusDotPaused {
+  background: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }
 
 

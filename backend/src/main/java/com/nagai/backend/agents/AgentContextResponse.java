@@ -15,6 +15,9 @@ public class AgentContextResponse {
     private String customInstructions;
     private boolean deployed;
     private LocalDateTime lastMessageSentAt;
+    private LocalDateTime nextMessageAt;
+    private int staleCount;
+    private String pauseReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -29,6 +32,9 @@ public class AgentContextResponse {
         response.setCustomInstructions(context.getCustomInstructions());
         response.setDeployed(context.isDeployed());
         response.setLastMessageSentAt(context.getLastMessageSentAt());
+        response.setNextMessageAt(context.getNextMessageAt());
+        response.setStaleCount(context.getStaleCount());
+        response.setPauseReason(context.getPauseReason());
         response.setCreatedAt(context.getCreatedAt());
         response.setUpdatedAt(context.getUpdatedAt());
         return response;

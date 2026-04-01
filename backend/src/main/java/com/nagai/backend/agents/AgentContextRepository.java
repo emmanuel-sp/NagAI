@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface AgentContextRepository extends JpaRepository<AgentContext, Long> {
     List<AgentContext> findByAgentId(Long agentId);
+    List<AgentContext> findByGoalId(Long goalId);
     boolean existsByAgentIdAndGoalId(Long agentId, Long goalId);
 
     @Query("SELECT ac FROM AgentContext ac WHERE ac.deployed = true")

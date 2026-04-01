@@ -2,7 +2,6 @@ package com.nagai.backend.agents;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -39,16 +38,6 @@ import io.micrometer.core.instrument.Counter;
 public class AgentScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(AgentScheduler.class);
-
-    static final Map<String, Long> BASE_INTERVALS = Map.of(
-            "nag", 6L,
-            "motivation", 24L,
-            "guidance", 48L);
-
-    static final Map<String, Long> MAX_INTERVALS = Map.of(
-            "nag", 24L,
-            "motivation", 72L,
-            "guidance", 168L);
     private static final Duration CLAIM_TTL = Duration.ofMinutes(15);
 
     private final AgentContextRepository agentContextRepository;
@@ -186,7 +175,8 @@ public class AgentScheduler {
             List<ChecklistItem> checklistItems = (context.getGoalId() != null)
                     ? checklistRepository.findChecklistItemByGoalId(context.getGoalId())
                     : List.of();
-            int messagesSinceLastChange = computeMessagesSinceLastChange(context, checklistItems);
+            boolean checklistActivitySinceLastMessage = hasChecklistActivitySinceLastMessage(context);
+            int messagesSinceLastChange = computeStaleCountForCurrentSend(context);
 
             AgentMessagePayload payload = buildPayload(context, agent, user,
                     checklistItems, messagesSinceLastChange);
@@ -199,11 +189,27 @@ public class AgentScheduler {
             redisTemplate.opsForStream().add(RedisStreamConfig.STREAM_AGENT_MESSAGES, fields);
 
             context.setLastMessageSentAt(now);
+            context.setStaleCount(messagesSinceLastChange);
+
+            if (messagesSinceLastChange >= AgentCadence.pauseThreshold(context.getMessageType())) {
+                context.setDeployed(false);
+                context.setNextMessageAt(null);
+                context.setPauseReason(AgentCadence.PAUSE_REASON_STALE_PROGRESS);
+                context.setProcessingStartedAt(null);
+                agentContextRepository.save(context);
+                cancelTimer(context.getContextId());
+                syncAgentDeploymentFlag(context.getAgentId());
+                agentMessagesSentCounter.increment();
+                log.info("Agent context {} auto-paused after {} stale sends",
+                        context.getContextId(), messagesSinceLastChange);
+                return;
+            }
 
             // Compute and persist the next message time (heuristic runs once per send, not per sweep)
-            LocalDateTime nextMessageAt = computeNextMessageAt(context, checklistItems,
-                    messagesSinceLastChange, now);
+            LocalDateTime nextMessageAt = computeNextMessageAt(
+                    context, checklistItems, checklistActivitySinceLastMessage, messagesSinceLastChange, now);
             context.setNextMessageAt(nextMessageAt);
+            context.setPauseReason(null);
             context.setProcessingStartedAt(null);
             agentContextRepository.save(context);
 
@@ -226,56 +232,44 @@ public class AgentScheduler {
      * Called once after each send — not on every sweep iteration.
      */
     LocalDateTime computeNextMessageAt(AgentContext context, List<ChecklistItem> items,
-                                        int messagesSinceLastChange, LocalDateTime now) {
-        String type = context.getMessageType();
-        long baseHours = BASE_INTERVALS.getOrDefault(type, 24L);
-        long maxHours = MAX_INTERVALS.getOrDefault(type, 72L);
-
-        double modifier = 1.0;
-        if (!items.isEmpty()) {
-            long recentCompletions = items.stream()
-                    .filter(ChecklistItem::isCompleted)
-                    .map(ChecklistItem::getCompletedAt)
-                    .map(ChecklistTimestampUtils::parseCompletedAt)
-                    .flatMap(java.util.Optional::stream)
-                    .map(LocalDateTime::toLocalDate)
-                    .filter(completed -> completed.isAfter(now.toLocalDate().minusDays(2)))
-                    .count();
-
-            if (recentCompletions >= 3) {
-                modifier = 0.5;
-            }
+                                        boolean checklistActivitySinceLastMessage,
+                                        int staleCountAfterSend, LocalDateTime now) {
+        long effectiveHours;
+        if (checklistActivitySinceLastMessage && hasHighRecentCompletionActivity(items, now)) {
+            effectiveHours = AgentCadence.acceleratedIntervalHours(context.getMessageType());
+        } else if (checklistActivitySinceLastMessage) {
+            effectiveHours = AgentCadence.baseIntervalHours(context.getMessageType());
+        } else {
+            effectiveHours = AgentCadence.staleIntervalHours(context.getMessageType(), staleCountAfterSend);
         }
-
-        // Account for the message we just sent (+1)
-        int adjustedCount = messagesSinceLastChange + 1;
-        if (adjustedCount >= 3) {
-            double staleMultiplier = 1.0 + (adjustedCount - 2) * 0.5;
-            modifier = Math.max(modifier, staleMultiplier);
-        }
-
-        long effectiveHours = Math.max(2, Math.min(maxHours, (long) (baseHours * modifier)));
         return now.plusHours(effectiveHours);
     }
 
-    int computeMessagesSinceLastChange(AgentContext context, List<ChecklistItem> items) {
-        LocalDateTime lastChangeAt = items.stream()
+    int computeStaleCountForCurrentSend(AgentContext context) {
+        if (hasChecklistActivitySinceLastMessage(context)) {
+            return 1;
+        }
+        return Math.max(0, context.getStaleCount()) + 1;
+    }
+
+    boolean hasChecklistActivitySinceLastMessage(AgentContext context) {
+        LocalDateTime lastChecklistActivityAt = context.getLastChecklistActivityAt();
+        if (lastChecklistActivityAt == null) {
+            return false;
+        }
+
+        LocalDateTime lastMessageSentAt = context.getLastMessageSentAt();
+        return lastMessageSentAt == null || lastChecklistActivityAt.isAfter(lastMessageSentAt);
+    }
+
+    private boolean hasHighRecentCompletionActivity(List<ChecklistItem> items, LocalDateTime now) {
+        return items.stream()
                 .filter(ChecklistItem::isCompleted)
                 .map(ChecklistItem::getCompletedAt)
                 .map(ChecklistTimestampUtils::parseCompletedAt)
                 .flatMap(java.util.Optional::stream)
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
-
-        List<SentAgentMessage> recentMessages = sentAgentMessageRepository
-                .findTop5ByContextIdOrderBySentAtDesc(context.getContextId());
-
-        if (lastChangeAt == null) {
-            return recentMessages.size();
-        }
-        return (int) recentMessages.stream()
-                .filter(m -> m.getSentAt() != null && m.getSentAt().isAfter(lastChangeAt))
-                .count();
+                .filter(completedAt -> completedAt.isAfter(now.minusDays(2)))
+                .count() >= 3;
     }
 
     void scheduleTimer(Long contextId, LocalDateTime nextMessageAt) {
@@ -380,6 +374,18 @@ public class AgentScheduler {
                 .messagesSinceLastChange(messagesSinceLastChange)
                 .unsubscribeToken(agent.getUnsubscribeToken())
                 .build();
+    }
+
+    private void syncAgentDeploymentFlag(Long agentId) {
+        Agent agent = agentRepository.findById(agentId).orElse(null);
+        if (agent == null) {
+            return;
+        }
+
+        boolean anyDeployed = agentContextRepository.findByAgentId(agentId).stream()
+                .anyMatch(AgentContext::isDeployed);
+        agent.setDeployed(anyDeployed);
+        agentRepository.save(agent);
     }
 
 }

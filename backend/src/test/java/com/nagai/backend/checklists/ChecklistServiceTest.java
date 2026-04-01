@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +18,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.nagai.backend.agents.Agent;
+import com.nagai.backend.agents.AgentCadence;
+import com.nagai.backend.agents.AgentContext;
+import com.nagai.backend.agents.AgentContextRepository;
+import com.nagai.backend.agents.AgentRepository;
 import com.nagai.backend.dailychecklist.DailyChecklistItem;
 import com.nagai.backend.dailychecklist.DailyChecklistItemRepository;
 import com.nagai.backend.exceptions.ChecklistException;
@@ -40,12 +47,20 @@ class ChecklistServiceTest {
     @Mock
     private DailyChecklistItemRepository dailyItemRepository;
 
+    @Mock
+    private AgentContextRepository agentContextRepository;
+
+    @Mock
+    private AgentRepository agentRepository;
+
     @InjectMocks
     private ChecklistService checklistService;
 
     private User user;
     private Goal goal;
     private ChecklistItem item;
+    private Agent agent;
+    private AgentContext context;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +76,21 @@ class ChecklistServiceTest {
         item.setGoalId(5L);
         item.setTitle("Read chapter 1");
         item.setCompleted(false);
+
+        agent = new Agent();
+        agent.setAgentId(10L);
+        agent.setDeployed(true);
+
+        context = new AgentContext();
+        context.setContextId(100L);
+        context.setAgentId(10L);
+        context.setGoalId(5L);
+        context.setMessageType("nag");
+        context.setDeployed(true);
+        context.setStaleCount(3);
+        context.setNextMessageAt(LocalDateTime.now().plusDays(7));
+
+        lenient().when(agentContextRepository.findByGoalId(5L)).thenReturn(List.of());
     }
 
     @Test
@@ -357,5 +387,71 @@ class ChecklistServiceTest {
         assertThat(dailyItem.isCompleted()).isFalse();
         assertThat(dailyItem.getCompletedAt()).isNull();
         verify(dailyItemRepository).saveAll(List.of(dailyItem));
+    }
+
+    @Test
+    void updateChecklistItem_resetsStaleCountAndTightensScheduleForDeployedContext() {
+        ChecklistUpdateRequest request = new ChecklistUpdateRequest();
+        request.setChecklistId(20L);
+        request.setTitle("Read chapter 2");
+
+        when(checklistRepository.findById(20L)).thenReturn(Optional.of(item));
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(goalService.getGoal(5L)).thenReturn(goal);
+        when(checklistRepository.save(any(ChecklistItem.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(agentContextRepository.findByGoalId(5L)).thenReturn(List.of(context));
+        when(agentContextRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+
+        checklistService.updateChecklistItem(request);
+
+        assertThat(context.getLastChecklistActivityAt()).isNotNull();
+        assertThat(context.getStaleCount()).isZero();
+        assertThat(context.getNextMessageAt()).isBeforeOrEqualTo(
+                LocalDateTime.now(ZoneOffset.UTC).plusHours(AgentCadence.baseIntervalHours("nag")));
+    }
+
+    @Test
+    void addChecklistItem_autoResumesStalePausedContextOnly() {
+        ChecklistAddRequest request = new ChecklistAddRequest();
+        request.setGoalId(5L);
+        request.setTitle("Read chapter 1");
+
+        AgentContext stalePaused = new AgentContext();
+        stalePaused.setContextId(101L);
+        stalePaused.setAgentId(10L);
+        stalePaused.setGoalId(5L);
+        stalePaused.setMessageType("motivation");
+        stalePaused.setPauseReason(AgentCadence.PAUSE_REASON_STALE_PROGRESS);
+        stalePaused.setDeployed(false);
+        stalePaused.setStaleCount(8);
+
+        AgentContext manuallyStopped = new AgentContext();
+        manuallyStopped.setContextId(102L);
+        manuallyStopped.setAgentId(10L);
+        manuallyStopped.setGoalId(5L);
+        manuallyStopped.setMessageType("guidance");
+        manuallyStopped.setDeployed(false);
+        manuallyStopped.setStaleCount(4);
+
+        when(goalService.getGoal(5L)).thenReturn(goal);
+        when(userService.getCurrentUser()).thenReturn(user);
+        when(checklistRepository.save(any(ChecklistItem.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(checklistRepository.findChecklistItemByGoalIdOrderBySortOrder(5L)).thenReturn(List.of());
+        when(agentContextRepository.findByGoalId(5L)).thenReturn(List.of(stalePaused, manuallyStopped));
+        when(agentContextRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+        when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
+        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(stalePaused, manuallyStopped));
+
+        checklistService.addChecklistItem(request);
+
+        assertThat(stalePaused.isDeployed()).isTrue();
+        assertThat(stalePaused.getPauseReason()).isNull();
+        assertThat(stalePaused.getStaleCount()).isZero();
+        assertThat(stalePaused.getNextMessageAt()).isBeforeOrEqualTo(
+                LocalDateTime.now(ZoneOffset.UTC).plusHours(AgentCadence.baseIntervalHours("motivation")));
+        assertThat(manuallyStopped.isDeployed()).isFalse();
+        assertThat(manuallyStopped.getNextMessageAt()).isNull();
+        verify(agentRepository).save(agent);
+        assertThat(agent.isDeployed()).isTrue();
     }
 }
