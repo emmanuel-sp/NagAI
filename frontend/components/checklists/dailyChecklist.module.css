@@ -138,6 +138,16 @@
   animation: spin 0.8s linear infinite;
 }
 
+.inlineSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid color-mix(in srgb, var(--text-muted) 20%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -150,6 +160,17 @@
   background: rgba(198, 40, 40, 0.08);
   border-bottom: 1px solid rgba(198, 40, 40, 0.15);
   line-height: 1.5;
+}
+
+.statusBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
 
 /* ─── Empty body ─── */

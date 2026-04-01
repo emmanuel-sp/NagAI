@@ -725,10 +725,14 @@ export default function TodayContainer() {
               className={styles.headerIconBtn}
               onClick={() => void handleGenerate()}
               aria-label="Regenerate daily plan"
-              title="Regenerate"
+              title={isGenerating ? "Regenerating daily plan" : "Regenerate"}
               disabled={isGenerating}
             >
-              <IoRefresh size={16} />
+              {isGenerating ? (
+                <div className={styles.inlineSpinner} aria-hidden="true" />
+              ) : (
+                <IoRefresh size={16} />
+              )}
             </button>
           )}
           <div className={styles.viewTabs}>
@@ -775,6 +779,13 @@ export default function TodayContainer() {
 
       {/* Error */}
       {error && <div className={styles.errorBanner}>{error}</div>}
+
+      {isGenerating && checklist && (
+        <div className={styles.statusBanner} aria-live="polite">
+          <div className={styles.inlineSpinner} />
+          <span>Regenerating today&apos;s plan...</span>
+        </div>
+      )}
 
       {/* Calendar notice */}
       {calendarNotice && (

@@ -229,10 +229,14 @@ export default function DailyChecklistContainer({
                     void handleGenerate();
                   }}
                   aria-label="Regenerate daily plan"
-                  title="Regenerate daily plan"
+                  title={isGenerating ? "Regenerating daily plan" : "Regenerate daily plan"}
                   disabled={isGenerating}
                 >
-                  <IoRefresh size={16} />
+                  {isGenerating ? (
+                    <div className={styles.inlineSpinner} aria-hidden="true" />
+                  ) : (
+                    <IoRefresh size={16} />
+                  )}
                 </button>
               )}
               <span
@@ -262,6 +266,13 @@ export default function DailyChecklistContainer({
       {!isCollapsed && (
         <>
           {error && <div className={styles.errorBanner}>{error}</div>}
+
+          {isGenerating && checklist && (
+            <div className={styles.statusBanner} aria-live="polite">
+              <div className={styles.inlineSpinner} />
+              <span>Regenerating today&apos;s plan...</span>
+            </div>
+          )}
 
           {/* Config panel — expands inside card */}
           {showConfig && config && (
