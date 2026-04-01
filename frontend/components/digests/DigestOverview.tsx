@@ -12,6 +12,25 @@ interface DigestOverviewProps {
 }
 
 export default function DigestOverview({ digest, headerAction }: DigestOverviewProps) {
+  const frequencyLabels = {
+    daily: "Daily",
+    weekly: "Weekly",
+    biweekly: "Every two weeks",
+    monthly: "Monthly",
+  } as const;
+
+  const deliveryLabels = {
+    morning: "Morning delivery",
+    afternoon: "Afternoon delivery",
+    evening: "Evening delivery",
+  } as const;
+
+  const statusLabel = digest.active
+    ? "Active"
+    : digest.pauseReason === "stale_progress"
+      ? "Paused for inactivity"
+      : "Inactive";
+
   const formatDate = (date?: string) => {
     if (!date) return "Not yet";
     return parseUtcDate(date).toLocaleDateString("en-US", {
@@ -30,15 +49,37 @@ export default function DigestOverview({ digest, headerAction }: DigestOverviewP
   };
 
   return (
-    <div className={styles.overviewCard}>
+    <section className={styles.overviewCard}>
       <div className={styles.overviewHeader}>
-        <div>
-          <h2 className={styles.cardTitle}>Digest Overview</h2>
-          <p className={styles.cardSubtitle}>
-            Keep track of the last send and when the next digest is scheduled.
+        <div className={styles.overviewIntro}>
+          <span className={styles.pageEyebrow}>Digest</span>
+          <h1 className={styles.pageTitle}>{digest.name}</h1>
+          <p className={styles.pageDescription}>
+            {digest.description || "Personalized guidance delivered on your cadence."}
           </p>
         </div>
-        {headerAction}
+        {headerAction ? <div className={styles.overviewHeaderAction}>{headerAction}</div> : null}
+      </div>
+
+      <div className={styles.overviewMeta}>
+        <div className={styles.overviewMetaItem}>
+          <span className={styles.overviewMetaLabel}>Cadence</span>
+          <span className={styles.overviewMetaValue}>
+            {frequencyLabels[digest.frequency]} · {deliveryLabels[digest.deliveryTime]}
+          </span>
+        </div>
+
+        <div className={styles.overviewMetaItem}>
+          <span className={styles.overviewMetaLabel}>Content Mix</span>
+          <span className={styles.overviewMetaValue}>
+            {digest.contentTypes.length} selected {digest.contentTypes.length === 1 ? "section" : "sections"}
+          </span>
+        </div>
+
+        <div className={styles.overviewMetaItem}>
+          <span className={styles.overviewMetaLabel}>Status</span>
+          <span className={styles.overviewMetaValue}>{statusLabel}</span>
+        </div>
       </div>
 
       <div className={styles.overviewContent}>
@@ -66,6 +107,6 @@ export default function DigestOverview({ digest, headerAction }: DigestOverviewP
           </span>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

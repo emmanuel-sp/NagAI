@@ -28,10 +28,10 @@ export default function DigestStatusPanel({
         </h2>
         <p className={styles.cardSubtitle}>
           {digest.active
-            ? "Your digest is currently active and will be delivered according to your schedule."
+            ? "Your digest is live and will keep following the cadence you set."
             : isPausedStale
-              ? "Your digest was automatically paused due to inactivity."
-              : "Activate your digest to start receiving personalized content."}
+              ? "Your digest was automatically paused after a stretch without checklist movement."
+              : "Turn the digest on when you want personalized content arriving on schedule."}
         </p>
         {digest.active && digest.nextDeliveryAt && (
           <p className={styles.deploymentDate}>

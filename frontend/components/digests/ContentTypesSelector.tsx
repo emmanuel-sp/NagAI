@@ -67,7 +67,7 @@ export default function ContentTypesSelector({
       <div className={styles.settingsCard}>
         <h2 className={styles.cardTitle}>Content Types</h2>
         <p className={styles.cardSubtitle}>
-          Choose what types of content you&apos;d like to receive in your digest
+          Choose the mix you want to read, without turning the digest into noise.
         </p>
 
         <div className={styles.contentTypeGrid}>
@@ -111,7 +111,7 @@ export default function ContentTypesSelector({
             disabled={safeSelected.length === 0}
           >
             <IoEye size={16} />
-            Preview Digest
+            Preview sample digest
           </button>
         </div>
       </div>

@@ -34,7 +34,7 @@ export default function DigestSettings({
     <div className={styles.settingsCard}>
       <h2 className={styles.cardTitle}>Digest Settings</h2>
       <p className={styles.cardSubtitle}>
-        Configure when and how often you receive your personalized digest
+        Set the rhythm so your digest lands when it can actually be useful.
       </p>
 
       <div className={styles.settingSection}>
