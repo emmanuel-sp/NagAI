@@ -30,6 +30,7 @@ import com.nagai.backend.ai.AiGrpcClientService;
 import com.nagai.backend.calendar.GoogleCalendarService;
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
+import com.nagai.backend.exceptions.DailyChecklistException;
 import com.nagai.backend.exceptions.DailyChecklistRegenerationLimitException;
 import com.nagai.backend.goals.Goal;
 import com.nagai.backend.goals.GoalRepository;
@@ -130,6 +131,48 @@ class DailyChecklistServiceTest {
     }
 
     @Test
+    void generateDailyChecklist_returnsBusyBlocksSeparatelyFromItems() {
+        config.setCalendarEnabled(true);
+        user.setGoogleCalendarRefreshToken("refresh-token");
+
+        DailyChecklist checklist = new DailyChecklist();
+        checklist.setDailyChecklistId(50L);
+        checklist.setUserId(1L);
+        checklist.setPlanDate(today);
+        checklist.setGenerationCount(1);
+
+        DailyChecklistItem savedItem = new DailyChecklistItem();
+        savedItem.setDailyItemId(200L);
+        savedItem.setDailyChecklistId(50L);
+        savedItem.setSortOrder(0);
+        savedItem.setTitle("Draft onboarding email");
+        savedItem.setScheduledTime("11:30");
+
+        when(dailyChecklistRepository.findByUserIdAndPlanDate(1L, today)).thenReturn(Optional.empty());
+        when(googleCalendarService.fetchTodayEvents(any(User.class), any(java.time.ZoneId.class)))
+                .thenReturn(List.of(new GoogleCalendarService.BusyBlock("10:00", "11:00", "Team sync")));
+        when(aiGrpcClientService.generateDailyChecklist(anyList(), anyList(), anyInt(), anyString(), anyString(), anyString(), anyString(), anyList()))
+                .thenReturn(com.nagai.ai.DailyChecklistResponse.newBuilder()
+                        .addItems(DailyChecklistItemSuggestion.newBuilder()
+                                .setLabel("[G5-100]")
+                                .setTitle("Draft onboarding email")
+                                .setScheduledTime("11:30")
+                                .build())
+                        .build());
+        when(dailyChecklistRepository.save(any(DailyChecklist.class))).thenReturn(checklist);
+        when(dailyItemRepository.save(any(DailyChecklistItem.class))).thenReturn(savedItem);
+        when(dailyItemRepository.findByDailyChecklistIdOrderBySortOrder(50L)).thenReturn(List.of(savedItem));
+        when(goalService.getGoal(5L)).thenReturn(goal);
+
+        DailyChecklistResponse result = dailyChecklistService.generateDailyChecklist();
+
+        assertThat(result.items()).extracting(DailyChecklistItemResponse::title)
+                .containsExactly("Draft onboarding email");
+        assertThat(result.busyBlocks()).hasSize(1);
+        assertThat(result.busyBlocks().get(0).summary()).isEqualTo("Team sync");
+    }
+
+    @Test
     void generateDailyChecklist_regeneratesOnceAndPreservesCompletedItems() {
         DailyChecklist checklist = new DailyChecklist();
         checklist.setDailyChecklistId(50L);
@@ -197,6 +240,117 @@ class DailyChecklistServiceTest {
                 .hasMessage("Today's daily plan has already been regenerated once");
 
         verify(aiGrpcClientService, never()).generateDailyChecklist(anyList(), anyList(), anyInt(), anyString(), anyString(), anyString(), anyString(), anyList());
+    }
+
+    @Test
+    void generateDailyChecklist_filtersSuggestionsScheduledDuringBusyBlocks() {
+        config.setCalendarEnabled(true);
+        user.setGoogleCalendarRefreshToken("refresh-token");
+
+        DailyChecklist checklist = new DailyChecklist();
+        checklist.setDailyChecklistId(50L);
+        checklist.setUserId(1L);
+        checklist.setPlanDate(today);
+        checklist.setGenerationCount(1);
+
+        DailyChecklistItem savedItem = new DailyChecklistItem();
+        savedItem.setDailyItemId(203L);
+        savedItem.setDailyChecklistId(50L);
+        savedItem.setTitle("Inbox cleanup");
+        savedItem.setScheduledTime("11:30");
+        savedItem.setSortOrder(0);
+
+        when(dailyChecklistRepository.findByUserIdAndPlanDate(1L, today)).thenReturn(Optional.empty());
+        when(googleCalendarService.fetchTodayEvents(any(User.class), any(java.time.ZoneId.class)))
+                .thenReturn(List.of(new GoogleCalendarService.BusyBlock("10:00", "11:00", "Team sync")));
+        when(aiGrpcClientService.generateDailyChecklist(anyList(), anyList(), anyInt(), anyString(), anyString(), anyString(), anyString(), anyList()))
+                .thenReturn(com.nagai.ai.DailyChecklistResponse.newBuilder()
+                        .addItems(DailyChecklistItemSuggestion.newBuilder()
+                                .setLabel("[NEW]")
+                                .setTitle("Team sync")
+                                .setScheduledTime("10:30")
+                                .build())
+                        .addItems(DailyChecklistItemSuggestion.newBuilder()
+                                .setLabel("[NEW]")
+                                .setTitle("Inbox cleanup")
+                                .setScheduledTime("11:30")
+                                .build())
+                        .build());
+        when(dailyChecklistRepository.save(any(DailyChecklist.class))).thenReturn(checklist);
+        when(dailyItemRepository.save(any(DailyChecklistItem.class))).thenReturn(savedItem);
+        when(dailyItemRepository.findByDailyChecklistIdOrderBySortOrder(50L)).thenReturn(List.of(savedItem));
+
+        DailyChecklistResponse result = dailyChecklistService.generateDailyChecklist();
+
+        assertThat(result.items()).extracting(DailyChecklistItemResponse::title)
+                .containsExactly("Inbox cleanup");
+    }
+
+    @Test
+    void generateDailyChecklist_filtersSuggestionsThatEchoBusyBlocks() {
+        config.setCalendarEnabled(true);
+        user.setGoogleCalendarRefreshToken("refresh-token");
+
+        DailyChecklist checklist = new DailyChecklist();
+        checklist.setDailyChecklistId(50L);
+        checklist.setUserId(1L);
+        checklist.setPlanDate(today);
+        checklist.setGenerationCount(1);
+
+        DailyChecklistItem savedItem = new DailyChecklistItem();
+        savedItem.setDailyItemId(204L);
+        savedItem.setDailyChecklistId(50L);
+        savedItem.setTitle("Work block");
+        savedItem.setScheduledTime("11:15");
+        savedItem.setSortOrder(0);
+
+        when(dailyChecklistRepository.findByUserIdAndPlanDate(1L, today)).thenReturn(Optional.empty());
+        when(googleCalendarService.fetchTodayEvents(any(User.class), any(java.time.ZoneId.class)))
+                .thenReturn(List.of(new GoogleCalendarService.BusyBlock("10:00", "11:00", "Weekly planning")));
+        when(aiGrpcClientService.generateDailyChecklist(anyList(), anyList(), anyInt(), anyString(), anyString(), anyString(), anyString(), anyList()))
+                .thenReturn(com.nagai.ai.DailyChecklistResponse.newBuilder()
+                        .addItems(DailyChecklistItemSuggestion.newBuilder()
+                                .setLabel("[NEW]")
+                                .setTitle("Weekly planning")
+                                .setNotes("10:00-11:00")
+                                .build())
+                        .addItems(DailyChecklistItemSuggestion.newBuilder()
+                                .setLabel("[NEW]")
+                                .setTitle("Work block")
+                                .setScheduledTime("11:15")
+                                .build())
+                        .build());
+        when(dailyChecklistRepository.save(any(DailyChecklist.class))).thenReturn(checklist);
+        when(dailyItemRepository.save(any(DailyChecklistItem.class))).thenReturn(savedItem);
+        when(dailyItemRepository.findByDailyChecklistIdOrderBySortOrder(50L)).thenReturn(List.of(savedItem));
+
+        DailyChecklistResponse result = dailyChecklistService.generateDailyChecklist();
+
+        assertThat(result.items()).extracting(DailyChecklistItemResponse::title)
+                .containsExactly("Work block");
+    }
+
+    @Test
+    void generateDailyChecklist_filtersFutureDaySuggestionsAndFailsWhenNoneRemain() {
+        config.setCalendarEnabled(false);
+
+        when(dailyChecklistRepository.findByUserIdAndPlanDate(1L, today)).thenReturn(Optional.empty());
+        when(aiGrpcClientService.generateDailyChecklist(anyList(), anyList(), anyInt(), anyString(), anyString(), anyString(), anyString(), anyList()))
+                .thenReturn(com.nagai.ai.DailyChecklistResponse.newBuilder()
+                        .addItems(DailyChecklistItemSuggestion.newBuilder()
+                                .setLabel("[NEW]")
+                                .setTitle("Tomorrow planning session")
+                                .build())
+                        .addItems(DailyChecklistItemSuggestion.newBuilder()
+                                .setLabel("[NEW]")
+                                .setTitle("Follow up")
+                                .setNotes("Do this on 2099-01-01")
+                                .build())
+                        .build());
+
+        assertThatThrownBy(() -> dailyChecklistService.generateDailyChecklist())
+                .isInstanceOf(DailyChecklistException.class)
+                .hasMessageContaining("Couldn't build a valid plan for today");
     }
 
     @Test

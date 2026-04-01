@@ -49,6 +49,11 @@ public class DailyChecklistService {
     private static final Logger log = LoggerFactory.getLogger(DailyChecklistService.class);
     private static final Pattern GOAL_LABEL = Pattern.compile("\\[G(\\d+)-(\\d+)]");
     private static final Pattern GOAL_TAG = Pattern.compile("\\[G(\\d+)]");
+    private static final Pattern NEXT_DAY_PATTERN = Pattern.compile(
+            "\\b(tomorrow|next\\s+day|next-day|following\\s+day|following-day)\\b",
+            Pattern.CASE_INSENSITIVE);
+    private static final Pattern ISO_DATE_PATTERN = Pattern.compile("\\b\\d{4}-\\d{2}-\\d{2}\\b");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private final DailyChecklistConfigRepository configRepository;
@@ -127,9 +132,12 @@ public class DailyChecklistService {
 
     public com.nagai.backend.dailychecklist.DailyChecklistResponse getTodayChecklist() {
         User user = userService.getCurrentUser();
-        LocalDate today = todayInUserTimezone(user);
+        ZoneId zone = ZoneId.of(user.getTimezone() != null ? user.getTimezone() : "UTC");
+        LocalDate today = LocalDate.now(zone);
+        DailyChecklistConfig config = getConfigOrDefaults(user.getUserId());
+        List<GoogleCalendarService.BusyBlock> busyBlocks = loadTodayBusyBlocks(user, zone, config);
         return dailyChecklistRepository.findByUserIdAndPlanDate(user.getUserId(), today)
-                .map(dc -> buildResponse(dc, user))
+                .map(dc -> buildResponse(dc, user, busyBlocks))
                 .orElse(null);
     }
 
@@ -148,8 +156,7 @@ public class DailyChecklistService {
         }
 
         // Load config
-        DailyChecklistConfig config = configRepository.findByUserId(user.getUserId())
-                .orElseGet(() -> createDefaultConfig(user.getUserId()));
+        DailyChecklistConfig config = getConfigOrDefaults(user.getUserId());
 
         List<String> recurringItems = parseJson(config.getRecurringItems(), new TypeReference<>() {});
         List<Long> includedGoalIds = parseJson(config.getIncludedGoalIds(), new TypeReference<>() {});
@@ -183,26 +190,14 @@ public class DailyChecklistService {
         }
 
         // Fetch calendar events if connected and enabled
-        List<CalendarBusyBlock> busyBlocks = List.of();
-        if (config.isCalendarEnabled() && user.isCalendarConnected()) {
-            try {
-                List<GoogleCalendarService.BusyBlock> events =
-                        googleCalendarService.fetchTodayEvents(user, zone);
-                busyBlocks = events.stream()
-                        .map(e -> CalendarBusyBlock.newBuilder()
-                                .setStartTime(e.startTime())
-                                .setEndTime(e.endTime())
-                                .setSummary(e.summary() != null ? e.summary() : "")
-                                .build())
-                        .toList();
-                if (!busyBlocks.isEmpty()) {
-                    log.info("Loaded {} calendar events for user={}", busyBlocks.size(), user.getUserId());
-                }
-            } catch (Exception e) {
-                log.warn("Calendar fetch failed for user={}, continuing without it: {}",
-                        user.getUserId(), e.getMessage());
-            }
-        }
+        List<GoogleCalendarService.BusyBlock> busyBlocks = loadTodayBusyBlocks(user, zone, config);
+        List<CalendarBusyBlock> aiBusyBlocks = busyBlocks.stream()
+                .map(e -> CalendarBusyBlock.newBuilder()
+                        .setStartTime(e.startTime())
+                        .setEndTime(e.endTime())
+                        .setSummary(e.summary() != null ? e.summary() : "")
+                        .build())
+                .toList();
 
         // Call AI
         String currentTime = nowTime.format(DateTimeFormatter.ofPattern("HH:mm"));
@@ -212,14 +207,15 @@ public class DailyChecklistService {
 
         DailyChecklistResponse aiResponse = aiGrpcClientService.generateDailyChecklist(
                 candidates, recurringItems, config.getMaxItems(),
-                currentTime, userProfile, dayOfWeek, planDate, busyBlocks);
+                currentTime, userProfile, dayOfWeek, planDate, aiBusyBlocks);
 
         // Validate AI returned usable items
-        if (aiResponse.getItemsList().isEmpty()) {
+        List<DailyChecklistItemSuggestion> validSuggestions = filterValidSuggestions(
+                aiResponse.getItemsList(), busyBlocks, today);
+        if (validSuggestions.isEmpty()) {
             throw new DailyChecklistException(
-                    "Not enough context to generate a daily plan. "
-                    + "Try adding more details to your profile, creating goals with checklist items, "
-                    + "or configuring recurring anchors in the daily plan settings.");
+                    "Couldn't build a valid plan for today. "
+                    + "Try regenerating or adjusting your goals, recurring anchors, or calendar settings.");
         }
 
         DailyChecklist checklist;
@@ -262,7 +258,7 @@ public class DailyChecklistService {
         // Parse AI response and create items
         List<DailyChecklistItem> items = new ArrayList<>();
         int sortOrder = startingSortOrder;
-        for (DailyChecklistItemSuggestion suggestion : aiResponse.getItemsList()) {
+        for (DailyChecklistItemSuggestion suggestion : validSuggestions) {
             DailyChecklistItem item = new DailyChecklistItem();
             item.setDailyChecklistId(checklist.getDailyChecklistId());
             item.setTitle(suggestion.getTitle());
@@ -298,7 +294,7 @@ public class DailyChecklistService {
         log.info("Generated daily checklist for user={} date={} items={}",
                 user.getUserId(), planDate, items.size());
 
-        return buildResponse(checklist, user);
+        return buildResponse(checklist, user, busyBlocks);
     }
 
     // ---- Toggle with write-through ----
@@ -383,7 +379,10 @@ public class DailyChecklistService {
     public com.nagai.backend.dailychecklist.DailyChecklistResponse reorderTodayItems(
             DailyChecklistReorderRequest request) {
         User user = userService.getCurrentUser();
+        ZoneId zone = ZoneId.of(user.getTimezone() != null ? user.getTimezone() : "UTC");
+        DailyChecklistConfig config = getConfigOrDefaults(user.getUserId());
         DailyChecklist checklist = getTodayChecklistEntityForUser(user);
+        List<GoogleCalendarService.BusyBlock> busyBlocks = loadTodayBusyBlocks(user, zone, config);
         List<DailyChecklistItem> items = dailyItemRepository
                 .findByDailyChecklistIdOrderBySortOrder(checklist.getDailyChecklistId());
         List<DailyChecklistItem> movableItems = items.stream()
@@ -396,7 +395,7 @@ public class DailyChecklistService {
 
         applyDailyReorder(items, request.getOrderedItemIds());
         dailyItemRepository.saveAll(items);
-        return buildResponse(checklist, user);
+        return buildResponse(checklist, user, busyBlocks);
     }
 
     // ---- Delete ----
@@ -411,18 +410,22 @@ public class DailyChecklistService {
     // ---- Helpers ----
 
     private com.nagai.backend.dailychecklist.DailyChecklistResponse buildResponse(
-            DailyChecklist checklist, User user) {
+            DailyChecklist checklist, User user, List<GoogleCalendarService.BusyBlock> busyBlocks) {
         List<DailyChecklistItem> items = dailyItemRepository
                 .findByDailyChecklistIdOrderBySortOrder(checklist.getDailyChecklistId());
         List<DailyChecklistItemResponse> itemResponses = items.stream()
                 .map(this::resolveItemResponse)
+                .toList();
+        List<DailyChecklistBusyBlockResponse> busyBlockResponses = busyBlocks.stream()
+                .map(DailyChecklistBusyBlockResponse::fromBusyBlock)
                 .toList();
         return new com.nagai.backend.dailychecklist.DailyChecklistResponse(
                 checklist.getDailyChecklistId(),
                 checklist.getPlanDate().toString(),
                 checklist.getGeneratedAt() != null ? checklist.getGeneratedAt().toString() : null,
                 checklist.getGenerationCount(),
-                itemResponses);
+                itemResponses,
+                busyBlockResponses);
     }
 
     private DailyChecklistItemResponse resolveItemResponse(DailyChecklistItem item) {
@@ -441,6 +444,38 @@ public class DailyChecklistService {
     private LocalDate todayInUserTimezone(User user) {
         String tz = user.getTimezone() != null ? user.getTimezone() : "UTC";
         return LocalDate.now(ZoneId.of(tz));
+    }
+
+    private List<GoogleCalendarService.BusyBlock> loadTodayBusyBlocks(
+            User user,
+            ZoneId zone,
+            DailyChecklistConfig config) {
+        if (!config.isCalendarEnabled() || !user.isCalendarConnected()) {
+            return List.of();
+        }
+
+        try {
+            List<GoogleCalendarService.BusyBlock> busyBlocks =
+                    googleCalendarService.fetchTodayEvents(user, zone);
+            if (!busyBlocks.isEmpty()) {
+                log.info("Loaded {} calendar events for user={}", busyBlocks.size(), user.getUserId());
+            }
+            return busyBlocks;
+        } catch (Exception e) {
+            log.warn("Calendar fetch failed for user={}, continuing without it: {}",
+                    user.getUserId(), e.getMessage());
+            return List.of();
+        }
+    }
+
+    private DailyChecklistConfig getConfigOrDefaults(Long userId) {
+        return configRepository.findByUserId(userId).orElseGet(() -> {
+            DailyChecklistConfig config = new DailyChecklistConfig();
+            config.setUserId(userId);
+            config.setMaxItems(10);
+            config.setCalendarEnabled(true);
+            return config;
+        });
     }
 
     private DailyChecklist getTodayChecklistEntityForUser(User user) {
@@ -497,6 +532,139 @@ public class DailyChecklistService {
                 item.setSortOrder(nextSortOrder++);
             }
         }
+    }
+
+    private List<DailyChecklistItemSuggestion> filterValidSuggestions(
+            List<DailyChecklistItemSuggestion> suggestions,
+            List<GoogleCalendarService.BusyBlock> busyBlocks,
+            LocalDate planDate) {
+        if (suggestions == null || suggestions.isEmpty()) {
+            return List.of();
+        }
+
+        List<DailyChecklistItemSuggestion> validSuggestions = new ArrayList<>();
+        for (DailyChecklistItemSuggestion suggestion : suggestions) {
+            if (isValidSuggestion(suggestion, busyBlocks, planDate)) {
+                validSuggestions.add(suggestion);
+            }
+        }
+        return validSuggestions;
+    }
+
+    private boolean isValidSuggestion(
+            DailyChecklistItemSuggestion suggestion,
+            List<GoogleCalendarService.BusyBlock> busyBlocks,
+            LocalDate planDate) {
+        String combinedText = ((suggestion.getTitle() != null ? suggestion.getTitle() : "") + " "
+                + (suggestion.getNotes() != null ? suggestion.getNotes() : "")).trim();
+
+        if (mentionsFutureDay(combinedText, planDate)) {
+            log.info("Dropping daily suggestion for future-day language: title={}", suggestion.getTitle());
+            return false;
+        }
+        if (echoesBusyBlock(combinedText, busyBlocks)) {
+            log.info("Dropping daily suggestion that echoes a busy block: title={}", suggestion.getTitle());
+            return false;
+        }
+        if (scheduledInsideBusyBlock(suggestion.getScheduledTime(), busyBlocks)) {
+            log.info("Dropping daily suggestion scheduled during busy time: title={} time={}",
+                    suggestion.getTitle(), suggestion.getScheduledTime());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean mentionsFutureDay(String text, LocalDate planDate) {
+        if (text == null || text.isBlank()) {
+            return false;
+        }
+
+        if (NEXT_DAY_PATTERN.matcher(text).find()) {
+            return true;
+        }
+
+        Matcher matcher = ISO_DATE_PATTERN.matcher(text);
+        while (matcher.find()) {
+            LocalDate mentionedDate;
+            try {
+                mentionedDate = LocalDate.parse(matcher.group());
+            } catch (Exception e) {
+                continue;
+            }
+            if (!mentionedDate.equals(planDate)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean echoesBusyBlock(String text, List<GoogleCalendarService.BusyBlock> busyBlocks) {
+        if (text == null || text.isBlank() || busyBlocks.isEmpty()) {
+            return false;
+        }
+
+        String normalizedText = normalizeText(text);
+        String lowerText = text.toLowerCase(Locale.ENGLISH);
+        for (GoogleCalendarService.BusyBlock busyBlock : busyBlocks) {
+            String normalizedSummary = normalizeText(busyBlock.summary());
+            if (normalizedSummary.length() >= 4 && normalizedText.contains(normalizedSummary)) {
+                return true;
+            }
+
+            String start = busyBlock.startTime();
+            String end = busyBlock.endTime();
+            if (lowerText.contains(start.toLowerCase(Locale.ENGLISH) + "-" + end.toLowerCase(Locale.ENGLISH))
+                    || lowerText.contains(start.toLowerCase(Locale.ENGLISH) + "–" + end.toLowerCase(Locale.ENGLISH))
+                    || lowerText.contains(start.toLowerCase(Locale.ENGLISH) + " to " + end.toLowerCase(Locale.ENGLISH))
+                    || (lowerText.contains(start.toLowerCase(Locale.ENGLISH))
+                    && lowerText.contains(end.toLowerCase(Locale.ENGLISH)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean scheduledInsideBusyBlock(
+            String scheduledTime,
+            List<GoogleCalendarService.BusyBlock> busyBlocks) {
+        if (scheduledTime == null || scheduledTime.isBlank() || busyBlocks.isEmpty()) {
+            return false;
+        }
+
+        LocalTime scheduled;
+        try {
+            scheduled = LocalTime.parse(scheduledTime, TIME_FORMATTER);
+        } catch (Exception e) {
+            return false;
+        }
+
+        for (GoogleCalendarService.BusyBlock busyBlock : busyBlocks) {
+            try {
+                LocalTime start = LocalTime.parse(busyBlock.startTime(), TIME_FORMATTER);
+                LocalTime end = LocalTime.parse(busyBlock.endTime(), TIME_FORMATTER);
+                boolean isAllDay = "00:00".equals(busyBlock.startTime()) && "23:59".equals(busyBlock.endTime());
+                boolean overlaps = isAllDay
+                        ? !scheduled.isBefore(start) && !scheduled.isAfter(end)
+                        : !scheduled.isBefore(start) && scheduled.isBefore(end);
+                if (overlaps) {
+                    return true;
+                }
+            } catch (Exception e) {
+                log.debug("Skipping busy block time comparison for malformed block {}-{}",
+                        busyBlock.startTime(), busyBlock.endTime());
+            }
+        }
+        return false;
+    }
+
+    private String normalizeText(String text) {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+        return text.toLowerCase(Locale.ENGLISH)
+                .replaceAll("[^a-z0-9]+", " ")
+                .trim()
+                .replaceAll("\\s+", " ");
     }
 
     private void publishGeneratedEvent(Long userId, String planDate, int itemCount) {

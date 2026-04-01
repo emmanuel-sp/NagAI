@@ -1,3 +1,9 @@
+export interface DailyChecklistBusyBlock {
+  startTime: string;
+  endTime: string;
+  summary: string;
+}
+
 export interface DailyChecklistItem {
   dailyItemId: number;
   parentChecklistId: number | null;
@@ -17,6 +23,7 @@ export interface DailyChecklist {
   generatedAt: string;
   generationCount: number;
   items: DailyChecklistItem[];
+  busyBlocks: DailyChecklistBusyBlock[];
 }
 
 export interface DailyChecklistConfig {

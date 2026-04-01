@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   DailyChecklist,
+  DailyChecklistBusyBlock,
   DailyChecklistItem as DailyItem,
   DailyChecklistConfig as ConfigType,
 } from "@/types/dailyChecklist";
@@ -54,6 +55,10 @@ function formatTime12h(time24: string): string {
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
+}
+
+function busyBlockKey(busyBlock: DailyChecklistBusyBlock, index: number): string {
+  return `${busyBlock.startTime}-${busyBlock.endTime}-${busyBlock.summary || "busy"}-${index}`;
 }
 
 // ─── Edit Form ─────────────────────────────────────────────────────────────────
@@ -520,21 +525,54 @@ export default function TodayContainer() {
   // ─── Hourly view ─────────────────────────────────────────────────────────────
 
   const renderHourlyView = () => {
+    const busyBlocks = checklist?.busyBlocks ?? [];
     const scheduled = items
       .filter((i) => i.scheduledTime)
       .sort((a, b) => timeToMinutes(a.scheduledTime!) - timeToMinutes(b.scheduledTime!));
     const unscheduled = items.filter((i) => !i.scheduledTime);
 
-    const hours = scheduled.map((i) => parseInt(i.scheduledTime!.split(":")[0]));
-    const minHour = scheduled.length > 0 ? Math.min(...hours) : new Date().getHours();
-    const maxHour = scheduled.length > 0 ? Math.max(minHour, ...hours) : minHour + 1;
+    type HourlyEntry =
+      | { kind: "item"; startMinutes: number; item: DailyItem }
+      | { kind: "busy"; startMinutes: number; busyBlock: DailyChecklistBusyBlock; key: string };
+
+    const busyHours = busyBlocks.flatMap((block) => [
+      parseInt(block.startTime.split(":")[0], 10),
+      parseInt(block.endTime.split(":")[0], 10),
+    ]);
+    const hours = [
+      ...scheduled.map((i) => parseInt(i.scheduledTime!.split(":")[0], 10)),
+      ...busyHours,
+    ];
+    const minHour = hours.length > 0 ? Math.min(...hours) : new Date().getHours();
+    const maxHour = hours.length > 0 ? Math.max(minHour, ...hours) : minHour + 1;
     const currentHour = new Date().getHours();
 
-    const itemsByHour: Record<number, DailyItem[]> = {};
+    const entriesByHour: Record<number, HourlyEntry[]> = {};
+    const hourlyEntries: HourlyEntry[] = [
+      ...scheduled.map((item) => ({
+        kind: "item" as const,
+        startMinutes: timeToMinutes(item.scheduledTime!),
+        item,
+      })),
+      ...busyBlocks.map((busyBlock, index) => ({
+        kind: "busy" as const,
+        startMinutes: timeToMinutes(busyBlock.startTime),
+        busyBlock,
+        key: busyBlockKey(busyBlock, index),
+      })),
+    ].sort((a, b) => {
+      if (a.startMinutes !== b.startMinutes) return a.startMinutes - b.startMinutes;
+      if (a.kind === b.kind) return 0;
+      return a.kind === "busy" ? -1 : 1;
+    });
+
     for (let h = minHour; h <= maxHour; h++) {
-      itemsByHour[h] = scheduled
-        .filter((i) => parseInt(i.scheduledTime!.split(":")[0]) === h)
-        .sort((a, b) => timeToMinutes(a.scheduledTime!) - timeToMinutes(b.scheduledTime!));
+      entriesByHour[h] = hourlyEntries.filter(
+        (entry) => parseInt(
+          (entry.kind === "item" ? entry.item.scheduledTime! : entry.busyBlock.startTime).split(":")[0],
+          10
+        ) === h
+      );
     }
 
     const renderHourlyItem = (item: DailyItem) => (
@@ -577,6 +615,24 @@ export default function TodayContainer() {
       </div>
     );
 
+    const renderBusyBlock = (busyBlock: DailyChecklistBusyBlock, key: string) => (
+      <div key={key} className={styles.busyBlockCard}>
+        <div className={styles.busyBlockIndicator}>
+          <IoCalendarOutline size={16} />
+        </div>
+        <div className={styles.itemContent}>
+          <span className={styles.busyBlockTitle}>{busyBlock.summary || "Busy"}</span>
+          <span className={styles.busyBlockLabel}>Calendar block</span>
+          <div className={styles.itemMeta}>
+            <span className={styles.timeBadge}>
+              <IoClock size={11} />
+              {formatTime12h(busyBlock.startTime)} - {formatTime12h(busyBlock.endTime)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+
     const label12 = (h: number) => {
       if (h === 0 || h === 12) return "12";
       return h > 12 ? `${h - 12}` : `${h}`;
@@ -597,14 +653,14 @@ export default function TodayContainer() {
         )}
 
         {Array.from({ length: maxHour - minHour + 1 }, (_, i) => minHour + i).map((h) => {
-          const hourItems = itemsByHour[h] ?? [];
+          const hourEntries = entriesByHour[h] ?? [];
           const isNow = h === currentHour;
           const isPast = h < currentHour;
 
           return (
             <div
               key={h}
-              className={`${styles.hourRow} ${isNow ? styles.hourRowNow : ""} ${isPast && hourItems.length === 0 ? styles.hourRowEmpty : ""}`}
+              className={`${styles.hourRow} ${isNow ? styles.hourRowNow : ""} ${isPast && hourEntries.length === 0 ? styles.hourRowEmpty : ""}`}
             >
               <div className={styles.hourLabel}>
                 <span className={styles.hourText}>{label12(h)}</span>
@@ -612,8 +668,12 @@ export default function TodayContainer() {
               </div>
               <div className={styles.hourItems}>
                 {isNow && <div className={styles.nowLine} />}
-                {hourItems.length > 0 ? (
-                  hourItems.map(renderHourlyItem)
+                {hourEntries.length > 0 ? (
+                  hourEntries.map((entry) =>
+                    entry.kind === "item"
+                      ? renderHourlyItem(entry.item)
+                      : renderBusyBlock(entry.busyBlock, entry.key)
+                  )
                 ) : (
                   <div className={styles.hourSlotEmpty} />
                 )}
@@ -642,7 +702,10 @@ export default function TodayContainer() {
   const totalCount = items.length;
   const progressPct = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
-  const dateLabel = new Date().toLocaleDateString("en-US", {
+  const dateLabel = (checklist
+    ? new Date(checklist.planDate + "T00:00:00")
+    : new Date()
+  ).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",

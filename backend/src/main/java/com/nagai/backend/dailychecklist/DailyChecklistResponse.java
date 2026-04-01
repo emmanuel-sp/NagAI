@@ -7,5 +7,6 @@ public record DailyChecklistResponse(
         String planDate,
         String generatedAt,
         Integer generationCount,
-        List<DailyChecklistItemResponse> items) {
+        List<DailyChecklistItemResponse> items,
+        List<DailyChecklistBusyBlockResponse> busyBlocks) {
 }
