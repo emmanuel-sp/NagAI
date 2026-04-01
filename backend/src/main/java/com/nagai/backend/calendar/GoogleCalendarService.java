@@ -47,8 +47,8 @@ public class GoogleCalendarService {
 
     private final UserRepository userRepository;
     private final StringRedisTemplate redisTemplate;
+    private final RestTemplate restTemplate;
     private final ObjectMapper mapper = new ObjectMapper();
-    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${google.client-id}")
     private String clientId;
@@ -59,9 +59,11 @@ public class GoogleCalendarService {
     @Value("${google.calendar.redirect-uri:http://localhost:8080/auth/calendar/callback}")
     private String redirectUri;
 
-    public GoogleCalendarService(UserRepository userRepository, StringRedisTemplate redisTemplate) {
+    public GoogleCalendarService(UserRepository userRepository, StringRedisTemplate redisTemplate,
+                                 RestTemplate externalRestTemplate) {
         this.userRepository = userRepository;
         this.redisTemplate = redisTemplate;
+        this.restTemplate = externalRestTemplate;
     }
 
     public record BusyBlock(String startTime, String endTime, String summary) {}

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.nagai.backend.exceptions.GoalLimitException;
 import com.nagai.backend.exceptions.GoalNotFoundException;
@@ -22,10 +23,10 @@ public class GoalService {
 
     private static final int MAX_GOALS = 10;
 
+    @Transactional
     public Goal addGoal(GoalAddRequest goalAddRequest) {
         User currentUser = userService.getCurrentUser();
-        List<Goal> existing = goalRepository.findAllByUserId(currentUser.getUserId());
-        if (existing.size() >= MAX_GOALS) {
+        if (goalRepository.countByUserId(currentUser.getUserId()) >= MAX_GOALS) {
             throw new GoalLimitException();
         }
         Goal goal = new Goal();
@@ -43,6 +44,7 @@ public class GoalService {
         return goalRepository.save(goal);
     }
 
+    @Transactional
     public Goal updateGoal(GoalUpdateRequest goalUpdateRequest) {
         User currentUser = userService.getCurrentUser();
         Goal goal = goalRepository.findById(goalUpdateRequest.getGoalId()).orElseThrow(() -> new GoalNotFoundException());
@@ -62,6 +64,7 @@ public class GoalService {
         return goalRepository.save(goal);
     }
 
+    @Transactional
     public Goal updateGoalJournal(Long goalId, GoalJournalUpdateRequest request) {
         User currentUser = userService.getCurrentUser();
         Goal goal = goalRepository.findById(goalId).orElseThrow(GoalNotFoundException::new);
@@ -93,6 +96,7 @@ public class GoalService {
         return goals;
     }
 
+    @Transactional
     public void deleteGoal(Long goalId) {
         User user = userService.getCurrentUser();
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new GoalNotFoundException());

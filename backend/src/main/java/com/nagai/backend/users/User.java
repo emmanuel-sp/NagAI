@@ -51,6 +51,9 @@ public class User implements UserDetails{
     @Column(name = "verification_token")
     private String verificationToken;
 
+    @Column(name = "verification_token_hash")
+    private String verificationTokenHash;
+
     @Column(name = "verification_token_expiry")
     private LocalDateTime verificationTokenExpiry;
 

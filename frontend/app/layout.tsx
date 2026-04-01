@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Raleway } from "next/font/google";
 import "./globals.css";
-import LayoutClient from "@/components/LayoutClient";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -37,9 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${figtree.variable} ${raleway.variable}`}>
-      <body>
-        <LayoutClient>{children}</LayoutClient>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

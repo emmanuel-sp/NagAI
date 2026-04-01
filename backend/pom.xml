@@ -196,10 +196,7 @@
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-maven-plugin</artifactId>
 				<configuration>
-					<url>jdbc:postgresql://localhost:5432/nagai</url>
-					<user>postgres</user>
-					<password>password</password>
-					<cleanDisabled>false</cleanDisabled>
+					<cleanDisabled>true</cleanDisabled>
 				</configuration>
 			</plugin>
 		</plugins>

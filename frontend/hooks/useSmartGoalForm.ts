@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { generateSmartGoalSuggestion } from "@/services/aiGoalService";
 
 export type SmartField = "specific" | "measurable" | "attainable" | "relevant" | "timely";
@@ -35,17 +35,17 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
   const [suggestions, setSuggestions] = useState<Record<string, string>>({});
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
 
-  const setField = (field: keyof SmartGoalFields, value: string) => {
+  const setField = useCallback((field: keyof SmartGoalFields, value: string) => {
     setFields((prev) => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const resetFields = (values?: Partial<SmartGoalFields>) => {
+  const resetFields = useCallback((values?: Partial<SmartGoalFields>) => {
     setFields({ ...emptyFields, ...values });
     setSuggestions({});
     setSuggestionError(null);
-  };
+  }, []);
 
-  const generateSuggestion = async (field: SmartField) => {
+  const generateSuggestion = useCallback(async (field: SmartField) => {
     if (!fields.title.trim()) {
       setSuggestionError("Please enter a goal title first to generate AI suggestions");
       return;
@@ -75,9 +75,9 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
     } finally {
       setLoadingSuggestion(null);
     }
-  };
+  }, [fields]);
 
-  const useSuggestion = (field: SmartField) => {
+  const applySuggestion = useCallback((field: SmartField) => {
     const suggestion = suggestions[field];
     if (suggestion) {
       setField(field, suggestion);
@@ -87,7 +87,7 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
         return next;
       });
     }
-  };
+  }, [setField, suggestions]);
 
   return {
     fields,
@@ -97,6 +97,6 @@ export function useSmartGoalForm(initialValues?: Partial<SmartGoalFields>) {
     suggestions,
     suggestionError,
     generateSuggestion,
-    useSuggestion,
+    applySuggestion,
   };
 }

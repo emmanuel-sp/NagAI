@@ -236,12 +236,6 @@
   cursor: not-allowed;
 }
 
-.contextList {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
 .contextLimitBanner {
   margin-bottom: 16px;
   padding: 12px 14px;
@@ -348,75 +342,6 @@
   color: var(--text-muted);
   font-size: var(--fs-xs);
   line-height: 1.6;
-}
-
-.contextCard {
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--visual-panel-bg);
-}
-
-.contextCardHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-
-.contextName {
-  font-size: var(--fs-lg);
-}
-
-.contextType {
-  display: inline-flex;
-  margin-top: 6px;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  background: var(--visual-accent-fill);
-  color: var(--accent);
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-500);
-  text-transform: capitalize;
-}
-
-.contextActions {
-  display: flex;
-  gap: 8px;
-}
-
-.iconButton {
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  color: var(--text-secondary);
-}
-
-.iconButtonDanger {
-  color: var(--error);
-}
-
-.contextInstructions,
-.contextInstructionsMuted {
-  font-size: var(--fs-sm);
-  line-height: 1.75;
-}
-
-.contextInstructions {
-  color: var(--text-secondary);
-}
-
-.contextInstructionsMuted {
-  color: var(--text-muted);
-}
-
-.limitNote {
-  margin-top: 14px;
-  color: var(--text-muted);
-  font-size: var(--fs-xs);
 }
 
 .smartSpark {

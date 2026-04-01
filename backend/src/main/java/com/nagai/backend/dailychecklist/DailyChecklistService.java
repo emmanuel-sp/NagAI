@@ -21,6 +21,7 @@ import org.slf4j.MDC;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -99,6 +100,7 @@ public class DailyChecklistService {
         return DailyChecklistConfigResponse.fromEntity(config, user);
     }
 
+    @Transactional
     public DailyChecklistConfigResponse updateConfig(DailyChecklistConfigRequest request) {
         User user = userService.getCurrentUser();
         DailyChecklistConfig config = configRepository.findByUserId(user.getUserId())
@@ -141,6 +143,7 @@ public class DailyChecklistService {
                 .orElse(null);
     }
 
+    @Transactional
     public com.nagai.backend.dailychecklist.DailyChecklistResponse generateDailyChecklist() {
         User user = userService.getCurrentUser();
         ZoneId zone = ZoneId.of(user.getTimezone() != null ? user.getTimezone() : "UTC");
@@ -170,11 +173,12 @@ public class DailyChecklistService {
                     .filter(g -> selected.contains(g.getGoalId()))
                     .toList();
         }
+        Map<Long, List<ChecklistItem>> checklistItemsByGoalId = loadChecklistItemsByGoalId(goals);
 
         // Build labeled candidates
         List<DailyChecklistCandidate> candidates = new ArrayList<>();
         for (Goal goal : goals) {
-            List<ChecklistItem> items = checklistRepository.findChecklistItemByGoalId(goal.getGoalId());
+            List<ChecklistItem> items = checklistItemsByGoalId.getOrDefault(goal.getGoalId(), List.of());
             String smartContext = ProfileUtils.buildGoalSmartContext(goal);
             for (ChecklistItem item : items) {
                 String label = "[G" + goal.getGoalId() + "-" + item.getChecklistId() + "]";
@@ -299,6 +303,7 @@ public class DailyChecklistService {
 
     // ---- Toggle with write-through ----
 
+    @Transactional
     public DailyChecklistItemResponse toggleDailyItem(Long dailyItemId) {
         User user = userService.getCurrentUser();
         DailyChecklistItem dailyItem = getOwnedDailyItem(dailyItemId, user);
@@ -333,6 +338,7 @@ public class DailyChecklistService {
         return resolveItemResponse(dailyItem);
     }
 
+    @Transactional
     public DailyChecklistItemResponse addDailyItem(DailyChecklistItemCreateRequest request) {
         User user = userService.getCurrentUser();
         DailyChecklist checklist = getTodayChecklistEntityForUser(user);
@@ -353,6 +359,7 @@ public class DailyChecklistService {
         return resolveItemResponse(dailyItemRepository.save(item));
     }
 
+    @Transactional
     public DailyChecklistItemResponse updateDailyItem(
             Long dailyItemId,
             DailyChecklistItemUpdateRequest request) {
@@ -376,6 +383,7 @@ public class DailyChecklistService {
         return resolveItemResponse(dailyItemRepository.save(item));
     }
 
+    @Transactional
     public com.nagai.backend.dailychecklist.DailyChecklistResponse reorderTodayItems(
             DailyChecklistReorderRequest request) {
         User user = userService.getCurrentUser();
@@ -410,6 +418,7 @@ public class DailyChecklistService {
 
     // ---- Delete ----
 
+    @Transactional
     public void deleteDailyItem(Long dailyItemId) {
         User user = userService.getCurrentUser();
         DailyChecklistItem dailyItem = getOwnedDailyItem(dailyItemId, user);
@@ -423,9 +432,7 @@ public class DailyChecklistService {
             DailyChecklist checklist, User user, List<GoogleCalendarService.BusyBlock> busyBlocks) {
         List<DailyChecklistItem> items = dailyItemRepository
                 .findByDailyChecklistIdOrderBySortOrder(checklist.getDailyChecklistId());
-        List<DailyChecklistItemResponse> itemResponses = items.stream()
-                .map(this::resolveItemResponse)
-                .toList();
+        List<DailyChecklistItemResponse> itemResponses = buildItemResponses(items);
         List<DailyChecklistBusyBlockResponse> busyBlockResponses = busyBlocks.stream()
                 .map(DailyChecklistBusyBlockResponse::fromBusyBlock)
                 .toList();
@@ -436,6 +443,23 @@ public class DailyChecklistService {
                 checklist.getGenerationCount(),
                 itemResponses,
                 busyBlockResponses);
+    }
+
+    private List<DailyChecklistItemResponse> buildItemResponses(List<DailyChecklistItem> items) {
+        List<Long> parentGoalIds = items.stream()
+                .map(DailyChecklistItem::getParentGoalId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+        Map<Long, String> goalTitlesById = parentGoalIds.isEmpty()
+                ? Map.of()
+                : goalRepository.findAllByGoalIdIn(parentGoalIds).stream()
+                        .collect(java.util.stream.Collectors.toMap(Goal::getGoalId, Goal::getTitle));
+        return items.stream()
+                .map(item -> DailyChecklistItemResponse.fromEntity(
+                        item,
+                        item.getParentGoalId() != null ? goalTitlesById.get(item.getParentGoalId()) : null))
+                .toList();
     }
 
     private DailyChecklistItemResponse resolveItemResponse(DailyChecklistItem item) {
@@ -449,6 +473,22 @@ public class DailyChecklistService {
             }
         }
         return DailyChecklistItemResponse.fromEntity(item, parentGoalTitle);
+    }
+
+    private Map<Long, List<ChecklistItem>> loadChecklistItemsByGoalId(List<Goal> goals) {
+        List<Long> goalIds = goals.stream()
+                .map(Goal::getGoalId)
+                .toList();
+        if (goalIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return checklistRepository.findChecklistItemsByGoalIds(goalIds).stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        ChecklistItem::getGoalId,
+                        java.util.LinkedHashMap::new,
+                        java.util.stream.Collectors.toList()
+                ));
     }
 
     private LocalDate todayInUserTimezone(User user) {

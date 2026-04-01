@@ -75,7 +75,7 @@ class ChatServiceTest {
             return m;
         });
         when(goalRepository.findAllByUserId(1L)).thenReturn(List.of());
-        when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(100L)).thenReturn(List.of());
+        when(chatMessageRepository.findTop20BySessionIdOrderByCreatedAtDesc(100L)).thenReturn(List.of());
 
         ActionSuggestion suggestion = ActionSuggestion.newBuilder()
                 .setSuggestionId("abc-123")
@@ -115,7 +115,7 @@ class ChatServiceTest {
             return m;
         });
         when(goalRepository.findAllByUserId(1L)).thenReturn(List.of());
-        when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(100L)).thenReturn(List.of());
+        when(chatMessageRepository.findTop20BySessionIdOrderByCreatedAtDesc(100L)).thenReturn(List.of());
 
         AgentChatResponse aiResponse = AgentChatResponse.newBuilder()
                 .setAssistantMessage("Response")
@@ -164,7 +164,7 @@ class ChatServiceTest {
             return m;
         });
         when(goalRepository.findAllByUserId(1L)).thenReturn(List.of());
-        when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(100L)).thenReturn(List.of());
+        when(chatMessageRepository.findTop20BySessionIdOrderByCreatedAtDesc(100L)).thenReturn(List.of());
 
         AgentChatResponse aiResponse = AgentChatResponse.newBuilder()
                 .setAssistantMessage("Just a plain reply")

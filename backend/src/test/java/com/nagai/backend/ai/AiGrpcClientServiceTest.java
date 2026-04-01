@@ -1,6 +1,5 @@
 package com.nagai.backend.ai;
 
-import com.nagai.ai.AiServiceGrpc;
 import com.nagai.ai.ChecklistItem;
 import com.nagai.ai.ChecklistItemResponse;
 import com.nagai.ai.FullChecklistResponse;
@@ -26,18 +25,18 @@ import static org.mockito.Mockito.when;
 class AiGrpcClientServiceTest {
 
     @Mock
-    private AiServiceGrpc.AiServiceBlockingStub mockStub;
+    private AiGrpcClientService.AiBlockingClient mockClient;
 
     private AiGrpcClientService service;
 
     @BeforeEach
     void setUp() {
-        service = new AiGrpcClientService(mockStub);
+        service = new AiGrpcClientService(mockClient);
     }
 
     @Test
     void suggestSmartField_returnsExpectedSuggestion() {
-        when(mockStub.suggestSmartField(any())).thenReturn(
+        when(mockClient.suggestSmartField(any())).thenReturn(
                 SmartFieldResponse.newBuilder().setSuggestion("Track 3 workouts per week").build());
 
         String result = service.suggestSmartField("measurable", "Get fit", "Exercise regularly",
@@ -48,7 +47,7 @@ class AiGrpcClientServiceTest {
 
     @Test
     void generateChecklistItem_returnsItemWithAllFields() {
-        when(mockStub.generateChecklistItem(any())).thenReturn(
+        when(mockClient.generateChecklistItem(any())).thenReturn(
                 ChecklistItemResponse.newBuilder()
                         .setTitle("Sign up for gym")
                         .setNotes("Choose nearby")
@@ -66,7 +65,7 @@ class AiGrpcClientServiceTest {
 
     @Test
     void generateFullChecklist_returnsItemList() {
-        when(mockStub.generateFullChecklist(any())).thenReturn(
+        when(mockClient.generateFullChecklist(any())).thenReturn(
                 FullChecklistResponse.newBuilder()
                         .addItems(ChecklistItem.newBuilder().setTitle("Start jogging").build())
                         .build());
@@ -80,7 +79,7 @@ class AiGrpcClientServiceTest {
 
     @Test
     void whenGrpcUnavailable_throwsAiServiceException() {
-        when(mockStub.suggestSmartField(any()))
+        when(mockClient.suggestSmartField(any()))
                 .thenThrow(new StatusRuntimeException(
                         Status.UNAVAILABLE.withDescription("Connection refused")));
 

@@ -17,7 +17,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestTemplate;
 
+import com.nagai.backend.common.TokenHashService;
 import com.nagai.backend.users.User;
 import com.nagai.backend.users.UserRepository;
 import com.nagai.backend.users.UserService;
@@ -39,6 +41,12 @@ class AuthServiceTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private RestTemplate restTemplate;
+
+    @Mock
+    private TokenHashService tokenHashService;
 
     @InjectMocks
     private AuthService authService;
@@ -62,13 +70,18 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("plaintext1")).thenReturn("hashedPassword");
         when(userService.createUser("Test User", "test@example.com", "hashedPassword")).thenReturn(user);
+        when(tokenHashService.hash(anyString())).thenReturn("hashed-token");
 
         User result = authService.registerUser(request);
 
         assertThat(result.getEmail()).isEqualTo("test@example.com");
         assertThat(result.getFullName()).isEqualTo("Test User");
+        assertThat(result.getVerificationToken()).isNull();
+        assertThat(result.getVerificationTokenHash()).isEqualTo("hashed-token");
+        assertThat(result.getVerificationTokenExpiry()).isNotNull();
         verify(passwordEncoder).encode("plaintext1");
         verify(userService).createUser("Test User", "test@example.com", "hashedPassword");
+        verify(userService).save(user);
     }
 
     @Test
@@ -82,6 +95,25 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.registerUser(request))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("DB error");
+    }
+
+    @Test
+    void verifyEmail_supportsLegacyPlaintextTokensDuringMigration() {
+        user.setEmailVerified(false);
+        user.setVerificationToken("legacy-token");
+        user.setVerificationTokenExpiry(java.time.LocalDateTime.now().plusHours(1));
+
+        when(tokenHashService.hash("legacy-token")).thenReturn("hashed-legacy-token");
+        when(userRepository.findByVerificationTokenHash("hashed-legacy-token")).thenReturn(Optional.empty());
+        when(userRepository.findByVerificationToken("legacy-token")).thenReturn(Optional.of(user));
+
+        authService.verifyEmail("legacy-token");
+
+        assertThat(user.isEmailVerified()).isTrue();
+        assertThat(user.getVerificationToken()).isNull();
+        assertThat(user.getVerificationTokenHash()).isNull();
+        assertThat(user.getVerificationTokenExpiry()).isNull();
+        verify(userService).save(user);
     }
 
     @Test

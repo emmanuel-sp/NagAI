@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import { UserProfile } from "@/types/user";
 import {
   fetchUserProfile,
@@ -35,17 +34,14 @@ function countAiContextFields(profile: UserProfile): number {
 
 export default function ProfileContainer() {
   const router = useRouter();
-  const { loading: authLoading } = useAuth({ requireAuth: true });
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
-    if (!authLoading) {
-      loadProfile();
-    }
-  }, [authLoading]);
+    void loadProfile();
+  }, []);
 
   const loadProfile = async () => {
     try {

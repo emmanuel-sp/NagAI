@@ -90,14 +90,6 @@
   color: var(--text-primary);
 }
 
-/* ─── Toast link ─── */
-.toastLink {
-  font-weight: var(--fw-500);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  color: inherit;
-}
-
 @media (max-width: 1100px) {
   .goalsList {
     grid-template-columns: repeat(2, 1fr);
@@ -109,11 +101,6 @@
     grid-template-columns: 1fr;
   }
 
-  .goalsHeaderContent {
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-
   .emptyActions {
     flex-direction: column;
     align-items: stretch;
@@ -121,12 +108,6 @@
 }
 
 @media (max-width: 600px) {
-
-  .goalsHeaderContent {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .addGoalButton {
     width: 100%;
     justify-content: center;

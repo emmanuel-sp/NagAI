@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentPropsWithoutRef } from "react";
 import { ChecklistItem as ChecklistItemType } from "@/types/checklist";
 import { parseUtcDate } from "@/lib/dates";
 import styles from "./checklist.module.css";
@@ -32,8 +32,8 @@ interface ChecklistItemProps {
   canMoveDown?: boolean;
   isDraggable?: boolean;
   isDragging?: boolean;
-  dragHandleAttributes?: any;
-  dragHandleListeners?: any;
+  dragHandleAttributes?: ComponentPropsWithoutRef<"button">;
+  dragHandleListeners?: ComponentPropsWithoutRef<"button">;
 }
 
 export default function ChecklistItem({

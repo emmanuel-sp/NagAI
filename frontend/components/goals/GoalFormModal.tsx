@@ -43,7 +43,17 @@ type GoalFormModalProps = CreateModeProps | EditModeProps;
 
 export default function GoalFormModal(props: GoalFormModalProps) {
   const { isOpen, onClose, mode } = props;
-  const { fields, setField, resetFields, loadingSuggestion, suggestions, suggestionError, generateSuggestion, useSuggestion } =
+  const editGoal = mode === "edit" ? props.goal : null;
+  const {
+    fields,
+    setField,
+    resetFields,
+    loadingSuggestion,
+    suggestions,
+    suggestionError,
+    generateSuggestion,
+    applySuggestion,
+  } =
     useSmartGoalForm();
   const [smartOpen, setSmartOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -101,22 +111,27 @@ export default function GoalFormModal(props: GoalFormModalProps) {
       return;
     }
     if (mode === "edit") {
-      const { goal } = props as EditModeProps;
       resetFields({
-        title: goal.title || "",
-        description: goal.description || "",
-        targetDate: goal.targetDate || "",
-        specific: goal.specific || "",
-        measurable: goal.measurable || "",
-        attainable: goal.attainable || "",
-        relevant: goal.relevant || "",
-        timely: goal.timely || "",
-        stepsTaken: goal.stepsTaken || "",
+        title: editGoal?.title || "",
+        description: editGoal?.description || "",
+        targetDate: editGoal?.targetDate || "",
+        specific: editGoal?.specific || "",
+        measurable: editGoal?.measurable || "",
+        attainable: editGoal?.attainable || "",
+        relevant: editGoal?.relevant || "",
+        timely: editGoal?.timely || "",
+        stepsTaken: editGoal?.stepsTaken || "",
       });
-      const hasSmartContent = !!(goal.specific || goal.measurable || goal.attainable || goal.relevant || goal.timely);
+      const hasSmartContent = !!(
+        editGoal?.specific ||
+        editGoal?.measurable ||
+        editGoal?.attainable ||
+        editGoal?.relevant ||
+        editGoal?.timely
+      );
       setSmartOpen(hasSmartContent);
     }
-  }, [isOpen]);
+  }, [editGoal, isOpen, mode, resetFields]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -283,7 +298,7 @@ export default function GoalFormModal(props: GoalFormModalProps) {
                       isLoading={loadingSuggestion === field}
                       disabled={!fields.title.trim()}
                       onGenerateSuggestion={() => generateSuggestion(field)}
-                      onUseSuggestion={() => useSuggestion(field)}
+                      onUseSuggestion={() => applySuggestion(field)}
                     />
                   ))}
                 </>

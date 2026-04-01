@@ -1,5 +1,6 @@
 package com.nagai.backend.agents;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,11 +21,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
+import com.nagai.backend.common.ChecklistTimestampUtils;
 import com.nagai.backend.common.ProfileUtils;
 import com.nagai.backend.config.RedisStreamConfig;
 import com.nagai.backend.goals.Goal;
@@ -48,6 +49,7 @@ public class AgentScheduler {
             "nag", 24L,
             "motivation", 72L,
             "guidance", 168L);
+    private static final Duration CLAIM_TTL = Duration.ofMinutes(15);
 
     private final AgentContextRepository agentContextRepository;
     private final AgentRepository agentRepository;
@@ -94,7 +96,6 @@ public class AgentScheduler {
      * Runs every 5 minutes instead of the old 60-second poll that recomputed heuristics for ALL contexts.
      */
     @Scheduled(fixedRate = 300_000, initialDelay = 30_000)
-    @Transactional
     public void processAgentMessages() {
         String correlationId = UUID.randomUUID().toString().substring(0, 8);
         MDC.put("correlationId", correlationId);
@@ -118,7 +119,7 @@ public class AgentScheduler {
         log.info("Found {} due agent context(s) to process", dueContexts.size());
 
         for (AgentContext context : dueContexts) {
-            processAgentContext(context, now, correlationId);
+            processAgentContextById(context.getContextId(), now, correlationId);
         }
     }
 
@@ -129,18 +130,8 @@ public class AgentScheduler {
         MDC.put("correlationId", correlationId);
 
         try {
-            AgentContext context = agentContextRepository.findById(contextId).orElse(null);
-            if (context == null) return;
-            if (context.getNextMessageAt() != null
-                    && context.getNextMessageAt().isAfter(LocalDateTime.now(ZoneOffset.UTC))) {
-                return;
-            }
-
-            Agent agent = agentRepository.findById(context.getAgentId()).orElse(null);
-            if (agent == null || !context.isDeployed()) return;
-
             log.info("Timer: processing agent context {}", contextId);
-            processAgentContext(context, LocalDateTime.now(ZoneOffset.UTC), correlationId);
+            processAgentContextById(contextId, LocalDateTime.now(ZoneOffset.UTC), correlationId);
         } catch (Exception e) {
             agentMessagesFailedCounter.increment();
             log.error("Timer: failed for context {}: {}", contextId, e.getMessage(), e);
@@ -149,14 +140,45 @@ public class AgentScheduler {
         }
     }
 
+    private void processAgentContextById(Long contextId, LocalDateTime now, String correlationId) {
+        if (!claimContext(contextId, now)) {
+            return;
+        }
+
+        AgentContext context = agentContextRepository.findById(contextId).orElse(null);
+        if (context == null || !context.isDeployed()) {
+            agentContextRepository.clearProcessingClaim(contextId);
+            return;
+        }
+        if (context.getNextMessageAt() != null && context.getNextMessageAt().isAfter(now)) {
+            agentContextRepository.clearProcessingClaim(contextId);
+            return;
+        }
+
+        processAgentContext(context, now, correlationId);
+    }
+
+    private boolean claimContext(Long contextId, LocalDateTime now) {
+        return agentContextRepository.claimDueContext(
+                contextId,
+                now,
+                now,
+                now.minus(CLAIM_TTL)
+        ) == 1;
+    }
+
     private void processAgentContext(AgentContext context, LocalDateTime now, String correlationId) {
         try {
             Agent agent = agentRepository.findById(context.getAgentId()).orElse(null);
-            if (agent == null) return;
+            if (agent == null) {
+                agentContextRepository.clearProcessingClaim(context.getContextId());
+                return;
+            }
 
             User user = userRepository.findById(agent.getUserId()).orElse(null);
             if (user == null) {
                 log.warn("User not found for agent {}", agent.getAgentId());
+                agentContextRepository.clearProcessingClaim(context.getContextId());
                 return;
             }
 
@@ -182,6 +204,7 @@ public class AgentScheduler {
             LocalDateTime nextMessageAt = computeNextMessageAt(context, checklistItems,
                     messagesSinceLastChange, now);
             context.setNextMessageAt(nextMessageAt);
+            context.setProcessingStartedAt(null);
             agentContextRepository.save(context);
 
             // Schedule a precise timer for the next message
@@ -191,6 +214,7 @@ public class AgentScheduler {
             log.info("Agent message published for context {} user {}, next at {}",
                     context.getContextId(), user.getUserId(), nextMessageAt);
         } catch (Exception e) {
+            agentContextRepository.clearProcessingClaim(context.getContextId());
             agentMessagesFailedCounter.increment();
             log.error("Failed to process agent context {}: {}",
                     context.getContextId(), e.getMessage(), e);
@@ -211,15 +235,11 @@ public class AgentScheduler {
         if (!items.isEmpty()) {
             long recentCompletions = items.stream()
                     .filter(ChecklistItem::isCompleted)
-                    .filter(i -> i.getCompletedAt() != null)
-                    .filter(i -> {
-                        try {
-                            LocalDate completed = LocalDateTime.parse(i.getCompletedAt()).toLocalDate();
-                            return completed.isAfter(now.toLocalDate().minusDays(2));
-                        } catch (Exception e) {
-                            return false;
-                        }
-                    })
+                    .map(ChecklistItem::getCompletedAt)
+                    .map(ChecklistTimestampUtils::parseCompletedAt)
+                    .flatMap(java.util.Optional::stream)
+                    .map(LocalDateTime::toLocalDate)
+                    .filter(completed -> completed.isAfter(now.toLocalDate().minusDays(2)))
                     .count();
 
             if (recentCompletions >= 3) {
@@ -241,12 +261,9 @@ public class AgentScheduler {
     int computeMessagesSinceLastChange(AgentContext context, List<ChecklistItem> items) {
         LocalDateTime lastChangeAt = items.stream()
                 .filter(ChecklistItem::isCompleted)
-                .filter(i -> i.getCompletedAt() != null)
-                .map(i -> {
-                    try { return LocalDateTime.parse(i.getCompletedAt()); }
-                    catch (Exception e) { return null; }
-                })
-                .filter(d -> d != null)
+                .map(ChecklistItem::getCompletedAt)
+                .map(ChecklistTimestampUtils::parseCompletedAt)
+                .flatMap(java.util.Optional::stream)
                 .max(LocalDateTime::compareTo)
                 .orElse(null);
 

@@ -57,6 +57,9 @@ class DigestSchedulerTest {
     @BeforeEach
     void setUp() {
         lenient().when(redisTemplate.opsForStream()).thenReturn(streamOps);
+        lenient().when(digestRepository.claimDueDigest(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(1);
+        lenient().when(digestRepository.clearProcessingClaim(anyLong())).thenReturn(1);
 
         digestScheduler = new DigestScheduler(
                 digestRepository, digestService, goalRepository,
@@ -79,6 +82,7 @@ class DigestSchedulerTest {
         digest.setContentTypes(new String[]{"tips", "progress_insights"});
         digest.setActive(true);
         digest.setNextDeliveryAt(LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5));
+        lenient().when(digestRepository.findById(10L)).thenReturn(Optional.of(digest));
 
         goal = new Goal();
         goal.setGoalId(100L);
@@ -93,6 +97,7 @@ class DigestSchedulerTest {
         item.setTitle("Buy textbook");
         item.setCompleted(true);
         item.setCompletedAt("2026-03-10");
+        lenient().when(checklistRepository.findChecklistItemsByGoalIds(anyCollection())).thenReturn(List.of(item));
     }
 
     @SuppressWarnings("unchecked")
@@ -102,7 +107,6 @@ class DigestSchedulerTest {
                 .thenReturn(List.of(digest));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(goalRepository.findAllByUserId(1L)).thenReturn(List.of(goal));
-        when(checklistRepository.findChecklistItemByGoalId(100L)).thenReturn(List.of(item));
         when(sentDigestRepository.findTop3ByUserIdOrderBySentAtDesc(1L)).thenReturn(List.of());
 
         digestScheduler.processDigests();
@@ -141,6 +145,8 @@ class DigestSchedulerTest {
         Digest digest2 = new Digest();
         digest2.setDigestId(20L);
         digest2.setUserId(2L);
+        digest2.setActive(true);
+        digest2.setNextDeliveryAt(LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1));
         digest2.setContentTypes(new String[]{"tips"});
 
         User user2 = new User();
@@ -150,6 +156,7 @@ class DigestSchedulerTest {
 
         when(digestRepository.findByActiveAndNextDeliveryAtBefore(eq(true), any(LocalDateTime.class)))
                 .thenReturn(List.of(digest, digest2));
+        when(digestRepository.findById(20L)).thenReturn(Optional.of(digest2));
         when(userRepository.findById(1L)).thenThrow(new RuntimeException("DB error"));
         when(userRepository.findById(2L)).thenReturn(Optional.of(user2));
         when(goalRepository.findAllByUserId(2L)).thenReturn(List.of());
@@ -177,9 +184,22 @@ class DigestSchedulerTest {
     }
 
     @Test
+    void processDigests_skipsWhenClaimNotAcquired() {
+        when(digestRepository.findByActiveAndNextDeliveryAtBefore(eq(true), any(LocalDateTime.class)))
+                .thenReturn(List.of(digest));
+        when(digestRepository.claimDueDigest(eq(10L), any(LocalDateTime.class), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(0);
+
+        digestScheduler.processDigests();
+
+        verify(digestRepository, never()).findById(10L);
+        verify(streamOps, never()).add(anyString(), any(Map.class));
+    }
+
+    @Test
     void buildPayload_containsAllFields() {
         when(goalRepository.findAllByUserId(1L)).thenReturn(List.of(goal));
-        when(checklistRepository.findChecklistItemByGoalId(100L)).thenReturn(List.of(item));
+        when(checklistRepository.findChecklistItemsByGoalIds(List.of(100L))).thenReturn(List.of(item));
         when(sentDigestRepository.findTop3ByUserIdOrderBySentAtDesc(1L)).thenReturn(List.of());
 
         DigestDeliveryPayload payload = digestScheduler.buildPayload(digest, user, true);
@@ -196,5 +216,16 @@ class DigestSchedulerTest {
         assertThat(payload.getGoals().get(0).getSmartContext()).contains("Specific: Pass B2 exam");
         assertThat(payload.getGoals().get(0).getChecklistItems()).hasSize(1);
         assertThat(payload.getGoals().get(0).getChecklistItems().get(0).isCompleted()).isTrue();
+    }
+
+    @Test
+    void hasProgressSinceLastDelivery_parsesCompletedTimestampsInsteadOfComparingStrings() {
+        digest.setLastDeliveredAt(LocalDateTime.of(2026, 3, 9, 12, 0));
+        when(goalRepository.findAllByUserId(1L)).thenReturn(List.of(goal));
+        when(checklistRepository.findChecklistItemsByGoalIds(List.of(100L))).thenReturn(List.of(item));
+
+        boolean hasProgress = digestScheduler.hasProgressSinceLastDelivery(digest);
+
+        assertThat(hasProgress).isTrue();
     }
 }

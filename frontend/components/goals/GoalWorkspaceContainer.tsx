@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import { useAgentData } from "@/contexts/AgentDataContext";
 import { GoalWithDetails } from "@/types/goal";
 import { Checklist as ChecklistType } from "@/types/checklist";
@@ -63,7 +62,6 @@ function getDefaultContext(): ContextDraft {
 
 export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContainerProps) {
   const router = useRouter();
-  const { loading: authLoading } = useAuth({ requireAuth: true });
   const {
     agent,
     loading: agentLoading,
@@ -92,13 +90,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
     onConfirm: () => Promise<void> | void;
   } | null>(null);
 
-  useEffect(() => {
-    if (!authLoading) {
-      void loadGoalWorkspace();
-    }
-  }, [authLoading, goalId]);
-
-  const loadGoalWorkspace = async () => {
+  const loadGoalWorkspace = useCallback(async () => {
     try {
       setIsLoading(true);
       setLoadError(null);
@@ -114,7 +106,11 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [goalId]);
+
+  useEffect(() => {
+    void loadGoalWorkspace();
+  }, [loadGoalWorkspace]);
 
   const goalContexts = useMemo(
     () => (agent?.contexts ?? []).filter((context) => context.goalId === goalId),
@@ -308,7 +304,7 @@ export default function GoalWorkspaceContainer({ goalId }: GoalWorkspaceContaine
     }
   };
 
-  if (isLoading || authLoading || agentLoading) {
+  if (isLoading || agentLoading) {
     return (
       <div className={styles.workspaceShell}>
         <LoadingSpinner message="Loading goal workspace..." />
