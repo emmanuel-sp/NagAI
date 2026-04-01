@@ -12,7 +12,7 @@ import { ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import SignupForm from "./SignupForm";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import styles from "./login.module.css";
 
 export default function SignupContainer() {
@@ -101,43 +101,45 @@ export default function SignupContainer() {
   }
 
   return (
-    <div className={styles.loginContainer}>
-      <div className={styles.loginCard}>
-        <div className={styles.loginHeader}>
-          <h1 className={styles.loginTitle}>Create Account</h1>
-          <p className={styles.loginSubtitle}>Sign up to set personalized goals supported by AI</p>
-        </div>
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+      <div className={styles.loginContainer}>
+        <div className={styles.loginCard}>
+          <div className={styles.loginHeader}>
+            <h1 className={styles.loginTitle}>Create Account</h1>
+            <p className={styles.loginSubtitle}>Sign up to set personalized goals supported by AI</p>
+          </div>
 
-        {error && <div className={styles.errorMessage}>{error}</div>}
+          {error && <div className={styles.errorMessage}>{error}</div>}
 
-        <SignupForm formData={formData} isLoading={isLoading} onChange={handleChange} onSubmit={handleSubmit} />
+          <SignupForm formData={formData} isLoading={isLoading} onChange={handleChange} onSubmit={handleSubmit} />
 
-        <div className={styles.divider}>OR</div>
+          <div className={styles.divider}>OR</div>
 
-        <div className={styles.googleButtonWrapper}>
-          <GoogleLogin
-            theme="outline"
-            size="large"
-            width="100%"
-            onSuccess={async (credentialResponse) => {
-              try {
-                await loginWithGoogle(credentialResponse.credential!);
-                router.push("/onboarding");
-              } catch {
-                setError("Google sign-in failed. Please try again.");
-              }
-            }}
-            onError={() => setError("Google sign-in failed. Please try again.")}
-          />
-        </div>
+          <div className={styles.googleButtonWrapper}>
+            <GoogleLogin
+              theme="outline"
+              size="large"
+              width="100%"
+              onSuccess={async (credentialResponse) => {
+                try {
+                  await loginWithGoogle(credentialResponse.credential!);
+                  router.push("/onboarding");
+                } catch {
+                  setError("Google sign-in failed. Please try again.");
+                }
+              }}
+              onError={() => setError("Google sign-in failed. Please try again.")}
+            />
+          </div>
 
-        <div className={styles.linkText} style={{ marginTop: "24px" }}>
-          Already have an account? <Link href="/login">Login here</Link>
-        </div>
-        <div className={styles.linkText} style={{ marginTop: "16px" }}>
-          <Link href="/">Back to home</Link>
+          <div className={styles.linkText} style={{ marginTop: "24px" }}>
+            Already have an account? <Link href="/login">Login here</Link>
+          </div>
+          <div className={styles.linkText} style={{ marginTop: "16px" }}>
+            <Link href="/">Back to home</Link>
+          </div>
         </div>
       </div>
-    </div>
+    </GoogleOAuthProvider>
   );
 }

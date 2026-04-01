@@ -34,9 +34,18 @@ import java.util.Map;
 @Service
 public class AiGrpcClientService {
 
+    interface AiBlockingClient {
+        com.nagai.ai.SmartFieldResponse suggestSmartField(SmartFieldRequest request);
+        ChecklistItemResponse generateChecklistItem(ChecklistItemRequest request);
+        FullChecklistResponse generateFullChecklist(FullChecklistRequest request);
+        DailyChecklistResponse generateDailyChecklist(DailyChecklistRequest request);
+        AgentChatResponse agentChat(AgentChatRequest request);
+    }
+
     private static final Logger log = LoggerFactory.getLogger(AiGrpcClientService.class);
 
     private final AiServiceGrpc.AiServiceBlockingStub stub;
+    private final AiBlockingClient blockingClient;
     private final Counter grpcErrorsCounter;
 
     // Primary constructor — used by Spring
@@ -44,12 +53,14 @@ public class AiGrpcClientService {
     public AiGrpcClientService(GrpcChannelFactory channelFactory, Counter grpcErrorsCounter) {
         ManagedChannel channel = channelFactory.createChannel("ai-service");
         this.stub = AiServiceGrpc.newBlockingStub(channel);
+        this.blockingClient = null;
         this.grpcErrorsCounter = grpcErrorsCounter;
     }
 
     // Test constructor — package-private, avoids mocking GrpcChannelFactory
-    AiGrpcClientService(AiServiceGrpc.AiServiceBlockingStub stub) {
-        this.stub = stub;
+    AiGrpcClientService(AiBlockingClient blockingClient) {
+        this.stub = null;
+        this.blockingClient = blockingClient;
         this.grpcErrorsCounter = null;
     }
 
@@ -82,7 +93,11 @@ public class AiGrpcClientService {
             if (targetDate != null && !targetDate.isBlank()) {
                 builder.setTargetDate(targetDate);
             }
-            return stubWithCorrelation().suggestSmartField(builder.build()).getSuggestion();
+            SmartFieldRequest request = builder.build();
+            if (blockingClient != null) {
+                return blockingClient.suggestSmartField(request).getSuggestion();
+            }
+            return stubWithCorrelation().suggestSmartField(request).getSuggestion();
         } catch (StatusRuntimeException e) {
             if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
             log.error("gRPC call failed: {}", e.getStatus().getDescription());
@@ -95,14 +110,18 @@ public class AiGrpcClientService {
             List<String> activeItems, List<String> completedItems,
             String goalSmartContext, String userProfile) {
         try {
-            return stubWithCorrelation().generateChecklistItem(ChecklistItemRequest.newBuilder()
+            ChecklistItemRequest request = ChecklistItemRequest.newBuilder()
                     .setGoalTitle(goalTitle)
                     .setGoalDescription(goalDescription)
                     .addAllExistingItems(activeItems)
                     .setUserProfile(userProfile)
                     .addAllCompletedItems(completedItems)
                     .setGoalSmartContext(goalSmartContext)
-                    .build());
+                    .build();
+            if (blockingClient != null) {
+                return blockingClient.generateChecklistItem(request);
+            }
+            return stubWithCorrelation().generateChecklistItem(request);
         } catch (StatusRuntimeException e) {
             if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
             log.error("gRPC call failed: {}", e.getStatus().getDescription());
@@ -114,13 +133,17 @@ public class AiGrpcClientService {
             String goalTitle, String goalDescription,
             List<String> completedItems, String goalSmartContext, String userProfile) {
         try {
-            return stubWithCorrelation().generateFullChecklist(FullChecklistRequest.newBuilder()
+            FullChecklistRequest request = FullChecklistRequest.newBuilder()
                     .setGoalTitle(goalTitle)
                     .setGoalDescription(goalDescription)
                     .setUserProfile(userProfile)
                     .addAllCompletedItems(completedItems)
                     .setGoalSmartContext(goalSmartContext)
-                    .build());
+                    .build();
+            if (blockingClient != null) {
+                return blockingClient.generateFullChecklist(request);
+            }
+            return stubWithCorrelation().generateFullChecklist(request);
         } catch (StatusRuntimeException e) {
             if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
             log.error("gRPC call failed: {}", e.getStatus().getDescription());
@@ -144,7 +167,11 @@ public class AiGrpcClientService {
             if (busyBlocks != null && !busyBlocks.isEmpty()) {
                 req.addAllBusyBlocks(busyBlocks);
             }
-            return stubWithCorrelation().generateDailyChecklist(req.build());
+            DailyChecklistRequest request = req.build();
+            if (blockingClient != null) {
+                return blockingClient.generateDailyChecklist(request);
+            }
+            return stubWithCorrelation().generateDailyChecklist(request);
         } catch (StatusRuntimeException e) {
             if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
             log.error("gRPC call failed: {}", e.getStatus().getDescription());
@@ -169,9 +196,13 @@ public class AiGrpcClientService {
             if (userId != null) {
                 builder.setUserId(userId);
             }
+            AgentChatRequest request = builder.build();
+            if (blockingClient != null) {
+                return blockingClient.agentChat(request);
+            }
             return stubWithCorrelation()
                     .withDeadlineAfter(30, java.util.concurrent.TimeUnit.SECONDS)
-                    .agentChat(builder.build());
+                    .agentChat(request);
         } catch (StatusRuntimeException e) {
             if (grpcErrorsCounter != null) grpcErrorsCounter.increment();
             log.error("gRPC call failed: {}", e.getStatus().getDescription());

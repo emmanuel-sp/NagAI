@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.nagai.backend.dailychecklist.DailyChecklistItem;
 import com.nagai.backend.dailychecklist.DailyChecklistItemRepository;
@@ -46,6 +47,7 @@ public class ChecklistService {
 
     private static final int MAX_CHECKLIST_ITEMS = 20;
 
+    @Transactional
     public ChecklistResponse addChecklistItem(ChecklistAddRequest request) {
         Goal goal = goalService.getGoal(request.getGoalId());
         User currentUser = userService.getCurrentUser();
@@ -63,12 +65,13 @@ public class ChecklistService {
         item.setTitle(request.getTitle());
         item.setNotes(request.getNotes());
         item.setDeadline(request.getDeadline());
-        item.setSortOrder(request.getSortOrder());
+        item.setSortOrder(request.getSortOrder() != null ? request.getSortOrder() : (long) existing.size());
         item.setCompleted(false);
 
         return ChecklistResponse.fromEntity(checklistRepository.save(item));
     }
 
+    @Transactional
     public List<ChecklistResponse> reorderItems(Long goalId, ChecklistReorderRequest request) {
         Goal goal = goalService.getGoal(goalId);
         User currentUser = userService.getCurrentUser();
@@ -99,6 +102,7 @@ public class ChecklistService {
                 .map(ChecklistResponse::fromEntity).toList();
     }
 
+    @Transactional
     public ChecklistResponse updateChecklistItem(ChecklistUpdateRequest request) {
         ChecklistItem item = checklistRepository.findById(request.getChecklistId())
                 .orElseThrow(ChecklistNotFoundException::new);
@@ -123,6 +127,7 @@ public class ChecklistService {
         return ChecklistResponse.fromEntity(checklistRepository.save(item));
     }
 
+    @Transactional
     public void deleteChecklistItem(Long checklistId) {
         ChecklistItem item = checklistRepository.findById(checklistId)
                 .orElseThrow(ChecklistNotFoundException::new);
@@ -136,6 +141,7 @@ public class ChecklistService {
         checklistRepository.delete(item);
     }
 
+    @Transactional
     public ChecklistResponse toggleComplete(Long checklistId) {
         ChecklistItem item = checklistRepository.findById(checklistId)
                 .orElseThrow(ChecklistNotFoundException::new);

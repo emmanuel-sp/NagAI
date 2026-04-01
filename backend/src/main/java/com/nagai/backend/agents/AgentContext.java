@@ -47,6 +47,9 @@ public class AgentContext {
     @Column(name = "next_message_at")
     private LocalDateTime nextMessageAt;
 
+    @Column(name = "processing_started_at")
+    private LocalDateTime processingStartedAt;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;

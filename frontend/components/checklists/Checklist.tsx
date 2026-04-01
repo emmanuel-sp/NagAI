@@ -7,7 +7,7 @@ import { Checklist as ChecklistType } from "@/types/checklist";
 import { buildDirectionalOrder, buildDraggedOrder } from "@/lib/anchoredReorder";
 import ChecklistItem from "./ChecklistItem";
 import AddItemForm from "./AddItemForm";
-import { IoAdd, IoSparkles, IoChevronDown } from "@/components/icons";
+import { IoAdd, IoChevronDown } from "@/components/icons";
 import styles from "./checklist.module.css";
 
 interface ChecklistProps {

@@ -3,6 +3,7 @@ package com.nagai.backend.dailychecklist;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -91,7 +92,8 @@ class DailyChecklistServiceTest {
         when(userService.getCurrentUser()).thenReturn(user);
         when(configRepository.findByUserId(1L)).thenReturn(Optional.of(config));
         when(goalService.getAllGoals()).thenReturn(List.of(goal));
-        when(checklistRepository.findChecklistItemByGoalId(5L)).thenReturn(List.of(checklistItem));
+        when(checklistRepository.findChecklistItemsByGoalIds(anyCollection())).thenReturn(List.of(checklistItem));
+        when(goalRepository.findAllByGoalIdIn(anyCollection())).thenReturn(List.of(goal));
         when(goalRepository.existsById(anyLong())).thenReturn(true);
         when(checklistRepository.existsById(anyLong())).thenReturn(true);
     }

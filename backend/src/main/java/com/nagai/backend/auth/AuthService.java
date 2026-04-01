@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.nagai.backend.common.TokenHashService;
 import com.nagai.backend.exceptions.EmailAlreadyExistsException;
 import com.nagai.backend.exceptions.EmailNotVerifiedException;
 import com.nagai.backend.users.User;
@@ -29,15 +30,19 @@ public class AuthService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+    private final TokenHashService tokenHashService;
 
     public AuthService(PasswordEncoder passwordEncoder, UserService userService, UserRepository userRepository,
-                       AuthenticationManager authenticationManager, EmailService emailService) {
+                       AuthenticationManager authenticationManager, EmailService emailService,
+                       RestTemplate externalRestTemplate, TokenHashService tokenHashService) {
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.emailService = emailService;
+        this.restTemplate = externalRestTemplate;
+        this.tokenHashService = tokenHashService;
     }
 
     public User registerUser(RegisterRequest request) {
@@ -53,7 +58,8 @@ public class AuthService {
         User user = userService.createUser(request.name(), request.email(), hashedPassword);
 
         String token = UUID.randomUUID().toString();
-        user.setVerificationToken(token);
+        user.setVerificationToken(null);
+        user.setVerificationTokenHash(tokenHashService.hash(token));
         user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
         userService.save(user);
 
@@ -78,7 +84,8 @@ public class AuthService {
     }
 
     public void verifyEmail(String token) {
-        User user = userRepository.findByVerificationToken(token)
+        User user = userRepository.findByVerificationTokenHash(tokenHashService.hash(token))
+            .or(() -> userRepository.findByVerificationToken(token))
             .orElseThrow(() -> new BadCredentialsException("Invalid or expired verification token"));
 
         if (user.getVerificationTokenExpiry() == null || user.getVerificationTokenExpiry().isBefore(LocalDateTime.now())) {
@@ -88,6 +95,7 @@ public class AuthService {
 
         user.setEmailVerified(true);
         user.setVerificationToken(null);
+        user.setVerificationTokenHash(null);
         user.setVerificationTokenExpiry(null);
         userService.save(user);
     }

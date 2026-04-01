@@ -59,6 +59,9 @@ class AgentSchedulerTest {
     @BeforeEach
     void setUp() {
         lenient().when(redisTemplate.opsForStream()).thenReturn(streamOps);
+        lenient().when(agentContextRepository.claimDueContext(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(1);
+        lenient().when(agentContextRepository.clearProcessingClaim(anyLong())).thenReturn(1);
 
         agentScheduler = new AgentScheduler(
                 agentContextRepository, agentRepository, userRepository,
@@ -84,7 +87,9 @@ class AgentSchedulerTest {
         context.setGoalId(200L);
         context.setName("Morning Check");
         context.setMessageType("motivation");
+        context.setDeployed(true);
         context.setLastMessageSentAt(null); // never sent
+        lenient().when(agentContextRepository.findById(100L)).thenReturn(Optional.of(context));
 
         goal = new Goal();
         goal.setGoalId(200L);
@@ -154,6 +159,19 @@ class AgentSchedulerTest {
         verify(streamOps, never()).add(anyString(), any(Map.class));
     }
 
+    @Test
+    void processAgentMessages_skipsWhenClaimNotAcquired() {
+        when(agentContextRepository.findDueForDeployedAgents(any(LocalDateTime.class)))
+                .thenReturn(List.of(context));
+        when(agentContextRepository.claimDueContext(eq(100L), any(LocalDateTime.class), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(0);
+
+        agentScheduler.processAgentMessages();
+
+        verify(agentContextRepository, never()).findById(100L);
+        verify(streamOps, never()).add(anyString(), any(Map.class));
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     void processAgentMessages_continuesAfterFailure() {
@@ -163,10 +181,12 @@ class AgentSchedulerTest {
         context2.setGoalId(200L);
         context2.setName("Evening Review");
         context2.setMessageType("guidance");
+        context2.setDeployed(true);
         context2.setLastMessageSentAt(null);
 
         when(agentContextRepository.findDueForDeployedAgents(any(LocalDateTime.class)))
                 .thenReturn(List.of(context, context2));
+        when(agentContextRepository.findById(101L)).thenReturn(Optional.of(context2));
         when(agentRepository.findById(10L)).thenReturn(Optional.of(agent));
         when(userRepository.findById(1L))
                 .thenThrow(new RuntimeException("DB error"))
@@ -254,6 +274,26 @@ class AgentSchedulerTest {
         LocalDateTime next = agentScheduler.computeNextMessageAt(context, List.of(), 9, now);
 
         assertThat(next).isEqualTo(now.plusHours(24));
+    }
+
+    @Test
+    void computeMessagesSinceLastChange_handlesDateOnlyCompletionTimestamps() {
+        context.setContextId(100L);
+        ChecklistItem completedItem = new ChecklistItem();
+        completedItem.setCompleted(true);
+        completedItem.setCompletedAt("2026-03-10");
+
+        SentAgentMessage olderMessage = new SentAgentMessage();
+        olderMessage.setSentAt(LocalDateTime.of(2026, 3, 9, 23, 59));
+        SentAgentMessage newerMessage = new SentAgentMessage();
+        newerMessage.setSentAt(LocalDateTime.of(2026, 3, 10, 12, 0));
+
+        when(sentAgentMessageRepository.findTop5ByContextIdOrderBySentAtDesc(100L))
+                .thenReturn(List.of(newerMessage, olderMessage));
+
+        int count = agentScheduler.computeMessagesSinceLastChange(context, List.of(completedItem));
+
+        assertThat(count).isEqualTo(1);
     }
 
     @Test

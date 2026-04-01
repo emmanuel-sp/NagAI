@@ -1,7 +1,9 @@
 package com.nagai.backend.chat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class ChatService {
     private final SentAgentMessageRepository sentAgentMessageRepository;
     private final UserService userService;
     private final AiGrpcClientService aiGrpcClientService;
+    private final ObjectMapper objectMapper;
 
     public ChatService(ChatSessionRepository chatSessionRepository,
                        ChatMessageRepository chatMessageRepository,
@@ -58,6 +61,7 @@ public class ChatService {
         this.sentAgentMessageRepository = sentAgentMessageRepository;
         this.userService = userService;
         this.aiGrpcClientService = aiGrpcClientService;
+        this.objectMapper = new ObjectMapper();
     }
 
     public ChatResponse sendMessage(ChatRequest request) {
@@ -222,16 +226,15 @@ public class ChatService {
         if (json == null || json.isBlank()) return;
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            List<java.util.Map<String, Object>> suggestions = mapper.readValue(json,
-                    mapper.getTypeFactory().constructCollectionType(List.class, java.util.Map.class));
+            List<java.util.Map<String, Object>> suggestions = objectMapper.readValue(json,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, java.util.Map.class));
             for (var s : suggestions) {
                 if (suggestionId.equals(s.get("suggestionId"))) {
                     s.put("status", status);
                     break;
                 }
             }
-            message.setSuggestions(mapper.writeValueAsString(suggestions));
+            message.setSuggestions(objectMapper.writeValueAsString(suggestions));
             chatMessageRepository.save(message);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to update suggestion status", e);
@@ -241,7 +244,6 @@ public class ChatService {
     private String serializeSuggestions(List<ActionSuggestion> suggestions) {
         if (suggestions == null || suggestions.isEmpty()) return null;
         try {
-            ObjectMapper mapper = new ObjectMapper();
             List<java.util.Map<String, String>> list = suggestions.stream().map(s -> java.util.Map.of(
                     "suggestionId", s.getSuggestionId(),
                     "type", s.getType(),
@@ -249,7 +251,7 @@ public class ChatService {
                     "paramsJson", s.getParamsJson(),
                     "status", "pending"
             )).collect(Collectors.toList());
-            return mapper.writeValueAsString(list);
+            return objectMapper.writeValueAsString(list);
         } catch (JsonProcessingException e) {
             return null;
         }
@@ -257,10 +259,11 @@ public class ChatService {
 
     private List<ChatGoalSummary> buildGoalSummaries(Long userId) {
         List<Goal> goals = goalRepository.findAllByUserId(userId);
+        Map<Long, List<ChecklistItem>> checklistItemsByGoalId = loadChecklistItemsByGoalId(goals);
         List<ChatGoalSummary> summaries = new ArrayList<>();
 
         for (Goal goal : goals) {
-            List<ChecklistItem> items = checklistRepository.findChecklistItemByGoalId(goal.getGoalId());
+            List<ChecklistItem> items = checklistItemsByGoalId.getOrDefault(goal.getGoalId(), List.of());
             List<String> activeItems = items.stream()
                     .filter(i -> !i.isCompleted())
                     .map(ChecklistItem::getTitle)
@@ -291,11 +294,30 @@ public class ChatService {
     }
 
     private List<ChatHistoryEntry> buildHistory(Long sessionId) {
-        return chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId).stream()
+        List<ChatMessage> recentMessages = new ArrayList<>(
+                chatMessageRepository.findTop20BySessionIdOrderByCreatedAtDesc(sessionId));
+        Collections.reverse(recentMessages);
+        return recentMessages.stream()
                 .map(msg -> ChatHistoryEntry.newBuilder()
                         .setRole(msg.getRole())
                         .setContent(msg.getContent())
                         .build())
                 .toList();
+    }
+
+    private Map<Long, List<ChecklistItem>> loadChecklistItemsByGoalId(List<Goal> goals) {
+        List<Long> goalIds = goals.stream()
+                .map(Goal::getGoalId)
+                .toList();
+        if (goalIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return checklistRepository.findChecklistItemsByGoalIds(goalIds).stream()
+                .collect(Collectors.groupingBy(
+                        ChecklistItem::getGoalId,
+                        java.util.LinkedHashMap::new,
+                        Collectors.toList()
+                ));
     }
 }

@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.nagai.backend.common.TokenHashService;
 import com.nagai.backend.exceptions.DigestAlreadyExistsException;
 import com.nagai.backend.exceptions.DigestNotFoundException;
 import com.nagai.backend.users.User;
@@ -30,6 +31,9 @@ class DigestServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private TokenHashService tokenHashService;
 
     @InjectMocks
     private DigestService digestService;
@@ -84,6 +88,7 @@ class DigestServiceTest {
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(digestRepository.existsByUserId(1L)).thenReturn(false);
+        when(tokenHashService.hash(anyString())).thenReturn("digest-hash");
         when(digestRepository.save(any(Digest.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Digest result = digestService.createDigest(request);
@@ -91,6 +96,7 @@ class DigestServiceTest {
         assertThat(result.getUserId()).isEqualTo(1L);
         assertThat(result.getName()).isEqualTo("New Digest");
         assertThat(result.getFrequency()).isEqualTo("weekly");
+        assertThat(result.getUnsubscribeTokenHash()).isEqualTo("digest-hash");
         verify(digestRepository).save(any(Digest.class));
     }
 
@@ -161,6 +167,7 @@ class DigestServiceTest {
     void toggleDigest_clearsNextDeliveryWhenTogglingOff() {
         digest.setActive(true);
         digest.setNextDeliveryAt(LocalDateTime.now());
+        digest.setProcessingStartedAt(LocalDateTime.now());
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(digestRepository.findByUserId(1L)).thenReturn(Optional.of(digest));
@@ -170,6 +177,26 @@ class DigestServiceTest {
 
         assertThat(result.isActive()).isFalse();
         assertThat(result.getNextDeliveryAt()).isNull();
+        assertThat(result.getProcessingStartedAt()).isNull();
+    }
+
+    @Test
+    void unsubscribeByToken_supportsLegacyPlaintextTokenFallback() {
+        digest.setActive(true);
+        digest.setProcessingStartedAt(LocalDateTime.now());
+
+        when(tokenHashService.hash("legacy-token")).thenReturn("digest-hash");
+        when(digestRepository.findByUnsubscribeTokenHash("digest-hash")).thenReturn(Optional.empty());
+        when(digestRepository.findByUnsubscribeToken("legacy-token")).thenReturn(Optional.of(digest));
+        when(digestRepository.save(any(Digest.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        digestService.unsubscribeByToken("legacy-token");
+
+        assertThat(digest.isActive()).isFalse();
+        assertThat(digest.getNextDeliveryAt()).isNull();
+        assertThat(digest.getProcessingStartedAt()).isNull();
+        assertThat(digest.getUnsubscribeTokenHash()).isEqualTo("digest-hash");
+        verify(digestRepository).save(digest);
     }
 
     @Test

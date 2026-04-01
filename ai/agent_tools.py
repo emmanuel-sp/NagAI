@@ -8,85 +8,77 @@ import web_search
 
 logger = logging.getLogger(__name__)
 
-TOOLS = [
-    {
-        "name": "get_user_progress",
-        "description": "Get the user's goal progress including checklist completion status, SMART breakdown, and recent activity.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "goal_title": {
-                    "type": "string",
-                    "description": "Title of a specific goal to look up. If omitted, returns all goals.",
-                },
+GET_USER_PROGRESS_TOOL = {
+    "name": "get_user_progress",
+    "description": "Get goal progress and checklist IDs.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "goal_title": {
+                "type": "string",
+                "description": "Optional goal title filter.",
             },
-            "required": [],
         },
+        "required": [],
     },
-    {
-        "name": "get_previous_messages",
-        "description": "Get older conversation history beyond what's already visible in the current chat window. Useful for recalling details from much earlier in a long conversation.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "limit": {
-                    "type": "integer",
-                    "description": "Max messages to retrieve (default 10).",
-                },
+}
+
+GET_PREVIOUS_MESSAGES_TOOL = {
+    "name": "get_previous_messages",
+    "description": "Get older chat messages outside the visible window.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "limit": {
+                "type": "integer",
+                "description": "Max messages to return.",
             },
-            "required": [],
         },
+        "required": [],
     },
-    {
-        "name": "search_news",
-        "description": "Search for relevant news articles related to a topic. Only use if a relevant article would genuinely help the user.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Search query for finding relevant news.",
-                },
+}
+
+SEARCH_NEWS_TOOL = {
+    "name": "search_news",
+    "description": "Search timely news when current articles would help.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "News search query.",
             },
-            "required": ["query"],
         },
+        "required": ["query"],
     },
-]
+}
+
+TOOLS = [GET_USER_PROGRESS_TOOL, GET_PREVIOUS_MESSAGES_TOOL, SEARCH_NEWS_TOOL]
 
 QUIZ_TOOLS = [
     {
         "name": "present_quiz",
-        "description": (
-            "Present an interactive quiz question to the user with clickable option chips. "
-            "Use this to gather information step-by-step when helping the user create a goal, "
-            "clarify their intent, or explore what they want to work on. "
-            "The user will see clickable buttons for each option and can also type a free response. "
-            "After calling this tool, briefly introduce the question in your text response — "
-            "don't repeat all the options since the card already shows them.\n\n"
-            "CRITICAL: Call this tool exactly ONCE per response with ALL options in a single "
-            "'options' array. Do NOT call it multiple times or put one option per call. "
-            "Example: {\"question\": \"What area?\", \"options\": [{\"label\": \"Career\"}, {\"label\": \"Health\"}]}"
-        ),
+        "description": "Present one quiz card with clickable options.",
         "input_schema": {
             "type": "object",
             "properties": {
                 "question": {
                     "type": "string",
-                    "description": "The question to ask the user.",
+                    "description": "Quiz question.",
                 },
                 "options": {
                     "type": "array",
-                    "description": "2-6 clickable options for the user to choose from.",
+                    "description": "2-6 clickable options.",
                     "items": {
                         "type": "object",
                         "properties": {
                             "label": {
                                 "type": "string",
-                                "description": "Short display label (e.g., 'Career growth').",
+                                "description": "Option label.",
                             },
                             "description": {
                                 "type": "string",
-                                "description": "Optional one-line description shown below the label.",
+                                "description": "Optional short helper text.",
                             },
                         },
                         "required": ["label"],
@@ -94,11 +86,11 @@ QUIZ_TOOLS = [
                 },
                 "allow_free_response": {
                     "type": "boolean",
-                    "description": "Whether to show a free-text input below the options. Default true.",
+                    "description": "Show a free-text input.",
                 },
                 "free_response_placeholder": {
                     "type": "string",
-                    "description": "Placeholder text for the free-text input (e.g., 'Or describe your own...').",
+                    "description": "Free-text placeholder.",
                 },
             },
             "required": ["question", "options"],
@@ -109,50 +101,45 @@ QUIZ_TOOLS = [
 SUGGEST_TOOLS = [
     {
         "name": "suggest_create_goal",
-        "description": (
-            "Suggest creating a new goal for the user. The user will see an interactive card "
-            "and can accept or reject the suggestion. Optionally include initial checklist items. "
-            "ALWAYS fill in the SMART fields (specific, measurable, attainable, relevant, timely) "
-            "based on your understanding of the user's intent. Fill in as many as you can."
-        ),
+        "description": "Suggest a new goal, optionally with SMART fields and checklist items.",
         "input_schema": {
             "type": "object",
             "properties": {
                 "title": {
                     "type": "string",
-                    "description": "Goal title (max 200 chars).",
+                    "description": "Goal title.",
                 },
                 "description": {
                     "type": "string",
-                    "description": "Goal description (max 1000 chars).",
+                    "description": "Goal description.",
                 },
                 "specific": {
                     "type": "string",
-                    "description": "SMART: What exactly will be accomplished? Be precise.",
+                    "description": "SMART specific field.",
                 },
                 "measurable": {
                     "type": "string",
-                    "description": "SMART: How will progress and completion be measured?",
+                    "description": "SMART measurable field.",
                 },
                 "attainable": {
                     "type": "string",
-                    "description": "SMART: Why is this goal realistic and achievable?",
+                    "description": "SMART attainable field.",
                 },
                 "relevant": {
                     "type": "string",
-                    "description": "SMART: Why does this goal matter to the user?",
+                    "description": "SMART relevant field.",
                 },
                 "timely": {
                     "type": "string",
-                    "description": "SMART: What is the timeframe or deadline?",
+                    "description": "SMART timely field.",
                 },
                 "target_date": {
                     "type": "string",
-                    "description": "Target completion date in ISO format (e.g., 2026-06-01). Optional.",
+                    "description": "Optional ISO target date.",
                 },
                 "checklist_items": {
                     "type": "array",
-                    "description": "Optional initial checklist items for the goal.",
+                    "description": "Optional initial checklist items.",
                     "items": {
                         "type": "object",
                         "properties": {
@@ -167,55 +154,58 @@ SUGGEST_TOOLS = [
     },
     {
         "name": "suggest_update_goal",
-        "description": (
-            "Suggest updating an existing goal. Use goal_id from get_user_progress. "
-            "The user will see an interactive card and can accept or reject."
-        ),
+        "description": "Suggest updating an existing goal.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "goal_id": {"type": "integer", "description": "The goal ID to update."},
-                "goal_title": {"type": "string", "description": "Current goal title (for display)."},
-                "title": {"type": "string", "description": "New title (optional)."},
-                "description": {"type": "string", "description": "New description (optional)."},
-                "target_date": {"type": "string", "description": "New target date ISO format (optional)."},
+                "goal_id": {"type": "integer", "description": "Goal ID."},
+                "goal_title": {"type": "string", "description": "Current goal title."},
+                "title": {"type": "string", "description": "New title."},
+                "description": {"type": "string", "description": "New description."},
+                "target_date": {"type": "string", "description": "New ISO target date."},
             },
             "required": ["goal_id", "goal_title"],
         },
     },
     {
         "name": "suggest_add_checklist_item",
-        "description": (
-            "Suggest adding a checklist item to an existing goal. Use goal_id from get_user_progress. "
-            "The user will see an interactive card and can accept or reject."
-        ),
+        "description": "Suggest adding a checklist item to a goal.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "goal_id": {"type": "integer", "description": "The goal to add the item to."},
-                "goal_title": {"type": "string", "description": "Goal title (for display)."},
-                "title": {"type": "string", "description": "Checklist item title (max 200 chars)."},
-                "notes": {"type": "string", "description": "Optional notes (max 500 chars)."},
+                "goal_id": {"type": "integer", "description": "Goal ID."},
+                "goal_title": {"type": "string", "description": "Goal title."},
+                "title": {"type": "string", "description": "Checklist item title."},
+                "notes": {"type": "string", "description": "Optional notes."},
             },
             "required": ["goal_id", "goal_title", "title"],
         },
     },
     {
         "name": "suggest_complete_checklist_item",
-        "description": (
-            "Suggest marking a checklist item as complete. Use checklist_id from get_user_progress. "
-            "The user will see an interactive card and can accept or reject."
-        ),
+        "description": "Suggest marking a checklist item complete.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "checklist_id": {"type": "integer", "description": "The checklist item ID to complete."},
-                "title": {"type": "string", "description": "Item title (for display)."},
+                "checklist_id": {"type": "integer", "description": "Checklist item ID."},
+                "title": {"type": "string", "description": "Item title."},
             },
             "required": ["checklist_id", "title"],
         },
     },
 ]
+
+
+def build_chat_tools(include_suggest: bool, include_history: bool, include_news: bool):
+    """Build the minimal tool list needed for the current chat turn."""
+    tools = [GET_USER_PROGRESS_TOOL, QUIZ_TOOLS[0]]
+    if include_history:
+        tools.append(GET_PREVIOUS_MESSAGES_TOOL)
+    if include_news:
+        tools.append(SEARCH_NEWS_TOOL)
+    if include_suggest:
+        tools.extend(SUGGEST_TOOLS)
+    return tools
 
 PERSONALITY = {
     "nag": (
@@ -501,6 +491,15 @@ def run_agent_loop(client, model, system_prompt, tool_context,
     import time
 
     active_tools = tools or TOOLS
+    routing = tool_context.get("_routing", {})
+    tool_names = ", ".join(tool["name"] for tool in active_tools)
+    logger.info(
+        "Agent loop start: route=%s active_tools=[%s] recent_history=%d older_history=%s",
+        routing.get("mode", "tool"),
+        tool_names,
+        routing.get("recent_history_count", len(prior_messages or [])),
+        routing.get("older_history_available", bool(tool_context.get("conversation_history"))),
+    )
 
     messages = []
     if prior_messages:

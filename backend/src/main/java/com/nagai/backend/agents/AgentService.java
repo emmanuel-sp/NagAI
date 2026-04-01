@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.nagai.backend.common.TokenHashService;
 import com.nagai.backend.exceptions.AgentContextLimitException;
 import com.nagai.backend.exceptions.AgentContextNotFoundException;
 import com.nagai.backend.exceptions.DuplicateGoalContextException;
@@ -21,15 +22,18 @@ public class AgentService {
     private final AgentContextRepository agentContextRepository;
     private final GoalRepository goalRepository;
     private final UserService userService;
+    private final TokenHashService tokenHashService;
 
     public AgentService(AgentRepository agentRepository,
                         AgentContextRepository agentContextRepository,
                         GoalRepository goalRepository,
-                        UserService userService) {
+                        UserService userService,
+                        TokenHashService tokenHashService) {
         this.agentRepository = agentRepository;
         this.agentContextRepository = agentContextRepository;
         this.goalRepository = goalRepository;
         this.userService = userService;
+        this.tokenHashService = tokenHashService;
     }
 
     public AgentResponse getOrCreateAgent() {
@@ -55,6 +59,7 @@ public class AgentService {
         contexts.forEach(context -> {
             context.setDeployed(true);
             context.setNextMessageAt(null);
+            context.setProcessingStartedAt(null);
         });
         agent.setDeployed(!contexts.isEmpty());
         agentContextRepository.saveAll(contexts);
@@ -66,7 +71,10 @@ public class AgentService {
         Agent agent = agentRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> createDefaultAgent(user.getUserId()));
         List<AgentContext> contexts = agentContextRepository.findByAgentId(agent.getAgentId());
-        contexts.forEach(context -> context.setDeployed(false));
+        contexts.forEach(context -> {
+            context.setDeployed(false);
+            context.setProcessingStartedAt(null);
+        });
         agentContextRepository.saveAll(contexts);
         agent.setDeployed(false);
         return buildResponse(agentRepository.save(agent));
@@ -116,6 +124,7 @@ public class AgentService {
         AgentContext context = getOwnedContext(contextId);
         context.setDeployed(true);
         context.setNextMessageAt(null);
+        context.setProcessingStartedAt(null);
         AgentContext saved = agentContextRepository.save(context);
         syncAgentDeploymentFlag(saved.getAgentId());
         return buildContextResponse(saved);
@@ -124,6 +133,7 @@ public class AgentService {
     public AgentContextResponse stopContext(Long contextId) {
         AgentContext context = getOwnedContext(contextId);
         context.setDeployed(false);
+        context.setProcessingStartedAt(null);
         AgentContext saved = agentContextRepository.save(context);
         syncAgentDeploymentFlag(saved.getAgentId());
         return buildContextResponse(saved);
@@ -137,20 +147,30 @@ public class AgentService {
     }
 
     public void stopByToken(String token) {
-        Agent agent = agentRepository.findByUnsubscribeToken(token)
+        String tokenHash = tokenHashService.hash(token);
+        Agent agent = agentRepository.findByUnsubscribeTokenHash(tokenHash)
+                .or(() -> agentRepository.findByUnsubscribeToken(token))
                 .orElseThrow(() -> new RuntimeException("Invalid token"));
+        if (agent.getUnsubscribeTokenHash() == null) {
+            agent.setUnsubscribeTokenHash(tokenHash);
+        }
         List<AgentContext> contexts = agentContextRepository.findByAgentId(agent.getAgentId());
-        contexts.forEach(context -> context.setDeployed(false));
+        contexts.forEach(context -> {
+            context.setDeployed(false);
+            context.setProcessingStartedAt(null);
+        });
         agentContextRepository.saveAll(contexts);
         agent.setDeployed(false);
         agentRepository.save(agent);
     }
 
     private Agent createDefaultAgent(Long userId) {
+        String unsubscribeToken = UUID.randomUUID().toString();
         Agent agent = new Agent();
         agent.setUserId(userId);
         agent.setName("My AI Agent");
-        agent.setUnsubscribeToken(UUID.randomUUID().toString());
+        agent.setUnsubscribeToken(unsubscribeToken);
+        agent.setUnsubscribeTokenHash(tokenHashService.hash(unsubscribeToken));
         return agentRepository.save(agent);
     }
 

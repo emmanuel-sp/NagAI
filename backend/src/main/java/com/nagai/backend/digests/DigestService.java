@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.nagai.backend.common.TokenHashService;
 import com.nagai.backend.exceptions.DigestAlreadyExistsException;
 import com.nagai.backend.exceptions.DigestNotFoundException;
 import com.nagai.backend.users.User;
@@ -20,10 +21,13 @@ public class DigestService {
 
     private final DigestRepository digestRepository;
     private final UserService userService;
+    private final TokenHashService tokenHashService;
 
-    public DigestService(DigestRepository digestRepository, UserService userService) {
+    public DigestService(DigestRepository digestRepository, UserService userService,
+                         TokenHashService tokenHashService) {
         this.digestRepository = digestRepository;
         this.userService = userService;
+        this.tokenHashService = tokenHashService;
     }
 
     public Digest getDigest() {
@@ -39,7 +43,9 @@ public class DigestService {
         }
         Digest digest = new Digest();
         digest.setUserId(user.getUserId());
-        digest.setUnsubscribeToken(UUID.randomUUID().toString());
+        String unsubscribeToken = UUID.randomUUID().toString();
+        digest.setUnsubscribeToken(unsubscribeToken);
+        digest.setUnsubscribeTokenHash(tokenHashService.hash(unsubscribeToken));
         applyFields(digest, request.getName(), request.getDescription(),
                 request.getFrequency(), request.getDeliveryTime(), request.getContentTypes());
         if (digest.isActive()) {
@@ -74,15 +80,22 @@ public class DigestService {
             initializeNextDelivery(digest, user);
         } else {
             digest.setNextDeliveryAt(null);
+            digest.setProcessingStartedAt(null);
         }
         return digestRepository.save(digest);
     }
 
     public void unsubscribeByToken(String token) {
-        Digest digest = digestRepository.findByUnsubscribeToken(token)
+        String tokenHash = tokenHashService.hash(token);
+        Digest digest = digestRepository.findByUnsubscribeTokenHash(tokenHash)
+                .or(() -> digestRepository.findByUnsubscribeToken(token))
                 .orElseThrow(DigestNotFoundException::new);
+        if (digest.getUnsubscribeTokenHash() == null) {
+            digest.setUnsubscribeTokenHash(tokenHash);
+        }
         digest.setActive(false);
         digest.setNextDeliveryAt(null);
+        digest.setProcessingStartedAt(null);
         digestRepository.save(digest);
     }
 
@@ -97,6 +110,7 @@ public class DigestService {
         digest.setLastDeliveredAt(LocalDateTime.now(ZoneOffset.UTC));
         ZoneId zone = resolveZone(user.getTimezone());
         digest.setNextDeliveryAt(calculateNextDelivery(digest.getFrequency(), digest.getDeliveryTime(), zone));
+        digest.setProcessingStartedAt(null);
         digestRepository.save(digest);
     }
 

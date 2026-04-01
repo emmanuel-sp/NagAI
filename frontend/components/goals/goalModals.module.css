@@ -317,29 +317,6 @@
   flex-shrink: 0;
 }
 
-.deleteButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-500);
-  color: var(--error);
-  background: none;
-  border: 1px solid transparent;
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
-  margin-right: auto;
-}
-
-.deleteButton:hover {
-  background: var(--error-light);
-  border-color: var(--error-border);
-}
-
-.deleteButton:disabled { opacity: 0.5; cursor: not-allowed; }
-
 .deleteIconButton {
   display: inline-flex;
   align-items: center;

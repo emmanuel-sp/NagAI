@@ -34,4 +34,4 @@ export interface CreateDigestRequest {
   contentTypes: DigestContentType[];
 }
 
-export interface UpdateDigestRequest extends CreateDigestRequest {}
+export type UpdateDigestRequest = CreateDigestRequest;

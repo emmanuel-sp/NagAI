@@ -38,6 +38,9 @@ public class Agent {
     @Column(name = "unsubscribe_token", unique = true, nullable = false)
     private String unsubscribeToken;
 
+    @Column(name = "unsubscribe_token_hash")
+    private String unsubscribeTokenHash;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;

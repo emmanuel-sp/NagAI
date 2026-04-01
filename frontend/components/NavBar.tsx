@@ -1,16 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { useModal } from "@/contexts/ModalContext";
 import { useAgentData } from "@/contexts/AgentDataContext";
-import GoalFormModal from "@/components/goals/GoalFormModal";
 import { IoSidebarPanel, IoAdd, IoChevronDown, IoPerson, IoSun, IoMoon } from "@/components/icons";
 import { useTheme, ACCENT_CONFIGS, type AccentKey } from "@/contexts/ThemeContext";
 import MessageInboxTrigger from "@/components/inbox/MessageInboxTrigger";
 import { createGoal } from "@/services/goalService";
 import styles from "./NavBar.module.css";
+
+const GoalFormModal = dynamic(() => import("@/components/goals/GoalFormModal"));
 
 const navLinks = [
   { href: "/home", label: "Dashboard" },
@@ -28,7 +30,6 @@ interface NavBarProps {
 export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { modalOpen } = useModal();
   const { mode, accent, setMode, setAccent } = useTheme();
@@ -44,11 +45,6 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
   const [goalsExpanded, setGoalsExpanded] = useState(true);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [deployingContextId, setDeployingContextId] = useState<number | null>(null);
-
-  useEffect(() => {
-    const hasToken = !!localStorage.getItem("authToken");
-    setIsLoggedIn(hasToken);
-  }, [pathname]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -101,8 +97,6 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
       setDeployingContextId(null);
     }
   };
-
-  if (!isLoggedIn || pathname === "/" || pathname === "/onboarding") return null;
 
   const canCreateGoal = goals.length < 10;
 
@@ -263,12 +257,14 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
         <IoSidebarPanel size={16} strokeWidth={1.35} />
       </button>
 
-      <GoalFormModal
-        mode="create"
-        isOpen={isGoalModalOpen}
-        onClose={() => setIsGoalModalOpen(false)}
-        onSubmit={handleCreateGoal}
-      />
+      {isGoalModalOpen ? (
+        <GoalFormModal
+          mode="create"
+          isOpen={isGoalModalOpen}
+          onClose={() => setIsGoalModalOpen(false)}
+          onSubmit={handleCreateGoal}
+        />
+      ) : null}
     </>
   );
 }

@@ -120,36 +120,6 @@
   background: var(--accent-light);
 }
 
-/* ─── Notification Bell ─── */
-.bellBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 10px 12px;
-  background: none;
-  border: none;
-  border-radius: var(--radius-md);
-  font-family: var(--font-body);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-500);
-  color: var(--text-secondary);
-  cursor: pointer;
-  text-align: left;
-  white-space: nowrap;
-  transition: color var(--transition-fast), background var(--transition-fast);
-  margin-bottom: 2px;
-}
-
-.bellBtn:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover);
-}
-
-.bellLabel {
-  font-size: var(--fs-sm);
-}
-
 /* ─── Nav link label — spacing only, no hover ─── */
 .navLinkLabel {
   margin-left: 8px;
@@ -235,13 +205,6 @@
   text-align: left;
 }
 
-.contextsSectionActions {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: auto;
-}
-
 .contextsSectionBtn {
   display: flex;
   align-items: center;
@@ -260,91 +223,6 @@
 .contextsSectionBtn:hover {
   color: var(--text-primary);
   background: var(--surface-hover);
-}
-
-.deployedBtn {
-  color: var(--accent);
-}
-
-/* Deploy pill — undeployed state */
-.deployPill {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  font-family: var(--font-body);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background var(--transition-fast), box-shadow var(--transition-fast),
-              color var(--transition-fast);
-}
-
-.deployPillInactive {
-  background: #ef4444;
-  color: #fff;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
-  animation: deployNudge 2.5s ease-in-out infinite;
-}
-
-.deployPillInactive:hover {
-  background: #dc2626;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
-}
-
-.deployPillActive {
-  background: rgba(52, 211, 153, 0.15);
-  color: #34d399;
-}
-
-.deployPillActive:hover {
-  background: rgba(52, 211, 153, 0.25);
-}
-
-/* Deploy status dot — inside pill */
-.deployDot {
-  display: block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  transition: background var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.deployDotInactive {
-  background: rgba(255, 255, 255, 0.8);
-}
-
-.deployDotActive {
-  background: #34d399;
-  box-shadow: 0 0 6px rgba(52, 211, 153, 0.5);
-  animation: dotPulse 2s ease-in-out infinite;
-}
-
-@keyframes dotPulse {
-  0%, 100% { box-shadow: 0 0 4px rgba(52, 211, 153, 0.4); }
-  50% { box-shadow: 0 0 10px rgba(52, 211, 153, 0.7); }
-}
-
-@keyframes deployNudge {
-  0%, 100% { box-shadow: 0 0 4px rgba(239, 68, 68, 0.3); }
-  50% { box-shadow: 0 0 12px rgba(239, 68, 68, 0.5); }
-}
-
-.miniSpinner {
-  display: block;
-  width: 10px;
-  height: 10px;
-  border: 1.5px solid var(--border-strong);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* Context list */
@@ -418,13 +296,6 @@
   white-space: nowrap;
 }
 
-.goalWorkspaceHint {
-  flex-shrink: 0;
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-600);
-  color: var(--accent);
-}
-
 /* Dot status indicator */
 .goalStatusDot {
   flex-shrink: 0;
@@ -456,43 +327,6 @@
   background: var(--text-light);
 }
 
-
-.contextRowActions {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.contextRow:hover .contextRowActions {
-  opacity: 1;
-}
-
-.contextActionBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  background: none;
-  border: none;
-  border-radius: var(--radius-sm);
-  color: var(--text-light);
-  cursor: pointer;
-  font-size: 14px;
-  transition: color var(--transition-fast), background var(--transition-fast);
-}
-
-.contextActionBtn:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover);
-}
-
-.contextDeleteBtn:hover {
-  color: var(--error);
-}
 
 /* ─── Theme Switcher ─── */
 .themeSection {
@@ -628,10 +462,5 @@
 
   .backdrop {
     display: block;
-  }
-
-  /* On mobile, always show context row actions */
-  .contextRowActions {
-    opacity: 1;
   }
 }

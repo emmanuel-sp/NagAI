@@ -12,6 +12,9 @@ RUN ./mvnw package -DskipTests -B
 # ── Runtime stage ──
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+RUN addgroup -S nagai && adduser -S nagai -G nagai
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080 9091
+RUN chown nagai:nagai /app/app.jar
+USER nagai
+EXPOSE 8080
 ENTRYPOINT ["java", "-Xmx512m", "-jar", "app.jar"]

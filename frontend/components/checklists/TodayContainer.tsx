@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, type ComponentPropsWithoutRef } from "react";
 import { DndContext, type DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -223,8 +223,8 @@ interface ListItemProps {
   canMoveDown: boolean;
   isDraggable: boolean;
   isDragging?: boolean;
-  dragHandleAttributes?: any;
-  dragHandleListeners?: any;
+  dragHandleAttributes?: ComponentPropsWithoutRef<"button">;
+  dragHandleListeners?: ComponentPropsWithoutRef<"button">;
   onToggle: (id: number) => void;
   onEdit: () => void;
   onDelete: (id: number) => void;
@@ -395,23 +395,7 @@ export default function TodayContainer() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  useEffect(() => {
-    const calendarParam = searchParams.get("calendar");
-    if (calendarParam === "connected") {
-      setCalendarNotice("Google Calendar connected! Your next daily plan will schedule around your meetings.");
-      router.replace("/today", { scroll: false });
-    } else if (calendarParam === "error") {
-      setError("Failed to connect Google Calendar. Please try again.");
-      router.replace("/today", { scroll: false });
-    }
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    if (checklist) setItems([...checklist.items]);
-  }, [checklist]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -429,7 +413,23 @@ export default function TodayContainer() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const calendarParam = searchParams.get("calendar");
+    if (calendarParam === "connected") {
+      setCalendarNotice("Google Calendar connected! Your next daily plan will schedule around your meetings.");
+      router.replace("/today", { scroll: false });
+    } else if (calendarParam === "error") {
+      setError("Failed to connect Google Calendar. Please try again.");
+      router.replace("/today", { scroll: false });
+    }
+    void loadData();
+  }, [loadData, router, searchParams]);
+
+  useEffect(() => {
+    if (checklist) setItems([...checklist.items]);
+  }, [checklist]);
 
   const handleGenerate = async () => {
     setIsGenerating(true);

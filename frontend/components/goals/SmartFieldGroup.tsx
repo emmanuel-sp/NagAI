@@ -1,6 +1,5 @@
 "use client";
 
-import { IoSparkles } from "@/components/icons";
 import styles from "./goalModals.module.css";
 import { SmartField } from "@/hooks/useSmartGoalForm";
 

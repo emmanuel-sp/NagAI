@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.nagai.backend.common.TokenHashService;
 import com.nagai.backend.exceptions.AgentContextNotFoundException;
 import com.nagai.backend.exceptions.DuplicateGoalContextException;
 import com.nagai.backend.goals.Goal;
@@ -37,6 +38,9 @@ class AgentServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private TokenHashService tokenHashService;
 
     @InjectMocks
     private AgentService agentService;
@@ -90,6 +94,7 @@ class AgentServiceTest {
     void getOrCreateAgent_createsDefaultAgentWhenNoneExists() {
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.empty());
+        when(tokenHashService.hash(anyString())).thenReturn("agent-hash");
         when(agentRepository.save(any(Agent.class))).thenAnswer(inv -> {
             Agent a = inv.getArgument(0);
             a.setAgentId(10L);
@@ -102,7 +107,7 @@ class AgentServiceTest {
         assertThat(result.getName()).isEqualTo("My AI Agent");
         assertThat(result.getCommunicationChannel()).isEqualTo("email");
         assertThat(result.isDeployed()).isFalse();
-        verify(agentRepository).save(any(Agent.class));
+        verify(agentRepository).save(argThat(saved -> "agent-hash".equals(saved.getUnsubscribeTokenHash())));
     }
 
     @Test
@@ -132,20 +137,45 @@ class AgentServiceTest {
         AgentResponse result = agentService.deployAgent();
 
         assertThat(result.isDeployed()).isTrue();
+        assertThat(context.getProcessingStartedAt()).isNull();
     }
 
     @Test
     void stopAgent_setsDeployedFalse() {
         agent.setDeployed(true);
+        context.setDeployed(true);
+        context.setProcessingStartedAt(java.time.LocalDateTime.now());
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(agentRepository.findByUserId(1L)).thenReturn(Optional.of(agent));
         when(agentRepository.save(any(Agent.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of());
+        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(context));
+        when(agentContextRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         AgentResponse result = agentService.stopAgent();
 
         assertThat(result.isDeployed()).isFalse();
+        assertThat(context.getProcessingStartedAt()).isNull();
+    }
+
+    @Test
+    void stopByToken_supportsLegacyPlaintextTokenFallback() {
+        context.setDeployed(true);
+        context.setProcessingStartedAt(java.time.LocalDateTime.now());
+
+        when(tokenHashService.hash("legacy-token")).thenReturn("agent-hash");
+        when(agentRepository.findByUnsubscribeTokenHash("agent-hash")).thenReturn(Optional.empty());
+        when(agentRepository.findByUnsubscribeToken("legacy-token")).thenReturn(Optional.of(agent));
+        when(agentContextRepository.findByAgentId(10L)).thenReturn(List.of(context));
+
+        agentService.stopByToken("legacy-token");
+
+        assertThat(agent.isDeployed()).isFalse();
+        assertThat(agent.getUnsubscribeTokenHash()).isEqualTo("agent-hash");
+        assertThat(context.isDeployed()).isFalse();
+        assertThat(context.getProcessingStartedAt()).isNull();
+        verify(agentContextRepository).saveAll(List.of(context));
+        verify(agentRepository).save(agent);
     }
 
     @Test

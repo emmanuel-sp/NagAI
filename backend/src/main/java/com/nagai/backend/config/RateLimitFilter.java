@@ -2,11 +2,14 @@ package com.nagai.backend.config;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
+import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,8 +31,15 @@ import jakarta.servlet.http.HttpServletResponse;
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RateLimitFilter.class);
+    private static final Duration BUCKET_IDLE_TTL = Duration.ofHours(1);
+    private static final int MAX_TRACKED_BUCKETS = 10_000;
 
-    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private final Map<String, BucketState> buckets = new ConcurrentHashMap<>();
+    private final boolean useForwardedFor;
+
+    public RateLimitFilter(@Value("${rate-limit.use-forwarded-for:false}") boolean useForwardedFor) {
+        this.useForwardedFor = useForwardedFor;
+    }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -42,11 +52,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String path = request.getRequestURI();
         String key;
-        Bucket bucket;
+        BucketState bucketState;
 
         if (path.startsWith("/auth/")) {
             key = "auth:" + resolveClientIp(request);
-            bucket = buckets.computeIfAbsent(key, k -> createAuthBucket());
+            bucketState = buckets.compute(key, (ignored, existing) -> touch(existing, this::createAuthBucket));
         } else if (path.startsWith("/ai/")) {
             String userId = resolveUserId();
             if (userId == null) {
@@ -55,14 +65,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 return;
             }
             key = "ai:" + userId;
-            bucket = buckets.computeIfAbsent(key, k -> createAiBucket());
+            bucketState = buckets.compute(key, (ignored, existing) -> touch(existing, this::createAiBucket));
         } else {
             String userId = resolveUserId();
             key = "general:" + (userId != null ? userId : resolveClientIp(request));
-            bucket = buckets.computeIfAbsent(key, k -> createGeneralBucket());
+            bucketState = buckets.compute(key, (ignored, existing) -> touch(existing, this::createGeneralBucket));
         }
 
-        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+        ConsumptionProbe probe = bucketState.bucket.tryConsumeAndReturnRemaining(1);
         if (probe.isConsumed()) {
             response.setHeader("X-RateLimit-Remaining", String.valueOf(probe.getRemainingTokens()));
             filterChain.doFilter(request, response);
@@ -76,10 +86,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
     }
 
-    private String resolveClientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
+    BucketState touch(BucketState existing, java.util.function.Supplier<Bucket> bucketSupplier) {
+        BucketState next = existing != null ? existing : new BucketState(bucketSupplier.get());
+        next.lastSeenAt = Instant.now();
+        return next;
+    }
+
+    String resolveClientIp(HttpServletRequest request) {
+        if (useForwardedFor) {
+            String forwarded = request.getHeader("X-Forwarded-For");
+            if (forwarded != null && !forwarded.isBlank()) {
+                return forwarded.split(",")[0].trim();
+            }
         }
         return request.getRemoteAddr();
     }
@@ -117,20 +135,35 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Scheduled(fixedRate = 300_000)
     public void evictExpiredBuckets() {
         long before = buckets.size();
-        buckets.entrySet().removeIf(entry -> {
-            Bucket b = entry.getValue();
-            // If the bucket has all tokens available, it's idle — safe to evict
-            return b.getAvailableTokens() == getCapacity(entry.getKey());
-        });
+        Instant cutoff = Instant.now().minus(BUCKET_IDLE_TTL);
+        buckets.entrySet().removeIf(entry -> entry.getValue().lastSeenAt.isBefore(cutoff));
+        trimToMaxTrackedBuckets();
         long evicted = before - buckets.size();
         if (evicted > 0) {
             log.debug("Evicted {} idle rate-limit buckets", evicted);
         }
     }
 
-    private long getCapacity(String key) {
-        if (key.startsWith("auth:")) return 10;
-        if (key.startsWith("ai:")) return 20;
-        return 100;
+    private void trimToMaxTrackedBuckets() {
+        int oversize = buckets.size() - MAX_TRACKED_BUCKETS;
+        if (oversize <= 0) {
+            return;
+        }
+
+        buckets.entrySet().stream()
+                .sorted(Comparator.comparing(entry -> entry.getValue().lastSeenAt))
+                .limit(oversize)
+                .map(Map.Entry::getKey)
+                .toList()
+                .forEach(buckets::remove);
+    }
+
+    static final class BucketState {
+        private final Bucket bucket;
+        private volatile Instant lastSeenAt = Instant.now();
+
+        private BucketState(Bucket bucket) {
+            this.bucket = bucket;
+        }
     }
 }

@@ -45,6 +45,9 @@ public class Digest {
     @Column(name = "unsubscribe_token", unique = true)
     private String unsubscribeToken;
 
+    @Column(name = "unsubscribe_token_hash")
+    private String unsubscribeTokenHash;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -54,6 +57,9 @@ public class Digest {
 
     @Column(name = "next_delivery_at")
     private LocalDateTime nextDeliveryAt;
+
+    @Column(name = "processing_started_at")
+    private LocalDateTime processingStartedAt;
 
     @Column(name = "stale_count", nullable = false)
     private int staleCount = 0;

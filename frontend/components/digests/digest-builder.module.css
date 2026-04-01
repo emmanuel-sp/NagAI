@@ -35,7 +35,6 @@
 /* ─── Shared Card Pattern ─── */
 .overviewCard,
 .settingsCard,
-.contentTypes,
 .deploymentPanel {
   background: color-mix(in srgb, var(--bg-card) 96%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
@@ -712,40 +711,6 @@
   letter-spacing: 0.04em;
   text-align: center;
   background: rgba(0, 0, 0, 0.12);
-}
-
-/* ─── Misc classes ─── */
-.description {
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-  line-height: 1.6;
-  padding: 0;
-  font-weight: var(--fw-300);
-}
-
-.includes {
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
-}
-
-.label {
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-500);
-  color: var(--text-secondary);
-}
-
-.value {
-  font-size: var(--fs-sm);
-  color: var(--text-primary);
-  font-weight: var(--fw-500);
-}
-
-.time {
-  font-family: var(--font-body);
-}
-
-.isActive {
-  color: var(--text-primary);
 }
 
 /* ═══════════════════════════════════════════════

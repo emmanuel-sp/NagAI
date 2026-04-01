@@ -1,5 +1,6 @@
 package com.nagai.backend.digests;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -17,11 +18,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nagai.backend.checklists.ChecklistItem;
 import com.nagai.backend.checklists.ChecklistRepository;
+import com.nagai.backend.common.ChecklistTimestampUtils;
 import com.nagai.backend.common.ProfileUtils;
 import com.nagai.backend.config.RedisStreamConfig;
 import com.nagai.backend.goals.Goal;
@@ -38,6 +39,7 @@ public class DigestScheduler {
 
     /** Auto-pause digest after this many consecutive stale deliveries. */
     static final int STALE_PAUSE_THRESHOLD = 5;
+    private static final Duration CLAIM_TTL = Duration.ofMinutes(15);
 
     private final DigestRepository digestRepository;
     private final DigestService digestService;
@@ -76,7 +78,6 @@ public class DigestScheduler {
      * Runs every 5 minutes instead of the old 60-second poll.
      */
     @Scheduled(fixedRate = 300_000, initialDelay = 30_000)
-    @Transactional
     public void processDigests() {
         String correlationId = UUID.randomUUID().toString().substring(0, 8);
         MDC.put("correlationId", correlationId);
@@ -89,8 +90,9 @@ public class DigestScheduler {
     }
 
     private void processDigestsInternal(String correlationId) {
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         List<Digest> dueDigests = digestRepository.findByActiveAndNextDeliveryAtBefore(
-                true, LocalDateTime.now(ZoneOffset.UTC));
+                true, now);
 
         if (dueDigests.isEmpty()) {
             log.debug("Sweep: no due digests found");
@@ -100,7 +102,7 @@ public class DigestScheduler {
         log.info("Found {} due digest(s) to process", dueDigests.size());
 
         for (Digest digest : dueDigests) {
-            processDigest(digest, correlationId);
+            processDigestById(digest.getDigestId(), correlationId, now);
         }
     }
 
@@ -111,15 +113,8 @@ public class DigestScheduler {
         MDC.put("correlationId", correlationId);
 
         try {
-            Digest digest = digestRepository.findById(digestId).orElse(null);
-            if (digest == null || !digest.isActive()) return;
-            if (digest.getNextDeliveryAt() == null
-                    || digest.getNextDeliveryAt().isAfter(LocalDateTime.now(ZoneOffset.UTC))) {
-                return;
-            }
-
             log.info("Timer: processing digest {}", digestId);
-            processDigest(digest, correlationId);
+            processDigestById(digestId, correlationId, LocalDateTime.now(ZoneOffset.UTC));
         } catch (Exception e) {
             digestsFailedCounter.increment();
             log.error("Timer: failed to process digest {}: {}", digestId, e.getMessage(), e);
@@ -128,12 +123,40 @@ public class DigestScheduler {
         }
     }
 
+    private void processDigestById(Long digestId, String correlationId, LocalDateTime now) {
+        if (!claimDigest(digestId, now)) {
+            return;
+        }
+
+        Digest digest = digestRepository.findById(digestId).orElse(null);
+        if (digest == null || !digest.isActive()) {
+            digestRepository.clearProcessingClaim(digestId);
+            return;
+        }
+        if (digest.getNextDeliveryAt() == null || digest.getNextDeliveryAt().isAfter(now)) {
+            digestRepository.clearProcessingClaim(digestId);
+            return;
+        }
+
+        processDigest(digest, correlationId);
+    }
+
+    private boolean claimDigest(Long digestId, LocalDateTime now) {
+        return digestRepository.claimDueDigest(
+                digestId,
+                now,
+                now,
+                now.minus(CLAIM_TTL)
+        ) == 1;
+    }
+
     private void processDigest(Digest digest, String correlationId) {
         try {
             User user = userRepository.findById(digest.getUserId())
                     .orElse(null);
             if (user == null) {
                 log.warn("User {} not found for digest {}", digest.getUserId(), digest.getDigestId());
+                digestRepository.clearProcessingClaim(digest.getDigestId());
                 return;
             }
 
@@ -152,6 +175,7 @@ public class DigestScheduler {
                 digest.setActive(false);
                 digest.setNextDeliveryAt(null);
                 digest.setPauseReason("stale_progress");
+                digest.setProcessingStartedAt(null);
                 digestRepository.save(digest);
                 cancelTimer(digest.getDigestId());
                 return;
@@ -176,6 +200,7 @@ public class DigestScheduler {
             scheduleTimer(digest.getDigestId(), digest.getNextDeliveryAt());
             log.info("Digest {} delivered, next at {}", digest.getDigestId(), digest.getNextDeliveryAt());
         } catch (Exception e) {
+            digestRepository.clearProcessingClaim(digest.getDigestId());
             digestsFailedCounter.increment();
             log.error("Failed to process digest {}: {}", digest.getDigestId(), e.getMessage(), e);
         }
@@ -206,14 +231,13 @@ public class DigestScheduler {
             return true; // first delivery — treat as fresh
         }
 
-        String sinceStr = since.toLocalDate().toString(); // YYYY-MM-DD
         List<Goal> goals = goalRepository.findAllByUserId(digest.getUserId());
+        Map<Long, List<ChecklistItem>> checklistItemsByGoalId = loadChecklistItemsByGoalId(goals);
 
         for (Goal goal : goals) {
-            List<ChecklistItem> items = checklistRepository.findChecklistItemByGoalId(goal.getGoalId());
+            List<ChecklistItem> items = checklistItemsByGoalId.getOrDefault(goal.getGoalId(), List.of());
             for (ChecklistItem item : items) {
-                if (item.isCompleted() && item.getCompletedAt() != null
-                        && item.getCompletedAt().compareTo(sinceStr) > 0) {
+                if (item.isCompleted() && ChecklistTimestampUtils.isCompletedAfter(item.getCompletedAt(), since)) {
                     return true;
                 }
             }
@@ -223,10 +247,11 @@ public class DigestScheduler {
 
     DigestDeliveryPayload buildPayload(Digest digest, User user, boolean hasProgress) {
         List<Goal> goals = goalRepository.findAllByUserId(user.getUserId());
+        Map<Long, List<ChecklistItem>> checklistItemsByGoalId = loadChecklistItemsByGoalId(goals);
 
         List<DigestDeliveryPayload.GoalPayload> goalPayloads = goals.stream()
                 .map(goal -> {
-                    List<ChecklistItem> items = checklistRepository.findChecklistItemByGoalId(goal.getGoalId());
+                    List<ChecklistItem> items = checklistItemsByGoalId.getOrDefault(goal.getGoalId(), List.of());
                     List<DigestDeliveryPayload.ChecklistItemPayload> itemPayloads = items.stream()
                             .map(item -> DigestDeliveryPayload.ChecklistItemPayload.builder()
                                     .title(item.getTitle())
@@ -267,6 +292,22 @@ public class DigestScheduler {
                 .staleCount(digest.getStaleCount())
                 .progressSinceLastDelivery(hasProgress)
                 .build();
+    }
+
+    private Map<Long, List<ChecklistItem>> loadChecklistItemsByGoalId(List<Goal> goals) {
+        List<Long> goalIds = goals.stream()
+                .map(Goal::getGoalId)
+                .toList();
+        if (goalIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return checklistRepository.findChecklistItemsByGoalIds(goalIds).stream()
+                .collect(Collectors.groupingBy(
+                        ChecklistItem::getGoalId,
+                        java.util.LinkedHashMap::new,
+                        Collectors.toList()
+                ));
     }
 
 }

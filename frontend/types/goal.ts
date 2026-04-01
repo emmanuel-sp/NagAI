@@ -32,4 +32,4 @@ export interface CreateGoalRequest {
   journalMarkdown?: string | null;
 }
 
-export interface UpdateGoalRequest extends Partial<CreateGoalRequest> {}
+export type UpdateGoalRequest = Partial<CreateGoalRequest>;

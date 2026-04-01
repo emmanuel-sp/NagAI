@@ -64,7 +64,7 @@ export default function DailyChecklistContainer({
 
   // Mirror linked goal toggle into daily items locally
   useEffect(() => {
-    if (!linkedToggle || !checklist) return;
+    if (!linkedToggle) return;
     const { checklistId, completed } = linkedToggle;
     setChecklist((current) =>
       current

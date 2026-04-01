@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { Digest, DigestFrequency, DeliveryTime, DigestContentType } from "@/types/digest";
 import { ApiError } from "@/lib/api";
 import {
@@ -20,7 +19,6 @@ import DigestStatusPanel from "./DigestStatusPanel";
 import styles from "./digest-builder.module.css";
 
 export default function DigestBuilderContainer() {
-  const { loading: authLoading } = useAuth({ requireAuth: true });
   const [digest, setDigest] = useState<Digest | null>(null);
   const [loading, setLoading] = useState(true);
   const [notConfigured, setNotConfigured] = useState(false);
@@ -28,10 +26,8 @@ export default function DigestBuilderContainer() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    if (!authLoading) {
-      loadDigest();
-    }
-  }, [authLoading]);
+    void loadDigest();
+  }, []);
 
   useEffect(() => {
     if (notConfigured) {

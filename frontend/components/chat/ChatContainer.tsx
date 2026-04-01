@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import { useAgentData } from "@/contexts/AgentDataContext";
+import { useAuthenticatedUser } from "@/components/layout/AuthGate";
 import {
   ActionSuggestion,
   AgentMessageDetail,
@@ -22,11 +22,10 @@ import SessionDropdown from "./SessionDropdown";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import PresetPrompts from "./PresetPrompts";
-import LoadingSpinner from "@/components/common/LoadingSpinner";
 import styles from "./chat.module.css";
 
 export default function ChatContainer() {
-  const { user, loading: authLoading } = useAuth({ requireAuth: true });
+  const user = useAuthenticatedUser();
   const searchParams = useSearchParams();
   const { goals, refreshAgent } = useAgentData();
 
@@ -265,14 +264,6 @@ export default function ChatContainer() {
     [handleSend]
   );
 
-  if (authLoading || loadingSessions) {
-    return (
-      <div className={styles.loadingPage}>
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   // Prepend the linked agent message as an assistant message when in a new chat
   const displayMessages: ChatMessage[] = [];
   if (linkedAgentMessage && !activeSessionId) {
@@ -290,6 +281,10 @@ export default function ChatContainer() {
   const initials = user?.fullName
     ? user.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "?";
+
+  if (loadingSessions) {
+    return <div className={styles.loadingPage}>Loading chat...</div>;
+  }
 
   const chatInputProps = {
     onSend: handleSend,

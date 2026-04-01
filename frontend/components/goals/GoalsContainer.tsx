@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import { useAgentData } from "@/contexts/AgentDataContext";
 import { Goal } from "@/types/goal";
 import GoalsList from "@/components/goals/GoalsList";
@@ -20,7 +19,6 @@ import { Checklist } from "@/types/checklist";
 import { fetchChecklists } from "@/services/checklistService";
 
 export default function GoalsContainer() {
-  const { loading: authLoading } = useAuth({ requireAuth: true });
   const router = useRouter();
   const { refreshAgent } = useAgentData();
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -30,10 +28,8 @@ export default function GoalsContainer() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading) {
-      loadGoals();
-    }
-  }, [authLoading]);
+    void loadGoals();
+  }, []);
 
   const loadGoals = async () => {
     setIsLoading(true);

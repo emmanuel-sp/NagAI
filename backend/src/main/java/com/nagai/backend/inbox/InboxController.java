@@ -1,9 +1,9 @@
 package com.nagai.backend.inbox;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -50,10 +50,15 @@ public class InboxController {
     public ResponseEntity<InboxPageResponse> getInbox(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
+        if (page < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        int safeSize = Math.max(1, Math.min(size, 50));
 
         User user = userService.getCurrentUser();
         // Fetch enough to cover any distribution between the two sources
-        int fetchCount = (page + 1) * size + 1;
+        int fetchCount = (page + 1) * safeSize + 1;
         PageRequest pageable = PageRequest.of(0, fetchCount);
 
         List<SentAgentMessage> agentMsgs = sentAgentMessageRepository
@@ -61,43 +66,49 @@ public class InboxController {
         List<SentDigest> digests = sentDigestRepository
                 .findByUserIdOrderBySentAtDesc(user.getUserId(), pageable);
 
-        List<InboxItem> all = new ArrayList<>();
+        Map<Long, String> contextNamesById = agentContextRepository.findAllById(agentMsgs.stream()
+                        .map(SentAgentMessage::getContextId)
+                        .distinct()
+                        .toList()).stream()
+                .collect(java.util.stream.Collectors.toMap(AgentContext::getContextId, AgentContext::getName));
+        Map<Long, String> digestNamesById = digestRepository.findAllById(digests.stream()
+                        .map(SentDigest::getDigestId)
+                        .distinct()
+                        .toList()).stream()
+                .collect(java.util.stream.Collectors.toMap(Digest::getDigestId, Digest::getName));
 
+        List<InboxItem> all = new ArrayList<>();
         for (SentAgentMessage msg : agentMsgs) {
-            String contextName = agentContextRepository.findById(msg.getContextId())
-                    .map(AgentContext::getName).orElse("Agent");
             all.add(new InboxItem(
                     msg.getSentMessageId(),
                     "agent",
                     msg.getSubject(),
                     extractPreview(msg.getContent()),
-                    contextName,
+                    contextNamesById.getOrDefault(msg.getContextId(), "Agent"),
                     msg.getSentAt() != null ? msg.getSentAt().toString() : ""
             ));
         }
 
         for (SentDigest digest : digests) {
-            String digestName = digestRepository.findById(digest.getDigestId())
-                    .map(Digest::getName).orElse("Digest");
             all.add(new InboxItem(
                     digest.getSentDigestId(),
                     "digest",
                     digest.getSubject(),
                     extractPreview(digest.getContent()),
-                    digestName,
+                    digestNamesById.getOrDefault(digest.getDigestId(), "Digest"),
                     digest.getSentAt() != null ? digest.getSentAt().toString() : ""
             ));
         }
 
         all.sort(Comparator.comparing(InboxItem::sentAt).reversed());
 
-        boolean hasMore = all.size() > (long) (page + 1) * size;
+        boolean hasMore = all.size() > (long) (page + 1) * safeSize;
         List<InboxItem> pageItems = all.stream()
-                .skip((long) page * size)
-                .limit(size)
+                .skip((long) page * safeSize)
+                .limit(safeSize)
                 .toList();
 
-        return ResponseEntity.ok(new InboxPageResponse(pageItems, hasMore, page, size));
+        return ResponseEntity.ok(new InboxPageResponse(pageItems, hasMore, page, safeSize));
     }
 
     @GetMapping("/digest/{sentDigestId}")
