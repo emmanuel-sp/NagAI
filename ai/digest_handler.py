@@ -192,64 +192,186 @@ def render_email_html(subject: str, body: str, user_name: str, unsubscribe_url: 
     safe_user_name = html_mod.escape(user_name) if user_name else "there"
 
     return f"""<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
 <title>{safe_subject}</title>
+<!--[if mso]>
+<noscript><xml><o:OfficeDocumentSettings>
+  <o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings></xml></noscript>
+<![endif]-->
+<style type="text/css">
+  body, table, td, p, a, li {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }}
+  table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse !important; }}
+  img {{ border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }}
+  div[style*="margin: 16px 0"] {{ margin: 0 !important; }}
+</style>
 </head>
-<body style="margin:0;padding:0;background-color:#f6f1ee;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#2c201f;line-height:1.6;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(180deg,#f6f1ee 0%,#f1e7e4 100%);">
-<tr><td align="center" style="padding:28px 16px;">
-<table role="presentation" width="620" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%;background-color:#fffdfb;border:1px solid #eadbd6;border-radius:24px;overflow:hidden;box-shadow:0 18px 38px rgba(61,43,41,0.10);">
+
+<body style="margin: 0; padding: 0; background-color: #eef2f6; font-family: Arial, Helvetica, sans-serif; color: #1f2937;">
+
+<!-- PREVIEW TEXT -->
+<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; color: #eef2f6; line-height: 1px; max-width: 0; opacity: 0;">
+  Your NagAI digest is ready &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+</div>
+
+<!-- PAGE WRAPPER -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #eef2f6;">
 <tr>
-<td style="padding:18px 24px;background-color:#f9f1ef;border-bottom:1px solid #eadbd6;text-align:center;">
-  <p style="margin:0;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#8a3b46;font-weight:700;">NagAI Digest</p>
-</td>
-</tr>
-<tr>
-<td style="background:linear-gradient(135deg,#251b1a 0%,#4b3432 100%);padding:34px 32px 30px;text-align:left;">
-  <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.62);font-weight:700;">Curated for your goals</p>
-  <h1 style="margin:0;font-size:30px;line-height:1.1;font-weight:700;letter-spacing:-0.03em;color:#f7ece9;">{safe_subject}</h1>
-  <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:rgba(255,255,255,0.78);">A sharper read on what matters next, delivered in a format that actually feels useful.</p>
-</td>
-</tr>
-<tr>
-<td style="padding:28px 28px 10px;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(180deg,#fffaf8 0%,#f9f1ef 100%);border:1px solid #eadbd6;border-radius:20px;">
-    <tr>
-      <td style="padding:22px 22px 8px;">
-        <p style="margin:0;font-size:18px;color:#2c201f;font-weight:700;">Hey {safe_user_name},</p>
-        <p style="margin:10px 0 0;font-size:15px;color:#6a504d;line-height:1.75;">Here’s a thoughtful pass on your goals, progress, and a few useful ideas worth carrying into the week.</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:0 22px 22px;">
-        {sections_html}
-      </td>
-    </tr>
-  </table>
-</td>
-</tr>
-<tr>
-<td style="padding:8px 28px 28px;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7eeeb;border:1px solid #eadbd6;border-radius:18px;">
-    <tr>
-      <td style="padding:18px 20px;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#7b625e;line-height:1.7;">
-          You received this because you have an active NagAI digest.<br>
-          Manage your digest preferences in the app anytime.
-        </p>
-        {"" if not unsubscribe_url else f'<p style="margin:12px 0 0;font-size:12px;line-height:1.6;"><a href="{unsubscribe_url}" style="color:#8a3b46;text-decoration:underline;font-weight:600;">Unsubscribe from digest emails</a></p>'}
-        <p style="margin:12px 0 0;font-size:11px;color:#a08580;">Built with care by NagAI</p>
-      </td>
-    </tr>
-  </table>
-</td>
+  <td align="center" style="padding: 0;">
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 1040px;">
+
+      <!-- OUTER TOP SPACE -->
+      <tr>
+        <td style="height: 24px; font-size: 0; line-height: 0;">&nbsp;</td>
+      </tr>
+
+      <!-- MAIN SHELL -->
+      <tr>
+        <td style="padding: 0 20px;">
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #ffffff; border: 1px solid #dbe3ec;">
+
+            <!-- TOP ACCENT -->
+            <tr>
+              <td style="height: 6px; background-color: #8f2942; font-size: 0; line-height: 0;">&nbsp;</td>
+            </tr>
+
+            <!-- HEADER -->
+            <tr>
+              <td style="padding: 56px 64px 44px 64px; background-color: #f8fafc;">
+
+                <!-- Brand row -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="left">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="background-color: #8f2942; padding: 6px 14px;">
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: #ffffff;">NagAI</p>
+                          </td>
+                          <td style="padding-left: 12px;">
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #7b8794;">Digest</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 30px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <!-- Subject -->
+                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 44px; line-height: 1.08; font-weight: normal; color: #0f172a; letter-spacing: -0.03em;">
+                  {safe_subject}
+                </p>
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 18px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <!-- Rule -->
+                <table role="presentation" width="72" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 3px; background-color: #8f2942; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+              </td>
+            </tr>
+
+            <!-- BODY -->
+            <tr>
+              <td style="padding: 52px 64px 56px 64px; background-color: #ffffff;">
+
+                <!-- Greeting -->
+                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 25px; line-height: 1.32; color: #111827; font-weight: normal;">
+                  Hey {safe_user_name},
+                </p>
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 14px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.85; color: #5b6776;">
+                  Here's your curated digest below. Take a moment to review and carry what matters into your week.
+                </p>
+
+                <!-- Divider -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 36px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                  <tr><td style="height: 1px; background-color: #e5ebf1; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                  <tr><td style="height: 36px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <!-- DYNAMIC SECTIONS -->
+                {sections_html}
+
+              </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+              <td style="padding: 38px 64px 44px 64px; background-color: #f8fafc; border-top: 1px solid #e5ebf1; text-align: center;">
+
+                <!-- Divider -->
+                <table role="presentation" width="64" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto;">
+                  <tr><td style="height: 1px; background-color: #ccd6e2; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 22px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.85; color: #6b7280;">
+                  You received this because you have an active NagAI digest.<br>
+                  Manage your digest preferences in the app anytime.
+                </p>
+
+                {"" if not unsubscribe_url else f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height: 14px; font-size: 0; line-height: 0;">&nbsp;</td></tr></table><p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.6;"><a href="{unsubscribe_url}" style="color: #8f2942; text-decoration: underline; font-weight: 600;">Unsubscribe from digest emails</a></p>'}
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 18px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 13px; line-height: 1.4; color: #8a94a3; letter-spacing: 0.05em;">
+                  Built with care &mdash; NagAI
+                </p>
+
+              </td>
+            </tr>
+
+            <!-- BOTTOM ACCENT -->
+            <tr>
+              <td style="height: 6px; background-color: #8f2942; font-size: 0; line-height: 0;">&nbsp;</td>
+            </tr>
+
+          </table>
+
+        </td>
+      </tr>
+
+      <!-- OUTER BOTTOM SPACE -->
+      <tr>
+        <td style="height: 24px; font-size: 0; line-height: 0;">&nbsp;</td>
+      </tr>
+
+    </table>
+
+  </td>
 </tr>
 </table>
-</td></tr>
-</table>
+
 </body>
 </html>"""
 

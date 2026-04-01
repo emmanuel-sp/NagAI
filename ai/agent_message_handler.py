@@ -283,164 +283,176 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url="", chat_ur
   body, table, td, p, a, li {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }}
   table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse !important; }}
   img {{ border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }}
-  /* Gmail image block fix */
   div[style*="margin: 16px 0"] {{ margin: 0 !important; }}
 </style>
 </head>
 
-<!-- BODY -->
-<body style="margin: 0; padding: 0; background-color: #ede6e1; font-family: Georgia, 'Times New Roman', serif; color: #1e1412;">
+<body style="margin: 0; padding: 0; background-color: #eef2f6; font-family: Arial, Helvetica, sans-serif; color: #1f2937;">
 
-<!-- PREVIEW TEXT (hidden) -->
-<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; color: #ede6e1; line-height: 1px; max-width: 0; opacity: 0;">
+<!-- PREVIEW TEXT -->
+<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; color: #eef2f6; line-height: 1px; max-width: 0; opacity: 0;">
   Your NagAI agent has a check-in for you &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
 </div>
 
-<!-- WRAPPER -->
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ede6e1;">
+<!-- PAGE WRAPPER -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #eef2f6;">
 <tr>
-  <td align="center" style="padding: 36px 16px 40px 16px;">
+  <td align="center" style="padding: 0;">
 
-    <!-- OUTER CARD (620px) -->
-    <table role="presentation" width="620" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 620px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 1040px;">
 
-      <!-- ══════════════════════════════════════════ -->
-      <!-- TOP ACCENT BAR                            -->
-      <!-- ══════════════════════════════════════════ -->
+      <!-- OUTER TOP SPACE -->
       <tr>
-        <td style="height: 4px; background-color: #7d3040; font-size: 0; line-height: 0;">&nbsp;</td>
+        <td style="height: 24px; font-size: 0; line-height: 0;">&nbsp;</td>
       </tr>
 
-      <!-- ══════════════════════════════════════════ -->
-      <!-- HEADER — dark warm brown                  -->
-      <!-- ══════════════════════════════════════════ -->
+      <!-- MAIN SHELL -->
       <tr>
-        <td style="background-color: #1e1412; padding: 32px 40px 28px 40px;">
+        <td style="padding: 0 20px;">
 
-          <!-- brand row -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #ffffff; border: 1px solid #dbe3ec;">
+
+            <!-- TOP ACCENT -->
             <tr>
-              <td>
-                <!-- Wordmark pill -->
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <td style="height: 6px; background-color: #8f2942; font-size: 0; line-height: 0;">&nbsp;</td>
+            </tr>
+
+            <!-- HEADER -->
+            <tr>
+              <td style="padding: 54px 64px 40px 64px; background-color: #f8fafc;">
+
+                <!-- Brand row -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                   <tr>
-                    <td style="background-color: #7d3040; padding: 4px 12px;">
-                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: #f9ede8;">NagAI</p>
-                    </td>
-                    <td style="padding-left: 10px;">
-                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.45);">Agent Check-In</p>
+                    <td align="left">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td style="background-color: #8f2942; padding: 6px 14px;">
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: #ffffff;">NagAI</p>
+                          </td>
+                          <td style="padding-left: 12px;">
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #7b8794;">Agent Check-In</p>
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
                 </table>
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 28px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <!-- Agent name -->
+                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 34px; line-height: 1.12; font-weight: normal; color: #0f172a; letter-spacing: -0.025em;">
+                  {safe_agent_name}
+                </p>
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 16px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <!-- Rule -->
+                <table role="presentation" width="64" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 3px; background-color: #8f2942; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
               </td>
             </tr>
-          </table>
 
-          <!-- divider -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="height: 20px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-          </table>
-
-          <!-- agent name -->
-          <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 30px; line-height: 1.2; font-weight: normal; color: #f7ece8; letter-spacing: -0.01em;">{safe_agent_name}</p>
-
-          <!-- sub-headline -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="height: 14px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-          </table>
-          <table role="presentation" width="48" cellpadding="0" cellspacing="0" border="0">
+            <!-- BODY -->
             <tr>
-              <td style="height: 1px; background-color: #7d3040; font-size: 0; line-height: 0;">&nbsp;</td>
+              <td style="padding: 52px 64px 56px 64px; background-color: #ffffff;">
+
+                <!-- Greeting -->
+                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 25px; line-height: 1.32; color: #111827; font-weight: normal;">
+                  Hey {safe_user_name},
+                </p>
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 14px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.85; color: #5b6776;">
+                  Your agent has a concise update below. Take a moment to review and get back into motion.
+                </p>
+
+                <!-- Divider -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 36px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                  <tr><td style="height: 1px; background-color: #e5ebf1; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                  <tr><td style="height: 36px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <!-- DYNAMIC SECTIONS -->
+                {sections_html}
+
+              </td>
             </tr>
+
+            <!-- CTA / FOOTER PANEL -->
+            <tr>
+              <td style="padding: 38px 64px 44px 64px; background-color: #f8fafc; border-top: 1px solid #e5ebf1; text-align: center;">
+
+                {chat_html}
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 28px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <!-- Short divider -->
+                <table role="presentation" width="64" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto;">
+                  <tr><td style="height: 1px; background-color: #ccd6e2; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 22px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.85; color: #6b7280;">
+                  This message was sent by your NagAI agent.<br>
+                  Manage your agent settings anytime inside the NagAI app.
+                </p>
+
+                {unsubscribe_html}
+
+                <!-- Spacer -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 18px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+
+                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 13px; line-height: 1.4; color: #8a94a3; letter-spacing: 0.05em;">
+                  Built with care &mdash; NagAI
+                </p>
+
+              </td>
+            </tr>
+
+            <!-- BOTTOM ACCENT -->
+            <tr>
+              <td style="height: 6px; background-color: #8f2942; font-size: 0; line-height: 0;">&nbsp;</td>
+            </tr>
+
           </table>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="height: 14px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-          </table>
-          <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.60);">A personal nudge to help you stay on track &mdash; with a clear path back into chat when you need support.</p>
 
         </td>
       </tr>
 
-      <!-- ══════════════════════════════════════════ -->
-      <!-- BODY — cream white                        -->
-      <!-- ══════════════════════════════════════════ -->
+      <!-- OUTER BOTTOM SPACE -->
       <tr>
-        <td style="background-color: #fdf8f5; padding: 36px 40px 32px 40px; border-left: 1px solid #e0d4cf; border-right: 1px solid #e0d4cf;">
-
-          <!-- greeting -->
-          <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; color: #1e1412; font-weight: normal;">Hey {safe_user_name},</p>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="height: 8px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-          </table>
-          <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.75; color: #6a504d;">Your agent has a concise update below. Take a moment to review and get back into motion.</p>
-
-          <!-- full-width rule -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="height: 28px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-            <tr><td style="height: 1px; background-color: #e0d4cf; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-            <tr><td style="height: 28px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-          </table>
-
-          <!-- DYNAMIC SECTIONS -->
-          {sections_html}
-
-        </td>
-      </tr>
-
-      <!-- ══════════════════════════════════════════ -->
-      <!-- CTA / FOOTER PANEL                        -->
-      <!-- ══════════════════════════════════════════ -->
-      <tr>
-        <td style="background-color: #f2ece8; border: 1px solid #e0d4cf; border-top: none; padding: 28px 40px 32px 40px; text-align: center;">
-
-          <!-- CTA button -->
-          {chat_html}
-
-          <!-- spacer -->
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="height: 20px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-          </table>
-
-          <!-- divider -->
-          <table role="presentation" width="80" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto;">
-            <tr><td style="height: 1px; background-color: #c9b8b3; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-          </table>
-
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="height: 18px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-          </table>
-
-          <!-- footer text -->
-          <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.75; color: #8a716e;">
-            This message was sent by your NagAI agent.<br>
-            Manage your agent settings anytime inside the NagAI app.
-          </p>
-
-          <!-- unsubscribe -->
-          {unsubscribe_html}
-
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="height: 16px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-          </table>
-
-          <!-- brand sign-off -->
-          <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 12px; color: #b09994; letter-spacing: 0.06em;">Built with care &mdash; NagAI</p>
-
-        </td>
-      </tr>
-
-      <!-- BOTTOM ACCENT BAR -->
-      <tr>
-        <td style="height: 4px; background-color: #1e1412; font-size: 0; line-height: 0;">&nbsp;</td>
+        <td style="height: 24px; font-size: 0; line-height: 0;">&nbsp;</td>
       </tr>
 
     </table>
-    <!-- /OUTER CARD -->
 
   </td>
 </tr>
 </table>
-<!-- /WRAPPER -->
 
 </body>
 </html>"""
