@@ -1,27 +1,131 @@
-/* ─── Page Container ─── */
 .goalsContainer {
   width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
-/* ─── Error ─── */
 .loadError {
   background: var(--error-light);
   border: 1px solid var(--error-border);
-  border-radius: var(--radius-md);
+  border-radius: 14px;
   padding: 12px 16px;
-  margin-bottom: var(--space-md);
+  margin-bottom: 20px;
   color: var(--error);
   font-size: var(--fs-sm);
 }
 
-/* ─── Header ─── */
-.goalsHeader {
-  margin-bottom: var(--space-lg);
-  display: flex;
-  justify-content: flex-end;
+.pageHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  padding: 6px 0 0;
 }
 
-/* ─── Add button ─── */
+.pageIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 720px;
+}
+
+.pageEyebrow,
+.pageStatLabel,
+.sectionCount {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-500);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pageEyebrow {
+  color: var(--accent);
+}
+
+.pageTitle {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 54px);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.98;
+  color: var(--text-primary);
+}
+
+.pageDescription {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  font-weight: var(--fw-300);
+}
+
+.pageStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 28px 0 34px;
+}
+
+.pageStat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 20px 22px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 28%, white), white);
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+}
+
+.pageStatLabel {
+  color: var(--text-muted);
+}
+
+.pageStatValue {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+}
+
+.pageStatMeta {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.goalsSectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 0 18px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  color: var(--text-primary);
+}
+
+.sectionDescription {
+  margin-top: 8px;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  font-weight: var(--fw-300);
+  line-height: 1.7;
+}
+
+.sectionCount {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .addGoalButton {
   display: inline-flex;
   align-items: center;
@@ -31,13 +135,17 @@
   color: var(--text-inverse);
   background: var(--accent);
   border: none;
-  padding: 10px 20px;
-  border-radius: var(--radius-md);
+  padding: 11px 20px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: background var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
   letter-spacing: 0.005em;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .addGoalButton:hover {
@@ -45,15 +153,14 @@
 }
 
 .addGoalButton:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
-/* ─── Grid ─── */
 .goalsList {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
   align-items: stretch;
   grid-auto-rows: 1fr;
 }
@@ -80,8 +187,11 @@
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 10px 20px;
-  border-radius: var(--radius-md);
-  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  border-radius: 999px;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .secondaryGoalAction:hover {
@@ -91,14 +201,37 @@
 }
 
 @media (max-width: 1100px) {
+  .pageStats,
   .goalsList {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .pageHeader,
+  .goalsSectionHeader {
+    grid-template-columns: 1fr;
+    display: grid;
+    align-items: start;
+  }
+
+  .sectionCount {
+    white-space: normal;
   }
 }
 
 @media (max-width: 768px) {
+  .pageStats,
   .goalsList {
     grid-template-columns: 1fr;
+  }
+
+  .pageStats {
+    margin: 24px 0 28px;
+  }
+
+  .pageStat {
+    padding: 18px 18px;
   }
 
   .emptyActions {
@@ -108,12 +241,13 @@
 }
 
 @media (max-width: 600px) {
-  .addGoalButton {
+  .addGoalButton,
+  .secondaryGoalAction {
     width: 100%;
     justify-content: center;
   }
 
-  .secondaryGoalAction {
-    width: 100%;
+  .pageTitle {
+    font-size: clamp(30px, 11vw, 40px);
   }
 }

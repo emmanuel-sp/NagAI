@@ -54,13 +54,11 @@
   z-index: 110;
   width: 28px;
   height: 28px;
-  background: color-mix(in srgb, var(--bg-page), transparent 8%);
+  background: transparent;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   color: var(--text-muted);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  box-shadow: none;
   cursor: pointer;
   transition: color var(--transition-fast), background var(--transition-fast),
               border-color var(--transition-fast), box-shadow var(--transition-fast),
@@ -74,9 +72,8 @@
 
 .toggleButton:hover {
   color: var(--text-primary);
-  background: var(--surface-elevated);
+  background: transparent;
   border-color: var(--border);
-  box-shadow: var(--shadow-md);
 }
 
 .toggleButtonHiddenMobile {

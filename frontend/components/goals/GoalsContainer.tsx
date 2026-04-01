@@ -75,6 +75,24 @@ export default function GoalsContainer() {
     router.push(`/goals/${createdGoal.goalId}`);
   };
 
+  const totalChecklistItems = checklists.reduce((sum, checklist) => sum + checklist.items.length, 0);
+  const completedChecklistItems = checklists.reduce(
+    (sum, checklist) => sum + checklist.items.filter((item) => item.completed).length,
+    0
+  );
+  const activeGoalsCount = checklists.filter((checklist) =>
+    checklist.items.some((item) => !item.completed)
+  ).length;
+  const nextTargetGoal = goals
+    .filter((goal) => goal.targetDate)
+    .sort((a, b) => new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime())[0];
+  const nextTargetLabel = nextTargetGoal
+    ? new Date(nextTargetGoal.targetDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })
+    : "No date set";
+
   if (isLoading) {
     return (
       <div className={styles.goalsContainer}>
@@ -87,13 +105,65 @@ export default function GoalsContainer() {
     <div className={styles.goalsContainer}>
       {loadError && <div className={styles.loadError}>{loadError}</div>}
 
-      {goals.length > 0 && (
-        <div className={styles.goalsHeader}>
+      <div className={styles.pageHeader}>
+        <div className={styles.pageIntro}>
+          <span className={styles.pageEyebrow}>Goals</span>
+          <h1 className={styles.pageTitle}>Your goals</h1>
+          <p className={styles.pageDescription}>
+            See everything you&apos;re building at a glance and open the workspace that needs your attention next.
+          </p>
+        </div>
+
+        {goals.length > 0 && (
           <button onClick={handleAddGoal} className={styles.addGoalButton} disabled={goals.length >= 10}>
             <IoAdd size={18} />
             {goals.length >= 10 ? "Goal Limit Reached (10)" : "Add Goal"}
           </button>
-        </div>
+        )}
+      </div>
+
+      {goals.length > 0 && (
+        <>
+          <div className={styles.pageStats}>
+            <div className={styles.pageStat}>
+              <span className={styles.pageStatLabel}>Goal Count</span>
+              <span className={styles.pageStatValue}>{goals.length}</span>
+              <span className={styles.pageStatMeta}>
+                {activeGoalsCount > 0 ? `${activeGoalsCount} with open checklist work` : "No active checklist work"}
+              </span>
+            </div>
+
+            <div className={styles.pageStat}>
+              <span className={styles.pageStatLabel}>Checklist Progress</span>
+              <span className={styles.pageStatValue}>
+                {completedChecklistItems}/{totalChecklistItems}
+              </span>
+              <span className={styles.pageStatMeta}>
+                {totalChecklistItems > 0 ? "Items completed across your goals" : "No checklist items yet"}
+              </span>
+            </div>
+
+            <div className={styles.pageStat}>
+              <span className={styles.pageStatLabel}>Next Target</span>
+              <span className={styles.pageStatValue}>{nextTargetLabel}</span>
+              <span className={styles.pageStatMeta}>
+                {nextTargetGoal ? nextTargetGoal.title : "Add a target date to anchor a goal"}
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.goalsSectionHeader}>
+            <div>
+              <h2 className={styles.sectionTitle}>Goal Workspaces</h2>
+              <p className={styles.sectionDescription}>
+                Open any card to jump into the full workspace for planning, journaling, and checklist progress.
+              </p>
+            </div>
+            <span className={styles.sectionCount}>
+              {goals.length} {goals.length === 1 ? "goal" : "goals"}
+            </span>
+          </div>
+        </>
       )}
 
       {goals.length === 0 ? (

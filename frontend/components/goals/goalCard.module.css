@@ -1,75 +1,149 @@
-/* ─── Goal Card ─── */
 .goalCard {
   position: relative;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 24px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  min-height: 280px;
-  transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 320px;
+  padding: 22px;
+  overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 22%, white), white);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  transition:
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
   animation: fadeInUp 0.3s ease both;
   cursor: pointer;
 }
 
-.goalCard:hover {
-  border-color: var(--border-strong);
+.goalCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 55%, white), transparent 78%);
+  opacity: 0.75;
 }
 
-/* ─── Header ─── */
+.goalCard:hover {
+  border-color: color-mix(in srgb, var(--accent) 14%, var(--border-strong));
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
 .goalHeader {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.goalHeaderMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.goalStatusBadge,
+.metaLabel,
+.progressLabel {
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-500);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.goalStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.goalStatusActive {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, white);
+  border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
+}
+
+.goalStatusComplete {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, white);
+  border-color: color-mix(in srgb, var(--success) 18%, var(--border));
+}
+
+.goalStatusIdle {
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--surface) 70%, white);
+  border-color: var(--border-light);
+}
+
+.goalDeadline,
+.goalDeadlineMuted {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-500);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.goalDeadlineMuted {
+  color: var(--text-muted);
 }
 
 .goalTitle {
   font-family: var(--font-display);
-  font-size: var(--fs-2xl);
+  font-size: clamp(24px, 3vw, 30px);
   font-weight: 500;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
   color: var(--text-primary);
-  line-height: 1.15;
+  line-height: 1.08;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ─── Description ─── */
 .goalDescription {
+  flex: 1;
   font-family: var(--font-body);
   font-size: var(--fs-sm);
   color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 0;
-  flex: 1;
-  font-weight: var(--fw-400);
+  line-height: 1.75;
+  font-weight: var(--fw-300);
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ─── Progress ─── */
 .goalProgress {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 14px;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
 }
 
 .progressRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 10px;
 }
 
+.progressLabel {
+  color: var(--text-muted);
+}
+
 .progressTrack {
-  flex: 1;
-  height: 4px;
+  height: 5px;
   background: var(--border);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -86,45 +160,36 @@
   font-size: var(--fs-2xs);
   font-weight: var(--fw-500);
   color: var(--text-secondary);
-  font-family: var(--font-body);
   white-space: nowrap;
-  letter-spacing: 0.04em;
 }
 
 .nextItem {
   font-size: var(--fs-xs);
   font-weight: var(--fw-400);
   color: var(--text-muted);
-  font-family: var(--font-body);
-  line-height: 1.4;
+  line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ─── Meta ─── */
 .goalMeta {
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 14px 0 12px;
-  border-top: 1px solid var(--border);
-  margin-top: 16px;
+  gap: 28px;
+  padding: 16px 0 12px;
+  border-top: 1px solid var(--border-light);
+  margin-top: 18px;
 }
 
 .metaItem {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .metaLabel {
-  font-family: var(--font-body);
-  font-size: var(--fs-2xs);
-  font-weight: var(--fw-500);
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
   color: var(--text-muted);
 }
 
@@ -132,34 +197,49 @@
   font-size: var(--fs-xs);
   font-weight: var(--fw-500);
   color: var(--text-primary);
-  font-family: var(--font-body);
 }
 
-/* ─── Actions ─── */
 .goalActions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: auto;
 }
 
 .viewButton {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--fs-xs);
+  padding: 0;
+  font-size: var(--fs-sm);
   font-weight: var(--fw-500);
-  color: var(--text-secondary);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 8px 16px;
-  border-radius: 6px;
+  color: var(--accent);
+  background: none;
+  border: none;
   cursor: pointer;
-  letter-spacing: 0.02em;
-  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+  transition: color 120ms ease, transform 120ms ease;
 }
 
 .viewButton:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover);
-  border-color: var(--border-strong);
+  color: var(--accent-dark);
+}
+
+.viewButton:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 640px) {
+  .goalCard {
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .goalHeaderMeta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .goalMeta {
+    gap: 18px;
+  }
 }

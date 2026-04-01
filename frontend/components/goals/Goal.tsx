@@ -18,10 +18,30 @@ export function Goal({ title, description, createdAt, targetDate, goalId, checkl
     const nextItem = checklist?.items
         .filter((i) => !i.completed)
         .sort((a, b) => a.sortOrder - b.sortOrder)[0];
+    const statusLabel = totalItems === 0
+        ? "No checklist yet"
+        : completedItems === totalItems
+            ? "Completed"
+            : completedItems === 0
+                ? "Ready to start"
+                : "In progress";
+    const statusToneClass = totalItems === 0
+        ? styles.goalStatusIdle
+        : completedItems === totalItems
+            ? styles.goalStatusComplete
+            : styles.goalStatusActive;
 
     return (
         <div className={styles.goalCard}>
             <div className={styles.goalHeader}>
+                <div className={styles.goalHeaderMeta}>
+                    <span className={`${styles.goalStatusBadge} ${statusToneClass}`}>{statusLabel}</span>
+                    {targetDate ? (
+                        <span className={styles.goalDeadline}>Target {formatDate(targetDate)}</span>
+                    ) : (
+                        <span className={styles.goalDeadlineMuted}>No target date</span>
+                    )}
+                </div>
                 <h3 className={styles.goalTitle}>{title}</h3>
             </div>
             <p className={styles.goalDescription}>{description}</p>
@@ -29,6 +49,7 @@ export function Goal({ title, description, createdAt, targetDate, goalId, checkl
             {totalItems > 0 && (
                 <div className={styles.goalProgress}>
                     <div className={styles.progressRow}>
+                        <span className={styles.progressLabel}>Checklist</span>
                         <div className={styles.progressTrack}>
                             <div
                                 className={styles.progressFill}
@@ -40,7 +61,7 @@ export function Goal({ title, description, createdAt, targetDate, goalId, checkl
                         </span>
                     </div>
                     <span className={styles.nextItem}>
-                        {nextItem ? nextItem.title : "All items completed"}
+                        {nextItem ? `Next: ${nextItem.title}` : "All items completed"}
                     </span>
                 </div>
             )}
@@ -50,13 +71,12 @@ export function Goal({ title, description, createdAt, targetDate, goalId, checkl
                     <span className={styles.metaLabel}>Created</span>
                     <span className={styles.metaValue}>{formatDate(createdAt)}</span>
                 </div>
-                {
-                targetDate &&
                 <div className={styles.metaItem}>
-                    <span className={styles.metaLabel}>Target Date</span>
-                    <span className={styles.metaValue}>{formatDate(targetDate)}</span>
+                    <span className={styles.metaLabel}>Checklist</span>
+                    <span className={styles.metaValue}>
+                        {totalItems > 0 ? `${totalItems} items` : "Not started"}
+                    </span>
                 </div>
-                }
             </div>
             <div className={styles.goalActions}>
                 <button
