@@ -7,6 +7,7 @@ import {
   fetchAgentMessageDetail,
   fetchDigestMessage,
 } from "@/services/inboxService";
+import { parseUtcDate } from "@/lib/dates";
 import { InboxItem, InboxMessageDetail } from "@/types/inbox";
 import { IoClose, IoChevronRight, IoBell, IoMail } from "@/components/icons";
 import styles from "./MessageInboxPanel.module.css";
@@ -19,8 +20,8 @@ interface Props {
 function formatDate(raw: string): string {
   if (!raw) return "";
   try {
-    const d = new Date(raw);
-    return d.toLocaleDateString("en-US", {
+    const d = parseUtcDate(raw);
+    return d.toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
