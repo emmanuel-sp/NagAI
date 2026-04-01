@@ -32,6 +32,7 @@ export default function DigestSettings({
 
   return (
     <div className={styles.settingsCard}>
+      <span className={styles.sectionEyebrow}>Delivery</span>
       <h2 className={styles.cardTitle}>Digest Settings</h2>
       <p className={styles.cardSubtitle}>
         Set the rhythm so your digest lands when it can actually be useful.

@@ -65,6 +65,7 @@ export default function ContentTypesSelector({
   return (
     <>
       <div className={styles.settingsCard}>
+        <span className={styles.sectionEyebrow}>Content</span>
         <h2 className={styles.cardTitle}>Content Types</h2>
         <p className={styles.cardSubtitle}>
           Choose the mix you want to read, without turning the digest into noise.
@@ -111,7 +112,7 @@ export default function ContentTypesSelector({
             disabled={safeSelected.length === 0}
           >
             <IoEye size={16} />
-            Preview sample digest
+            Preview Digest
           </button>
         </div>
       </div>

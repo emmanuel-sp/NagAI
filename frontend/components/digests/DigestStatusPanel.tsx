@@ -19,6 +19,7 @@ export default function DigestStatusPanel({
   return (
     <div className={styles.deploymentPanel}>
       <div className={styles.deploymentInfo}>
+        <span className={styles.sectionEyebrow}>Status</span>
         <h2 className={styles.cardTitle}>
           {digest.active
             ? "Digest Active"
