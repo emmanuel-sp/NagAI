@@ -54,8 +54,8 @@
   padding: 28px;
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
-  background: var(--visual-panel-bg-strong);
-  box-shadow: var(--visual-panel-shadow);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
 }
 
 .heroCopy {
@@ -120,7 +120,7 @@
 .progressFill {
   height: 100%;
   border-radius: inherit;
-  background: var(--visual-accent-gradient);
+  background: var(--accent);
 }
 
 .progressLabel {
@@ -142,7 +142,7 @@
   padding: 16px 18px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: var(--visual-accent-fill-strong);
+  background: color-mix(in srgb, var(--surface) 80%, var(--bg-card));
 }
 
 .statLabel {
