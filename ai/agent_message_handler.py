@@ -34,6 +34,7 @@ INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "")
 
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 MODEL = "claude-haiku-4-5-20251001"
+EMAIL_SHELL_MAX_WIDTH = 1120
 
 def handle_agent_message(value: str):
     """Main entry point: called by Redis consumer with the JSON payload."""
@@ -299,18 +300,23 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url="", chat_ur
 <tr>
   <td align="center" style="padding: 0;">
 
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 1040px;">
+    <!--[if mso]>
+    <table role="presentation" width="{EMAIL_SHELL_MAX_WIDTH}" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td>
+    <![endif]-->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: {EMAIL_SHELL_MAX_WIDTH}px; margin: 0 auto;">
 
       <!-- OUTER TOP SPACE -->
       <tr>
-        <td style="height: 24px; font-size: 0; line-height: 0;">&nbsp;</td>
+        <td style="height: 28px; font-size: 0; line-height: 0;">&nbsp;</td>
       </tr>
 
       <!-- MAIN SHELL -->
       <tr>
-        <td style="padding: 0 20px;">
+        <td style="padding: 0 16px;">
 
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #ffffff; border: 1px solid #dbe3ec;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #ffffff; border: 1px solid #d7e0ea;">
 
             <!-- TOP ACCENT -->
             <tr>
@@ -319,7 +325,7 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url="", chat_ur
 
             <!-- HEADER -->
             <tr>
-              <td style="padding: 54px 64px 40px 64px; background-color: #f8fafc;">
+              <td style="padding: 56px 52px 40px 52px; background-color: #f8fafc;">
 
                 <!-- Brand row -->
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -345,7 +351,7 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url="", chat_ur
                 </table>
 
                 <!-- Agent name -->
-                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 34px; line-height: 1.12; font-weight: normal; color: #0f172a; letter-spacing: -0.025em;">
+                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 38px; line-height: 1.08; font-weight: normal; color: #0f172a; letter-spacing: -0.03em;">
                   {safe_agent_name}
                 </p>
 
@@ -364,10 +370,10 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url="", chat_ur
 
             <!-- BODY -->
             <tr>
-              <td style="padding: 52px 64px 56px 64px; background-color: #ffffff;">
+              <td style="padding: 48px 52px 56px 52px; background-color: #ffffff;">
 
                 <!-- Greeting -->
-                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 25px; line-height: 1.32; color: #111827; font-weight: normal;">
+                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 27px; line-height: 1.28; color: #111827; font-weight: normal;">
                   Hey {safe_user_name},
                 </p>
 
@@ -376,15 +382,15 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url="", chat_ur
                   <tr><td style="height: 14px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
                 </table>
 
-                <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.85; color: #5b6776;">
+                <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.8; color: #5b6776;">
                   Your agent has a concise update below. Take a moment to review and get back into motion.
                 </p>
 
                 <!-- Divider -->
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr><td style="height: 36px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                  <tr><td style="height: 32px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
                   <tr><td style="height: 1px; background-color: #e5ebf1; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                  <tr><td style="height: 36px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                  <tr><td style="height: 32px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
                 </table>
 
                 <!-- DYNAMIC SECTIONS -->
@@ -395,7 +401,7 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url="", chat_ur
 
             <!-- CTA / FOOTER PANEL -->
             <tr>
-              <td style="padding: 38px 64px 44px 64px; background-color: #f8fafc; border-top: 1px solid #e5ebf1; text-align: center;">
+              <td style="padding: 40px 52px 44px 52px; background-color: #f8fafc; border-top: 1px solid #e5ebf1; text-align: center;">
 
                 {chat_html}
 
@@ -445,10 +451,15 @@ def _render_agent_email(body, agent_name, user_name, unsubscribe_url="", chat_ur
 
       <!-- OUTER BOTTOM SPACE -->
       <tr>
-        <td style="height: 24px; font-size: 0; line-height: 0;">&nbsp;</td>
+        <td style="height: 28px; font-size: 0; line-height: 0;">&nbsp;</td>
       </tr>
 
     </table>
+    <!--[if mso]>
+      </td>
+    </tr>
+    </table>
+    <![endif]-->
 
   </td>
 </tr>
@@ -473,19 +484,25 @@ def _markdown_to_sections(body):
         content = _render_lines(current_lines)
         if current_title:
             html_parts.append(
-                f'<div style="margin-bottom:16px;padding:18px 18px 16px;background-color:#ffffff;'
-                f'border:1px solid #ebddd8;border-radius:18px;">'
-                f'<p style="margin:0 0 8px;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;'
+                f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
+                f'style="width:100%;background-color:#ffffff;border:1px solid #ebddd8;">'
+                f'<tr><td style="padding:22px 24px 20px 24px;">'
+                f'<p style="margin:0 0 8px;font-size:11px;line-height:1.4;letter-spacing:0.14em;text-transform:uppercase;'
                 f'font-weight:700;color:#8a3b46;">Focus</p>'
-                f'<h2 style="margin:0 0 12px;font-size:18px;line-height:1.3;font-weight:700;color:#2c201f;'
+                f'<h2 style="margin:0 0 14px;font-size:20px;line-height:1.3;font-weight:700;color:#2c201f;'
                 f'letter-spacing:-0.01em;">{current_title}</h2>'
                 f'{content}'
-                f'</div>'
+                f'</td></tr></table>'
+                f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">'
+                f'<tr><td style="height:16px;font-size:0;line-height:0;">&nbsp;</td></tr></table>'
             )
         else:
             html_parts.append(
-                f'<div style="margin-bottom:16px;padding:18px;background-color:#ffffff;'
-                f'border:1px solid #ebddd8;border-radius:18px;">{content}</div>'
+                f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
+                f'style="width:100%;background-color:#ffffff;border:1px solid #ebddd8;">'
+                f'<tr><td style="padding:22px 24px;">{content}</td></tr></table>'
+                f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">'
+                f'<tr><td style="height:16px;font-size:0;line-height:0;">&nbsp;</td></tr></table>'
             )
         current_title = None
         current_lines = []
@@ -522,15 +539,15 @@ def _render_lines(lines):
 
         if stripped.startswith("- ") or stripped.startswith("* "):
             if not in_list:
-                html.append('<ul style="margin:10px 0 0;padding-left:20px;">')
+                html.append('<ul style="margin:12px 0 0;padding-left:22px;">')
                 in_list = True
             item_text = _linkify(stripped[2:])
-            html.append(f'<li style="margin-bottom:8px;font-size:15px;color:#5c4643;line-height:1.7;">{item_text}</li>')
+            html.append(f'<li style="margin-bottom:10px;font-size:16px;color:#5c4643;line-height:1.75;">{item_text}</li>')
         else:
             if in_list:
                 html.append("</ul>")
                 in_list = False
-            html.append(f'<p style="margin:0 0 10px;font-size:15px;color:#2c201f;line-height:1.75;">{_linkify(stripped)}</p>')
+            html.append(f'<p style="margin:0 0 12px;font-size:16px;color:#2c201f;line-height:1.8;">{_linkify(stripped)}</p>')
 
     if in_list:
         html.append("</ul>")
