@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAgentData } from "@/contexts/AgentDataContext";
 import { useAuthenticatedUser } from "@/components/layout/AuthGate";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import {
   ActionSuggestion,
   AgentMessageDetail,
@@ -283,7 +284,12 @@ export default function ChatContainer() {
     : "?";
 
   if (loadingSessions) {
-    return <div className={styles.loadingPage}>Loading chat...</div>;
+    return (
+      <LoadingSpinner
+        message="Loading chat..."
+        hint="Pulling in your recent conversations."
+      />
+    );
   }
 
   const chatInputProps = {

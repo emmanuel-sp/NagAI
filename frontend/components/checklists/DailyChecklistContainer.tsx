@@ -8,6 +8,7 @@ import {
 import { Goal } from "@/types/goal";
 import DailyChecklistItem from "./DailyChecklistItem";
 import DailyChecklistConfig from "./DailyChecklistConfig";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { IoChevronDown, IoRefresh, IoSettings } from "@/components/icons";
 import {
   fetchTodayChecklist,
@@ -169,10 +170,11 @@ export default function DailyChecklistContainer({
             <h2 className={styles.cardTitle}>Daily Plan</h2>
           </div>
         </div>
-        <div className={styles.loadingBody}>
-          <div className={styles.spinner} />
-          <span>Loading daily plan...</span>
-        </div>
+        <LoadingSpinner
+          variant="card"
+          message="Loading daily plan..."
+          hint="Putting today's tasks in place."
+        />
       </div>
     );
   }

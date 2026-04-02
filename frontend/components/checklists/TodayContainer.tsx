@@ -12,6 +12,7 @@ import {
 } from "@/types/dailyChecklist";
 import { Goal } from "@/types/goal";
 import DailyChecklistConfig from "./DailyChecklistConfig";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import {
   IoSparkles,
   IoSettings,
@@ -793,10 +794,10 @@ export default function TodayContainer() {
   if (isLoading) {
     return (
       <div className={styles.page}>
-        <div className={styles.loadingState}>
-          <div className={styles.spinner} />
-          <span>Loading today&apos;s plan...</span>
-        </div>
+        <LoadingSpinner
+          message={"Loading today's plan..."}
+          hint="Syncing your schedule and daily checklist."
+        />
       </div>
     );
   }
