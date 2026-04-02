@@ -294,13 +294,14 @@
 }
 
 .contextStatusText {
-  display: block;
+  display: -webkit-box;
   margin-top: 2px;
   font-size: 11px;
   color: var(--text-light);
+  line-height: 1.3;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* Dot status indicator */

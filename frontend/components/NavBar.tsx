@@ -187,12 +187,11 @@ export default function NavBar({ collapsed, onToggleCollapse }: NavBarProps) {
                             {goal.title}
                           </span>
                           {context && (
-                            <span className={styles.contextStatusText}>
-                              {status.tone === "cooling"
-                                ? status.helperText
-                                : status.tone === "paused"
-                                  ? "Paused for inactivity"
-                                  : status.label}
+                            <span
+                              className={styles.contextStatusText}
+                              title={status.helperText}
+                            >
+                              {status.sidebarText}
                             </span>
                           )}
                         </Link>

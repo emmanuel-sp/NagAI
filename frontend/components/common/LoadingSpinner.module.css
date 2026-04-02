@@ -20,41 +20,19 @@
 }
 
 .loadingBadge {
-  position: relative;
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  max-width: min(100%, 420px);
-  padding: 16px 18px;
-  border: 1px solid color-mix(in srgb, var(--accent), transparent 88%);
-  border-radius: 20px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(250, 245, 245, 0.94)),
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent), transparent 88%), transparent 55%);
-  box-shadow:
-    0 16px 36px rgba(29, 18, 20, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  overflow: hidden;
-}
-
-.loadingBadge::after {
-  content: "";
-  position: absolute;
-  inset: auto 14px 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--accent), transparent 72%),
-    transparent
-  );
+  gap: 14px;
+  width: min(100%, 420px);
+  text-align: center;
 }
 
 .loadingSpinner {
   position: relative;
   flex-shrink: 0;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
 }
 
 .loadingSpinnerRing,
@@ -65,54 +43,76 @@
 }
 
 .loadingSpinnerRing {
-  border: 2.5px solid color-mix(in srgb, var(--accent), transparent 86%);
+  border: 2.5px solid color-mix(in srgb, var(--border-strong), transparent 18%);
   border-top-color: var(--accent);
-  border-right-color: color-mix(in srgb, var(--accent), transparent 52%);
+  border-right-color: color-mix(in srgb, var(--accent), transparent 46%);
   animation: spin 0.9s linear infinite;
 }
 
 .loadingSpinnerCore {
-  inset: 10px;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--accent), white 10%) 0%,
-    color-mix(in srgb, var(--accent), transparent 10%) 42%,
-    transparent 75%
-  );
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent), transparent 92%);
+  inset: 12px;
+  background: color-mix(in srgb, var(--accent), white 10%);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent), transparent 90%);
   animation: pulse 1.4s ease-in-out infinite;
 }
 
 .loadingCopy {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 5px;
   min-width: 0;
 }
 
 .loadingMessage {
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
   font-weight: var(--fw-500);
-  letter-spacing: 0.02em;
 }
 
 .loadingHint {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--text-muted);
   line-height: 1.5;
+  max-width: 30rem;
+  margin: 0 auto;
+}
+
+.loadingStateCard .loadingMessage,
+.loadingStateInline .loadingMessage {
+  font-size: var(--fs-lg);
+}
+
+.loadingStateCard .loadingHint,
+.loadingStateInline .loadingHint {
+  font-size: var(--fs-xs);
+}
+
+[data-theme="dark"] .loadingSpinnerRing {
+  border-color: color-mix(in srgb, var(--border-strong), transparent 6%);
+  border-top-color: var(--accent);
+  border-right-color: color-mix(in srgb, var(--accent), transparent 38%);
+}
+
+[data-theme="dark"] .loadingSpinnerCore {
+  background: color-mix(in srgb, var(--accent), white 6%);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent), transparent 84%);
 }
 
 @media (max-width: 640px) {
-  .loadingBadge {
-    width: 100%;
-    padding: 14px 16px;
-    gap: 14px;
+  .loadingSpinner {
+    width: 36px;
+    height: 36px;
   }
 
-  .loadingSpinner {
-    width: 34px;
-    height: 34px;
+  .loadingMessage {
+    font-size: 18px;
+  }
+
+  .loadingHint {
+    font-size: var(--fs-xs);
   }
 }
 

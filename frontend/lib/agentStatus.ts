@@ -17,12 +17,37 @@ function formatStatusTime(dateString: string): string {
   });
 }
 
+function formatSidebarStatusTime(dateString: string): string {
+  const date = parseUtcDate(dateString);
+  if (Number.isNaN(date.getTime())) {
+    return "later";
+  }
+
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+
+  if (sameDay) {
+    return date.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export type AgentContextStatusTone = "live" | "cooling" | "paused" | "draft";
 
 export interface AgentContextStatus {
   tone: AgentContextStatusTone;
   label: string;
   helperText: string;
+  sidebarText: string;
   title: string;
 }
 
@@ -32,6 +57,7 @@ export function getAgentContextStatus(context: AgentContext | null): AgentContex
       tone: "draft",
       label: "Draft",
       helperText: "Set up this agent to start receiving email nudges for this goal.",
+      sidebarText: "Draft",
       title: "Draft",
     };
   }
@@ -41,16 +67,19 @@ export function getAgentContextStatus(context: AgentContext | null): AgentContex
       tone: "paused",
       label: "Paused",
       helperText: "Paused for inactivity; re-deploy or change the checklist to restart.",
+      sidebarText: "Paused for inactivity",
       title: "Paused for inactivity — click to deploy again",
     };
   }
 
   if (isDeployCooldownActive(context)) {
     const until = formatStatusTime(context.nextMessageAt as string);
+    const sidebarUntil = formatSidebarStatusTime(context.nextMessageAt as string);
     return {
       tone: "cooling",
       label: "Cooling",
       helperText: `Cooling down until ${until} to avoid duplicate deploy emails.`,
+      sidebarText: `Cooling until ${sidebarUntil}`,
       title: `Cooling down until ${until}`,
     };
   }
@@ -60,6 +89,7 @@ export function getAgentContextStatus(context: AgentContext | null): AgentContex
       tone: "live",
       label: "Live",
       helperText: "Agent is live and sending emails. Stop it any time, or adjust settings and save.",
+      sidebarText: "Live",
       title: "Live — click to stop",
     };
   }
@@ -68,6 +98,7 @@ export function getAgentContextStatus(context: AgentContext | null): AgentContex
     tone: "draft",
     label: "Draft",
     helperText: "Agent is saved but not active. Deploy it to start receiving email nudges.",
+    sidebarText: "Draft",
     title: "Draft — click to deploy",
   };
 }
