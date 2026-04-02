@@ -47,8 +47,28 @@ def test_build_chat_prompt_omits_disabled_instruction_blocks():
     assert 'present_quiz' not in prompt
     assert 'suggest_*' not in prompt
     assert 'search_news' not in prompt
+    assert 'get_app_help' not in prompt
     assert 'get_previous_messages' not in prompt
     assert '"Learn Spanish" (1/3 tasks done)' in prompt
+
+
+def test_build_chat_prompt_includes_app_help_without_quiz_when_requested():
+    prompt = chat_handler._build_chat_prompt(
+        user_profile="Busy product leader",
+        goals=[_goal()],
+        from_context_summary="",
+        capabilities={
+            "uses_tools": True,
+            "quiz": False,
+            "suggest": False,
+            "news": False,
+            "app_help": True,
+            "history": False,
+        },
+    )
+
+    assert "get_app_help" in prompt
+    assert "present_quiz" not in prompt
 
 
 def test_handle_chat_uses_recent_window_and_exposes_history_tool(monkeypatch):
@@ -107,6 +127,29 @@ def test_handle_chat_only_exposes_news_tool_for_news_intent(monkeypatch):
     assert "search_news" not in tool_names[1]
 
 
+def test_handle_chat_only_exposes_app_help_tool_for_app_help_intent(monkeypatch):
+    captured = {}
+
+    def fake_run_agent_loop(client, model, system_prompt, tool_context, **kwargs):
+        captured["tool_names"] = [tool["name"] for tool in kwargs["tools"]]
+        captured["system_prompt"] = system_prompt
+        return "Tool path response"
+
+    monkeypatch.setattr(chat_handler, "run_agent_loop", fake_run_agent_loop)
+
+    chat_handler.handle_chat(
+        user_message="How do I use the digests feature in the NagAI app?",
+        user_profile="Builder",
+        goals=[_goal()],
+        history=[{"role": "user", "content": "How do I use the digests feature in the NagAI app?"}],
+    )
+
+    assert "get_app_help" in captured["tool_names"]
+    assert "present_quiz" not in captured["tool_names"]
+    assert "get_app_help" in captured["system_prompt"]
+    assert "present_quiz" not in captured["system_prompt"]
+
+
 def test_handle_chat_only_exposes_suggest_tools_for_action_intent(monkeypatch):
     tool_names = []
 
@@ -132,6 +175,28 @@ def test_handle_chat_only_exposes_suggest_tools_for_action_intent(monkeypatch):
     assert "suggest_create_goal" in tool_names[0]
     assert "suggest_create_goal" not in tool_names[1]
     assert "present_quiz" in tool_names[1]
+
+
+def test_handle_chat_generic_help_me_get_started_stays_quiz_without_app_markers(monkeypatch):
+    captured = {}
+
+    def fake_run_agent_loop(client, model, system_prompt, tool_context, **kwargs):
+        captured["tool_names"] = [tool["name"] for tool in kwargs["tools"]]
+        captured["system_prompt"] = system_prompt
+        return "Tool path response"
+
+    monkeypatch.setattr(chat_handler, "run_agent_loop", fake_run_agent_loop)
+
+    chat_handler.handle_chat(
+        user_message="Help me get started.",
+        user_profile="Builder",
+        goals=[_goal()],
+        history=[{"role": "user", "content": "Help me get started."}],
+    )
+
+    assert "present_quiz" in captured["tool_names"]
+    assert "get_app_help" not in captured["tool_names"]
+    assert "present_quiz" in captured["system_prompt"]
 
 
 def test_handle_chat_uses_fast_path_when_no_tool_intent(monkeypatch):

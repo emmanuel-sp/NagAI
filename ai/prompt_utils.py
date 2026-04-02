@@ -43,6 +43,13 @@ CHAT_NEWS_INSTRUCTIONS = (
     "- Never invent news or links."
 )
 
+CHAT_APP_HELP_INSTRUCTIONS = (
+    "App-help tool:\n"
+    "- Use get_app_help for NagAI usage questions, feature explanations, getting-started help, or navigation help.\n"
+    "- Prefer the narrowest topic instead of overview when the user asks about one area.\n"
+    "- Do not use get_app_help for ordinary coaching, prioritization, motivation, or checklist/goal actions."
+)
+
 CHAT_HISTORY_INSTRUCTIONS = (
     "History tool:\n"
     "- Use get_previous_messages only when older context would materially help."
@@ -116,6 +123,38 @@ HISTORY_KEYWORDS = (
     "recap",
     "as i said",
     "like i mentioned",
+)
+
+APP_HELP_MARKERS = (
+    "nagai",
+    "app",
+    "dashboard",
+    "home",
+    "goals",
+    "goal",
+    "today",
+    "daily plan",
+    "digest",
+    "digests",
+    "agent",
+    "agents",
+    "chat",
+    "profile",
+    "onboarding",
+    "inbox",
+)
+
+APP_HELP_PHRASES = (
+    "how do i",
+    "where do i",
+    "how does nagai work",
+    "how does this app work",
+    "what can i do here",
+    "how do i use this app",
+    "how do i get started with this app",
+    "how do i get started in the app",
+    "where can i find",
+    "what is the difference between",
 )
 
 
@@ -211,6 +250,13 @@ def has_history_intent(user_message: str) -> bool:
     return _contains_phrase(message, HISTORY_KEYWORDS)
 
 
+def has_app_help_intent(user_message: str) -> bool:
+    message = normalize_whitespace(user_message).lower()
+    has_help_phrase = _contains_phrase(message, APP_HELP_PHRASES)
+    has_app_marker = _contains_phrase(message, APP_HELP_MARKERS)
+    return has_help_phrase and has_app_marker
+
+
 def route_chat_request(
     user_message: str,
     context_summary: str = "",
@@ -219,14 +265,16 @@ def route_chat_request(
     quiz = has_quiz_intent(user_message)
     suggest = has_suggestion_intent(user_message)
     news = has_news_intent(user_message, context_summary)
+    app_help = has_app_help_intent(user_message)
     history_intent = older_history_exists and has_history_intent(user_message)
-    use_tool_path = quiz or suggest or news or history_intent
+    use_tool_path = quiz or suggest or news or app_help or history_intent
 
     return {
         "use_tool_path": use_tool_path,
-        "quiz": use_tool_path,
+        "quiz": use_tool_path and quiz,
         "suggest": use_tool_path and suggest,
         "news": use_tool_path and news,
+        "app_help": use_tool_path and app_help,
         "history": use_tool_path and older_history_exists,
         "history_intent": history_intent,
     }

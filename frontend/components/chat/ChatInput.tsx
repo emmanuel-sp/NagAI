@@ -21,6 +21,7 @@ export default function ChatInput({
   selectedGoalId,
   onSelectGoal,
 }: ChatInputProps) {
+  const collapsedHeight = 36;
   const [text, setText] = useState("");
   const [plusOpen, setPlusOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -31,10 +32,10 @@ export default function ChatInput({
     onSend(text.trim());
     setText("");
     if (textareaRef.current) {
-      textareaRef.current.style.height = "36px";
+      textareaRef.current.style.height = `${collapsedHeight}px`;
       textareaRef.current.style.overflowY = "hidden";
     }
-  }, [text, disabled, onSend]);
+  }, [collapsedHeight, text, disabled, onSend]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -49,12 +50,12 @@ export default function ChatInput({
   const handleInput = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
-    el.style.height = "36px";
+    el.style.height = `${collapsedHeight}px`;
     const scrollH = el.scrollHeight;
     const clamped = Math.min(scrollH, 140);
     el.style.height = clamped + "px";
     el.style.overflowY = scrollH > 140 ? "auto" : "hidden";
-  }, []);
+  }, [collapsedHeight]);
 
   // Close plus menu on outside click
   useEffect(() => {
@@ -103,7 +104,7 @@ export default function ChatInput({
         </div>
       )}
       <div className={styles.inputWrapper} ref={plusRef}>
-        <div className={styles.inputPill}>
+        <div className={`${styles.inputPill} ${!hasMenuItems ? styles.inputPillNoLeading : ""}`}>
           {hasMenuItems && (
             <div className={styles.inputLeading}>
               <button
@@ -124,7 +125,7 @@ export default function ChatInput({
               </button>
             </div>
           )}
-          <div className={styles.inputPrimary}>
+          <div className={`${styles.inputPrimary} ${!hasMenuItems ? styles.inputPrimaryNoLeading : ""}`}>
             <textarea
               ref={textareaRef}
               className={styles.chatTextarea}

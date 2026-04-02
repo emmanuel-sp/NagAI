@@ -13,7 +13,7 @@ import ai_handlers
 import web_search
 
 logger = logging.getLogger(__name__)
-EMAIL_SHELL_MAX_WIDTH = 1120
+EMAIL_SHELL_MAX_WIDTH = 860
 
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
@@ -210,10 +210,26 @@ def render_email_html(subject: str, body: str, user_name: str, unsubscribe_url: 
   table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse !important; }}
   img {{ border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }}
   div[style*="margin: 16px 0"] {{ margin: 0 !important; }}
+  .outer-pad {{ padding: 0 16px; }}
+  .content-cell {{ padding: 26px 24px 30px 24px; }}
+  .brand {{ font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.2; letter-spacing: 0.16em; text-transform: uppercase; color: #8f2942; font-weight: 700; }}
+  .headline {{ font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 32px; line-height: 1.2; color: #17202a; font-weight: 700; }}
+  .greeting {{ font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 22px; line-height: 1.35; color: #17202a; font-weight: 700; }}
+  .body-copy, .body-copy p, .body-copy li {{ font-family: Arial, Helvetica, sans-serif; font-size: 17px; line-height: 1.75; color: #2f3a45; }}
+  .section-title {{ font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 21px; line-height: 1.35; color: #17202a; font-weight: 700; }}
+  .meta {{ font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.7; color: #697586; }}
+  @media only screen and (max-width: 620px) {{
+    .outer-pad {{ padding: 0 12px !important; }}
+    .content-cell {{ padding: 20px 16px 24px 16px !important; }}
+    .headline {{ font-size: 25px !important; line-height: 1.25 !important; }}
+    .greeting {{ font-size: 20px !important; line-height: 1.35 !important; }}
+    .body-copy, .body-copy p, .body-copy li {{ font-size: 16px !important; line-height: 1.7 !important; }}
+    .section-title {{ font-size: 19px !important; line-height: 1.35 !important; }}
+  }}
 </style>
 </head>
 
-<body style="margin: 0; padding: 0; background-color: #eef2f6; font-family: Arial, Helvetica, sans-serif; color: #1f2937;">
+<body style="margin: 0; padding: 0; background-color: #f3f5f8; font-family: Arial, Helvetica, sans-serif; color: #1f2937;">
 
 <!-- PREVIEW TEXT -->
 <div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; color: #eef2f6; line-height: 1px; max-width: 0; opacity: 0;">
@@ -221,7 +237,7 @@ def render_email_html(subject: str, body: str, user_name: str, unsubscribe_url: 
 </div>
 
 <!-- PAGE WRAPPER -->
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #eef2f6;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #f3f5f8;">
 <tr>
   <td align="center" style="padding: 0;">
 
@@ -232,144 +248,28 @@ def render_email_html(subject: str, body: str, user_name: str, unsubscribe_url: 
     <![endif]-->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: {EMAIL_SHELL_MAX_WIDTH}px; margin: 0 auto;">
 
-      <!-- OUTER TOP SPACE -->
       <tr>
-        <td style="height: 28px; font-size: 0; line-height: 0;">&nbsp;</td>
-      </tr>
-
-      <!-- MAIN SHELL -->
-      <tr>
-        <td style="padding: 0 16px;">
-
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #ffffff; border: 1px solid #d7e0ea;">
-
-            <!-- TOP ACCENT -->
+        <td class="outer-pad" style="padding: 0 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; background-color: #ffffff;">
             <tr>
-              <td style="height: 6px; background-color: #8f2942; font-size: 0; line-height: 0;">&nbsp;</td>
-            </tr>
-
-            <!-- HEADER -->
-            <tr>
-              <td style="padding: 58px 52px 44px 52px; background-color: #f8fafc;">
-
-                <!-- Brand row -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td align="left">
-                      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                        <tr>
-                          <td style="background-color: #8f2942; padding: 6px 14px;">
-                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 11px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: #ffffff;">NagAI</p>
-                          </td>
-                          <td style="padding-left: 12px;">
-                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #7b8794;">Digest</p>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-
-                <!-- Spacer -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr><td style="height: 30px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                </table>
-
-                <!-- Subject -->
-                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 48px; line-height: 1.04; font-weight: normal; color: #0f172a; letter-spacing: -0.035em;">
-                  {safe_subject}
-                </p>
-
-                <!-- Spacer -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr><td style="height: 18px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                </table>
-
-                <!-- Rule -->
-                <table role="presentation" width="72" cellpadding="0" cellspacing="0" border="0">
-                  <tr><td style="height: 3px; background-color: #8f2942; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                </table>
-
-              </td>
-            </tr>
-
-            <!-- BODY -->
-            <tr>
-              <td style="padding: 48px 52px 56px 52px; background-color: #ffffff;">
-
-                <!-- Greeting -->
-                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 27px; line-height: 1.28; color: #111827; font-weight: normal;">
-                  Hey {safe_user_name},
-                </p>
-
-                <!-- Spacer -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr><td style="height: 14px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                </table>
-
-                <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; line-height: 1.8; color: #5b6776;">
-                  Here's your curated digest below. Take a moment to review and carry what matters into your week.
-                </p>
-
-                <!-- Divider -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr><td style="height: 32px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                  <tr><td style="height: 1px; background-color: #e5ebf1; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                  <tr><td style="height: 32px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                </table>
-
-                <!-- DYNAMIC SECTIONS -->
+              <td class="content-cell body-copy" style="padding: 26px 24px 30px 24px; font-family: Arial, Helvetica, sans-serif; font-size: 17px; line-height: 1.75; color: #2f3a45;">
+                <p class="brand" style="margin: 0 0 18px; font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.2; letter-spacing: 0.16em; text-transform: uppercase; color: #8f2942; font-weight: 700;">NagAI</p>
+                <p class="headline" style="margin: 0 0 18px; font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 32px; line-height: 1.2; color: #17202a; font-weight: 700;">{safe_subject}</p>
+                <p class="greeting" style="margin: 0 0 18px; font-family: Tahoma, Arial, Helvetica, sans-serif; font-size: 22px; line-height: 1.35; color: #17202a; font-weight: 700;">Hey {safe_user_name},</p>
                 {sections_html}
-
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td style="height: 24px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                  <tr><td style="height: 1px; background-color: #e4e9ef; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                  <tr><td style="height: 16px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
+                </table>
+                <p class="meta" style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.7; color: #697586;">
+                  You received this because you have an active NagAI digest. Manage your digest preferences in the app anytime.
+                </p>
+                {"" if not unsubscribe_url else f'<p style="margin: 12px 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.6;"><a href="{unsubscribe_url}" style="color: #8f2942; text-decoration: underline; font-weight: 600;">Unsubscribe from digest emails</a></p>'}
               </td>
             </tr>
-
-            <!-- FOOTER -->
-            <tr>
-              <td style="padding: 40px 52px 44px 52px; background-color: #f8fafc; border-top: 1px solid #e5ebf1; text-align: center;">
-
-                <!-- Divider -->
-                <table role="presentation" width="64" cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto;">
-                  <tr><td style="height: 1px; background-color: #ccd6e2; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                </table>
-
-                <!-- Spacer -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr><td style="height: 22px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                </table>
-
-                <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.85; color: #6b7280;">
-                  You received this because you have an active NagAI digest.<br>
-                  Manage your digest preferences in the app anytime.
-                </p>
-
-                {"" if not unsubscribe_url else f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="height: 14px; font-size: 0; line-height: 0;">&nbsp;</td></tr></table><p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.6;"><a href="{unsubscribe_url}" style="color: #8f2942; text-decoration: underline; font-weight: 600;">Unsubscribe from digest emails</a></p>'}
-
-                <!-- Spacer -->
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                  <tr><td style="height: 18px; font-size: 0; line-height: 0;">&nbsp;</td></tr>
-                </table>
-
-                <p style="margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 13px; line-height: 1.4; color: #8a94a3; letter-spacing: 0.05em;">
-                  Built with care &mdash; NagAI
-                </p>
-
-              </td>
-            </tr>
-
-            <!-- BOTTOM ACCENT -->
-            <tr>
-              <td style="height: 6px; background-color: #8f2942; font-size: 0; line-height: 0;">&nbsp;</td>
-            </tr>
-
           </table>
-
         </td>
-      </tr>
-
-      <!-- OUTER BOTTOM SPACE -->
-      <tr>
-        <td style="height: 28px; font-size: 0; line-height: 0;">&nbsp;</td>
       </tr>
 
     </table>
@@ -402,26 +302,17 @@ def _markdown_to_sections(body: str) -> str:
             content = _render_lines(current_lines)
             if current_section_title:
                 html_parts.append(
-                    f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
-                    f'style="width:100%;background-color:#ffffff;border:1px solid #ebddd8;">'
-                    f'<tr><td style="padding:22px 24px 20px 24px;">'
-                    f'<p style="margin:0 0 8px;font-size:11px;line-height:1.4;letter-spacing:0.14em;text-transform:uppercase;'
-                    f'font-weight:700;color:#8a3b46;">Section</p>'
-                    f'<h2 style="margin:0 0 14px;font-size:20px;line-height:1.3;font-weight:700;color:#2c201f;'
-                    f'letter-spacing:-0.01em;">{current_section_title}</h2>'
-                    f'<div style="font-size:16px;color:#5c4643;line-height:1.8;">{content}</div>'
-                    f'</td></tr></table>'
+                    f'<h2 class="section-title" style="margin:0 0 12px; font-family: Tahoma, Arial, Helvetica, sans-serif; '
+                    f'font-size:21px; line-height:1.35; color:#17202a; font-weight:700;">{current_section_title}</h2>'
+                    f'{content}'
                     f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">'
-                    f'<tr><td style="height:16px;font-size:0;line-height:0;">&nbsp;</td></tr></table>'
+                    f'<tr><td style="height:18px;font-size:0;line-height:0;">&nbsp;</td></tr></table>'
                 )
             else:
                 html_parts.append(
-                    f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" '
-                    f'style="width:100%;background-color:#ffffff;border:1px solid #ebddd8;">'
-                    f'<tr><td style="padding:22px 24px;font-size:16px;color:#5c4643;line-height:1.8;">'
-                    f'{content}</td></tr></table>'
+                    f'{content}'
                     f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">'
-                    f'<tr><td style="height:16px;font-size:0;line-height:0;">&nbsp;</td></tr></table>'
+                    f'<tr><td style="height:18px;font-size:0;line-height:0;">&nbsp;</td></tr></table>'
                 )
         current_section_title = None
         current_lines = []
@@ -456,15 +347,15 @@ def _render_lines(lines: list[str]) -> str:
 
         if stripped.startswith("- ") or stripped.startswith("* "):
             if not in_list:
-                html.append('<ul style="margin:12px 0 0;padding-left:22px;">')
+                html.append('<ul style="margin:10px 0 0; padding-left: 22px;">')
                 in_list = True
             item_text = _linkify(stripped[2:])
-            html.append(f'<li style="margin-bottom:10px;font-size:16px;color:#5c4643;line-height:1.75;">{item_text}</li>')
+            html.append(f'<li style="margin-bottom:10px; font-family: Arial, Helvetica, sans-serif; font-size:17px; color:#2f3a45; line-height:1.75;">{item_text}</li>')
         else:
             if in_list:
                 html.append("</ul>")
                 in_list = False
-            html.append(f"<p style=\"margin:0 0 12px;font-size:16px;line-height:1.8;\">{_linkify(stripped)}</p>")
+            html.append(f"<p style=\"margin:0 0 14px; font-family: Arial, Helvetica, sans-serif; font-size:17px; color:#2f3a45; line-height:1.75;\">{_linkify(stripped)}</p>")
 
     if in_list:
         html.append("</ul>")

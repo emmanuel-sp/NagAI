@@ -606,7 +606,7 @@
 
 .inputPill {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 8px;
   width: 100%;
   min-width: 0;
@@ -615,6 +615,10 @@
   padding: 8px 8px 8px 6px;
   border: 1px solid var(--border);
   transition: border-color 0.2s ease-in-out, border-radius 0.15s ease, box-shadow 0.2s ease;
+}
+
+.inputPillNoLeading {
+  padding-left: 14px;
 }
 
 .inputPill:focus-within {
@@ -629,6 +633,10 @@
   align-items: center;
 }
 
+.inputPrimaryNoLeading {
+  padding-left: 0;
+}
+
 .chatTextarea {
   width: 100%;
   min-width: 0;
@@ -639,11 +647,11 @@
   font-family: var(--font-body);
   font-size: var(--fs-base);
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: 1.35;
   min-height: unset;
   max-height: 140px;
   height: 36px;
-  padding: 8px 0;
+  padding: 7px 0;
   overflow-y: hidden;
 }
 
@@ -941,5 +949,7 @@
 
   .chatTextarea {
     font-size: 16px;
+    line-height: 1.35;
+    padding: 6px 0;
   }
 }

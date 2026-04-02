@@ -2,7 +2,15 @@
 
 import json
 import pytest
-from agent_tools import execute_tool, SUGGEST_TOOLS, QUIZ_TOOLS, TOOLS
+from agent_tools import (
+    APP_HELP_CONTENT,
+    GET_APP_HELP_TOOL,
+    QUIZ_TOOLS,
+    SUGGEST_TOOLS,
+    TOOLS,
+    build_chat_tools,
+    execute_tool,
+)
 
 
 class TestSuggestCreateGoal:
@@ -273,6 +281,34 @@ class TestPresentQuiz:
         assert context["_suggestions"][1]["type"] == "create_goal"
 
 
+class TestGetAppHelp:
+    def test_get_app_help_defaults_to_overview(self):
+        context = {"goals": []}
+
+        result = execute_tool("get_app_help", {}, context)
+
+        assert result.startswith("NagAI app help")
+        assert "goal accountability app" in result
+        assert "Agent emails are proactive check-ins" in result
+        assert len(result.splitlines()) <= 6
+
+    def test_get_app_help_returns_topic_specific_content(self):
+        context = {"goals": []}
+
+        result = execute_tool("get_app_help", {"topic": "navigation"}, context)
+
+        assert "/home is the dashboard" in result
+        assert "/chat is the live support" in result
+        assert "goal accountability app" not in result
+
+    def test_get_app_help_invalid_topic_falls_back_to_overview(self):
+        context = {"goals": []}
+
+        result = execute_tool("get_app_help", {"topic": "unknown"}, context)
+
+        assert "Core areas:" in result
+
+
 class TestToolListCompleteness:
     def test_suggest_tools_have_four_entries(self):
         assert len(SUGGEST_TOOLS) == 4
@@ -295,6 +331,29 @@ class TestToolListCompleteness:
         assert len(QUIZ_TOOLS) == 1
         assert QUIZ_TOOLS[0]["name"] == "present_quiz"
 
+    def test_app_help_tool_has_expected_topics(self):
+        assert GET_APP_HELP_TOOL["name"] == "get_app_help"
+        assert GET_APP_HELP_TOOL["input_schema"]["properties"]["topic"]["enum"] == [
+            "overview",
+            "onboarding",
+            "goals",
+            "today",
+            "agents",
+            "digests",
+            "chat",
+            "navigation",
+        ]
+        assert set(APP_HELP_CONTENT) == {
+            "overview",
+            "onboarding",
+            "goals",
+            "today",
+            "agents",
+            "digests",
+            "chat",
+            "navigation",
+        }
+
     def test_suggest_tools_not_in_base_tools(self):
         base_names = {t["name"] for t in TOOLS}
         suggest_names = {t["name"] for t in SUGGEST_TOOLS}
@@ -302,3 +361,17 @@ class TestToolListCompleteness:
         assert base_names.isdisjoint(suggest_names)
         assert base_names.isdisjoint(quiz_names)
         assert suggest_names.isdisjoint(quiz_names)
+
+    def test_build_chat_tools_only_includes_requested_tools(self):
+        tools = build_chat_tools(
+            include_quiz=False,
+            include_suggest=False,
+            include_history=False,
+            include_news=False,
+            include_app_help=True,
+        )
+
+        assert [tool["name"] for tool in tools] == [
+            "get_user_progress",
+            "get_app_help",
+        ]

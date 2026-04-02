@@ -5,6 +5,7 @@ import logging
 import ai_handlers
 from agent_tools import build_chat_tools, run_agent_loop
 from prompt_utils import (
+    CHAT_APP_HELP_INSTRUCTIONS,
     CHAT_BASE_INSTRUCTIONS,
     CHAT_HISTORY_INSTRUCTIONS,
     CHAT_NEWS_INSTRUCTIONS,
@@ -59,9 +60,10 @@ def handle_chat(user_message, user_profile, goals, history,
 
     capabilities = {
         "uses_tools": routing["use_tool_path"],
-        "quiz": routing["use_tool_path"],
+        "quiz": routing["quiz"],
         "suggest": routing["suggest"],
         "news": routing["news"],
+        "app_help": routing["app_help"],
         "history": routing["history"],
     }
     system_prompt = _build_chat_prompt(
@@ -72,10 +74,12 @@ def handle_chat(user_message, user_profile, goals, history,
     )
 
     logger.info(
-        "Chat route: mode=%s suggest=%s news=%s history=%s recent_history=%d older_history=%s",
+        "Chat route: mode=%s quiz=%s suggest=%s news=%s app_help=%s history=%s recent_history=%d older_history=%s",
         routing["mode"],
+        routing["quiz"],
         routing["suggest"],
         routing["news"],
+        routing["app_help"],
         routing["history"],
         len(recent_messages),
         bool(older_history),
@@ -100,9 +104,11 @@ def handle_chat(user_message, user_profile, goals, history,
     }
 
     active_tools = build_chat_tools(
+        include_quiz=routing["quiz"],
         include_suggest=routing["suggest"],
         include_history=bool(older_history),
         include_news=routing["news"],
+        include_app_help=routing["app_help"],
     )
 
     response_text = run_agent_loop(
@@ -159,6 +165,8 @@ def _build_chat_prompt(user_profile, goals, from_context_summary="", capabilitie
         instruction_blocks.append(CHAT_SUGGESTION_INSTRUCTIONS)
     if capabilities.get("news"):
         instruction_blocks.append(CHAT_NEWS_INSTRUCTIONS)
+    if capabilities.get("app_help"):
+        instruction_blocks.append(CHAT_APP_HELP_INSTRUCTIONS)
     if capabilities.get("history"):
         instruction_blocks.append(CHAT_HISTORY_INSTRUCTIONS)
 
@@ -167,6 +175,7 @@ def _build_chat_prompt(user_profile, goals, from_context_summary="", capabilitie
         closing = (
             "Use tools only when they materially help. "
             "Use get_user_progress for deeper goal details or accurate IDs before acting. "
+            "Use get_app_help for NagAI feature and navigation questions. "
             "Reply in markdown. No subject line."
         )
 

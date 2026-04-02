@@ -53,6 +53,31 @@ SEARCH_NEWS_TOOL = {
     },
 }
 
+GET_APP_HELP_TOOL = {
+    "name": "get_app_help",
+    "description": "Get a compact guide to how NagAI works and where features live in the app.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "topic": {
+                "type": "string",
+                "description": "Specific app-help topic to explain.",
+                "enum": [
+                    "overview",
+                    "onboarding",
+                    "goals",
+                    "today",
+                    "agents",
+                    "digests",
+                    "chat",
+                    "navigation",
+                ],
+            },
+        },
+        "required": [],
+    },
+}
+
 TOOLS = [GET_USER_PROGRESS_TOOL, GET_PREVIOUS_MESSAGES_TOOL, SEARCH_NEWS_TOOL]
 
 QUIZ_TOOLS = [
@@ -195,14 +220,71 @@ SUGGEST_TOOLS = [
     },
 ]
 
+APP_HELP_CONTENT = {
+    "overview": [
+        "NagAI is a goal accountability app that helps users turn intentions into SMART goals, checklists, daily plans, and follow-up support.",
+        "Core areas: onboarding/profile context, goals, Today daily planning, digests, proactive agents, and follow-up chat.",
+        "Use it for goal clarity, planning, accountability, and habit support rather than general off-topic assistant work.",
+        "Agent emails are proactive check-ins tied to goals, while digests are scheduled content emails based on selected topics and cadence.",
+    ],
+    "onboarding": [
+        "Onboarding collects life context, interests, hobbies, habits, and timezone so AI suggestions feel personal instead of generic.",
+        "That profile context influences SMART goal suggestions, checklist ideas, planning help, and accountability messages.",
+        "If the user is just getting started, onboarding is the first place to give NagAI enough context to help well.",
+    ],
+    "goals": [
+        "The Goals area is for creating and managing SMART goals with titles, descriptions, optional target dates, and checklist items.",
+        "NagAI can help define a goal, suggest SMART fields, review progress, and suggest next checklist steps.",
+        "Use goals when the user wants a durable outcome to work toward, not just a one-off task for today.",
+    ],
+    "today": [
+        "The Today area is the daily execution layer: it turns active goals and open checklist items into a focused day plan.",
+        "It is meant for deciding what to work on now, alongside routines and lightweight day-level planning.",
+        "Use Today when the user asks what to prioritize today or wants a short action plan from existing goals.",
+    ],
+    "agents": [
+        "Agents are proactive accountability helpers attached to goals or contexts.",
+        "They send email check-ins, nudges, and progress prompts without waiting for the user to start the conversation.",
+        "Agent messages are about follow-up and accountability, not broad content curation.",
+    ],
+    "digests": [
+        "Digests are scheduled emails with motivation, practical tips, and curated reading tied to the user's selected interests or topics.",
+        "They are separate from agent check-ins: digests deliver content on a cadence, while agents proactively follow up on progress.",
+        "Use digests when the user wants periodic reading or inspiration rather than accountability nudges.",
+    ],
+    "chat": [
+        "Chat is for live follow-up: the user can ask about goals, progress, next steps, or questions triggered by an agent email.",
+        "Chat can review goal progress, suggest next steps, present short quizzes, and queue action cards for goal or checklist changes.",
+        "It should stay focused on goals, planning, accountability, and related app usage help.",
+    ],
+    "navigation": [
+        "/home is the dashboard for high-level status and system summaries.",
+        "/goals is where goals and checklist-backed progress live.",
+        "/today is the daily planning view for current execution.",
+        "/digests manages scheduled digest content and delivery settings.",
+        "/chat is the live support and follow-up conversation space.",
+        "/profile holds user details and profile context.",
+    ],
+}
 
-def build_chat_tools(include_suggest: bool, include_history: bool, include_news: bool):
+
+def build_chat_tools(
+    include_quiz: bool,
+    include_suggest: bool,
+    include_history: bool,
+    include_news: bool,
+    include_app_help: bool,
+):
     """Build the minimal tool list needed for the current chat turn."""
-    tools = [GET_USER_PROGRESS_TOOL, QUIZ_TOOLS[0]]
+    tools = [GET_USER_PROGRESS_TOOL]
+    if include_quiz:
+        tools.append(QUIZ_TOOLS[0])
     if include_history:
         tools.append(GET_PREVIOUS_MESSAGES_TOOL)
     if include_news:
         tools.append(SEARCH_NEWS_TOOL)
+    if include_app_help:
+        tools.append(GET_APP_HELP_TOOL)
     if include_suggest:
         tools.extend(SUGGEST_TOOLS)
     return tools
@@ -334,6 +416,14 @@ def execute_tool(tool_name, tool_input, context):
         for r in results[:3]:
             lines.append(f"- {r['title']}: {r['link']}\n  {r['snippet']}")
         return "\n".join(lines)
+
+    elif tool_name == "get_app_help":
+        topic = str(tool_input.get("topic", "overview") or "overview").strip().lower()
+        if topic not in APP_HELP_CONTENT:
+            topic = "overview"
+        lines = APP_HELP_CONTENT[topic]
+        heading = topic.replace("_", " ").title()
+        return f"NagAI app help — {heading}\n" + "\n".join(f"- {line}" for line in lines)
 
     # --- Suggest tools (chat only) ---
 
