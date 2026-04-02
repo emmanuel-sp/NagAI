@@ -93,7 +93,58 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section className={styles.section}>
-          <h2>8. Changes to This Policy</h2>
+          <h2>8. Google API Data</h2>
+          <p>
+            NagAI may request access to your Google Calendar data to generate a
+            personalized daily plan that avoids conflicts with your existing events.
+            Specifically, we access read-only calendar event data (titles, times, and
+            durations) solely for the purpose of generating that plan.
+          </p>
+          <ul>
+            <li>
+              <strong>What we access:</strong> Google Calendar event data (event titles,
+              start/end times) for the current day only
+            </li>
+            <li>
+              <strong>How we use it:</strong> This data is sent to Anthropic&apos;s Claude
+              API to generate a personalized daily schedule. It is not stored by NagAI
+              beyond the duration of that request.
+            </li>
+            <li>
+              <strong>Opt-in only:</strong> This feature is entirely optional. You must
+              explicitly grant calendar access, and you can revoke it at any time via
+              your{" "}
+              <a
+                href="https://myaccount.google.com/permissions"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Google Account permissions
+              </a>
+              .
+            </li>
+            <li>
+              <strong>No sale or advertising use:</strong> Google user data is never
+              sold, shared with third parties for advertising purposes, or used for any
+              purpose other than the feature described above.
+            </li>
+          </ul>
+          <p>
+            NagAI&apos;s use and transfer of information received from Google APIs
+            adheres to the{" "}
+            <a
+              href="https://developers.google.com/terms/api-services-user-data-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google API Services User Data Policy
+            </a>
+            , including the Limited Use requirements.
+          </p>
+        </section>
+
+        <section className={styles.section}>
+          <h2>9. Changes to This Policy</h2>
           <p>
             We may update this Privacy Policy from time to time. We will notify you of
             any significant changes by posting the new policy on this page.
@@ -101,7 +152,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section className={styles.section}>
-          <h2>9. Contact</h2>
+          <h2>10. Contact</h2>
           <p>
             For questions about this Privacy Policy, please visit{" "}
             <a href="https://www.emmanuelp.com" target="_blank" rel="noopener noreferrer">
