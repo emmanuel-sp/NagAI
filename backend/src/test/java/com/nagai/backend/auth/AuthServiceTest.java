@@ -3,8 +3,10 @@ package com.nagai.backend.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -82,6 +84,7 @@ class AuthServiceTest {
         verify(passwordEncoder).encode("plaintext1");
         verify(userService).createUser("Test User", "test@example.com", "hashedPassword");
         verify(userService).save(user);
+        verify(emailService).sendVerificationEmail(eq("test@example.com"), anyString());
     }
 
     @Test
@@ -114,6 +117,47 @@ class AuthServiceTest {
         assertThat(user.getVerificationTokenHash()).isNull();
         assertThat(user.getVerificationTokenExpiry()).isNull();
         verify(userService).save(user);
+    }
+
+    @Test
+    void resendVerificationEmail_reissuesTokenForUnverifiedUser() {
+        user.setEmailVerified(false);
+        user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(1));
+
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(tokenHashService.hash(anyString())).thenReturn("new-hashed-token");
+
+        authService.resendVerificationEmail("test@example.com");
+
+        assertThat(user.getVerificationToken()).isNull();
+        assertThat(user.getVerificationTokenHash()).isEqualTo("new-hashed-token");
+        assertThat(user.getVerificationTokenExpiry()).isAfter(LocalDateTime.now());
+        verify(userService).save(user);
+        verify(emailService).sendVerificationEmail(eq("test@example.com"), anyString());
+    }
+
+    @Test
+    void resendVerificationEmail_doesNothingForVerifiedUser() {
+        user.setEmailVerified(true);
+
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+
+        authService.resendVerificationEmail("test@example.com");
+
+        verify(tokenHashService, never()).hash(anyString());
+        verify(userService, never()).save(any());
+        verify(emailService, never()).sendVerificationEmail(anyString(), anyString());
+    }
+
+    @Test
+    void resendVerificationEmail_doesNothingForUnknownUser() {
+        when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+        authService.resendVerificationEmail("missing@example.com");
+
+        verify(tokenHashService, never()).hash(anyString());
+        verify(userService, never()).save(any());
+        verify(emailService, never()).sendVerificationEmail(anyString(), anyString());
     }
 
     @Test

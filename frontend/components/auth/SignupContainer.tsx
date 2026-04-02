@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signup, loginWithGoogle } from "@/services/authService";
+import { signup, loginWithGoogle, resendVerificationEmail } from "@/services/authService";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
@@ -22,6 +22,8 @@ export default function SignupContainer() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
 
   if (loading) {
     return (
@@ -41,6 +43,7 @@ export default function SignupContainer() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setResendMessage("");
     setIsLoading(true);
 
     try {
@@ -84,13 +87,40 @@ export default function SignupContainer() {
     }
   };
 
-  if (registered) {
+    if (registered) {
+    const handleResend = async () => {
+      setError("");
+      setResendMessage("");
+      setIsResending(true);
+
+      try {
+        await resendVerificationEmail(formData.email);
+        setResendMessage("If your account still needs verification, we’ve sent another link.");
+      } catch {
+        setError("We couldn’t resend the verification email right now. Please try again.");
+      } finally {
+        setIsResending(false);
+      }
+    };
+
     return (
       <div className={styles.loginContainer}>
         <div className={styles.loginCard}>
           <div className={styles.loginHeader}>
             <h1 className={styles.loginTitle}>Check your email</h1>
             <p className={styles.loginSubtitle}>We sent a verification link to <strong>{formData.email}</strong>. Click it to activate your account.</p>
+          </div>
+          {error && <div className={styles.errorMessage}>{error}</div>}
+          {resendMessage && <div className={styles.successMessage}>{resendMessage}</div>}
+          <div className={styles.inlineAction}>
+            <button
+              type="button"
+              className={styles.textButton}
+              onClick={handleResend}
+              disabled={isResending}
+            >
+              {isResending ? "Sending..." : "Resend verification email"}
+            </button>
           </div>
           <div className={styles.linkText} style={{ marginTop: "28px" }}>
             <Link href="/login">Back to login</Link>

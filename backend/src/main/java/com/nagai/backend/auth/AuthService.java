@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,6 +23,8 @@ import com.nagai.backend.users.UserService;
 
 @Service
 public class AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     @Value("${google.client-id}")
     private String googleClientId;
@@ -56,20 +60,20 @@ public class AuthService {
 
         String hashedPassword = passwordEncoder.encode(request.password());
         User user = userService.createUser(request.name(), request.email(), hashedPassword);
-
-        String token = UUID.randomUUID().toString();
-        user.setVerificationToken(null);
-        user.setVerificationTokenHash(tokenHashService.hash(token));
-        user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
-        userService.save(user);
-
-        try {
-            emailService.sendVerificationEmail(user.getEmail(), token);
-        } catch (Exception e) {
-            // Don't fail registration if email sending fails — user can contact support
-        }
+        issueVerificationEmail(user, "registration");
 
         return user;
+    }
+
+    public void resendVerificationEmail(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.isEmailVerified()) {
+                log.info("Verification resend skipped for already-verified email={}", email);
+                return;
+            }
+
+            issueVerificationEmail(user, "resend");
+        });
     }
 
     public User loginUser(LoginRequest request) {
@@ -123,5 +127,20 @@ public class AuthService {
         String googleId = (String) tokenInfo.get("sub");
 
         return userService.findOrCreateGoogleUser(email, name, googleId);
+    }
+
+    private void issueVerificationEmail(User user, String reason) {
+        String token = UUID.randomUUID().toString();
+        user.setVerificationToken(null);
+        user.setVerificationTokenHash(tokenHashService.hash(token));
+        user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
+        userService.save(user);
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), token);
+            log.info("Verification email queued for email={} reason={}", user.getEmail(), reason);
+        } catch (Exception e) {
+            log.warn("Verification email failed for email={} reason={}", user.getEmail(), reason, e);
+        }
     }
 }

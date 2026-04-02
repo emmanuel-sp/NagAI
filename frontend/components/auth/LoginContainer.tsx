@@ -9,7 +9,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login, loginWithGoogle } from "@/services/authService";
+import { login, loginWithGoogle, resendVerificationEmail } from "@/services/authService";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
@@ -24,6 +24,8 @@ export default function LoginContainer() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
 
   if (loading) {
     return (
@@ -38,6 +40,7 @@ export default function LoginContainer() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setResendMessage("");
     setIsLoading(true);
 
     try {
@@ -52,7 +55,7 @@ export default function LoginContainer() {
       if (err instanceof ApiError) {
         if (err.status === 401) {
           setError("Invalid email or password.");
-        } else if (err.status === 403 && err.message.includes("verify your email")) {
+        } else if (err.status === 403 && err.errorCode === "EMAIL_NOT_VERIFIED") {
           setError("Please verify your email address. Check your inbox for the verification link.");
         } else if (err.status === 403) {
           setError("Your account has been locked. Please contact support.");
@@ -67,6 +70,26 @@ export default function LoginContainer() {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError("Enter your email first so we know where to send the verification link.");
+      return;
+    }
+
+    setError("");
+    setResendMessage("");
+    setIsResending(true);
+
+    try {
+      await resendVerificationEmail(email);
+      setResendMessage("If the account exists and still needs verification, we’ve sent a fresh link.");
+    } catch {
+      setError("We couldn’t resend the verification email right now. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
       <div className={styles.loginContainer}>
@@ -77,6 +100,7 @@ export default function LoginContainer() {
           </div>
 
           {error && <div className={styles.errorMessage}>{error}</div>}
+          {resendMessage && <div className={styles.successMessage}>{resendMessage}</div>}
 
           <LoginForm
             email={email}
@@ -86,6 +110,19 @@ export default function LoginContainer() {
             onPasswordChange={setPassword}
             onSubmit={handleSubmit}
           />
+
+          {error.includes("verify your email") && (
+            <div className={styles.inlineAction}>
+              <button
+                type="button"
+                className={styles.textButton}
+                onClick={handleResendVerification}
+                disabled={isResending}
+              >
+                {isResending ? "Sending..." : "Resend verification email"}
+              </button>
+            </div>
+          )}
 
           <div className={styles.divider}>OR</div>
 

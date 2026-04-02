@@ -20,6 +20,13 @@ export async function signup(data: SignupData): Promise<void> {
   // No auto-login — user must verify their email first
 }
 
+export async function resendVerificationEmail(email: string): Promise<void> {
+  await apiRequest<void>("/auth/resend-verification", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
 export async function verifyEmail(token: string): Promise<void> {
   await apiRequest<void>(`/auth/verify?token=${encodeURIComponent(token)}`, {
     method: "GET",

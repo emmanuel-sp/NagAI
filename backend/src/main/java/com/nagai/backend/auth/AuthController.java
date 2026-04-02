@@ -44,6 +44,14 @@ public class AuthController {
                 .body(Map.of("message", "If this email is not already registered, a verification email has been sent."));
     }
 
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Map<String, String>> resendVerification(
+            @Valid @RequestBody ResendVerificationRequest resendVerificationRequest) {
+        authService.resendVerificationEmail(resendVerificationRequest.email());
+        return ResponseEntity.accepted()
+                .body(Map.of("message", "If this email is registered and not yet verified, a verification email has been sent."));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         User authenticatedUser = authService.loginUser(loginRequest);
