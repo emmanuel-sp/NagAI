@@ -2,7 +2,6 @@
 
 import logging
 
-import ai_handlers
 from agent_tools import build_chat_tools, run_agent_loop
 from prompt_utils import (
     CHAT_APP_HELP_INSTRUCTIONS,
@@ -53,6 +52,7 @@ def handle_chat(user_message, user_profile, goals, history,
         user_message,
         context_summary=from_context_summary,
         older_history_exists=bool(older_history),
+        recent_history=recent_messages,
     )
     routing["recent_history_count"] = len(recent_messages)
     routing["older_history_available"] = bool(older_history)
@@ -85,17 +85,6 @@ def handle_chat(user_message, user_profile, goals, history,
         bool(older_history),
     )
 
-    if not routing["use_tool_path"]:
-        message = ai_handlers._call_claude_messages(
-            recent_messages + [{"role": "user", "content": user_message}],
-            MAX_TOKENS,
-            "agent_chat_fast_path",
-            system=system_prompt,
-            client_obj=ai_handlers.client,
-            model=ai_handlers.MODEL,
-        )
-        return _extract_text(message), []
-
     tool_context = {
         "goals": _build_tool_goals(goals),
         "conversation_history": older_history,
@@ -106,9 +95,9 @@ def handle_chat(user_message, user_profile, goals, history,
     active_tools = build_chat_tools(
         include_quiz=routing["quiz"],
         include_suggest=routing["suggest"],
-        include_history=bool(older_history),
+        include_history=routing["history"],
         include_news=routing["news"],
-        include_app_help=routing["app_help"],
+        include_app_help=True,
     )
 
     response_text = run_agent_loop(
@@ -175,7 +164,7 @@ def _build_chat_prompt(user_profile, goals, from_context_summary="", capabilitie
         closing = (
             "Use tools only when they materially help. "
             "Use get_user_progress for deeper goal details or accurate IDs before acting. "
-            "Use get_app_help for NagAI feature and navigation questions. "
+            "For NagAI feature, setup, subscription, or navigation questions, call get_app_help before answering and do not guess UI details. "
             "Reply in markdown. No subject line."
         )
 
@@ -192,11 +181,3 @@ def _build_chat_prompt(user_profile, goals, from_context_summary="", capabilitie
         TAGGED_CONTEXT_NOTE,
         closing,
     )
-
-
-def _extract_text(message):
-    return "\n".join(
-        block.text
-        for block in getattr(message, "content", [])
-        if getattr(block, "type", "text") == "text"
-    ).strip()

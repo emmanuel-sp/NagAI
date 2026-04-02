@@ -250,6 +250,7 @@ APP_HELP_CONTENT = {
     "digests": [
         "Digests are scheduled emails with motivation, practical tips, and curated reading tied to the user's selected interests or topics.",
         "They are separate from agent check-ins: digests deliver content on a cadence, while agents proactively follow up on progress.",
+        "To manage or subscribe to digests in the app, use the /digests area.",
         "Use digests when the user wants periodic reading or inspiration rather than accountability nudges.",
     ],
     "chat": [
@@ -261,7 +262,7 @@ APP_HELP_CONTENT = {
         "/home is the dashboard for high-level status and system summaries.",
         "/goals is where goals and checklist-backed progress live.",
         "/today is the daily planning view for current execution.",
-        "/digests manages scheduled digest content and delivery settings.",
+        "/digests manages scheduled digest content and delivery settings, including digest setup and subscription-style changes.",
         "/chat is the live support and follow-up conversation space.",
         "/profile holds user details and profile context.",
     ],

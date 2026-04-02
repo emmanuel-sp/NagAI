@@ -45,9 +45,10 @@ CHAT_NEWS_INSTRUCTIONS = (
 
 CHAT_APP_HELP_INSTRUCTIONS = (
     "App-help tool:\n"
-    "- Use get_app_help for NagAI usage questions, feature explanations, getting-started help, or navigation help.\n"
+    "- Call get_app_help before answering NagAI feature, setup, subscription, or navigation questions.\n"
     "- Prefer the narrowest topic instead of overview when the user asks about one area.\n"
-    "- Do not use get_app_help for ordinary coaching, prioritization, motivation, or checklist/goal actions."
+    "- Do not use get_app_help for ordinary coaching, prioritization, motivation, or checklist/goal actions.\n"
+    "- Never guess UI details or settings paths that are not covered by get_app_help."
 )
 
 CHAT_HISTORY_INSTRUCTIONS = (
@@ -144,17 +145,68 @@ APP_HELP_MARKERS = (
     "inbox",
 )
 
+APP_HELP_CONTEXT_MARKERS = (
+    "nagai",
+    "app",
+    "dashboard",
+    "home",
+    "today",
+    "daily plan",
+    "digest",
+    "digests",
+    "agent",
+    "agents",
+    "chat",
+    "profile",
+    "onboarding",
+    "inbox",
+    "/home",
+    "/goals",
+    "/today",
+    "/digests",
+    "/chat",
+    "/profile",
+)
+
 APP_HELP_PHRASES = (
+    "how to use this app",
+    "how to use the app",
     "how do i",
+    "how to",
     "where do i",
+    "where is",
     "how does nagai work",
     "how does this app work",
+    "what is this app about",
+    "what is the app about",
     "what can i do here",
     "how do i use this app",
     "how do i get started with this app",
     "how do i get started in the app",
     "where can i find",
     "what is the difference between",
+    "how to navigate",
+    "navigate there",
+    "how do i navigate",
+    "how do i subscribe",
+    "subscribe to",
+    "sign up for",
+)
+
+APP_HELP_FOLLOW_UP_MARKERS = (
+    "subscribe",
+    "subscription",
+    "digest",
+    "digests",
+    "navigate",
+    "navigation",
+    "there",
+    "that",
+    "it",
+    "where is that",
+    "how to get there",
+    "take me there",
+    "show me where",
 )
 
 
@@ -250,24 +302,53 @@ def has_history_intent(user_message: str) -> bool:
     return _contains_phrase(message, HISTORY_KEYWORDS)
 
 
-def has_app_help_intent(user_message: str) -> bool:
+def _conversation_mentions_app_help(conversation_text: str) -> bool:
+    return _contains_phrase(conversation_text, APP_HELP_CONTEXT_MARKERS) or _contains_phrase(
+        conversation_text, APP_HELP_PHRASES
+    )
+
+
+def has_app_help_intent(
+    user_message: str,
+    conversation_context: str = "",
+    context_summary: str = "",
+) -> bool:
     message = normalize_whitespace(user_message).lower()
+    conversation = normalize_whitespace(conversation_context).lower()
+    summary = normalize_whitespace(context_summary).lower()
     has_help_phrase = _contains_phrase(message, APP_HELP_PHRASES)
     has_app_marker = _contains_phrase(message, APP_HELP_MARKERS)
-    return has_help_phrase and has_app_marker
+    if has_help_phrase and has_app_marker:
+        return True
+
+    combined_context = " ".join(part for part in (conversation, summary) if part)
+    follow_up = _contains_phrase(message, APP_HELP_FOLLOW_UP_MARKERS)
+    if follow_up and _conversation_mentions_app_help(combined_context):
+        return True
+
+    return False
 
 
 def route_chat_request(
     user_message: str,
     context_summary: str = "",
     older_history_exists: bool = False,
+    recent_history: list[dict] | None = None,
 ) -> dict:
+    recent_history = recent_history or []
+    recent_context = " ".join(
+        normalize_whitespace(entry.get("content", "")) for entry in recent_history[-4:]
+    )
     quiz = has_quiz_intent(user_message)
     suggest = has_suggestion_intent(user_message)
     news = has_news_intent(user_message, context_summary)
-    app_help = has_app_help_intent(user_message)
+    app_help = has_app_help_intent(
+        user_message,
+        conversation_context=recent_context,
+        context_summary=context_summary,
+    )
     history_intent = older_history_exists and has_history_intent(user_message)
-    use_tool_path = quiz or suggest or news or app_help or history_intent
+    use_tool_path = True
 
     return {
         "use_tool_path": use_tool_path,
@@ -275,6 +356,6 @@ def route_chat_request(
         "suggest": use_tool_path and suggest,
         "news": use_tool_path and news,
         "app_help": use_tool_path and app_help,
-        "history": use_tool_path and older_history_exists,
+        "history": use_tool_path and history_intent,
         "history_intent": history_intent,
     }

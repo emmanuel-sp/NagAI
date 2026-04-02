@@ -1,5 +1,4 @@
 import os
-from types import SimpleNamespace
 
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 
@@ -83,7 +82,7 @@ def test_handle_chat_uses_recent_window_and_exposes_history_tool(monkeypatch):
 
     monkeypatch.setattr(chat_handler, "run_agent_loop", fake_run_agent_loop)
 
-    user_message = "Add a checklist item for my language goal."
+    user_message = "Can you remind me what we discussed earlier?"
     history = _history(11) + [{"role": "user", "content": user_message}]
     response, suggestions = chat_handler.handle_chat(
         user_message=user_message,
@@ -98,7 +97,7 @@ def test_handle_chat_uses_recent_window_and_exposes_history_tool(monkeypatch):
     assert captured["kwargs"]["prior_messages"][-1]["content"] == "message-10"
     assert len(captured["tool_context"]["conversation_history"]) == 3
     assert "get_previous_messages" in captured["tool_names"]
-    assert "suggest_add_checklist_item" in captured["tool_names"]
+    assert "get_app_help" in captured["tool_names"]
 
 
 def test_handle_chat_only_exposes_news_tool_for_news_intent(monkeypatch):
@@ -125,6 +124,8 @@ def test_handle_chat_only_exposes_news_tool_for_news_intent(monkeypatch):
 
     assert "search_news" in tool_names[0]
     assert "search_news" not in tool_names[1]
+    assert "get_app_help" in tool_names[0]
+    assert "get_app_help" in tool_names[1]
 
 
 def test_handle_chat_only_exposes_app_help_tool_for_app_help_intent(monkeypatch):
@@ -148,6 +149,27 @@ def test_handle_chat_only_exposes_app_help_tool_for_app_help_intent(monkeypatch)
     assert "present_quiz" not in captured["tool_names"]
     assert "get_app_help" in captured["system_prompt"]
     assert "present_quiz" not in captured["system_prompt"]
+
+
+def test_handle_chat_broad_app_help_phrase_routes_without_explicit_how_do_i(monkeypatch):
+    captured = {}
+
+    def fake_run_agent_loop(client, model, system_prompt, tool_context, **kwargs):
+        captured["tool_names"] = [tool["name"] for tool in kwargs["tools"]]
+        captured["system_prompt"] = system_prompt
+        return "Tool path response"
+
+    monkeypatch.setattr(chat_handler, "run_agent_loop", fake_run_agent_loop)
+
+    chat_handler.handle_chat(
+        user_message="What is this app about?",
+        user_profile="Builder",
+        goals=[_goal()],
+        history=[{"role": "user", "content": "What is this app about?"}],
+    )
+
+    assert "get_app_help" in captured["tool_names"]
+    assert "get_app_help" in captured["system_prompt"]
 
 
 def test_handle_chat_only_exposes_suggest_tools_for_action_intent(monkeypatch):
@@ -195,24 +217,19 @@ def test_handle_chat_generic_help_me_get_started_stays_quiz_without_app_markers(
     )
 
     assert "present_quiz" in captured["tool_names"]
-    assert "get_app_help" not in captured["tool_names"]
+    assert "get_app_help" in captured["tool_names"]
     assert "present_quiz" in captured["system_prompt"]
 
-
-def test_handle_chat_uses_fast_path_when_no_tool_intent(monkeypatch):
+def test_handle_chat_uses_tool_loop_even_without_specific_intent(monkeypatch):
     captured = {}
 
-    def fake_run_agent_loop(*args, **kwargs):
-        raise AssertionError("run_agent_loop should not be used for fast-path chats")
-
-    def fake_call_claude_messages(messages, max_tokens, operation, **kwargs):
-        captured["messages"] = messages
-        captured["system"] = kwargs["system"]
-        captured["operation"] = operation
-        return SimpleNamespace(content=[SimpleNamespace(type="text", text="Fast path response")])
+    def fake_run_agent_loop(client, model, system_prompt, tool_context, **kwargs):
+        captured["tool_names"] = [tool["name"] for tool in kwargs["tools"]]
+        captured["system_prompt"] = system_prompt
+        captured["prior_messages"] = kwargs["prior_messages"]
+        return "Tool path response"
 
     monkeypatch.setattr(chat_handler, "run_agent_loop", fake_run_agent_loop)
-    monkeypatch.setattr(chat_handler.ai_handlers, "_call_claude_messages", fake_call_claude_messages)
 
     user_message = "I'm feeling a little scattered today."
     history = _history(10) + [{"role": "user", "content": user_message}]
@@ -223,10 +240,36 @@ def test_handle_chat_uses_fast_path_when_no_tool_intent(monkeypatch):
         history=history,
     )
 
-    assert response == "Fast path response"
+    assert response == "Tool path response"
     assert suggestions == []
-    assert captured["operation"] == "agent_chat_fast_path"
-    assert len(captured["messages"]) == 9
-    assert captured["messages"][-1]["content"] == user_message
-    assert "present_quiz" not in captured["system"]
-    assert "suggest_*" not in captured["system"]
+    assert captured["prior_messages"][-1]["content"] == "message-10"
+    assert "get_user_progress" in captured["tool_names"]
+    assert "get_app_help" in captured["tool_names"]
+    assert "present_quiz" not in captured["tool_names"]
+    assert "get_app_help" not in captured["system_prompt"]
+
+
+def test_handle_chat_follow_up_inherits_app_help_context(monkeypatch):
+    captured = {}
+
+    def fake_run_agent_loop(client, model, system_prompt, tool_context, **kwargs):
+        captured["tool_names"] = [tool["name"] for tool in kwargs["tools"]]
+        captured["system_prompt"] = system_prompt
+        return "Tool path response"
+
+    monkeypatch.setattr(chat_handler, "run_agent_loop", fake_run_agent_loop)
+
+    history = [
+        {"role": "user", "content": "How do I add a digest in this app?"},
+        {"role": "assistant", "content": "You can manage digests in the app."},
+        {"role": "user", "content": "I want to subscribe"},
+    ]
+    chat_handler.handle_chat(
+        user_message="I want to subscribe",
+        user_profile="Builder",
+        goals=[_goal()],
+        history=history,
+    )
+
+    assert "get_app_help" in captured["tool_names"]
+    assert "get_app_help" in captured["system_prompt"]
