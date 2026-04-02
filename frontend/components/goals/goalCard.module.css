@@ -5,9 +5,10 @@
   width: 100%;
   height: 100%;
   min-height: 320px;
+  max-height: 410px;
   padding: 22px;
   overflow: hidden;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 22%, white), white);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 22%, var(--bg-card)), var(--bg-card));
   border: 1px solid var(--border);
   border-radius: 18px;
   transition:
@@ -59,19 +60,19 @@
 
 .goalStatusActive {
   color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 8%, white);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
   border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
 }
 
 .goalStatusComplete {
   color: var(--success);
-  background: color-mix(in srgb, var(--success) 10%, white);
+  background: color-mix(in srgb, var(--success) 10%, var(--bg-card));
   border-color: color-mix(in srgb, var(--success) 18%, var(--border));
 }
 
 .goalStatusIdle {
   color: var(--text-muted);
-  background: color-mix(in srgb, var(--surface) 70%, white);
+  background: color-mix(in srgb, var(--surface) 70%, var(--bg-card));
   border-color: var(--border-light);
 }
 
@@ -108,7 +109,7 @@
   line-height: 1.75;
   font-weight: var(--fw-300);
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -218,9 +219,35 @@
   transform: scale(0.98);
 }
 
+.goalCard[data-theme="dark"] {
+  box-shadow: none;
+}
+
+[data-theme="dark"] .goalCard {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 62%, var(--bg-card)), color-mix(in srgb, var(--bg-card) 94%, var(--bg-elevated)));
+  border-color: color-mix(in srgb, var(--border) 94%, transparent);
+}
+
+[data-theme="dark"] .goalCard:hover {
+  border-color: color-mix(in srgb, var(--accent) 18%, var(--border-strong));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme="dark"] .goalStatusActive,
+[data-theme="dark"] .goalStatusComplete,
+[data-theme="dark"] .goalStatusIdle {
+  background: color-mix(in srgb, currentColor 12%, var(--bg-card));
+}
+
+[data-theme="dark"] .viewButton:hover {
+  color: color-mix(in srgb, var(--accent) 82%, white);
+}
+
 @media (max-width: 640px) {
   .goalCard {
+    height: auto;
     min-height: 0;
+    max-height: none;
     padding: 18px;
   }
 

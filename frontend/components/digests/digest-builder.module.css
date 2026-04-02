@@ -17,10 +17,8 @@
   width: 320px;
   height: 320px;
   pointer-events: none;
-  background:
-    radial-gradient(circle at center, color-mix(in srgb, var(--accent) 12%, transparent), transparent 68%),
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.9), transparent 72%);
-  opacity: 0.9;
+  background: radial-gradient(circle at center, color-mix(in srgb, var(--accent) 12%, transparent), transparent 68%);
+  opacity: 0.7;
 }
 
 .digestBuilderContent {
@@ -826,7 +824,11 @@
     border: 1px solid color-mix(in srgb, var(--border-light) 94%, var(--border));
     border-radius: 14px;
     background:
-      linear-gradient(180deg, color-mix(in srgb, var(--accent) 2%, white), color-mix(in srgb, var(--surface) 32%, white));
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--accent) 2%, var(--bg-card)),
+        color-mix(in srgb, var(--surface) 32%, var(--bg-elevated))
+      );
   }
 
   .cardTitle {
@@ -1035,4 +1037,58 @@
   .previewModalBody {
     padding: 14px 18px 20px;
   }
+}
+
+[data-theme="dark"] .digestPageShell::before {
+  opacity: 0.32;
+  background: radial-gradient(circle at center, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%);
+}
+
+[data-theme="dark"] .overviewCard {
+  border-bottom-color: color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+[data-theme="dark"] .settingsCard,
+[data-theme="dark"] .deploymentPanel {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface) 72%, var(--bg-card)),
+    color-mix(in srgb, var(--bg-card) 94%, var(--bg-elevated))
+  );
+  border-color: color-mix(in srgb, var(--border) 94%, transparent);
+}
+
+[data-theme="dark"] .frequencyButton,
+[data-theme="dark"] .timeButton,
+[data-theme="dark"] .contentTypeCard,
+[data-theme="dark"] .checkmark,
+[data-theme="dark"] .previewModalCloseButton,
+[data-theme="dark"] .previewEmail {
+  border-color: color-mix(in srgb, var(--border) 92%, transparent);
+}
+
+[data-theme="dark"] .frequencyButton,
+[data-theme="dark"] .timeButton {
+  background: color-mix(in srgb, var(--surface) 92%, var(--bg-card));
+}
+
+[data-theme="dark"] .frequencyButton:hover,
+[data-theme="dark"] .timeButton:hover {
+  background: color-mix(in srgb, var(--surface-hover) 86%, var(--bg-card));
+}
+
+[data-theme="dark"] .contentTypeCardActive .checkmark {
+  color: var(--accent-foreground);
+}
+
+[data-theme="dark"] .previewModalContent {
+  background: linear-gradient(180deg, var(--bg-card), var(--bg-elevated));
+}
+
+[data-theme="dark"] .previewEmail {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 68%, var(--bg-card)), var(--bg-elevated));
+}
+
+[data-theme="dark"] .previewEmailHeader {
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
 }

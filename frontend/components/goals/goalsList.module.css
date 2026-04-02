@@ -72,7 +72,7 @@
   gap: 8px;
   min-width: 0;
   padding: 20px 22px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 28%, white), white);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 28%, var(--bg-card)), var(--bg-card));
   border: 1px solid var(--border-light);
   border-radius: 18px;
 }
@@ -200,6 +200,20 @@
   color: var(--text-primary);
 }
 
+[data-theme="dark"] .pageStat {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 68%, var(--bg-card)), color-mix(in srgb, var(--bg-card) 94%, var(--bg-elevated)));
+  border-color: color-mix(in srgb, var(--border) 94%, transparent);
+}
+
+[data-theme="dark"] .addGoalButton {
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+[data-theme="dark"] .secondaryGoalAction {
+  background: color-mix(in srgb, var(--surface) 80%, var(--bg-card));
+  border-color: color-mix(in srgb, var(--border) 92%, transparent);
+}
+
 @media (max-width: 1100px) {
   .pageStats,
   .goalsList {
@@ -224,6 +238,14 @@
   .pageStats,
   .goalsList {
     grid-template-columns: 1fr;
+  }
+
+  .goalsList {
+    grid-auto-rows: auto;
+  }
+
+  .goalsList > li {
+    display: block;
   }
 
   .pageStats {
