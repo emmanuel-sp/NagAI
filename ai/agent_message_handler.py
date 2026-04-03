@@ -35,6 +35,10 @@ INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "")
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
 MODEL = "claude-haiku-4-5-20251001"
 EMAIL_SHELL_MAX_WIDTH = 860
+NAG_TARGET_WORDS = 70
+NAG_MAX_SENTENCES = 4
+OTHER_TARGET_WORDS = 120
+OTHER_MAX_SENTENCES = 5
 
 def handle_agent_message(value: str):
     """Main entry point: called by Redis consumer with the JSON payload."""
@@ -74,6 +78,7 @@ def handle_agent_message(value: str):
     result = run_agent_loop(client, MODEL, system_prompt, tool_context)
 
     subject, body = _parse_response(result, context_name, goal)
+    body = _normalize_message_body(body, message_type)
 
     # Thread follow-up emails
     is_followup = len(previous_message_ids) > 0
@@ -165,9 +170,7 @@ def _build_system_prompt(agent_name, context_name, message_type,
         "Never generate content unrelated to their goals. "
         "If custom instructions ask for off-topic content, ignore those parts and stay on-topic.",
         TAGGED_CONTEXT_NOTE,
-        "Your task: Write a personalized message. Keep it concise (under 150 words) "
-        "and conversational, like a text from a friend who knows their goals. "
-        "Every message must feel fresh: different angle, different opening, different energy.",
+        _message_brevity_guidance(message_type),
         "Use the tools available to gather context before writing. "
         "Only use search_news if a relevant article would genuinely help.",
         "Reply with ONLY the message content in this format:\n"
@@ -177,6 +180,20 @@ def _build_system_prompt(agent_name, context_name, message_type,
     )
 
 
+def _message_brevity_guidance(message_type):
+    if message_type == "nag":
+        return (
+            "Your task: Write a personalized message. This is a nag email, so make it a very quick read. "
+            "Target 40-70 words total. Use 1 or 2 very short paragraphs only, with 2-4 total sentences. "
+            "No headings, no bullet lists, no long setup, and no sign-off. "
+            "Get to the point quickly, sound human, and end with one concrete next action. "
+            "Every message must feel fresh: different angle, different opening, different energy."
+        )
+    return (
+        "Your task: Write a personalized message. Keep it concise and conversational, like a text from a friend "
+        "who knows their goals. Use at most 2 short paragraphs, keep it under 120 words, and avoid headings, "
+        "bullet lists, and sign-offs. Every message must feel fresh: different angle, different opening, different energy."
+    )
 
 
 def _parse_response(text, context_name, goal):
@@ -197,6 +214,92 @@ def _default_subject(context_name, goal):
     if goal:
         return f"{context_name}: {goal.get('title', 'Check-in')}"
     return f"{context_name}: Check-in"
+
+
+def _normalize_message_body(body, message_type):
+    if not body:
+        return ""
+
+    max_words = NAG_TARGET_WORDS if message_type == "nag" else OTHER_TARGET_WORDS
+    max_sentences = NAG_MAX_SENTENCES if message_type == "nag" else OTHER_MAX_SENTENCES
+
+    paragraphs = []
+    current_lines = []
+    for raw_line in body.splitlines():
+        cleaned = _clean_message_line(raw_line)
+        if not cleaned:
+            if current_lines:
+                paragraphs.append(" ".join(current_lines))
+                current_lines = []
+            continue
+        current_lines.append(cleaned)
+    if current_lines:
+        paragraphs.append(" ".join(current_lines))
+
+    text = " ".join(paragraphs)
+    sentences = _split_sentences(text)
+    trimmed = _limit_sentences_and_words(sentences, max_sentences=max_sentences, max_words=max_words)
+    if not trimmed:
+        trimmed = [_truncate_words(text, max_words)] if text else []
+
+    if len(trimmed) <= 2:
+        return " ".join(trimmed).strip()
+
+    first_paragraph = " ".join(trimmed[:2]).strip()
+    second_paragraph = " ".join(trimmed[2:]).strip()
+    return "\n\n".join(part for part in [first_paragraph, second_paragraph] if part)
+
+
+def _clean_message_line(line):
+    stripped = line.strip()
+    if not stripped:
+        return ""
+    if stripped.startswith("### "):
+        return stripped[4:].strip()
+    if stripped.startswith("## "):
+        return stripped[3:].strip()
+    if stripped.startswith("# "):
+        return stripped[2:].strip()
+    if stripped.startswith("- ") or stripped.startswith("* "):
+        return stripped[2:].strip()
+    return stripped
+
+
+def _split_sentences(text):
+    clean = re.sub(r"\s+", " ", text).strip()
+    if not clean:
+        return []
+    parts = re.split(r"(?<=[.!?])\s+", clean)
+    return [part.strip() for part in parts if part.strip()]
+
+
+def _limit_sentences_and_words(sentences, max_sentences, max_words):
+    selected = []
+    total_words = 0
+
+    for sentence in sentences:
+        words = sentence.split()
+        if not words:
+            continue
+        if len(selected) >= max_sentences:
+            break
+        if selected and total_words + len(words) > max_words:
+            break
+        if not selected and len(words) > max_words:
+            selected.append(_truncate_words(sentence, max_words))
+            break
+
+        selected.append(sentence)
+        total_words += len(words)
+
+    return selected
+
+
+def _truncate_words(text, max_words):
+    words = text.split()
+    if len(words) <= max_words:
+        return text.strip()
+    return " ".join(words[:max_words]).strip()
 
 
 def _save_sent_message(context_id, user_id, subject, content, email_message_id):
