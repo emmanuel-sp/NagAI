@@ -2,6 +2,7 @@
 
 import logging
 
+import ai_handlers
 from agent_tools import build_chat_tools, run_agent_loop
 from prompt_utils import (
     CHAT_APP_HELP_INSTRUCTIONS,
